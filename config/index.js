@@ -20,9 +20,9 @@ function build() {
 			config: {
 				url: process.env.KUBERNETES_HOST,
 				auth: {
-					bearer: Buffer.from(process.env.KUBERNETES_AUTH_BEARER_TOKEN, 'base64'),
+					bearer: process.env.KUBERNETES_AUTH_BEARER_TOKEN,
 				},
-				ca: Buffer.from(process.env.KUBERNETES_CA_CERT, 'base64'),
+				ca: process.env.KUBERNETES_CA_CERT,
 			},
 		},
 		codefresh: {

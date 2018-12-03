@@ -29,9 +29,9 @@ class Kubernetes {
 			config: {
 				url,
 				auth: {
-					bearer,
+					bearer: Buffer.from(bearer, 'base64'),
 				},
-				ca,
+				ca: Buffer.from(ca, 'base64'),
 			},
 		});
 		return new this(metadata, client);
