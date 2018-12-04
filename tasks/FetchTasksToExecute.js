@@ -2,6 +2,7 @@ const Promise = require('bluebird');
 const _ = require('lodash');
 const Base = require('./BaseTask');
 const StartWorkflow = require('./StartWorkflow');
+const TerminateWorkflow = require('./TerminateWorkflow');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task FetchTasksToExecute, call to Codefresh rejected',
@@ -34,8 +35,10 @@ class FetchTasksToExecute extends Base {
 					.map((task) => {
 						const typeToTaskMap = {
 							'StartWorkflow': this._executeTask(StartWorkflow),
+							'FinishSystemWorkflow': this._executeTask(TerminateWorkflow),
 						};
 						const type = _.get(task, 'type');
+						this.logger.info(`Got reqeust to run task with type: ${type}`);
 						const fn = typeToTaskMap[type] || _.noop;
 						return fn(task);
 					})

@@ -7,6 +7,7 @@ const ERROR_MESSAGES = {
 	MISSING_KUBERNETES_CA_CERTIFICATE: 'Failed to construct Kubernetes API service, missing Kubernetes ca certificate',
 	FAILED_TO_INIT: 'Failed to complete Kubernetes service initialization',
 	FAILED_TO_CREATE_POD: 'Failed to create Kubernetes pod',
+	FAILED_TO_DELETE_POD: 'Failed to delete Kubernetes pod',
 };
 
 
@@ -48,11 +49,21 @@ class Kubernetes {
 
 	async createPod(logger, spec) {
 		try {
-			await this.client.api.v1.namespaces(spec.metadata.namespace || 'default').pod.post({ body: spec });
+			await this.client.api.v1.namespaces(spec.metadata.namespace).pod.post({ body: spec });
 			logger.info('Pod created');
 			return Promise.resolve();
 		} catch (err) {
 			throw new Error(`${ERROR_MESSAGES.FAILED_TO_CREATE_POD} with message: ${err.message}`);
+		}
+	}
+
+	async deletePod(logger, namespace, name) {
+		try {
+			await this.client.api.v1.namespaces(namespace).pod(name).delete();
+			logger.info('Pod deleted');
+			return Promise.resolve();
+		} catch (err) {
+			throw new Error(`${ERROR_MESSAGES.FAILED_TO_DELETE_POD} with message: ${err.message}`);
 		}
 	}
 }

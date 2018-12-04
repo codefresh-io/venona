@@ -38,6 +38,7 @@ class Agent {
 		])
 			.then(() => {
 				this.logger.info('Initializing finished');
+				return this;
 			}, (err) => {
 				const message = `Failed to initialize agent with error message: ${err.message}`;
 				this.logger.error(message);

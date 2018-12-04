@@ -105,31 +105,6 @@ describe('Kubernetes API unit tests', () => {
 				});
 		});
 
-		it('Should create a pod successfully on default namespace when spec doesnt have one', () => {
-			const fakePod = {
-				metadata: {
-					name: 'pod',
-				},
-			};
-			const getNamespaceSpy = jest.fn();
-			kube.Client.mockImplementationOnce(() => ({
-				api: {
-					v1: {
-						namespaces: getNamespaceSpy.mockImplementation(() => ({
-							pod: {
-								post: jest.fn(),
-							},
-						})),
-					},
-				},
-			}));
-			return buildKubernetesAPI()
-				.createPod(createLogger(), fakePod)
-				.then(() => {
-					expect(getNamespaceSpy).toHaveBeenCalledWith('default');
-				});
-		});
-
 		it('Should throw an error', () => {
 			kube.Client.mockImplementationOnce(() => ({
 				api: {
@@ -143,6 +118,59 @@ describe('Kubernetes API unit tests', () => {
 				},
 			}));
 			return expect(buildKubernetesAPI().createPod(createLogger(), { metadata: { name: 'fake-name' } })).rejects.toThrowError('Failed to create Kubernetes pod with message');
+		});
+	});
+
+	describe('deletePod', () => {
+		it('Should delete a pod successfully', () => {
+			const namespace = 'fake-namespace';
+			const name = 'pod';
+			const fakePod = {
+				metadata: {
+					namespace,
+					name,
+				},
+			};
+			const deletePodSpy = jest.fn();
+			const getNamespaceSpy = jest.fn();
+			const podSpy = jest.fn();
+			kube.Client.mockImplementationOnce(() => ({
+				api: {
+					v1: {
+						namespaces: getNamespaceSpy.mockImplementation(() => ({
+							pod: podSpy.mockImplementationOnce(() => {
+								return {
+									delete: deletePodSpy,
+								};
+							})
+						})),
+					},
+				},
+			}));
+			return buildKubernetesAPI()
+				.deletePod(createLogger(), fakePod.metadata.namespace, fakePod.metadata.name)
+				.then(() => {
+					expect(getNamespaceSpy).toHaveBeenCalledWith(namespace);
+					expect(podSpy).toHaveBeenCalledWith(name);
+					expect(deletePodSpy).toHaveBeenCalledWith();
+				});
+		});
+
+		it('Should throw an error when pod deletion failed', () => {
+			kube.Client.mockImplementationOnce(() => ({
+				api: {
+					v1: {
+						namespaces: jest.fn(() => ({
+							pod: jest.fn(() => {
+								return {
+									delete: jest.fn().mockRejectedValue(new Error('Error to make api call')),
+								};
+							}),
+						})),
+					},
+				},
+			}));
+			return expect(buildKubernetesAPI().deletePod(createLogger(), '', '')).rejects.toThrowError('Failed to delete Kubernetes pod with message');
 		});
 	});
 });
