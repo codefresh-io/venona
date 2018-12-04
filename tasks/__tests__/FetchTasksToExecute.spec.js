@@ -54,7 +54,7 @@ describe('FetchTasksToExecute unit tests', () => {
 		});
 		const tasks = [
 			{
-				type: 'WorkflowStart',
+				type: 'StartWorkflow',
 			}
 		];
 		const logger = createLogger();
