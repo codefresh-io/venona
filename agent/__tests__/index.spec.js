@@ -4,7 +4,8 @@ const Codefresh = require('./../../services/Codefresh');
 const Kubernetes = require('./../../services/Kubernetes');
 const Logger = require('./../../services/Logger');
 const { Server } = require('./../../server');
-
+const FetchTasksToExecute = require('./../../tasks/FetchTasksToExecute');
+const ReportStatus = require('./../../tasks/ReportStatus');
 
 jest.mock('./../../services/Codefresh');
 jest.mock('./../../services/Kubernetes');
@@ -36,13 +37,34 @@ const buildTestConfig = () => ({
 	codefresh: {
 		baseURL: 'https://g.codefresh.io',
 		token: 'token'
+	},
+	tasks: {
+		FetchTasksToExecute: {
+			cronExpression: 'cron'
+		},
+		ReportStatus: {
+			cronExpression: 'cron'
+		}
 	}
+});
+
+beforeEach(() => {
+	Server.mockImplementationOnce(() => ({
+		init: jest.fn(),
+	}));
+	Codefresh.mockImplementationOnce(() => ({
+		init: jest.fn(),
+	}));
+	Kubernetes.mockImplementationOnce(() => ({
+		init: jest.fn(),
+	}));
+	Kubernetes.buildFromConfig = jest.fn(Kubernetes);
+	Kubernetes.buildFromInCluster = jest.fn(Kubernetes);
 });
 
 describe('Agent unit test', () => {
 	describe('Constructing new Agent', () => {
 		it('Should construct successfully', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			const agent = new Agent(buildTestConfig());
 			expect(Object.keys(agent).sort()).toEqual([
 				'kubernetesAPI',
@@ -64,13 +86,11 @@ describe('Agent unit test', () => {
 		});
 
 		it('Should create logger during construction', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			new Agent(buildTestConfig());
 			expect(Logger.create).toHaveBeenCalled();
 		});
 
 		it('Should create logger during construction with specific keys', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			new Agent(buildTestConfig());
 			const callsArguments = Logger.create.mock.calls[0];
 			expect(Object.keys(callsArguments[0])).toEqual(['name', 'version', 'mode']);
@@ -78,7 +98,6 @@ describe('Agent unit test', () => {
 		});
 
 		it('Should call logger with message during construction', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			new Agent(buildTestConfig());
 			const callsArguments = Logger.create.mock.instances[1].info.mock.calls[0][0];
 			expect(callsArguments).toEqual('Starting agent');
@@ -86,14 +105,12 @@ describe('Agent unit test', () => {
 
 
 		it('Should Codefresh API service during construction just once', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			new Agent(buildTestConfig());
 			const totalCallsToCodefreshConstructor = Codefresh.mock.calls;
 			expect(totalCallsToCodefreshConstructor).toHaveLength(1);
 		});
 
 		it('Should construct CodefreshAPI service with specific keys', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			new Agent(buildTestConfig());
 			const callsArguments = Codefresh.mock.calls[0];
 			expect(callsArguments).toHaveLength(2);
@@ -102,7 +119,6 @@ describe('Agent unit test', () => {
 		});
 
 		it('Should construct KubernetesAPI service with specific keys', () => {
-			Kubernetes.buildFromConfig = jest.fn();
 			new Agent(buildTestConfig());
 			const callsArguments = Kubernetes.buildFromConfig.mock.calls[0];
 			expect(callsArguments).toHaveLength(2);
@@ -130,16 +146,6 @@ describe('Agent unit test', () => {
 
 	describe('Initializing agent', () => {
 		it('Should complete initialization with message', () => {
-			Kubernetes.buildFromConfig = jest.fn(Kubernetes);
-			Server.mockImplementationOnce(() => ({
-				init: jest.fn(),
-			}));
-			Codefresh.mockImplementationOnce(() => ({
-				init: jest.fn(),
-			}));
-			Kubernetes.mockImplementationOnce(() => ({
-				init: jest.fn(),
-			}));
 			return new Agent(buildTestConfig())
 				.init()
 				.then(() => {
@@ -150,14 +156,9 @@ describe('Agent unit test', () => {
 
 		it('Should call to Server initialization process during agent initialization', () => {
 			const serverInitSpy = jest.fn();
+			Server.mockReset();
 			Server.mockImplementationOnce(() => ({
 				init: serverInitSpy,
-			}));
-			Codefresh.mockImplementationOnce(() => ({
-				init: jest.fn(),
-			}));
-			Kubernetes.mockImplementationOnce(() => ({
-				init: jest.fn(),
 			}));
 			return new Agent(buildTestConfig())
 				.init()
@@ -169,14 +170,9 @@ describe('Agent unit test', () => {
 
 		it('Should call to CodefreshAPI initialization process during agent initialization', () => {
 			const codefreshInitSpy = jest.fn();
-			Server.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
+			Codefresh.mockReset();
 			Codefresh.mockImplementation(() => ({
 				init: codefreshInitSpy,
-			}));
-			Kubernetes.mockImplementation(() => ({
-				init: jest.fn(),
 			}));
 			return new Agent(buildTestConfig())
 				.init()
@@ -188,12 +184,7 @@ describe('Agent unit test', () => {
 
 		it('Should call to KubernetesAPI initialization process during agent initialization', () => {
 			const kubernetesInitSpy = jest.fn();
-			Server.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
-			Codefresh.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
+			Kubernetes.mockReset();
 			Kubernetes.mockImplementation(() => ({
 				init: kubernetesInitSpy,
 			}));
@@ -205,35 +196,33 @@ describe('Agent unit test', () => {
 				});
 		});
 
-		it('Initialization should return with no value', () => {
-			Server.mockImplementation(() => ({
-				init: jest.fn(),
+		it('Should throw an error when initialization crashed', () => {
+			Server.mockReset();
+			Server.mockImplementationOnce(() => ({
+				init: jest.fn().mockRejectedValue(new Error('Error!')),
 			}));
-			Codefresh.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
-			Kubernetes.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
-			return new Agent(buildTestConfig()).init()
-				.then((...params) => {
-					expect(...params).toBeUndefined();
-				});
+			return expect(new Agent(buildTestConfig()).init()).rejects.toThrow('Failed to initialize agent with error message');
 		});
 
-		it('Should throw an error when initialization crashed', () => {
-			Server.mockImplementation(() => ({
-				init: jest.fn(() => Promise.reject(new Error('Error!!'))),
-			}));
-			Codefresh.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
-			Kubernetes.mockImplementation(() => ({
-				init: jest.fn(),
-			}));
+		it('Should return agent instance after initialization finished', () => {
 			return new Agent(buildTestConfig()).init()
-				.catch((err) => {
-					expect(err.message).toEqual(expect.stringContaining('Failed to initialize agent with error message:'));
+				.then((result) => {
+					expect(result).toBeInstanceOf(Agent);
+				});
+		});
+	});
+
+	describe('Stat agent flow', () => {
+		it('Should call to _startTask for both supported tasks', () => {
+			const agent = new Agent(buildTestConfig());
+			agent._startTask = jest.fn();
+			return agent
+				.init()
+				.then(a => a.start())
+				.then(() => {
+					expect(agent._startTask).toHaveBeenCalledTimes(2);
+					expect(agent._startTask).toHaveBeenNthCalledWith(1, 'cron', FetchTasksToExecute);
+					expect(agent._startTask).toHaveBeenNthCalledWith(2, 'cron', ReportStatus);
 				});
 		});
 	});

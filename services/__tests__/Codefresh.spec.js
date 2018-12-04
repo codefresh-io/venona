@@ -95,7 +95,7 @@ describe('Codefresh API unit tests', () => {
 				return createCodefreshAPI()
 					.fetchTasksToExecute(createLogger(getFakeMetadata()))
 					.then(() => {
-						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/runtime-environments/unit-test/workflows');
+						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/tasks/unit-test');
 					});
 			});
 		});

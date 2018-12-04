@@ -34,7 +34,7 @@ class Codefresh {
 
 	fetchTasksToExecute(logger) {
 		logger.info('Calling Codefresh API to fetch jobs');
-		const url = `/api/runtime-environments/${encodeURIComponent(this.metadata.name)}/workflows`;
+		const url = `/api/tasks/${encodeURIComponent(this.metadata.name)}`;
 		return this._call({
 			url,
 			method: 'GET',
