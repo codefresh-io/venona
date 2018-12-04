@@ -51,26 +51,20 @@ class Agent {
 		return Promise.resolve();
 	}
 
-	_wrapTask(Task) {
-		const taskLogger = this.logger.child({
-			namespace: LOGGER_NAMESPACES.TASK,
-			task: FetchTasksToExecute.name,
-		});
-		Promise.resolve()
-			.then(() => new Task(this.codefreshAPI, this.kubernetesAPI, taskLogger).run())
-			.catch((err) => {
-				this.logger.error(`Failed to execute task ${Task.name} with error message: ${err.message}`);
-			})
-			.done();
-	}
-
 	_startTask(cron, Task) {
 		this.logger.info(`Starting task: ${Task.name} with cron: ${cron}`);
-		if (cron) {
-			scheduler.scheduleJob(cron, () => this._wrapTask(Task));
-		} else {
-			this._wrapTask(Task);
-		}
+		scheduler.scheduleJob(cron, () => {
+			const taskLogger = this.logger.child({
+				namespace: LOGGER_NAMESPACES.TASK,
+				task: FetchTasksToExecute.name,
+			});
+			Promise.resolve()
+				.then(() => new Task(this.codefreshAPI, this.kubernetesAPI, taskLogger).run())
+				.catch((err) => {
+					this.logger.error(`Failed to execute task ${Task.name} with error message: ${err.message}`);
+				})
+				.done();
+		});
 	}
 }
 

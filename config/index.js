@@ -24,6 +24,10 @@ function build() {
 				},
 				ca: process.env.KUBERNETES_CA_CERT,
 			},
+			metadata: {
+				name: process.env.SELF_POD_NAME,
+				namepsace: process.env.SELF_POD_NAMESPACE,
+			}
 		},
 		codefresh: {
 			baseURL: process.env.CODEFRESH_HOST || 'https://g.codefresh.io',
@@ -34,7 +38,7 @@ function build() {
 				cronExpression: process.env.TASK_FETCH_JOBS_TO_EXECUTE_CRON_EXPRESSION || '* * * * *', // once a minute
 			},
 			ReportStatus: {
-				cronExpression: process.env.TASK_REPORT_STATUS_CRON_EXPRESSION || '* * * * *', // twice a minute
+				cronExpression: process.env.TASK_REPORT_STATUS_CRON_EXPRESSION || '* * * * *', // once a minute
 			},
 		},
 	};
