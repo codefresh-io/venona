@@ -16,7 +16,6 @@ class Codefresh {
 			headers: {
 				Authorization: utils.getPropertyOrError(options, 'token', ERROR_MESSAGES.MISSING_TOKEN),
 				'Codefresh-Agent-Version': metadata.version,
-				'Codefresh-Agent-Name': metadata.name,
 			},
 			json: true,
 			timeout: 30 * 1000,
@@ -34,7 +33,7 @@ class Codefresh {
 
 	fetchTasksToExecute(logger) {
 		logger.info('Calling Codefresh API to fetch jobs');
-		const url = `/api/tasks/${encodeURIComponent(this.metadata.name)}`;
+		const url = '/api/tasks';
 		return this._call({
 			url,
 			method: 'GET',
@@ -43,7 +42,7 @@ class Codefresh {
 
 	reportStatus(logger, status) {
 		logger.info({ status }, 'Calling Codefresh API to report status');
-		const url = `/api/runtime-environments/status/${encodeURIComponent(this.metadata.name)}`;
+		const url = '/api/runtime-environments/status';
 		return this._call({
 			url,
 			method: 'PUT',

@@ -11,12 +11,10 @@ const { LOGGER_NAMESPACES, AGENT_MODES } = require('./../constants');
 const utils = require('./../utils');
 
 const ERROR_MESSAGES = {
-	FAILED_TO_CONSTRUCT_ANONYMOUS_AGENT: 'Cannot construct anonymous agent',
 };
 
 class Agent {
 	constructor(config = {}) {
-		this.name = utils.getPropertyOrError(config, 'metadata.name', ERROR_MESSAGES.FAILED_TO_CONSTRUCT_ANONYMOUS_AGENT);
 		this.logger = Logger.create(config.metadata, config.logger);
 		this.logger.info('Starting agent');
 		this.server = new Server(config.metadata, config.server, this.logger.child({
