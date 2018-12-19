@@ -5,7 +5,6 @@ const { LOGGER_MODES } = require('./../constants');
 function build() {
 	return {
 		metadata: {
-			name: process.env.AGENT_NAME,
 			version,
 			mode: process.env.AGENT_MODE,
 		},

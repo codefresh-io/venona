@@ -69,22 +69,11 @@ describe('Agent unit test', () => {
 			expect(Object.keys(agent).sort()).toEqual([
 				'kubernetesAPI',
 				'codefreshAPI',
-				'name',
 				'logger',
 				'tasks',
 				'server',
 			].sort());
 		});
-
-		it('Should throw an error when config constructing anonymous agent', () => {
-			try {
-				// eslint-disable-next-line no-new
-				new Agent();
-			} catch (err) {
-				expect(err.message).toEqual('Cannot construct anonymous agent');
-			}
-		});
-
 		it('Should create logger during construction', () => {
 			new Agent(buildTestConfig());
 			expect(Logger.create).toHaveBeenCalled();
