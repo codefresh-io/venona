@@ -8,7 +8,6 @@ const { Server } = require('./../server');
 const FetchTasksToExecute = require('./../tasks/FetchTasksToExecute');
 const ReportStatus = require('./../tasks/ReportStatus');
 const { LOGGER_NAMESPACES, AGENT_MODES } = require('./../constants');
-const utils = require('./../utils');
 
 const ERROR_MESSAGES = {
 };

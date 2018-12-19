@@ -94,7 +94,7 @@ describe('Codefresh API unit tests', () => {
 				return createCodefreshAPI()
 					.fetchTasksToExecute(createLogger(getFakeMetadata()))
 					.then(() => {
-						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/tasks');
+						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/tasks');
 					});
 			});
 		});
@@ -110,7 +110,7 @@ describe('Codefresh API unit tests', () => {
 						},
 					})
 					.then(() => {
-						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/runtime-environments/status');
+						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/status');
 						expect(spy.mock.calls[0][0]).toHaveProperty('method', 'PUT');
 						expect(spy.mock.calls[0][0]).toHaveProperty('body');
 					});
