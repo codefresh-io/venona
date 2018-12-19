@@ -40,7 +40,7 @@ class Kubernetes {
 
 	async init() {
 		try {
-			await this.client.loadSpec(); // TOOD: this is calling to the api to /openapi/v2 or swagger.json
+			await this.client.loadSpec();
 			return Promise.resolve();
 		} catch (err) {
 			throw new Error(`${ERROR_MESSAGES.FAILED_TO_INIT} with error: ${err.message}`);
