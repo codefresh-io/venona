@@ -1,0 +1,86 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{AGENT_NAME}}
+    version: {{AGENT_VERSION}}
+  name: {{AGENT_NAME}}
+  namespace: {{AGENT_NAMESPACE}}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{AGENT_NAME}}
+        version: {{AGENT_VERSION}}
+    spec:
+      serviceAccountName: {{APP_NAME}}
+      containers:
+      - env:
+        - name: SELF_DEPLOYMENT_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CODEFRESH_TOKEN
+          value: {{CODEFRESH_TOKEN}}
+        - name: CODEFRESH_HOST
+          value: {{CODEFRESH_HOST}}
+        - name: AGENT_MODE
+          value: {{AGENT_MODE}}
+        - name: AGENT_NAME
+          value: {{AGENT_NAME}}
+        image: {{AGENT_IMAGE_NAME}}:{{AGENT_IMAGE_TAG}}
+        imagePullPolicy: Always
+        name: {{AGENT_NAME}}
+      restartPolicy: Always
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{APP_NAME}}
+  namespace: {{AGENT_NAMESPACE}}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create", "delete"]
+
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{APP_NAME}}-binding
+  namespace: {{AGENT_NAMESPACE}}
+subjects:
+- kind: ServiceAccount
+  name: {{APP_NAME}}
+roleRef:
+  kind: Role
+  name: {{APP_NAME}}
+  apiGroup: rbac.authorization.k8s.io
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{APP_NAME}}-cluster-role-binding
+subjects:
+- kind: ServiceAccount
+  name: {{APP_NAME}}
+  namespace: {{AGENT_NAMESPACE}}
+roleRef:
+  kind: ClusterRole
+  name: openapi:v2:discovery
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{APP_NAME}}
+  namespace: {{AGENT_NAMESPACE}}
