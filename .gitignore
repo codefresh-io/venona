@@ -4,3 +4,10 @@ node_modules
 .envrc*
 .vscode
 .REST
+vcs.xml
+Project_Default.xml
+modules.xml
+misc.xml
+Isser.iml
+encodings.xml
+yarn-error.log
