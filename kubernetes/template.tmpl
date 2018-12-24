@@ -28,7 +28,10 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CODEFRESH_TOKEN
-          value: {{CODEFRESH_TOKEN}}
+          valueFrom:
+            secretKeyRef:
+              name: {{APP_NAME}}
+              key: codefresh.token
         - name: CODEFRESH_HOST
           value: {{CODEFRESH_HOST}}
         - name: AGENT_MODE
@@ -54,7 +57,7 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{APP_NAME}}-binding
+  name: {{APP_NAME}}
   namespace: {{AGENT_NAMESPACE}}
 subjects:
 - kind: ServiceAccount
@@ -84,3 +87,13 @@ kind: ServiceAccount
 metadata:
   name: {{APP_NAME}}
   namespace: {{AGENT_NAMESPACE}}
+
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{APP_NAME}}
+  namespace: {{AGENT_NAMESPACE}}
+data:
+  codefresh.token: {{CODEFRESH_TOKEN}}
