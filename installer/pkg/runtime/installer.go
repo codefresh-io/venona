@@ -16,16 +16,31 @@ limitations under the License.
 
 package runtime
 
+import (
+    "fmt"
+)
 
-// RuntimeInstaller Interface to implement
-type RuntimeInstaller interface {
+// Installer Interface to implement
+type Installer interface {
 
     // Install runtime environment  
-    Install(*RuntimeConfig) error
+    Install(*Config) error
 
     // GetStatus of runtime environment
-    GetStatus(*RuntimeConfig) RuntimeStatus, error
+    GetStatus(*Config) (Status, error)
 
     // Delete runtime environment
-    Delete(*RuntimeConfig) error
+    Delete(*Config) error
+}
+
+// GetInstaller Returns right installer based on Config object
+func GetInstaller(runtimeConfig *Config) (Installer, error) {
+   var installer Installer
+   var err error
+   if runtimeConfig.RuntimeType == TypeKubernetesDind {
+      installer = &KubernetesDindInstaller{}
+   } else {
+      err = fmt.Errorf("Unknown runtime type %s", runtimeConfig.RuntimeType)
+   }
+   return installer, err
 }

@@ -22,17 +22,17 @@ type KubernetesDindInstaller struct {
 }
 
 // Install runtime environment  
-func(u *KubernetesDindInstaller) Install(*RuntimeConfig) error {
+func(u *KubernetesDindInstaller) Install(*Config) error {
 
-    return nill
+    return nil
 }
 
 // GetStatus of runtime environment
-func(u *KubernetesDindInstaller) GetStatus(*RuntimeConfig) RuntimeStatus, error{
+func(u *KubernetesDindInstaller) GetStatus(*Config) (Status, error){
 
-    runtimeStatus := RuntimeStatus{
-        status: statusRunning,
-        statusMessage: "",
+    runtimeStatus := Status{
+        Status: StatusRunning,
+        StatusMessage: "",
     }
     return runtimeStatus, nil
 }
@@ -40,7 +40,7 @@ func(u *KubernetesDindInstaller) GetStatus(*RuntimeConfig) RuntimeStatus, error{
 
 
 // Delete runtime environment
-func(u *KubernetesDindInstaller) Delete(*RuntimeConfig) error {
+func(u *KubernetesDindInstaller) Delete(*Config) error {
 
     return nil
 }

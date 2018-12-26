@@ -18,38 +18,38 @@ package codefresh
 
 import (
 
-	// "github.com/golang/glog"
-	"github.com/codefresh-io/Isser/installer/pkg/certs"
+	//"github.com/golang/glog"
+	//"github.com/codefresh-io/Isser/installer/pkg/certs"
 	"github.com/codefresh-io/Isser/installer/pkg/runtime"
 )
 
 const (
-	defaultURL = "https://g.codefresh.io"
+	// DefaultURL - by default it is Codefresh Production
+	DefaultURL = "https://g.codefresh.io"
 	
-	runtimeTypeKubernetesDind = "k8sDind"
 	//runtimeTypeDockerd = "dockerd"
 )
 
 // CfAPI struct to call Codefresh API
 type CfAPI struct {
-   url string
-   apiKey string    
+   URL string
+   APIKey string    
 }
 
 // Validate calls codefresh API to validate runtimeConfig
-func (u *CfAPI) Validate (runtimeConfig *runtime.RuntimeConfig) error {
+func (u *CfAPI) Validate (runtimeConfig *runtime.Config) error {
 
     return nil
 }
 
 // Sign calls codefresh API to sign certificates
-func (u *CfAPI) Sign (runtimeConfig *runtime.RuntimeConfig) error {
+func (u *CfAPI) Sign (runtimeConfig *runtime.Config) error {
 
     return nil
 }
 
 // Register calls codefresh API to register runtime environment
-func (u *CfAPI) Register (runtimeConfig *runtime.RuntimeConfig) error {
+func (u *CfAPI) Register (runtimeConfig *runtime.Config) error {
 
     return nil
 }

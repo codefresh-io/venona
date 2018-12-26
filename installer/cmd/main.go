@@ -19,62 +19,98 @@ package main
 import (
 
 	"flag"
-	// "fmt"
+	"fmt"
+	"os"
 
-	"github.com/golang/glog"
+	//"github.com/golang/glog"
 	"github.com/codefresh-io/Isser/installer/pkg/codefresh"
 	"github.com/codefresh-io/Isser/installer/pkg/runtime"
 )
 
 var (
 
-	codefreshApiKey = flag.String("api-key", "", "Codefresh api key (token)")
-	codefreshUrl = flag.String("url", codefresh.defaultURL, "Codefresh url")
+	codefreshAPIKey = flag.String("api-key", "", "Codefresh api key (token)")
+	codefreshURL = flag.String("url", codefresh.DefaultURL, "Codefresh url")
 
-	runtimeType = flag.String("runtime-type", runtime.typeKubernetesDind, "Runtime Environement Type")
-	
+	//runtimeType = flag.String("runtime-type", runtime.TypeKubernetesDind, "Runtime Environement Type")
+	runtimeType = runtime.TypeKubernetesDind
 	kubeconfig = flag.String("kubeconfig", "", "Absolute path to the kubeconfig")
 	kubecontext = flag.String("kubecontext", "", "Kubeconfig context name")
+	
+	namespace = flag.String("namespace", "default", "Kubernetes namespace")
+	clusterName = flag.String("cluster-name", "", "Cluster Name registered in Codefresh")
 )
 
-func getRuntimeConfig() (runtime.RuntimeConfig, error) {
-   return nil, nil
+func getRuntimeConfig() (*runtime.Config, error) {
+   
+	var clientConfig runtime.ClientConfig
+	if runtimeType == runtime.TypeKubernetesDind {
+		clientConfig = runtime.ClientConfig{
+			KubeClient: runtime.KubernetesClientConfig{
+				Kubeconfig: *kubeconfig,
+				Context: *kubecontext,
+				Namespace: *namespace,
+			},
+		}
+	} else {
+		return nil, fmt.Errorf("Unknown runtime type %s", runtimeType)
+	}
+	
+	runtimeConfig := &runtime.Config{
+			RuntimeType: runtimeType,
+			ClusterName: *clusterName,
+			ClientConfig: clientConfig,
+    }	
+    return runtimeConfig, nil
 }
 
 func main() {
-  
+  fmt.Printf("Started dddd")
   flag.Parse()
-  flag.Set("v", "4")
+  //flag.Set("v", "4")
   flag.Set("alsologtostderr", "true")
   // Validate Flags
 
   runtimeConfig, err := getRuntimeConfig()
   if err != nil {
-
+	 fmt.Printf("Error: %v", err)
+	 os.Exit(1)
   }
   
-  cfApi := codefresh.CfApi{
-	url: codefreshUrl,
-	apiKey: codefreshApiKey, 
+  cfAPI := codefresh.CfAPI{
+		URL: *codefreshURL,
+		APIKey: *codefreshAPIKey, 
   }
 
-  err = cfApi.Validate(runtimeConfig)
+  err = cfAPI.Validate(runtimeConfig)
   if err != nil {
-	  
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)	  
   }
 
-  err = cfApi.Sign(runtimeConfig)
+  err = cfAPI.Sign(runtimeConfig)
   if err != nil {
-	  
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)	  
   }
 
-  err = runtime.Install(runtimeConfig)
+	installer, err := runtime.GetInstaller(runtimeConfig)
   if err != nil {
-	  
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)	  
+	}
+		
+  err = installer.Install(runtimeConfig)
+  if err != nil {
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)	  
   }
 
-  err = cfApi.Register(runtimeConfig)
+  err = cfAPI.Register(runtimeConfig)
   if err != nil {
-	  
+		fmt.Printf("Error: %v", err)
+		os.Exit(1)
   }
+
+  fmt.Printf("Installation completed Successfully")
 }

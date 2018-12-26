@@ -16,36 +16,50 @@ limitations under the License.
 
 package runtime
 
-const (
-	typeKubernetesDind = "kubernetesDind"
-	//typeDockerd = "dockerd"
+import (
 
-	statusRunning = "Running"
-	statusFailed = "Failed"
-	statusNotIntalled = "NotInstalled"
-
+	"github.com/codefresh-io/Isser/installer/pkg/certs"
 )
 
-type RuntimeConfig struct {
+const (
+	// TypeKubernetesDind - name for Kubernetes  Dind runtime 
+	TypeKubernetesDind = "kubernetesDind"
+	//typeDockerd = "dockerd"
 
-    runtimeType string
-	clusterName string
+	// StatusInstalled - status installed
+	StatusInstalled = "Installed"
+	// StatusNotIntalled - status installed
+	StatusNotIntalled = "NotInstalled"
+	// StatusRunning - status failed
+	StatusRunning = "Running"
+	// StatusFailed - status failed
+	StatusFailed = "Failed"
+)
+
+// Config - contains all data needed to config specific runtime
+type Config struct {
+
+    RuntimeType string
+	ClusterName string
 	ClientConfig
     
-    sercerCerts certs.RuntimeServerCert
+    ServerCerts certs.RuntimeServerCert
 }
 
+// ClientConfig - structy for client of runtime env (kube client config)
 type ClientConfig struct {
-	Kubernetes KubernetesClientConfig
+	KubeClient KubernetesClientConfig
 }
 
+// KubernetesClientConfig - kube client config struct
 type KubernetesClientConfig struct {
-	kubeconfig string
-	context string
-	namespace string
+	Kubeconfig string
+	Context string
+	Namespace string
 }
 
-type RuntimeStatus struct {
-	status string
-	statusMessage string
+// Status - status of runtime env configuration
+type Status struct {
+	Status string
+	StatusMessage string
 }
