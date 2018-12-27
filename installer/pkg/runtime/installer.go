@@ -37,10 +37,10 @@ type Installer interface {
 func GetInstaller(runtimeConfig *Config) (Installer, error) {
    var installer Installer
    var err error
-   if runtimeConfig.RuntimeType == TypeKubernetesDind {
+   if runtimeConfig.Type == TypeKubernetesDind {
       installer = &KubernetesDindInstaller{}
    } else {
-      err = fmt.Errorf("Unknown runtime type %s", runtimeConfig.RuntimeType)
+      err = fmt.Errorf("Unknown runtime type %s", runtimeConfig.Type)
    }
    return installer, err
 }

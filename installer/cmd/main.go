@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os"
 
-	//"github.com/golang/glog"
+	"github.com/golang/glog"
 	"github.com/codefresh-io/Isser/installer/pkg/codefresh"
 	"github.com/codefresh-io/Isser/installer/pkg/runtime"
 )
@@ -57,18 +57,18 @@ func getRuntimeConfig() (*runtime.Config, error) {
 	}
 	
 	runtimeConfig := &runtime.Config{
-			RuntimeType: runtimeType,
-			ClusterName: *clusterName,
-			ClientConfig: clientConfig,
+			Type: runtimeType,
+			Name: *clusterName,
+			Client: clientConfig,
     }	
     return runtimeConfig, nil
 }
 
 func main() {
-  fmt.Printf("Started dddd")
   flag.Parse()
-  //flag.Set("v", "4")
+  flag.Set("v", "4")
   flag.Set("alsologtostderr", "true")
+  glog.V(4).Infof("Entering\n codefreshUrl = %s \n clusterName = %s ", *codefreshURL, clusterName)
   // Validate Flags
 
   runtimeConfig, err := getRuntimeConfig()
@@ -77,10 +77,7 @@ func main() {
 	 os.Exit(1)
   }
   
-  cfAPI := codefresh.CfAPI{
-		URL: *codefreshURL,
-		APIKey: *codefreshAPIKey, 
-  }
+  cfAPI, _ := codefresh.NewCfAPI(*codefreshURL, *codefreshAPIKey)
 
   err = cfAPI.Validate(runtimeConfig)
   if err != nil {

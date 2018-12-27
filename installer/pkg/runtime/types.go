@@ -38,10 +38,12 @@ const (
 
 // Config - contains all data needed to config specific runtime
 type Config struct {
-
-    RuntimeType string
-	ClusterName string
-	ClientConfig
+    // Runtime Env Type
+	Type string
+	// Runtime Env Name
+	Name string
+	
+	Client ClientConfig
     
     ServerCerts certs.RuntimeServerCert
 }
