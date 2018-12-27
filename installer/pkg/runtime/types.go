@@ -45,7 +45,7 @@ type Config struct {
 	
 	Client ClientConfig
     
-    ServerCerts certs.RuntimeServerCert
+    ServerCert *certs.ServerCert
 }
 
 // ClientConfig - structy for client of runtime env (kube client config)

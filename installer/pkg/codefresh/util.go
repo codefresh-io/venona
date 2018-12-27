@@ -24,8 +24,11 @@ import (
 	"encoding/json"
 	"bytes"
 	"io/ioutil"
+
+	"archive/zip"
+
 	"github.com/golang/glog"
-	//"github.com/codefresh-io/Isser/installer/pkg/certs"
+	"github.com/codefresh-io/Isser/installer/pkg/certs"
 	"github.com/codefresh-io/Isser/installer/pkg/runtime"
 )
 
@@ -80,6 +83,7 @@ func (u *CfAPI) createCfRequest(path string, reqBodyMap map[string]string) (*htt
 // Validate calls codefresh API to validate runtimeConfig
 func (u *CfAPI) Validate (runtimeConfig *runtime.Config) error {
 	
+	glog.V(4).Infof("Entering codefresh.Validate" )
 	reqPath := "api/custom_clusters/validate"
 	var reqBodyMap map[string]string
 	if runtimeConfig.Type == runtime.TypeKubernetesDind {
@@ -101,7 +105,7 @@ func (u *CfAPI) Validate (runtimeConfig *runtime.Config) error {
 		return err
 	}
 	respBody, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
+	defer resp.Body.Close()
     if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Validation failed: %s", respBody)
 	}
@@ -112,8 +116,89 @@ func (u *CfAPI) Validate (runtimeConfig *runtime.Config) error {
 
 // Sign calls codefresh API to sign certificates
 func (u *CfAPI) Sign (runtimeConfig *runtime.Config) error {
+	
+	glog.V(4).Infof("Entering codefresh.Sign" )
+	serverCert, err := certs.NewServerCert()
+	if err != nil {
+		return err
+	}
 
-    return nil
+	glog.V(4).Infof("Generated ServerCerts Csr")
+
+	var certExtraSANs string
+    if runtimeConfig.Type == runtime.TypeKubernetesDind {
+       certExtraSANs = fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io", 
+           runtimeConfig.Client.KubeClient.Namespace, runtimeConfig.Client.KubeClient.Namespace)
+    } else {
+        certExtraSANs = "IP:127.0.0.1,DNS:*.cf-cd.com,DNS:*.codefresh.io"
+	}
+	glog.V(4).Infof("certExtraSANs = %s", certExtraSANs )
+
+	reqPath := "api/custom_clusters/signServerCerts"
+	var reqBodyMap map[string]string
+	reqBodyMap = make(map[string]string)
+	reqBodyMap["reqSubjectAltName"] = certExtraSANs
+	reqBodyMap["csr"] = serverCert.Csr
+
+	glog.V(4).Infof("Submitting request to %s", reqPath )
+	req, err := u.createCfRequest(reqPath, reqBodyMap)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Sign certificates failed: %s", respBody)
+	}
+	
+	respBodyReaderAt := bytes.NewReader(respBody)
+	zipReader, err := zip.NewReader(respBodyReaderAt, resp.ContentLength)
+	for _, zf := range zipReader.File {
+		buf := new(bytes.Buffer)
+		src, _ := zf.Open()
+		defer src.Close()
+		buf.ReadFrom(src)
+		
+		if zf.Name == "cf-ca.pem" {
+			serverCert.Ca = buf.String()
+		} else if zf.Name == "cf-server-cert.pem" {
+			serverCert.Cert = buf.String()
+		} else {
+			glog.V(4).Infof("Warning: Unknown filename in sign responce %s", zf.Name)
+		}
+	}   
+
+	// Validating serverCert
+	var missingCerts string
+	if serverCert.Csr == "" {
+		missingCerts += " csr"
+	}
+	if serverCert.Cert == "" {
+		missingCerts += " cert"
+	}
+	if serverCert.Key == "" {
+		missingCerts += " key"
+	}
+	if serverCert.Ca == "" {
+		missingCerts += " ca"
+	}
+	if missingCerts != "" {
+		return fmt.Errorf("Failed to to generate and sign certificates: %s is missing", missingCerts)
+	}
+
+	runtimeConfig.ServerCert = serverCert
+	return nil
 }
 
 // Register calls codefresh API to register runtime environment
