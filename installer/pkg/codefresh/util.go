@@ -83,8 +83,9 @@ func (u *CfAPI) createCfRequest(path string, reqBodyMap map[string]string) (*htt
 // Validate calls codefresh API to validate runtimeConfig
 func (u *CfAPI) Validate (runtimeConfig *runtime.Config) error {
 	
-	glog.V(4).Infof("Entering codefresh.Validate" )
 	reqPath := "api/custom_clusters/validate"
+	glog.V(4).Infof("Entering codefresh.Validate - %s",  reqPath)
+
 	var reqBodyMap map[string]string
 	if runtimeConfig.Type == runtime.TypeKubernetesDind {
 		reqBodyMap = make(map[string]string)
@@ -204,5 +205,34 @@ func (u *CfAPI) Sign (runtimeConfig *runtime.Config) error {
 // Register calls codefresh API to register runtime environment
 func (u *CfAPI) Register (runtimeConfig *runtime.Config) error {
 
+	reqPath := "api/custom_clusters/register"
+	glog.V(4).Infof("Entering codefresh.Register - %s",  reqPath)
+
+	var reqBodyMap map[string]string
+	if runtimeConfig.Type == runtime.TypeKubernetesDind {
+		reqBodyMap = make(map[string]string)
+		reqBodyMap["clusterName"] = runtimeConfig.Name
+		reqBodyMap["namespace"] = runtimeConfig.Client.KubeClient.Namespace
+	} else {
+		return fmt.Errorf("Unknown runtime type %s", runtimeConfig.Type)
+	}
+
+	req, err := u.createCfRequest(reqPath, reqBodyMap)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	respBody, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+    if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Register request failed: %s", respBody)
+	}
+
+	glog.V(4).Infof("Register Response %s", respBody)
     return nil
 }
