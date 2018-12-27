@@ -78,6 +78,7 @@ describe('Agent unit test', () => {
 				'server',
 			].sort());
 		});
+
 		it('Should create logger during construction', () => {
 			new Agent(buildTestConfig());
 			expect(Logger.create).toHaveBeenCalled();
@@ -95,7 +96,6 @@ describe('Agent unit test', () => {
 			const callsArguments = Logger.create.mock.instances[1].info.mock.calls[0][0];
 			expect(callsArguments).toEqual('Starting agent');
 		});
-
 
 		it('Should Codefresh API service during construction just once', () => {
 			new Agent(buildTestConfig());
@@ -196,9 +196,7 @@ describe('Agent unit test', () => {
 			}));
 			return expect(new Agent(buildTestConfig()).init()).rejects.toThrow('Failed to initialize agent with error message');
 		});
-	});
 
-	describe('Stat agent flow', () => {
 		it('Should call to _startJob for both supported tasks', () => {
 			const agent = new Agent(buildTestConfig());
 			agent._startJob = jest.fn();
@@ -209,6 +207,56 @@ describe('Agent unit test', () => {
 					expect(agent._startJob).toHaveBeenNthCalledWith(1, 'cron', StatusReporterJob);
 					expect(agent._startJob).toHaveBeenNthCalledWith(2, 'cron', TaskPullerJob);
 				});
+		});
+	});
+
+	describe('Queue', () => {
+		it('Should call run on each job in the queue', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should call cb with an error in case a job been rejected', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should call cb with an error in case a job throws an error', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should call cb with an error in case a job timedout', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should call cb in case the job was resolved', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should call to _onEmptyQueue once a queue have no more tasks', () => {
+			expect(true).toBeFalsy();
+		});
+	});
+
+	describe('Auto jobs load', () => {
+		it('Should load only jobs that related to agent', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should not load jobs that dosent matched pattern', () => {
+			expect(true).toBeFalsy();
+		});
+	});
+
+	describe('_startJob', () => {
+		it('Should create fork logger for each job', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should pass all services to the Job constructor', () => {
+			expect(true).toBeFalsy();
+		});
+
+		it('Should push the job to the queue', () => {
+			expect(true).toBeFalsy();
 		});
 	});
 });
