@@ -5,7 +5,7 @@ const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task TerminateWorkflow, failed to delete pod',
 };
 
-class TerminateWorkflow extends Base {
+class TerminateWorkflowTask extends Base {
 	async run(task) {
 		this.logger.info('Running TerminateWorkflow task');
 		const runtimeSpec = {
@@ -28,5 +28,5 @@ class TerminateWorkflow extends Base {
 		}
 	}
 }
-TerminateWorkflow.Errors = ERROR_MESSAGES;
-module.exports = TerminateWorkflow;
+TerminateWorkflowTask.Errors = ERROR_MESSAGES;
+module.exports               = TerminateWorkflowTask;

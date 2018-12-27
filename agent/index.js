@@ -39,7 +39,7 @@ class Agent {
 		this.logger.info(`Running job: ${job.constructor.name}`);
 		Promise.resolve()
 			.then(() => job.run())
-			.done(() => cb(), cb);
+			.then(() => cb(), cb);
 	}
 
 	async _loadJobs() {
@@ -70,7 +70,7 @@ class Agent {
 			throw new Error(message);
 		}
 	}
-	
+
 	_startJob(cron, Job) {
 		this.logger.info(`Preparing job: ${Job.name} with cron: ${cron}`);
 		scheduler.scheduleJob(cron, () => {

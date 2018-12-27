@@ -1,8 +1,8 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
 const Base = require('../BaseJob');
-const StartWorkflow = require('./tasks/StartWorkflow');
-const TerminateWorkflow = require('./tasks/TerminateWorkflow');
+const StartWorkflow = require('./tasks/StartWorkflow.task');
+const TerminateWorkflow = require('./tasks/TerminateWorkflow.task');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task TaskPullerJob, call to Codefresh rejected',

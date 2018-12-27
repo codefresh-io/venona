@@ -4,7 +4,7 @@ const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task StartWorkflow, failed to create pod',
 };
 
-class StartWorkflow extends Base {
+class StartWorkflowTask extends Base {
 	async run(task) {
 		this.logger.info('Running StartWorkflow task');
 		try {
@@ -21,5 +21,5 @@ class StartWorkflow extends Base {
 		}
 	}
 }
-StartWorkflow.Errors = ERROR_MESSAGES;
-module.exports = StartWorkflow;
+StartWorkflowTask.Errors = ERROR_MESSAGES;
+module.exports           = StartWorkflowTask;
