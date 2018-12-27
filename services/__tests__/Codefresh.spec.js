@@ -87,12 +87,12 @@ describe('Codefresh API unit tests', () => {
 			});
 		});
 
-		describe('fetchTasksToExecute', () => {
+		describe('pullTasks', () => {
 			it('Should set the url', () => {
 				const spy = jest.fn();
 				rp.__setRequestMock(spy);
 				return createCodefreshAPI()
-					.fetchTasksToExecute(createLogger(getFakeMetadata()))
+					.pullTasks(createLogger(getFakeMetadata()))
 					.then(() => {
 						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/tasks');
 					});

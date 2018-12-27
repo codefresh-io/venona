@@ -1,8 +1,8 @@
 const _ = require('lodash');
-const { create: createLogger } = require('../../services/Logger');
+const { create: createLogger } = require('../../../../services/Logger');
 const TerminateWorkflow = require('../TerminateWorkflow');
 
-jest.mock('./../../services/Logger');
+jest.mock('./../../../../services/Logger');
 
 const getValidTaskDef = () => {
 	return {

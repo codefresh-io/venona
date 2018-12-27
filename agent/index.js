@@ -1,13 +1,16 @@
 
 const Promise = require('bluebird');
 const scheduler = require('node-schedule');
+const path = require('path');
+const _ = require('lodash');
+const Queue = require('async/priorityQueue');
+const recursive = require('recursive-readdir');
 const Codefresh = require('./../services/Codefresh');
 const Kubernetes = require('./../services/Kubernetes');
 const Logger = require('./../services/Logger');
 const { Server } = require('./../server');
-const FetchTasksToExecute = require('./../tasks/FetchTasksToExecute');
-const ReportStatus = require('./../tasks/ReportStatus');
 const { LOGGER_NAMESPACES, AGENT_MODES } = require('./../constants');
+
 
 const ERROR_MESSAGES = {
 };
@@ -23,46 +26,73 @@ class Agent {
 		this.kubernetesAPI = config.metadata.mode === AGENT_MODES.IN_CLUSTER
 			? Kubernetes.buildFromInCluster(config.metadata)
 			: Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
-		this.tasks = config.tasks;
+		this.jobs = config.jobs;
+		this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
+		this.queue.drain = this._onEmptyQueue.bind(this);
+	}
+
+	_onEmptyQueue() {
+		this.logger.info('Queue is empty');
+	}
+
+	_queueRunner(job = { run: Promise }, cb) {
+		this.logger.info(`Running job: ${job.constructor.name}`);
+		Promise.resolve()
+			.then(() => job.run())
+			.done(() => cb(), cb);
+	}
+
+	async _loadJobs() {
+		const ignorePaths = ['BaseJob*', '**/__tests__/**', '**/tasks/**', (file, stats) => {
+			return !file.includes('Job') && !stats.isDirectory();
+		}];
+		await Promise.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
+			.map(require)
+			.map((Job) => {
+				const cron = _.get(this, `jobs.${Job.name}.cronExpression`, this.jobs.DEFAULT_CRON);
+				this._startJob(cron, Job);
+			});
 	}
 
 	async init() {
 		this.logger.info('Initializing agent');
-		return Promise.all([
-			this.server.init(),
-			this.codefreshAPI.init(),
-			this.kubernetesAPI.init(),
-		])
-			.then(() => {
-				this.logger.info('Initializing finished');
-				return this;
-			}, (err) => {
-				const message = `Failed to initialize agent with error message: ${err.message}`;
-				this.logger.error(message);
-				throw new Error(message);
-			});
+		try {
+			await Promise.all([
+				this.server.init(),
+				this.codefreshAPI.init(),
+				this.kubernetesAPI.init(),
+			]);
+			this.logger.info('All services has been initialized');
+			await this._loadJobs();
+		} catch(err) {
+			const message = `Failed to initialize agent with error message: ${err.message}`;
+			this.logger.error(message);
+			throw new Error(message);
+		}
 	}
-
-	async start() {
-		this._startTask(this.tasks.FetchTasksToExecute.cronExpression, FetchTasksToExecute);
-		this._startTask(this.tasks.ReportStatus.cronExpression, ReportStatus);
-		return Promise.resolve();
-	}
-
-	_startTask(cron, Task) {
-		this.logger.info(`Starting task: ${Task.name} with cron: ${cron}`);
+	
+	_startJob(cron, Job) {
+		this.logger.info(`Preparing job: ${Job.name} with cron: ${cron}`);
 		scheduler.scheduleJob(cron, () => {
 			const taskLogger = this.logger.child({
 				namespace: LOGGER_NAMESPACES.TASK,
-				task: FetchTasksToExecute.name,
+				job: Job.name,
 			});
-			Promise.resolve()
-				.then(() => new Task(this.codefreshAPI, this.kubernetesAPI, taskLogger).run())
-				.catch((err) => {
-					this.logger.error(`Failed to execute task ${Task.name} with error message: ${err.message}`);
-				})
-				.done();
+			const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
+			this.logger.info(`Pushing job: ${Job.name} to queue`);
+			this.queue.push(job, 1, this._handleJobError(job));
 		});
+	}
+
+	_handleJobError(job) {
+		return (err) => {
+			if (err) {
+				this.logger.error(`Failed to execute job ${job.constructor.name} with error message: ${err.message}`);
+				this.logger.error(err.stack);
+			} else {
+				this.logger.info(`Job: ${job.constructor.name} finished`);
+			}
+		};
 	}
 }
 

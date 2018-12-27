@@ -3,6 +3,4 @@ const buildConfig = require('./config');
 
 const agent = new Agent(buildConfig());
 
-agent
-	.init()
-	.then(() => agent.start());
+agent.init();

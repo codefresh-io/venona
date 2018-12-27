@@ -1,5 +1,5 @@
-const Base = require('./BaseTask');
-const utils = require('./../utils');
+const Base = require('../../BaseJob');
+const utils = require('../../../utils');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task TerminateWorkflow, failed to delete pod',

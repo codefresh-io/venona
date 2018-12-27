@@ -1,6 +1,6 @@
 const Chance = require('chance');
 
-class Task {
+class Job {
 	constructor(codefreshAPI, kubernetesAPI, logger) {
 		this.codefreshAPI = codefreshAPI;
 		this.kubernetesAPI = kubernetesAPI;
@@ -10,4 +10,4 @@ class Task {
 	}
 }
 
-module.exports = Task;
+module.exports = Job;

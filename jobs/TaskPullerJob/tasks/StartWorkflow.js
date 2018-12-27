@@ -1,4 +1,4 @@
-const Base = require('./BaseTask');
+const Base = require('../../BaseJob');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task StartWorkflow, failed to create pod',

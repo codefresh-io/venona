@@ -4,8 +4,8 @@ const Codefresh = require('./../../services/Codefresh');
 const Kubernetes = require('./../../services/Kubernetes');
 const Logger = require('./../../services/Logger');
 const { Server } = require('./../../server');
-const FetchTasksToExecute = require('./../../tasks/FetchTasksToExecute');
-const ReportStatus = require('./../../tasks/ReportStatus');
+const TaskPullerJob = require('./../../jobs/TaskPullerJob/TaskPullerJob');
+const StatusReporterJob = require('./../../jobs/StatusReporterJob/StatusReporterJob');
 
 jest.mock('./../../services/Codefresh');
 jest.mock('./../../services/Kubernetes');
@@ -38,12 +38,15 @@ const buildTestConfig = () => ({
 		baseURL: 'https://g.codefresh.io',
 		token: 'token'
 	},
-	tasks: {
-		FetchTasksToExecute: {
+	jobs: {
+		TaskPullerJob: {
 			cronExpression: 'cron'
 		},
-		ReportStatus: {
+		StatusReporterJob: {
 			cronExpression: 'cron'
+		},
+		queue: {
+
 		}
 	}
 });
@@ -70,7 +73,8 @@ describe('Agent unit test', () => {
 				'kubernetesAPI',
 				'codefreshAPI',
 				'logger',
-				'tasks',
+				'jobs',
+				'queue',
 				'server',
 			].sort());
 		});
@@ -134,12 +138,12 @@ describe('Agent unit test', () => {
 	});
 
 	describe('Initializing agent', () => {
-		it('Should complete initialization with message', () => {
+		it('Should report all services been initialized', () => {
 			return new Agent(buildTestConfig())
 				.init()
 				.then(() => {
 					const loggerSuccessMessage = Logger.create.mock.instances[1].info.mock.calls[2][0];
-					expect(loggerSuccessMessage).toEqual('Initializing finished');
+					expect(loggerSuccessMessage).toEqual('All services has been initialized');
 				});
 		});
 
@@ -192,26 +196,18 @@ describe('Agent unit test', () => {
 			}));
 			return expect(new Agent(buildTestConfig()).init()).rejects.toThrow('Failed to initialize agent with error message');
 		});
-
-		it('Should return agent instance after initialization finished', () => {
-			return new Agent(buildTestConfig()).init()
-				.then((result) => {
-					expect(result).toBeInstanceOf(Agent);
-				});
-		});
 	});
 
 	describe('Stat agent flow', () => {
-		it('Should call to _startTask for both supported tasks', () => {
+		it('Should call to _startJob for both supported tasks', () => {
 			const agent = new Agent(buildTestConfig());
-			agent._startTask = jest.fn();
+			agent._startJob = jest.fn();
 			return agent
 				.init()
-				.then(a => a.start())
 				.then(() => {
-					expect(agent._startTask).toHaveBeenCalledTimes(2);
-					expect(agent._startTask).toHaveBeenNthCalledWith(1, 'cron', FetchTasksToExecute);
-					expect(agent._startTask).toHaveBeenNthCalledWith(2, 'cron', ReportStatus);
+					expect(agent._startJob).toHaveBeenCalledTimes(2);
+					expect(agent._startJob).toHaveBeenNthCalledWith(1, 'cron', StatusReporterJob);
+					expect(agent._startJob).toHaveBeenNthCalledWith(2, 'cron', TaskPullerJob);
 				});
 		});
 	});

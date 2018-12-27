@@ -1,14 +1,14 @@
 const Promise = require('bluebird');
 const _ = require('lodash');
-const Base = require('./BaseTask');
-const StartWorkflow = require('./StartWorkflow');
-const TerminateWorkflow = require('./TerminateWorkflow');
+const Base = require('../BaseJob');
+const StartWorkflow = require('./tasks/StartWorkflow');
+const TerminateWorkflow = require('./tasks/TerminateWorkflow');
 
 const ERROR_MESSAGES = {
-	FAILED_TO_EXECUTE_TASK: 'Failed to run task FetchTasksToExecute, call to Codefresh rejected',
+	FAILED_TO_EXECUTE_TASK: 'Failed to run task TaskPullerJob, call to Codefresh rejected',
 };
 
-class FetchTasksToExecute extends Base {
+class TaskPullerJob extends Base {
 	_executeTask(Task) {
 		return (taskDef) => {
 			const logger = this.logger.child({
@@ -22,8 +22,7 @@ class FetchTasksToExecute extends Base {
 	}
 
 	run() {
-		this.logger.info('Running task FetchTasksToExecute');
-		return this.codefreshAPI.fetchTasksToExecute(this.logger)
+		return this.codefreshAPI.pullTasks(this.logger)
 			.catch((err) => {
 				const message = `${ERROR_MESSAGES.FAILED_TO_EXECUTE_TASK} with message: ${err.message}`;
 				this.logger.error(message);
@@ -49,5 +48,5 @@ class FetchTasksToExecute extends Base {
 			});
 	}
 }
-FetchTasksToExecute.Errors = ERROR_MESSAGES;
-module.exports = FetchTasksToExecute;
+TaskPullerJob.Errors = ERROR_MESSAGES;
+module.exports = TaskPullerJob;

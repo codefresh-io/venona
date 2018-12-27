@@ -1,8 +1,8 @@
 const _ = require('lodash');
-const { create: createLogger } = require('../../services/Logger');
-const StartWorkflow = require('../StartWorkflow');
+const { create: createLogger } = require('../../../../services/Logger');
+const StartWorkflow = require('../startWorkflow');
 
-jest.mock('./../../services/Logger');
+jest.mock('./../../../../services/Logger');
 
 describe('StartWorkflow unit tests', () => {
 	it('Should throw an error when call to Kubernetes service is been rejected', () => {

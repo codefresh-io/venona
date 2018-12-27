@@ -1,6 +1,6 @@
-const Base = require('./BaseTask');
+const Base = require('../BaseJob');
 
-class ReportStatus extends Base {
+class StatusReporterJob extends Base {
 	async _getStatus() {
 		return {
 			message: 'All good',
@@ -8,10 +8,9 @@ class ReportStatus extends Base {
 	}
 
 	async run() {
-		this.logger.info('Running task ReportStatus');
 		const status = await this._getStatus();
 		const res = await this.codefreshAPI.reportStatus(this.logger, status);
 		this.logger.info(res);
 	}
 }
-module.exports = ReportStatus;
+module.exports = StatusReporterJob;

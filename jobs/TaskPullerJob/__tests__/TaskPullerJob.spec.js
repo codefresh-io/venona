@@ -1,36 +1,25 @@
 const _ = require('lodash');
-const { create: createLogger } = require('../../services/Logger');
-const FetchTasksToExecute = require('../FetchTasksToExecute');
-const StartWorkflow = require('./../StartWorkflow');
+const { create: createLogger } = require('../../../services/Logger');
+const TaskPullerJob = require('../TaskPullerJob');
+const StartWorkflow = require('../tasks/StartWorkflow');
 
-jest.mock('./../../services/Logger');
-jest.mock('./../StartWorkflow');
+jest.mock('./../../../services/Logger');
+jest.mock('./../tasks/StartWorkflow');
 
-describe('FetchTasksToExecute unit tests', () => {
+describe('TaskPullerJob unit tests', () => {
 	it('Should throw an error when codefresh service call failed', () => {
 		const logger = createLogger();
-		const task = new FetchTasksToExecute({
-			fetchTasksToExecute: jest.fn().mockRejectedValue(new Error('Failed')),
+		const task = new TaskPullerJob({
+			pullTasks: jest.fn().mockRejectedValue(new Error('Failed')),
 		}, _.noop(), logger);
-		return expect(task.run()).rejects.toThrowError('Failed to run task FetchTasksToExecute, call to Codefresh rejected with message');
-	});
-
-	it('Should log an error when codefresh service call failed', () => {
-		const logger = createLogger();
-		const task = new FetchTasksToExecute({
-			fetchTasksToExecute: jest.fn().mockRejectedValue(new Error('Failed')),
-		}, _.noop(), logger);
-		return task.run()
-			.catch(() => {
-				expect(logger.child.mock.results[1].value.error.mock.calls[0][0]).toMatch('Failed to run task FetchTasksToExecute, call to Codefresh rejected with message');
-			});
+		return expect(task.run()).rejects.toThrowError('Failed to run task TaskPullerJob, call to Codefresh rejected with message');
 	});
 
 	it('Should pass logger to codefresh api service', () => {
 		const spy = jest.fn().mockResolvedValue();
 		const logger = createLogger();
-		const task = new FetchTasksToExecute({
-			fetchTasksToExecute: spy,
+		const task = new TaskPullerJob({
+			pullTasks: spy,
 		}, _.noop(), logger);
 		return task.run()
 			.then(() => {
@@ -58,8 +47,8 @@ describe('FetchTasksToExecute unit tests', () => {
 			}
 		];
 		const logger = createLogger();
-		const task = new FetchTasksToExecute({
-			fetchTasksToExecute: jest.fn().mockResolvedValue(tasks),
+		const task = new TaskPullerJob({
+			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
 		return expect(task.run()).resolves.toEqual([{ status: 'ok'}]);
 	});
@@ -71,8 +60,8 @@ describe('FetchTasksToExecute unit tests', () => {
 			},
 		];
 		const logger = createLogger();
-		const task = new FetchTasksToExecute({
-			fetchTasksToExecute: jest.fn().mockResolvedValue(tasks),
+		const task = new TaskPullerJob({
+			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
 		return expect(task.run()).resolves.toEqual([]);
 	});
@@ -84,8 +73,8 @@ describe('FetchTasksToExecute unit tests', () => {
 			},
 		];
 		const logger = createLogger();
-		const task = new FetchTasksToExecute({
-			fetchTasksToExecute: jest.fn().mockResolvedValue(tasks),
+		const task = new TaskPullerJob({
+			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
 		return expect(task.run()).resolves.toEqual([]);
 	});
