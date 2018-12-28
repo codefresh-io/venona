@@ -1,10 +1,10 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../services/Logger');
-const TaskPullerJob = require('../TaskPullerJob');
-const StartWorkflow = require('../tasks/StartWorkflow');
+const TaskPullerJob = require('../TaskPuller.job');
+const StartWorkflow = require('../tasks/StartWorkflow.task');
 
 jest.mock('./../../../services/Logger');
-jest.mock('./../tasks/StartWorkflow');
+jest.mock('./../tasks/StartWorkflow.task');
 
 describe('TaskPullerJob unit tests', () => {
 	it('Should throw an error when codefresh service call failed', () => {

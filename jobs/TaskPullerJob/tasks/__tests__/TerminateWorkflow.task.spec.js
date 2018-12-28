@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../../services/Logger');
-const TerminateWorkflow = require('../TerminateWorkflow');
+const TerminateWorkflow = require('../TerminateWorkflow.task');
 
 jest.mock('./../../../../services/Logger');
 

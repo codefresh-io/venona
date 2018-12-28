@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../services/Logger');
-const StatusReporter = require('../StatusReporterJob');
+const StatusReporter = require('../StatusReporter.job');
 
 jest.mock('./../../../services/Logger');
 
