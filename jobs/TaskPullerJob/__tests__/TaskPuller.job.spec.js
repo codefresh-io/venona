@@ -12,7 +12,7 @@ describe('TaskPullerJob unit tests', () => {
 		const task = new TaskPullerJob({
 			pullTasks: jest.fn().mockRejectedValue(new Error('Failed')),
 		}, _.noop(), logger);
-		return expect(task.run()).rejects.toThrowError('Failed to run task TaskPullerJob, call to Codefresh rejected with message');
+		return expect(task.run()).rejects.toThrowError('Failed to run job TaskPuller, call to Codefresh rejected with message');
 	});
 
 	it('Should pass logger to codefresh api service', () => {

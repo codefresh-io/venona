@@ -5,7 +5,7 @@ const StartWorkflow = require('./tasks/StartWorkflow.task');
 const TerminateWorkflow = require('./tasks/TerminateWorkflow.task');
 
 const ERROR_MESSAGES = {
-	FAILED_TO_EXECUTE_TASK: 'Failed to run task TaskPullerJob, call to Codefresh rejected',
+	FAILED_TO_EXECUTE_TASK: 'Failed to run job TaskPuller, call to Codefresh rejected',
 };
 
 class TaskPullerJob extends Base {
