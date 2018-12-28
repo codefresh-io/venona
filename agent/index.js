@@ -43,16 +43,17 @@ class Agent {
 	}
 
 	async _loadJobs() {
-		const ignorePaths = ['BaseJob*', '**/__tests__/**', '**/tasks/**', (file, stats) => {
-			return !file.includes('Job') && !stats.isDirectory();
+		const ignorePaths = [(file, stats) => {
+
+			return !(new RegExp(/.*job.js/g).test(file)) && !stats.isDirectory();
 		}];
-		await Promise.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
+		return Promise
+			.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
 			.map(require)
-			.map((Job) => {
-				const cron = _.get(this, `jobs.${Job.name}.cronExpression`, this.jobs.DEFAULT_CRON);
-				this._startJob(cron, Job);
-			});
+			.map(Job => this._startJob(Job));
 	}
+
+	
 
 	async init() {
 		this.logger.info('Initializing agent');
@@ -71,7 +72,8 @@ class Agent {
 		}
 	}
 
-	_startJob(cron, Job) {
+	_startJob(Job) {
+		const cron = _.get(this, `jobs.${Job.name}.cronExpression`, this.jobs.DEFAULT_CRON);
 		this.logger.info(`Preparing job: ${Job.name} with cron: ${cron}`);
 		scheduler.scheduleJob(cron, () => {
 			const taskLogger = this.logger.child({
