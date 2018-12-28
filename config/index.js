@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 const { version } = require('./../package.json');
-const { LOGGER_MODES } = require('./../constants');
+const { LOGGER_MODES, CRON } = require('./../constants');
 
 function build() {
 	return {
@@ -34,12 +34,12 @@ function build() {
 		},
 		jobs: {
 			TaskPullerJob: {
-				cronExpression: process.env.JOB_PULL_TASKS_TO_EXECUTE_CRON_EXPRESSION || '*/10 * * * * *', // once a minute
+				cronExpression: process.env.JOB_PULL_TASKS_TO_EXECUTE_CRON_EXPRESSION || CRON.EVERY_TEN_SECONDS,
 			},
 			StatusReporterJob: {
-				cronExpression: process.env.JOB_REPORT_STATUS_CRON_EXPRESSION || '* * * * *', // once a minute
+				cronExpression: process.env.JOB_REPORT_STATUS_CRON_EXPRESSION || CRON.EVERY_MINUTE,
 			},
-			DEFAULT_CRON: '* * * * *', // once a minute
+			DEFAULT_CRON: CRON.EVERY_MINUTE,
 			queue: {
 				concurrency: parseInt(process.env.JOBS_QUEUE_CONCURRENCY || '1')
 			}
