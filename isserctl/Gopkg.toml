@@ -24,9 +24,14 @@
 #   go-tests = true
 #   unused-packages = true
 
-required = [
-  "github.com/golang/glog"
-]
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/golang/glog"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "10.0.0"
 
 [prune]
   go-tests = true

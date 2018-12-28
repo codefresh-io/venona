@@ -14,22 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 /*
 We are using generated template.go for serialized kubernetes assets
 */
-//go:generate go run github.com/codefresh-io/Isser/installer/pkg/runtime/templates kubernetes_dind
+//go:generate go run github.com/codefresh-io/Isser/isserctl/pkg/runtimectl/templates kubernetes_dind
 
-
-package runtime
+package runtimectl
 
 import (
-
-	"github.com/codefresh-io/Isser/installer/pkg/certs"
+	"github.com/codefresh-io/Isser/isserctl/pkg/certs"
 )
 
 const (
-	// TypeKubernetesDind - name for Kubernetes  Dind runtime 
+	// TypeKubernetesDind - name for Kubernetes  Dind runtimectl
 	TypeKubernetesDind = "kubernetesDind"
 	//typeDockerd = "dockerd"
 
@@ -43,19 +40,19 @@ const (
 	StatusFailed = "Failed"
 )
 
-// Config - contains all data needed to config specific runtime
+// Config - contains all data needed to config specific runtimectl
 type Config struct {
-    // Runtime Env Type
+	// runtimectl Env Type
 	Type string
-	// Runtime Env Name
+	// runtimectl Env Name
 	Name string
-	
+
 	Client ClientConfig
-    
-    ServerCert *certs.ServerCert
+
+	ServerCert *certs.ServerCert
 }
 
-// ClientConfig - structy for client of runtime env (kube client config)
+// ClientConfig - structy for client of runtimectl env (kube client config)
 type ClientConfig struct {
 	KubeClient KubernetesClientConfig
 }
@@ -63,12 +60,12 @@ type ClientConfig struct {
 // KubernetesClientConfig - kube client config struct
 type KubernetesClientConfig struct {
 	Kubeconfig string
-	Context string
-	Namespace string
+	Context    string
+	Namespace  string
 }
 
-// Status - status of runtime env configuration
+// Status - status of runtimectl env configuration
 type Status struct {
-	Status string
+	Status        string
 	StatusMessage string
 }
