@@ -1,11 +1,13 @@
 const _ = require('lodash');
+const Promise = require('bluebird');
+const scheduler = require('node-schedule');
 const Agent = require('./../');
 const Codefresh = require('./../../services/Codefresh');
 const Kubernetes = require('./../../services/Kubernetes');
 const Logger = require('./../../services/Logger');
 const { Server } = require('./../../server');
-const TaskPullerJob = require('./../../jobs/TaskPullerJob/TaskPullerJob');
-const StatusReporterJob = require('./../../jobs/StatusReporterJob/StatusReporterJob');
+const TaskPullerJob = require('./../../jobs/TaskPullerJob/TaskPuller.job');
+const StatusReporterJob = require('./../../jobs/StatusReporterJob/StatusReporter.job');
 
 jest.mock('./../../services/Codefresh');
 jest.mock('./../../services/Kubernetes');
@@ -204,15 +206,28 @@ describe('Agent unit test', () => {
 				.init()
 				.then(() => {
 					expect(agent._startJob).toHaveBeenCalledTimes(2);
-					expect(agent._startJob).toHaveBeenNthCalledWith(1, 'cron', StatusReporterJob);
-					expect(agent._startJob).toHaveBeenNthCalledWith(2, 'cron', TaskPullerJob);
+					expect(agent._startJob).toHaveBeenNthCalledWith(1, StatusReporterJob);
+					expect(agent._startJob).toHaveBeenNthCalledWith(2, TaskPullerJob);
 				});
 		});
 	});
 
 	describe('Queue', () => {
-		it('Should call run on each job in the queue', () => {
-			expect(true).toBeFalsy();
+		it('Should call run on each job in the queue', async () => {
+			scheduler.scheduleJob = jest.fn((_ex, cb) => {
+				cb();
+			});
+			const spy = jest.fn();
+			const agent = new Agent(buildTestConfig());
+			const FakeJob = function() {
+				this.run = spy;
+				this.fake = jest.fn();
+				return this;
+			};
+			agent._startJob(FakeJob);
+			await Promise.delay(2000);
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith();
 		});
 
 		it('Should call cb with an error in case a job been rejected', () => {
