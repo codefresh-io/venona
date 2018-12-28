@@ -13,9 +13,10 @@ COPY cmd ./cmd/
 # COPY lib ./lib/
 COPY pkg ./pkg/
 
-RUN go build -o /usr/local/bin/isser-installer ./cmd && \
-    chmod +x /usr/local/bin/isser-installer && \
+RUN go generate pkg/runtime/types.go
+RUN go build -o /usr/local/bin/isserctl ./cmd && \
+    chmod +x /usr/local/bin/isserctl && \
     rm -rf /go/*
 
 FROM alpine:3.7
-COPY --from=gobuild /usr/local/bin/isser-installer /usr/local/bin/
+COPY --from=gobuild /usr/local/bin/isserctl /usr/local/bin/

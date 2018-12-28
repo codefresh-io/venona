@@ -14,6 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+
+/*
+We are using generated template.go for serialized kubernetes assets
+*/
+//go:generate go run github.com/codefresh-io/Isser/installer/pkg/runtime/templates kubernetes_dind
+
+
 package runtime
 
 import (

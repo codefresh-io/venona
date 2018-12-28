@@ -14,7 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+
 package runtime
+
+import (
+    "fmt"
+    templates "github.com/codefresh-io/Isser/installer/pkg/runtime/templates/kubernetes_dind"
+)
 
 // KubernetesDindInstaller installs assets on Kubernetes Dind Runtime Env
 type KubernetesDindInstaller struct {
@@ -24,6 +30,11 @@ type KubernetesDindInstaller struct {
 // Install runtime environment  
 func(u *KubernetesDindInstaller) Install(*Config) error {
 
+    templatesMap := templates.TemplatesMap()
+// https://github.com/kubernetes/client-go/issues/193
+    for n, _ := range templatesMap {
+       fmt.Printf("template = %s\n", n)
+    }
     return nil
 }
 
