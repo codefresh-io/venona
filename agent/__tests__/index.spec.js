@@ -137,6 +137,10 @@ describe('Agent unit test', () => {
 			expect(Object.keys(callsArguments[1])).toEqual(['port']);
 			expect(Object.keys(callsArguments[2])).toEqual(['info', 'child', 'error']);
 		});
+
+		it('Should crash the process in case the agent wasnt constructed correctly', () => {
+			expect(true).toBeFalsy();
+		});
 	});
 
 	describe('Initializing agent', () => {
@@ -210,6 +214,11 @@ describe('Agent unit test', () => {
 					expect(agent._startJob).toHaveBeenNthCalledWith(2, TaskPullerJob);
 				});
 		});
+
+		it('Should crash the process in case the agent wasnt initialized correctly', () => {
+			expect(true).toBeFalsy();
+		});
+
 	});
 
 	describe('Queue', () => {
