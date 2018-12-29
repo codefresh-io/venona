@@ -18,27 +18,57 @@ package runtimectl
 
 import (
 	"fmt"
-
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/kubernetes/scheme"
-	templates "github.com/codefresh-io/Isser/isserctl/pkg/runtimectl/templates/kubernetes_dind"
+
+    templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
 )
 
 // KubernetesDindCtl installs assets on Kubernetes Dind runtimectl Env
 type KubernetesDindCtl struct {
+
+}
+
+
+// NewClientsetConfig Returns rest.Config 
+func (u *KubernetesDindCtl) NewClientsetConfig(config *Config) (*rest.Config, error) {
+	var restConfig *rest.Config
+	var err error
+	kubeconfig := config.Client.KubeClient.Kubeconfig
+    kubecontext := config.Client.KubeClient.Context
+	if *kubeconfig != "" {
+		restConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			&clientcmd.ClientConfigLoadingRules{ExplicitPath: *kubeconfig},
+			&clientcmd.ConfigOverrides{
+					CurrentContext: *kubecontext,
+
+			}).ClientConfig()
+
+	} else {
+		restConfig, err = rest.InClusterConfig()
+	}
+
+	return restConfig, err
 }
 
 // Install runtimectl environment
-func (u *KubernetesDindCtl) Install(*Config) error {
+func (u *KubernetesDindCtl) Install(config *Config) error {
 
 	templatesMap := templates.TemplatesMap()
+	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
 	// https://github.com/kubernetes/client-go/issues/193
 	for n, tpl := range templatesMap {
-	
 		fmt.Printf("template = %s\n", n)
-		decode := scheme.Codecs.UniversalDeserializer().Decode
-		obj, _, _ := decode([]byte(tpl), nil, nil)
-	
-		fmt.Printf("%++v\n\n", obj.GetObjectKind())
+		tplEx, err := ExecuteTemplate(tpl, config)
+		if err != nil {
+			fmt.Printf("Cannot parse and execute template %s: %v\n ", n, err)
+			continue
+		}
+		
+		obj, _, _ := kubeDecode([]byte(tplEx), nil, nil)
+	    objKind := obj.GetObjectKind()
+		fmt.Printf("%++v\n\n", objKind)
 		fmt.Printf("%++v\n\n", obj)
 
 	}
@@ -46,7 +76,7 @@ func (u *KubernetesDindCtl) Install(*Config) error {
 }
 
 // GetStatus of runtimectl environment
-func (u *KubernetesDindCtl) GetStatus(*Config) (Status, error) {
+func (u *KubernetesDindCtl) GetStatus(config *Config) (Status, error) {
 
 	runtimectlStatus := Status{
 		Status:        StatusRunning,
@@ -56,7 +86,7 @@ func (u *KubernetesDindCtl) GetStatus(*Config) (Status, error) {
 }
 
 // Delete runtimectl environment
-func (u *KubernetesDindCtl) Delete(*Config) error {
+func (u *KubernetesDindCtl) Delete(config *Config) error {
 
 	return nil
 }

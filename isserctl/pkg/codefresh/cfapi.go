@@ -89,7 +89,7 @@ func (u *CfAPI) Validate(runtimectlConfig *runtimectl.Config) error {
 	if runtimectlConfig.Type == runtimectl.TypeKubernetesDind {
 		reqBodyMap = make(map[string]string)
 		reqBodyMap["clusterName"] = runtimectlConfig.Name
-		reqBodyMap["namespace"] = runtimectlConfig.Client.KubeClient.Namespace
+		reqBodyMap["namespace"] = *runtimectlConfig.Client.KubeClient.Namespace
 	} else {
 		return fmt.Errorf("Unknown runtimectl type %s", runtimectlConfig.Type)
 	}
@@ -128,7 +128,7 @@ func (u *CfAPI) Sign(runtimectlConfig *runtimectl.Config) error {
 	var certExtraSANs string
 	if runtimectlConfig.Type == runtimectl.TypeKubernetesDind {
 		certExtraSANs = fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io",
-			runtimectlConfig.Client.KubeClient.Namespace, runtimectlConfig.Client.KubeClient.Namespace)
+			*runtimectlConfig.Client.KubeClient.Namespace, *runtimectlConfig.Client.KubeClient.Namespace)
 	} else {
 		certExtraSANs = "IP:127.0.0.1,DNS:*.cf-cd.com,DNS:*.codefresh.io"
 	}
@@ -211,7 +211,7 @@ func (u *CfAPI) Register(runtimectlConfig *runtimectl.Config) error {
 	if runtimectlConfig.Type == runtimectl.TypeKubernetesDind {
 		reqBodyMap = make(map[string]string)
 		reqBodyMap["clusterName"] = runtimectlConfig.Name
-		reqBodyMap["namespace"] = runtimectlConfig.Client.KubeClient.Namespace
+		reqBodyMap["namespace"] = *runtimectlConfig.Client.KubeClient.Namespace
 	} else {
 		return fmt.Errorf("Unknown runtimectl type %s", runtimectlConfig.Type)
 	}

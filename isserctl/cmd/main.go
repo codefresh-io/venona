@@ -20,6 +20,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/user"
+	"path"
 
 	"github.com/codefresh-io/Isser/isserctl/pkg/codefresh"
 	"github.com/codefresh-io/Isser/isserctl/pkg/runtimectl"
@@ -49,12 +51,16 @@ func dieIfError(err error) {
 func getruntimectlConfig() (*runtimectl.Config, error) {
 
 	var clientConfig runtimectl.ClientConfig
+	if *kubeconfig == "" {
+		currentUser, _ := user.Current()
+		*kubeconfig = path.Join(currentUser.HomeDir, ".kube", "config")
+	}
 	if runtimectlType == runtimectl.TypeKubernetesDind {
 		clientConfig = runtimectl.ClientConfig{
 			KubeClient: runtimectl.KubernetesClientConfig{
-				Kubeconfig: *kubeconfig,
-				Context:    *kubecontext,
-				Namespace:  *namespace,
+				Kubeconfig: kubeconfig,
+				Context:    kubecontext,
+				Namespace:  namespace,
 			},
 		}
 	} else {

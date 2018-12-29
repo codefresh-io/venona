@@ -33,6 +33,10 @@
   name = "k8s.io/client-go"
   version = "10.0.0"
 
+[[constraint]]
+  name = "github.com/hairyhenderson/gomplate"
+  version = "v2.8.0"
+
 [prune]
   go-tests = true
   unused-packages = true
