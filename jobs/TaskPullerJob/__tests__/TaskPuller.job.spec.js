@@ -1,10 +1,10 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../services/Logger');
 const TaskPullerJob = require('../TaskPuller.job');
-const StartWorkflow = require('../tasks/StartWorkflow.task');
+const CreatePodTask = require('../tasks/CreatePod.task');
 
 jest.mock('./../../../services/Logger');
-jest.mock('./../tasks/StartWorkflow.task');
+jest.mock('./../tasks/CreatePod.task');
 
 describe('TaskPullerJob unit tests', () => {
 	it('Should throw an error when codefresh service call failed', () => {
@@ -12,7 +12,7 @@ describe('TaskPullerJob unit tests', () => {
 		const task = new TaskPullerJob({
 			pullTasks: jest.fn().mockRejectedValue(new Error('Failed')),
 		}, _.noop(), logger);
-		return expect(task.run()).rejects.toThrowError('Failed to run job TaskPuller, call to Codefresh rejected with message');
+		return expect(task.exec()).rejects.toThrowError('Failed to run job TaskPuller, call to Codefresh rejected with message');
 	});
 
 	it('Should pass logger to codefresh api service', () => {
@@ -21,7 +21,7 @@ describe('TaskPullerJob unit tests', () => {
 		const task = new TaskPullerJob({
 			pullTasks: spy,
 		}, _.noop(), logger);
-		return task.run()
+		return task.exec()
 			.then(() => {
 				expect(spy).toHaveBeenCalledWith(expect.objectContaining({
 					error: expect.any(Function),
@@ -32,9 +32,9 @@ describe('TaskPullerJob unit tests', () => {
 	});
 
 	it('Should map all results to tasks by types and execute them', () => {
-		StartWorkflow.mockImplementationOnce(() => {
+		CreatePodTask.mockImplementationOnce(() => {
 			return {
-				run: jest.fn(() => {
+				exec: jest.fn(() => {
 					return {
 						status: 'ok'
 					};
@@ -43,14 +43,14 @@ describe('TaskPullerJob unit tests', () => {
 		});
 		const tasks = [
 			{
-				type: 'StartWorkflow',
+				type: 'CreatePod',
 			}
 		];
 		const logger = createLogger();
 		const task = new TaskPullerJob({
 			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
-		return expect(task.run()).resolves.toEqual([{ status: 'ok'}]);
+		return expect(task.exec()).resolves.toEqual([{ status: 'ok'}]);
 	});
 
 	it('Should not fail when unknown type task arrives', () => {
@@ -63,7 +63,7 @@ describe('TaskPullerJob unit tests', () => {
 		const task = new TaskPullerJob({
 			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
-		return expect(task.run()).resolves.toEqual([]);
+		return expect(task.exec()).resolves.toEqual([]);
 	});
 
 	it('Should not fail when non-typed task arrives', () => {
@@ -76,6 +76,6 @@ describe('TaskPullerJob unit tests', () => {
 		const task = new TaskPullerJob({
 			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
-		return expect(task.run()).resolves.toEqual([]);
+		return expect(task.exec()).resolves.toEqual([]);
 	});
 });

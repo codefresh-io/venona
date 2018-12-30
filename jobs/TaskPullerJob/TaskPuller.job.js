@@ -1,26 +1,15 @@
 const Promise = require('bluebird');
+const Chance = require('chance');
 const _ = require('lodash');
 const Base = require('../BaseJob');
-const StartWorkflow = require('./tasks/StartWorkflow.task');
-const TerminateWorkflow = require('./tasks/TerminateWorkflow.task');
+const CreatePod = require('./tasks/CreatePod.task');
+const DeletePod = require('./tasks/DeletePod.task');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run job TaskPuller, call to Codefresh rejected',
 };
 
 class TaskPullerJob extends Base {
-	_executeTask(Task) {
-		return (taskDef) => {
-			const logger = this.logger.child({
-				subTask: Task.name,
-				workflow: taskDef.workflow,
-				uid: this.uid,
-			});
-			const args = [this.codefreshAPI, this.kubernetesAPI, logger];
-			return new Task(...args).run(taskDef);
-		};
-	}
-
 	run() {
 		return this.codefreshAPI.pullTasks(this.logger)
 			.catch((err) => {
@@ -32,12 +21,13 @@ class TaskPullerJob extends Base {
 				this.logger.info(`Got ${res.length} tasks`);
 				const promises = _.chain(res)
 					.map((task) => {
+						// TODO auto load all tasks
 						const typeToTaskMap = {
-							'StartWorkflow': this._executeTask(StartWorkflow),
-							'FinishSystemWorkflow': this._executeTask(TerminateWorkflow),
+							'CreatePod': this._executeTask(CreatePod),
+							'DeletePod': this._executeTask(DeletePod),
 						};
 						const type = _.get(task, 'type');
-						this.logger.info(`Got reqeust to run task with type: ${type}`);
+						this.logger.info(`Got request to run task with type: ${type}`);
 						const fn = typeToTaskMap[type] || _.noop;
 						return fn(task);
 					})
@@ -46,6 +36,21 @@ class TaskPullerJob extends Base {
 					.value();
 				return Promise.all(promises);
 			});
+	}
+
+	_executeTask(Task) {
+		return async (taskSpec) => {
+			const logger = this.logger.child({
+				task: Task.name,
+				taskUid: new Chance().guid()
+			});
+			const task = new Task(this.codefreshAPI, this.kubernetesAPI, logger);
+			return task.exec(taskSpec);
+		};
+	}
+
+	validate() {
+		return;
 	}
 }
 TaskPullerJob.Errors = ERROR_MESSAGES;

@@ -12,5 +12,9 @@ class StatusReporterJob extends Base {
 		const res = await this.codefreshAPI.reportStatus(this.logger, status);
 		this.logger.info(res);
 	}
+
+	async validate() {
+		return;
+	}
 }
 module.exports = StatusReporterJob;

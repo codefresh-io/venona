@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 const { version } = require('./../package.json');
-const { LOGGER_MODES, CRON } = require('./../constants');
+const { CRON } = require('./../constants');
 
 function build() {
 	return {
@@ -9,7 +9,11 @@ function build() {
 			mode: process.env.AGENT_MODE,
 		},
 		logger: {
-			prettyPrint: !(process.env.LOGGER_MODE === LOGGER_MODES.PRETTY),
+			...(!process.env.LOGGER_MODE && {
+				prettyPrint: {
+					levelFirst: true,
+				}
+			}),
 			level: process.env.LOGGER_LEVEL || 'info',
 		},
 		server: {

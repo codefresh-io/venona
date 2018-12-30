@@ -1,5 +1,5 @@
-
 const Promise = require('bluebird');
+const Chance = require('chance');
 const scheduler = require('node-schedule');
 const path = require('path');
 const _ = require('lodash');
@@ -38,7 +38,7 @@ class Agent {
 	_queueRunner(job = { run: Promise }, cb) {
 		this.logger.info(`Running job: ${job.constructor.name}`);
 		Promise.resolve()
-			.then(() => job.run())
+			.then(() => job.exec())
 			.then(() => cb(), cb);
 	}
 
@@ -53,7 +53,7 @@ class Agent {
 			.map(Job => this._startJob(Job));
 	}
 
-	
+
 
 	async init() {
 		this.logger.info('Initializing agent');
@@ -79,6 +79,7 @@ class Agent {
 			const taskLogger = this.logger.child({
 				namespace: LOGGER_NAMESPACES.TASK,
 				job: Job.name,
+				uid: new Chance().guid(),
 			});
 			const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
 			this.logger.info(`Pushing job: ${Job.name} to queue`);

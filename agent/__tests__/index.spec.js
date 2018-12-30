@@ -138,7 +138,7 @@ describe('Agent unit test', () => {
 			expect(Object.keys(callsArguments[2])).toEqual(['info', 'child', 'error']);
 		});
 
-		it('Should crash the process in case the agent wasnt constructed correctly', () => {
+		it('Should crash the process in case the agent was not constructed correctly', () => {
 			expect(true).toBeFalsy();
 		});
 	});
@@ -229,7 +229,7 @@ describe('Agent unit test', () => {
 			const spy = jest.fn();
 			const agent = new Agent(buildTestConfig());
 			const FakeJob = function() {
-				this.run = spy;
+				this.exec = spy;
 				this.fake = jest.fn();
 				return this;
 			};
