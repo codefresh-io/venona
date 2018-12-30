@@ -56,8 +56,8 @@ class Agent {
 
 
 	async init() {
-		this.logger.info('Initializing agent');
 		try {
+			this.logger.info('Initializing agent');
 			await Promise.all([
 				this.server.init(),
 				this.codefreshAPI.init(),

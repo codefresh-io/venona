@@ -3,4 +3,12 @@ const buildConfig = require('./config');
 
 const agent = new Agent(buildConfig());
 
-agent.init();
+(async () => {
+	try {
+		await agent.init();
+	} catch (err) {
+		setTimeout(() => {
+			process.exit(1);
+		}, 10);
+	}
+})();
