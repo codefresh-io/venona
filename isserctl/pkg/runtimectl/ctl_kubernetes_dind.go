@@ -21,14 +21,15 @@ import (
 //	"github.com/golang/glog"
 //	"k8s.io/client-go/rest"
 //	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/kubernetes"
+//	"k8s.io/client-go/kubernetes/scheme"
+//	"k8s.io/client-go/kubernetes"
 
 //	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+//	"k8s.io/apimachinery/pkg/runtime/schema"//
 //	"k8s.io/apimachinery/pkg/runtime"
 //	"k8s.io/client-go/rest"
-
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/api/core/v1"
 
     templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
@@ -43,64 +44,55 @@ type KubernetesDindCtl struct {
 func (u *KubernetesDindCtl) Install(config *Config) error {
 
 	templatesMap := templates.TemplatesMap()
-	parsedTemplates, err := ParseTemplates(templatesMap, config)
+	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, config)
 	if err != nil {
 		return err	
-	}
+	}	
 
-	// Deserializing all kube objects from parsedTemplates
-	// see https://github.com/kubernetes/client-go/issues/193 for examples	
-	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
-	kubeObjects := make(map[string]KubeRuntimeObject)
-	for n, objStr := range parsedTemplates {
-		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
-		if groupVersionKind.Group == "" {
-			groupVersionKind.Group = "api"
-		}
-        if err != nil {
-			fmt.Printf("Cannot deserialize kuberentes object %s: %v\n ", n, err)
-			return err	
-		}
-		kubeObjects[n] = KubeRuntimeObject{
-			Obj: obj,
-			GroupVersion: &schema.GroupVersion{
-				Group: groupVersionKind.Group,
-				Version: groupVersionKind.Version,
-			},
-		}
-	    //objKind := obj.GetObjectKind()
-	    //fmt.Printf("%++v\n\n", objKind)
-		// fmt.Printf("%++v\n\n", obj)
-	}
 
-	kubeClientConfig, err := NewKubeRESTClientConfig(config)
-	if err != nil {
-		fmt.Printf("Cannot get kubernetes client config: %v\n ", err)
-		return err	
-	}
-	kubeClientset, err := kubernetes.NewForConfig(kubeClientConfig)
+	kubeClientset, err := NewKubeClientset(config)
 	if err != nil {
 		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
 		return err	
 	}
 	namespace := config.Client.KubeClient.Namespace
+	var createErr error
+	var kind, name string
 	for n, obj := range kubeObjects {
-		switch o := obj.Obj.(type) {
-
-		case *v1.Secret:
-			kubeClientset.CoreV1().Secrets(*namespace).Create(obj.Obj.(*v1.Secret))
-		case *v1.ConfigMap:
-			kubeClientset.CoreV1().ConfigMaps(*namespace).Create(obj.Obj.(*v1.ConfigMap))
-		case *v1.Service:
-			kubeClientset.CoreV1().Services(*namespace).Create(obj.Obj.(*v1.Service))
-		// case *v1beta1.Role:
-		// 	// o is the actual role Object with all fields etc
-		// case *v1beta1.RoleBinding:
-		// case *v1beta1.ClusterRole:
-		// case *v1beta1.ClusterRoleBinding:
-		// case *v1.ServiceAccount:
-		default:
-			fmt.Printf("Unknown object type in %s: %v\n ", n, o)
+		switch objT := obj.(type) {
+			case *v1.Secret:
+				name = objT.ObjectMeta.Name
+                kind = objT.TypeMeta.Kind
+				_, createErr = kubeClientset.CoreV1().Secrets(*namespace).Create(objT)
+			case *v1.ConfigMap:
+				name = objT.ObjectMeta.Name
+                kind = objT.TypeMeta.Kind
+				_, createErr = kubeClientset.CoreV1().ConfigMaps(*namespace).Create(objT)
+			case *v1.Service:
+				name = objT.ObjectMeta.Name
+                kind = objT.TypeMeta.Kind
+				_, createErr = kubeClientset.CoreV1().Services(*namespace).Create(objT)
+			// case *v1beta1.Role:
+			// 	// o is the actual role Object with all fields etc
+			// case *v1beta1.RoleBinding:
+			// case *v1beta1.ClusterRole:
+			// case *v1beta1.ClusterRoleBinding:
+			// case *v1.ServiceAccount:
+			default:
+				fmt.Printf("Unknown object type in %s: %T\n ", n, objT)
+			}
+		if createErr == nil {
+			fmt.Printf("%s \"%s\" created\n ", kind, name)
+		} else if statusError, errIsStatusError := createErr.(*errors.StatusError); errIsStatusError {
+			if statusError.ErrStatus.Reason == metav1.StatusReasonAlreadyExists {
+				fmt.Printf("%s \"%s\" already exists\n ", kind, name)
+			} else {
+				fmt.Printf("%s \"%s\" failed: %v ", kind, name, statusError)
+				return statusError
+			}
+		} else {
+			fmt.Printf("%s \"%s\" failed: %v ", kind, name, createErr)
+			return createErr
 		}
 	}
 
