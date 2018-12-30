@@ -18,14 +18,18 @@ package runtimectl
 
 import (
 	"fmt"
-	"github.com/golang/glog"
+//	"github.com/golang/glog"
 //	"k8s.io/client-go/rest"
 //	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/kubernetes"
+
+//	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 //	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/rest"
+//	"k8s.io/client-go/rest"
+
+	"k8s.io/api/core/v1"
 
     templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
 )
@@ -50,6 +54,9 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 	kubeObjects := make(map[string]KubeRuntimeObject)
 	for n, objStr := range parsedTemplates {
 		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
+		if groupVersionKind.Group == "" {
+			groupVersionKind.Group = "api"
+		}
         if err != nil {
 			fmt.Printf("Cannot deserialize kuberentes object %s: %v\n ", n, err)
 			return err	
@@ -71,30 +78,56 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 		fmt.Printf("Cannot get kubernetes client config: %v\n ", err)
 		return err	
 	}
-
-	for n, obj := range kubeObjects {
-		restConfig := rest.CopyConfig(kubeClientConfig)
-		//restConfig.APIPath = "/apis"
-		restConfig.ContentConfig.GroupVersion = obj.GroupVersion
-		restConfig.ContentConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-		restConfig.UserAgent = rest.DefaultKubernetesUserAgent()
-		restClient, err := rest.RESTClientFor(restConfig)
-		if err != nil {
-			fmt.Printf("Cannot get kubernetes rest client for %s: %v\n ", n, err)
-			return err	
-		}		
-
-		req := restClient.Post()
-		req.Body(obj.Obj)
-
-		result := req.Do()
-		resultRaw, err := result.Raw() 
-		if err != nil {
-			fmt.Printf("Cannot get request result for %s: %v\n ", n, err)
-			return err	
-		}	
-		glog.V(4).Infof("result for %s : %v", n, string(resultRaw))
+	kubeClientset, err := kubernetes.NewForConfig(kubeClientConfig)
+	if err != nil {
+		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
+		return err	
 	}
+	namespace := config.Client.KubeClient.Namespace
+	for n, obj := range kubeObjects {
+		switch o := obj.Obj.(type) {
+
+		case *v1.Secret:
+			kubeClientset.CoreV1().Secrets(*namespace).Create(obj.Obj.(*v1.Secret))
+		case *v1.ConfigMap:
+			kubeClientset.CoreV1().ConfigMaps(*namespace).Create(obj.Obj.(*v1.ConfigMap))
+		case *v1.Service:
+			kubeClientset.CoreV1().Services(*namespace).Create(obj.Obj.(*v1.Service))
+		// case *v1beta1.Role:
+		// 	// o is the actual role Object with all fields etc
+		// case *v1beta1.RoleBinding:
+		// case *v1beta1.ClusterRole:
+		// case *v1beta1.ClusterRoleBinding:
+		// case *v1.ServiceAccount:
+		default:
+			fmt.Printf("Unknown object type in %s: %v\n ", n, o)
+		}
+	}
+
+	// for n, obj := range kubeObjects {
+	// 	restConfig := rest.CopyConfig(kubeClientConfig)
+	// 	//restConfig.APIPath = "/apis"
+	// 	restConfig.ContentConfig.GroupVersion = obj.GroupVersion
+	// 	restConfig.ContentConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	// 	restConfig.UserAgent = rest.DefaultKubernetesUserAgent()
+	// 	restClient, err := rest.UnversionedRESTClientFor(restConfig)
+	// 	if err != nil {
+	// 		fmt.Printf("Cannot get kubernetes rest client for %s: %v\n ", n, err)
+	// 		return err	
+	// 	}		
+        
+	// 	req := restClient.Post().
+	// 	    Body(obj.Obj).
+	// 		Resource("secrets").
+	// 		Namespace("tst1")
+	// 	result := req.Do()
+	// 	resultRaw, err := result.Raw() 
+	// 	if err != nil {
+	// 		fmt.Printf("Cannot get request result for %s: %v\n ", n, err)
+	// 		return err	
+	// 	}	
+	// 	glog.V(4).Infof("result for %s : %v", n, string(resultRaw))
+	// }
 
 	return nil
 }
