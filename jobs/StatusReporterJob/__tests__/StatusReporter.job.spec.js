@@ -1,14 +1,14 @@
 const _ = require('lodash');
-const { create: createLogger } = require('../../services/Logger');
-const ReportStatus = require('../ReportStatus');
+const { create: createLogger } = require('../../../services/Logger');
+const StatusReporter = require('../StatusReporter.job');
 
-jest.mock('./../../services/Logger');
+jest.mock('./../../../services/Logger');
 
 describe('FetchTasksToExecute unit tests', () => {
 	it('Should call Codefresh service to report the status', () => {
 		const spy = jest.fn().mockResolvedValue('OK');
 		const logger = createLogger();
-		const task = new ReportStatus({
+		const task = new StatusReporter({
 			reportStatus: spy,
 		}, _.noop(), logger);
 		const loggerMacher = expect.objectContaining({

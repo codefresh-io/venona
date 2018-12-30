@@ -2,7 +2,7 @@
 
 const create = jest.fn(() => ({
 	info: jest.fn(),
-	child: create,
+	child: jest.fn(create),
 	error: jest.fn(),
 }));
 

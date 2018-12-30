@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 const { version } = require('./../package.json');
-const { LOGGER_MODES } = require('./../constants');
+const { CRON } = require('./../constants');
 
 function build() {
 	return {
@@ -9,7 +9,11 @@ function build() {
 			mode: process.env.AGENT_MODE,
 		},
 		logger: {
-			prettyPrint: !(process.env.LOGGER_MODE === LOGGER_MODES.PRETTY),
+			...(!process.env.LOGGER_MODE && {
+				prettyPrint: {
+					levelFirst: true,
+				}
+			}),
 			level: process.env.LOGGER_LEVEL || 'info',
 		},
 		server: {
@@ -32,13 +36,17 @@ function build() {
 			baseURL: process.env.CODEFRESH_HOST || 'https://g.codefresh.io',
 			token: process.env.CODEFRESH_TOKEN,
 		},
-		tasks: {
-			FetchTasksToExecute: {
-				cronExpression: process.env.TASK_FETCH_JOBS_TO_EXECUTE_CRON_EXPRESSION || '* * * * *', // once a minute
+		jobs: {
+			TaskPullerJob: {
+				cronExpression: process.env.JOB_PULL_TASKS_TO_EXECUTE_CRON_EXPRESSION || CRON.EVERY_TEN_SECONDS,
 			},
-			ReportStatus: {
-				cronExpression: process.env.TASK_REPORT_STATUS_CRON_EXPRESSION || '* * * * *', // once a minute
+			StatusReporterJob: {
+				cronExpression: process.env.JOB_REPORT_STATUS_CRON_EXPRESSION || CRON.EVERY_MINUTE,
 			},
+			DEFAULT_CRON: CRON.EVERY_MINUTE,
+			queue: {
+				concurrency: parseInt(process.env.JOBS_QUEUE_CONCURRENCY || '1')
+			}
 		},
 	};
 }
