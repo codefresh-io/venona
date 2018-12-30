@@ -18,25 +18,24 @@ package runtimectl
 
 import (
 	"bytes"
+	"fmt"
 	"text/template"
-//	"encoding/base64"
+	"github.com/golang/glog"
 	"github.com/hairyhenderson/gomplate"
-	dataPkg "github.com/hairyhenderson/gomplate/data"
+	gomplateData "github.com/hairyhenderson/gomplate/data"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-
-// func b64(s string) string {
-// 	data := []byte(s)
-// 	return base64.StdEncoding.EncodeToString(data)
-// }
-
-// ExecuteTemplate - executes templates in tpl str with config as values 
+// ExecuteTemplate - executes templates in tpl str with config as values
+// Using template Funcs from gomplate - github.com/hairyhenderson/gomplate
 func ExecuteTemplate(tplStr string, data interface{}) (string, error){
 
 	// gomplate func initializing
 	dataSources := []string{}
 	dataSourceHeaders := []string{}
-	d, _ := dataPkg.NewData(dataSources, dataSourceHeaders)
+	d, _ := gomplateData.NewData(dataSources, dataSourceHeaders)
 
 	template, err := template.New("").Funcs(gomplate.Funcs(d)).Parse(tplStr)
 	if err != nil {
@@ -50,4 +49,44 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error){
 	}
 
 	return buf.String(), nil
+}
+
+// ParseTemplates - parses and exexute templates and return map of strings with obj data
+func ParseTemplates(templatesMap map[string]string, config *Config) (map[string]string, error) {
+	parsedTemplates := make(map[string]string) 
+	for n, tpl := range templatesMap {
+		glog.V(4).Infof("template = %s\n", n)
+		tplEx, err := ExecuteTemplate(tpl, config)
+		if err != nil {
+			fmt.Printf("Cannot parse and execute template %s: %v\n ", n, err)
+			return nil, err
+		}
+		parsedTemplates[n] = tplEx
+	}
+	return parsedTemplates, nil
+}
+
+// NewKubeRESTClientConfig Returns rest.Config 
+func NewKubeRESTClientConfig(config *Config) (*rest.Config, error) {
+	var restConfig *rest.Config
+	var err error
+	kubeconfig := config.Client.KubeClient.Kubeconfig
+	kubecontext := config.Client.KubeClient.Context
+	namespace := config.Client.KubeClient.Namespace
+	if *kubeconfig != "" {
+		restConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			&clientcmd.ClientConfigLoadingRules{ExplicitPath: *kubeconfig},
+			&clientcmd.ConfigOverrides{
+					CurrentContext: *kubecontext,
+					Context: clientcmdapi.Context{
+						Namespace:  *namespace,
+					},
+
+			}).ClientConfig()
+
+	} else {
+		restConfig, err = rest.InClusterConfig()
+	}
+
+	return restConfig, err
 }

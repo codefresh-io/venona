@@ -23,6 +23,8 @@ package runtimectl
 
 import (
 	"github.com/codefresh-io/Isser/isserctl/pkg/certs"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 const (
@@ -68,4 +70,10 @@ type KubernetesClientConfig struct {
 type Status struct {
 	Status        string
 	StatusMessage string
+}
+
+// KubeRuntimeObject - struct to hold 
+type KubeRuntimeObject struct {
+	Obj runtime.Object
+	GroupVersion *schema.GroupVersion
 }

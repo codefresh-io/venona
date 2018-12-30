@@ -18,9 +18,14 @@ package runtimectl
 
 import (
 	"fmt"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	"github.com/golang/glog"
+//	"k8s.io/client-go/rest"
+//	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+//	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/rest"
 
     templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
 )
@@ -30,48 +35,67 @@ type KubernetesDindCtl struct {
 
 }
 
-
-// NewClientsetConfig Returns rest.Config 
-func (u *KubernetesDindCtl) NewClientsetConfig(config *Config) (*rest.Config, error) {
-	var restConfig *rest.Config
-	var err error
-	kubeconfig := config.Client.KubeClient.Kubeconfig
-    kubecontext := config.Client.KubeClient.Context
-	if *kubeconfig != "" {
-		restConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: *kubeconfig},
-			&clientcmd.ConfigOverrides{
-					CurrentContext: *kubecontext,
-
-			}).ClientConfig()
-
-	} else {
-		restConfig, err = rest.InClusterConfig()
-	}
-
-	return restConfig, err
-}
-
 // Install runtimectl environment
 func (u *KubernetesDindCtl) Install(config *Config) error {
 
 	templatesMap := templates.TemplatesMap()
-	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
-	// https://github.com/kubernetes/client-go/issues/193
-	for n, tpl := range templatesMap {
-		fmt.Printf("template = %s\n", n)
-		tplEx, err := ExecuteTemplate(tpl, config)
-		if err != nil {
-			fmt.Printf("Cannot parse and execute template %s: %v\n ", n, err)
-			continue
-		}
-		
-		obj, _, _ := kubeDecode([]byte(tplEx), nil, nil)
-	    objKind := obj.GetObjectKind()
-		fmt.Printf("%++v\n\n", objKind)
-		fmt.Printf("%++v\n\n", obj)
-
+	parsedTemplates, err := ParseTemplates(templatesMap, config)
+	if err != nil {
+		return err	
 	}
+
+	// Deserializing all kube objects from parsedTemplates
+	// see https://github.com/kubernetes/client-go/issues/193 for examples	
+	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
+	kubeObjects := make(map[string]KubeRuntimeObject)
+	for n, objStr := range parsedTemplates {
+		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
+        if err != nil {
+			fmt.Printf("Cannot deserialize kuberentes object %s: %v\n ", n, err)
+			return err	
+		}
+		kubeObjects[n] = KubeRuntimeObject{
+			Obj: obj,
+			GroupVersion: &schema.GroupVersion{
+				Group: groupVersionKind.Group,
+				Version: groupVersionKind.Version,
+			},
+		}
+	    //objKind := obj.GetObjectKind()
+	    //fmt.Printf("%++v\n\n", objKind)
+		// fmt.Printf("%++v\n\n", obj)
+	}
+
+	kubeClientConfig, err := NewKubeRESTClientConfig(config)
+	if err != nil {
+		fmt.Printf("Cannot get kubernetes client config: %v\n ", err)
+		return err	
+	}
+
+	for n, obj := range kubeObjects {
+		restConfig := rest.CopyConfig(kubeClientConfig)
+		//restConfig.APIPath = "/apis"
+		restConfig.ContentConfig.GroupVersion = obj.GroupVersion
+		restConfig.ContentConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+		restConfig.UserAgent = rest.DefaultKubernetesUserAgent()
+		restClient, err := rest.RESTClientFor(restConfig)
+		if err != nil {
+			fmt.Printf("Cannot get kubernetes rest client for %s: %v\n ", n, err)
+			return err	
+		}		
+
+		req := restClient.Post()
+		req.Body(obj.Obj)
+
+		result := req.Do()
+		resultRaw, err := result.Raw() 
+		if err != nil {
+			fmt.Printf("Cannot get request result for %s: %v\n ", n, err)
+			return err	
+		}	
+		glog.V(4).Infof("result for %s : %v", n, string(resultRaw))
+	}
+
 	return nil
 }
 
