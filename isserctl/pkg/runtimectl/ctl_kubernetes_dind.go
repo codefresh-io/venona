@@ -183,6 +183,6 @@ func (u *KubernetesDindCtl) GetStatus(config *Config) (*Status, error) {
 
 // Delete runtimectl environment
 func (u *KubernetesDindCtl) Delete(config *Config) error {
-	fmt.Printf("To delete isser delete all the object printed by status")
+	fmt.Printf("To delete isser delete all the object printed by status\n")
 	return nil
 }
