@@ -49,7 +49,6 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 		return err	
 	}	
 
-
 	kubeClientset, err := NewKubeClientset(config)
 	if err != nil {
 		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
@@ -125,17 +124,65 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 }
 
 // GetStatus of runtimectl environment
-func (u *KubernetesDindCtl) GetStatus(config *Config) (Status, error) {
+func (u *KubernetesDindCtl) GetStatus(config *Config) (*Status, error) {
+	templatesMap := templates.TemplatesMap()
+	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, config)
+	if err != nil {
+		return nil, err	
+	}	
 
-	runtimectlStatus := Status{
-		Status:        StatusRunning,
-		StatusMessage: "",
+	kubeClientset, err := NewKubeClientset(config)
+	if err != nil {
+		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, err	
+	}
+	namespace := config.Client.KubeClient.Namespace
+	var getErr error
+	var kind, name, status, statusMessage string
+	
+	status = StatusInstalled
+	for n, obj := range kubeObjects {
+		switch objT := obj.(type) {
+			case *v1.Secret:
+				name = objT.ObjectMeta.Name
+                kind = objT.TypeMeta.Kind
+				_, getErr = kubeClientset.CoreV1().Secrets(*namespace).Get(name, metav1.GetOptions{})
+			case *v1.ConfigMap:
+				name = objT.ObjectMeta.Name
+                kind = objT.TypeMeta.Kind
+				_, getErr = kubeClientset.CoreV1().ConfigMaps(*namespace).Get(name, metav1.GetOptions{})
+			case *v1.Service:
+				name = objT.ObjectMeta.Name
+                kind = objT.TypeMeta.Kind
+				_, getErr = kubeClientset.CoreV1().Services(*namespace).Get(name, metav1.GetOptions{})
+			// case *v1beta1.Role:
+			// 	// o is the actual role Object with all fields etc
+			// case *v1beta1.RoleBinding:
+			// case *v1beta1.ClusterRole:
+			// case *v1beta1.ClusterRoleBinding:
+			// case *v1.ServiceAccount:
+			default:
+				fmt.Printf("Unknown object type in %s: %T\n ", n, objT)
+			}
+		if getErr == nil {
+			statusMessage += fmt.Sprintf("%s \"%s\" installed\n", kind, name)
+		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {
+            statusMessage += fmt.Sprintf("%s\n", statusError.ErrStatus.Message)
+            status = StatusNotInstalled
+		} else {
+			fmt.Printf("%s \"%s\" failed: %v ", kind, name, getErr)
+			return nil, getErr
+		}
+	}
+	runtimectlStatus := &Status{
+		Status:        status,
+		StatusMessage: statusMessage,
 	}
 	return runtimectlStatus, nil
 }
 
 // Delete runtimectl environment
 func (u *KubernetesDindCtl) Delete(config *Config) error {
-
+	fmt.Printf("To delete isser delete all the object printed by status")
 	return nil
 }

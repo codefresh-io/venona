@@ -34,8 +34,8 @@ const (
 
 	// StatusInstalled - status installed
 	StatusInstalled = "Installed"
-	// StatusNotIntalled - status installed
-	StatusNotIntalled = "NotInstalled"
+	// StatusNotInstalled - status installed
+	StatusNotInstalled = "Not Installed"
 	// StatusRunning - status failed
 	StatusRunning = "Running"
 	// StatusFailed - status failed

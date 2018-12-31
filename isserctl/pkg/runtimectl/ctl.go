@@ -27,7 +27,7 @@ type Ctl interface {
 	Install(*Config) error
 
 	// GetStatus of runtimectl environment
-	GetStatus(*Config) (Status, error)
+	GetStatus(*Config) (*Status, error)
 
 	// Delete runtimectl environment
 	Delete(*Config) error

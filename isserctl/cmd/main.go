@@ -25,6 +25,7 @@ import (
 
 	"github.com/codefresh-io/Isser/isserctl/pkg/codefresh"
 	"github.com/codefresh-io/Isser/isserctl/pkg/runtimectl"
+	"github.com/codefresh-io/Isser/isserctl/pkg/certs"
 	"github.com/golang/glog"
 )
 
@@ -85,6 +86,7 @@ func getruntimectlConfig() (*runtimectl.Config, error) {
 		Type:   runtimectlType,
 		Name:   clusterName,
 		Client: clientConfig,
+		ServerCert: &certs.ServerCert{},
 	}
 	return runtimectlConfig, nil
 }
@@ -122,19 +124,25 @@ func doInstall(runtimectlConfig *runtimectl.Config) {
 }
 
 func printStatus(runtimectlConfig *runtimectl.Config) {
+	ctl, err := runtimectl.GetCtl(runtimectlConfig)
+    dieIfError(err)
+	
+	status, err := ctl.GetStatus(runtimectlConfig)
+	dieIfError(err)
 
+	fmt.Printf(status.StatusMessage)
+    fmt.Printf("\nStatus: %s\n", status.Status)
 }
 
 func doDelete(runtimectlConfig *runtimectl.Config) {
-
+	ctl, err := runtimectl.GetCtl(runtimectlConfig)
+    dieIfError(err)
+	
+	err = ctl.Delete(runtimectlConfig)
+	dieIfError(err)
 }
 
 func main() {
-	// flag.Parse()
-	// // flag.Set("v", "4")
-	// flag.Set("alsologtostderr", "true")
-	// glog.V(4).Infof("Entering\n codefreshUrl = %s \n clusterName = %s ", *codefreshURL, *clusterName)
-	// Validate Flags
 
 	usage := `
 Usage: isserctl <command> [options]
@@ -165,10 +173,10 @@ Options:
 
 	validCommands := []string{cmdInstall, cmdStatus, cmdDelete}
     if len(os.Args) < 2 {
-		glog.Errorf("%s", usage)
-		os.Exit(2)
+		fmt.Printf("%s\n", usage)
+		os.Exit(0)
 	} else if !_stringInList(validCommands,os.Args[1]) {
-		glog.Errorf("Invalid command %s\n%s", os.Args[1], usage)
+		fmt.Printf("Invalid command %s\n%s", os.Args[1], usage)
 		os.Exit(2)
 	}
 
