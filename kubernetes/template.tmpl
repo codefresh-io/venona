@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: {{.Env.AGENT_NAME}}
-    version: {{.Env.AGENT_VERSION}}
+    version: "{{.Env.AGENT_VERSION}}"
   name: {{.Env.APP_NAME}}
   namespace: {{.Env.AGENT_NAMESPACE}}
 spec:
@@ -18,7 +18,7 @@ spec:
     metadata:
       labels:
         app: {{.Env.AGENT_NAME}}
-        version: {{.Env.AGENT_VERSION}}
+        version: "{{.Env.AGENT_VERSION}}"
     spec:
       serviceAccountName: {{.Env.APP_NAME}}
       containers:
