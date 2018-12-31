@@ -10,19 +10,19 @@
 
 ### Install Isser
 
-* Create namespace where Isser should run 
+* Create namespace where Isser should run<br />
 Example: `kubectl create namespace codefresh-runtime`
-* Create a cluster in Codefresh 
+* Create a cluster in Codefresh <br />
 Example: `codefresh create clusters --kube-context YOUR_KUBE_CONTEXT --behind-firewall --namespace codefresh-runtime`
-* Create runtime-environment in Codefresh 
+* Create runtime-environment in Codefresh <br />
 Example: `codefresh create re --cluster YOUR_KUBE_CONTEXT --namespace codefresh-runtime --kube-context YOUR_KUBE_CONTEXT`
-* Create token for just created runtime-environment 
+* Create token for just created runtime-environment <br />
 Example: `codefresh create token --name TOKEN_NAME --type runtime-environment --subject YOUR_KUBE_CONTEXT/codefresh-runtime`
-* Encode the token and export it as `CODEFRESH_TOKEN_B64_ENCODED` environment variable
+* Encode the token and export it as `CODEFRESH_TOKEN_B64_ENCODED` environment variable<br />
 Example: `echo -n "TOKEN" | base64`
-* export environment variables: 
+* export environment variables<br />
 Example: `export AGENT_NAME=codefresh-runtime AGENT_VERSION=1 APP_NAME=isser AGENT_NAMESPACE=codefresh-runtime CODEFRESH_HOST=https://g.codefresh.io AGENT_MODE=InCluster AGENT_IMAGE_NAME=codefresh/isser AGENT_IMAGE_TAG=master`
-* Render K8S resources 
+* Render K8S resources <br />
 `gomplate -f kubernetes/template.tmpl --out kubernetes/resources.yaml`
-* Apply resources 
+* Apply resources <br />
 `kubectl apply -f kubernetes/resources.yaml`
