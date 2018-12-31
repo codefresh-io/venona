@@ -66,7 +66,7 @@ func main() {
    }
 
    var currentFilePath string
-   if strings.Contains(os.Args[0], path.Join("tmp", "go-build")) {
+   if strings.Contains(os.Args[0], "/go-build") {
       _, currentFilePath, _, _ = runtime.Caller(0)
    } else {
      currentFilePath = os.Args[0]
