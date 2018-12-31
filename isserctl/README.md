@@ -19,12 +19,18 @@ Options:
         namespace
 ```
 
+### Download Binary
+http://download.codefresh.io.s3-website-us-east-1.amazonaws.com/isserctl/<version>/<system>/<platform>/isserctl
+
+Linux: http://download.codefresh.io.s3-website-us-east-1.amazonaws.com/isserctl/latest/Linux/x86_64/isserctl
+Mac: http://download.codefresh.io.s3-website-us-east-1.amazonaws.com/isserctl/latest/Darwin/x86_64/isserctl
+
 ### Build
 Set Go environment + dep and `build.sh`
 `isserctl` will be in $GOPATH/bin
 
 ### Push for public downloading
-To be done
+./push-s3.sh <version> [path/to/isserctl]
 
 ### `isserctl install` Flow
 - call Codefresh api to validate api-key and get some data
