@@ -30,9 +30,10 @@ import (
 //	"k8s.io/client-go/rest"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/api/core/v1"
+//	"k8s.io/api/core/v1"
 
-    templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
+	templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
+	"github.com/codefresh-io/Isser/isserctl/obj/kubeobj"
 )
 
 // KubernetesDindCtl installs assets on Kubernetes Dind runtimectl Env
@@ -57,29 +58,9 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 	namespace := config.Client.KubeClient.Namespace
 	var createErr error
 	var kind, name string
-	for n, obj := range kubeObjects {
-		switch objT := obj.(type) {
-			case *v1.Secret:
-				name = objT.ObjectMeta.Name
-                kind = objT.TypeMeta.Kind
-				_, createErr = kubeClientset.CoreV1().Secrets(*namespace).Create(objT)
-			case *v1.ConfigMap:
-				name = objT.ObjectMeta.Name
-                kind = objT.TypeMeta.Kind
-				_, createErr = kubeClientset.CoreV1().ConfigMaps(*namespace).Create(objT)
-			case *v1.Service:
-				name = objT.ObjectMeta.Name
-                kind = objT.TypeMeta.Kind
-				_, createErr = kubeClientset.CoreV1().Services(*namespace).Create(objT)
-			// case *v1beta1.Role:
-			// 	// o is the actual role Object with all fields etc
-			// case *v1beta1.RoleBinding:
-			// case *v1beta1.ClusterRole:
-			// case *v1beta1.ClusterRoleBinding:
-			// case *v1.ServiceAccount:
-			default:
-				fmt.Printf("Unknown object type in %s: %T\n ", n, objT)
-			}
+	for _, obj := range kubeObjects {
+		name, kind, createErr = kubeobj.CreateObject(kubeClientset, obj, *namespace)
+
 		if createErr == nil {
 			fmt.Printf("%s \"%s\" created\n ", kind, name)
 		} else if statusError, errIsStatusError := createErr.(*errors.StatusError); errIsStatusError {
@@ -94,31 +75,6 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 			return createErr
 		}
 	}
-
-	// for n, obj := range kubeObjects {
-	// 	restConfig := rest.CopyConfig(kubeClientConfig)
-	// 	//restConfig.APIPath = "/apis"
-	// 	restConfig.ContentConfig.GroupVersion = obj.GroupVersion
-	// 	restConfig.ContentConfig.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-	// 	restConfig.UserAgent = rest.DefaultKubernetesUserAgent()
-	// 	restClient, err := rest.UnversionedRESTClientFor(restConfig)
-	// 	if err != nil {
-	// 		fmt.Printf("Cannot get kubernetes rest client for %s: %v\n ", n, err)
-	// 		return err	
-	// 	}		
-        
-	// 	req := restClient.Post().
-	// 	    Body(obj.Obj).
-	// 		Resource("secrets").
-	// 		Namespace("tst1")
-	// 	result := req.Do()
-	// 	resultRaw, err := result.Raw() 
-	// 	if err != nil {
-	// 		fmt.Printf("Cannot get request result for %s: %v\n ", n, err)
-	// 		return err	
-	// 	}	
-	// 	glog.V(4).Infof("result for %s : %v", n, string(resultRaw))
-	// }
 
 	return nil
 }
@@ -141,29 +97,8 @@ func (u *KubernetesDindCtl) GetStatus(config *Config) (*Status, error) {
 	var kind, name, status, statusMessage string
 	
 	status = StatusInstalled
-	for n, obj := range kubeObjects {
-		switch objT := obj.(type) {
-			case *v1.Secret:
-				name = objT.ObjectMeta.Name
-                kind = objT.TypeMeta.Kind
-				_, getErr = kubeClientset.CoreV1().Secrets(*namespace).Get(name, metav1.GetOptions{})
-			case *v1.ConfigMap:
-				name = objT.ObjectMeta.Name
-                kind = objT.TypeMeta.Kind
-				_, getErr = kubeClientset.CoreV1().ConfigMaps(*namespace).Get(name, metav1.GetOptions{})
-			case *v1.Service:
-				name = objT.ObjectMeta.Name
-                kind = objT.TypeMeta.Kind
-				_, getErr = kubeClientset.CoreV1().Services(*namespace).Get(name, metav1.GetOptions{})
-			// case *v1beta1.Role:
-			// 	// o is the actual role Object with all fields etc
-			// case *v1beta1.RoleBinding:
-			// case *v1beta1.ClusterRole:
-			// case *v1beta1.ClusterRoleBinding:
-			// case *v1.ServiceAccount:
-			default:
-				fmt.Printf("Unknown object type in %s: %T\n ", n, objT)
-			}
+	for _, obj := range kubeObjects {
+		name, kind, getErr = kubeobj.CheckObject(kubeClientset, obj, *namespace)
 		if getErr == nil {
 			statusMessage += fmt.Sprintf("%s \"%s\" installed\n", kind, name)
 		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {

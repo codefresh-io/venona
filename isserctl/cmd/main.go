@@ -49,7 +49,7 @@ var (
 
 func dieIfError(err error) {
 	if err != nil {
-		fmt.Printf("Error: %v", err)
+		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)		
 	}
 }
@@ -91,14 +91,18 @@ func getruntimectlConfig() (*runtimectl.Config, error) {
 	return runtimectlConfig, nil
 }
 
-func setCommonFlags(flagset *flag.FlagSet){
+func defineCommonFlags(flagset *flag.FlagSet){
 	if runtimectlType == runtimectl.TypeKubernetesDind {
 		flagset.StringVar(&kubeconfig, "kubeconfig", "", "Absolute path to the kubeconfig")
 		flagset.StringVar(&kubecontext, "kubecontext", "", "Kubeconfig context name")
 		flagset.StringVar(&namespace, "namespace", "default", "Kubernetes namespace")
 	}
-	flagset.Set("alsologtostderr", "true")
-	flagset.StringVar(&v, "v", "", "glog debug flag - set -v4 for debug")
+	flagset.StringVar(&v, "v", "2", "glog debug flag - set -v4 for debug")
+}
+
+func processFlags(){
+	flag.Set("alsologtostderr", "true")
+	flag.Set("v", v)
 }
 
 func doInstall(runtimectlConfig *runtimectl.Config) {
@@ -120,7 +124,7 @@ func doInstall(runtimectlConfig *runtimectl.Config) {
 	err = cfAPI.Register(runtimectlConfig)
     dieIfError(err)
 
-	fmt.Printf("Installation completed Successfully")
+	fmt.Printf("Installation completed Successfully\n")
 }
 
 func printStatus(runtimectlConfig *runtimectl.Config) {
@@ -159,17 +163,19 @@ Options:
    kubecontext
    namespace
 `
+	flag.Parse()
+
 	installCommand := flag.NewFlagSet(cmdInstall, flag.ExitOnError)
     installCommand.StringVar(&codefreshAPIKey, "api-key", "", "Codefresh api key (token)")	
 	installCommand.StringVar(&codefreshURL, "url", codefresh.DefaultURL, "Codefresh url")
 	installCommand.StringVar(&clusterName, "cluster-name", "", "cluster name")
-	setCommonFlags(installCommand)
+	defineCommonFlags(installCommand)
 
 	statusCommand := flag.NewFlagSet(cmdStatus, flag.ExitOnError)
-	setCommonFlags(statusCommand)
+	defineCommonFlags(statusCommand)
 
 	deleteCommand := flag.NewFlagSet(cmdDelete, flag.ExitOnError)
-	setCommonFlags(deleteCommand)
+	defineCommonFlags(deleteCommand)
 
 	validCommands := []string{cmdInstall, cmdStatus, cmdDelete}
     if len(os.Args) < 2 {
@@ -186,12 +192,15 @@ Options:
 	switch os.Args[1] {
 	case cmdInstall:
 		installCommand.Parse(os.Args[2:])
+		processFlags()
 		doInstall(runtimectlConfig)
 	case cmdStatus:
 		statusCommand.Parse(os.Args[2:])
+		processFlags()
 		printStatus(runtimectlConfig)
 	case cmdDelete:
 		deleteCommand.Parse(os.Args[2:])
+		processFlags()
 		doDelete(runtimectlConfig)	
 	default:
 		glog.Errorf("%q is not valid command.\n", os.Args[1])

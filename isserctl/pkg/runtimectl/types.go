@@ -18,7 +18,7 @@ limitations under the License.
 We are using generated template.go for serialized kubernetes assets
 */
 //go:generate go run github.com/codefresh-io/Isser/isserctl/templates kubernetes_dind
-
+//go:generate go run github.com/codefresh-io/Isser/isserctl/obj kubernetes_dind
 package runtimectl
 
 import (
