@@ -65,7 +65,7 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 			fmt.Printf("%s \"%s\" created\n ", kind, name)
 		} else if statusError, errIsStatusError := createErr.(*errors.StatusError); errIsStatusError {
 			if statusError.ErrStatus.Reason == metav1.StatusReasonAlreadyExists {
-				fmt.Printf("%s \"%s\" already exists\n ", kind, name)
+				fmt.Printf("%s \"%s\" already exists\n", kind, name)
 			} else {
 				fmt.Printf("%s \"%s\" failed: %v ", kind, name, statusError)
 				return statusError

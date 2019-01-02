@@ -97,6 +97,7 @@ func defineCommonFlags(flagset *flag.FlagSet){
 		flagset.StringVar(&kubecontext, "kubecontext", "", "Kubeconfig context name")
 		flagset.StringVar(&namespace, "namespace", "default", "Kubernetes namespace")
 	}
+	flagset.StringVar(&clusterName, "cluster-name", "", "cluster name")
 	flagset.StringVar(&v, "v", "2", "glog debug flag - set -v4 for debug")
 }
 
@@ -165,17 +166,13 @@ Options:
 `
 	flag.Parse()
 
-	installCommand := flag.NewFlagSet(cmdInstall, flag.ExitOnError)
-    installCommand.StringVar(&codefreshAPIKey, "api-key", "", "Codefresh api key (token)")	
-	installCommand.StringVar(&codefreshURL, "url", codefresh.DefaultURL, "Codefresh url")
-	installCommand.StringVar(&clusterName, "cluster-name", "", "cluster name")
-	defineCommonFlags(installCommand)
+	installCommandFlagset := flag.NewFlagSet(cmdInstall, flag.ExitOnError)
+    installCommandFlagset.StringVar(&codefreshAPIKey, "api-key", "", "Codefresh api key (token)")	
+	installCommandFlagset.StringVar(&codefreshURL, "url", codefresh.DefaultURL, "Codefresh url")
 
-	statusCommand := flag.NewFlagSet(cmdStatus, flag.ExitOnError)
-	defineCommonFlags(statusCommand)
+	statusCommandFlagset := flag.NewFlagSet(cmdStatus, flag.ExitOnError)
 
-	deleteCommand := flag.NewFlagSet(cmdDelete, flag.ExitOnError)
-	defineCommonFlags(deleteCommand)
+	deleteCommandFlagset := flag.NewFlagSet(cmdDelete, flag.ExitOnError)
 
 	validCommands := []string{cmdInstall, cmdStatus, cmdDelete}
     if len(os.Args) < 2 {
@@ -186,24 +183,29 @@ Options:
 		os.Exit(2)
 	}
 
-	runtimectlConfig, err := getruntimectlConfig()
-	dieIfError(err)
+	var flagset *flag.FlagSet
+	var cmdFunction func(runtimectlConfig *runtimectl.Config)
 
 	switch os.Args[1] {
 	case cmdInstall:
-		installCommand.Parse(os.Args[2:])
-		processFlags()
-		doInstall(runtimectlConfig)
+		flagset = installCommandFlagset
+		cmdFunction = doInstall
 	case cmdStatus:
-		statusCommand.Parse(os.Args[2:])
-		processFlags()
-		printStatus(runtimectlConfig)
+		flagset = statusCommandFlagset
+		cmdFunction = printStatus
 	case cmdDelete:
-		deleteCommand.Parse(os.Args[2:])
-		processFlags()
-		doDelete(runtimectlConfig)	
+		flagset = deleteCommandFlagset
+		cmdFunction = doDelete
 	default:
 		glog.Errorf("%q is not valid command.\n", os.Args[1])
 		os.Exit(2)
 	}
+	
+	defineCommonFlags(flagset)
+	flagset.Parse(os.Args[2:])
+	processFlags()
+	runtimectlConfig, err := getruntimectlConfig()
+	dieIfError(err)
+	cmdFunction(runtimectlConfig)	
+
 }
