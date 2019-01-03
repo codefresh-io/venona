@@ -31,7 +31,7 @@ class Codefresh {
 		return rp(opt);
 	}
 
-	fetchTasksToExecute(logger) {
+	pullTasks(logger) {
 		logger.info('Calling Codefresh API to fetch jobs');
 		const url = '/api/agent/tasks';
 		return this._call({
