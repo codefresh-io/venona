@@ -28,6 +28,9 @@ import (
 )
 
 const (
+	// AppName - app name for config
+	AppName = "isser"
+
 	// TypeKubernetesDind - name for Kubernetes  Dind runtimectl
 	TypeKubernetesDind = "kubernetesDind"
 	//typeDockerd = "dockerd"
@@ -49,9 +52,17 @@ type Config struct {
 	// runtimectl Env Name
 	Name string
 
-	Client ClientConfig
+	AppName string 
 
+	Client ClientConfig
+	Cfapi CfAPI
 	ServerCert *certs.ServerCert
+}
+
+// CfAPI - connection params to Codefresh Api
+type CfAPI struct {
+	URL    string
+	APIKey string
 }
 
 // ClientConfig - structy for client of runtimectl env (kube client config)

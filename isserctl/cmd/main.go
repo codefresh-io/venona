@@ -82,9 +82,16 @@ func getruntimectlConfig() (*runtimectl.Config, error) {
 		return nil, fmt.Errorf("Unknown runtimectl type %s", runtimectlType)
 	}
 
+	cfapi := runtimectl.CfAPI{
+		URL: codefreshURL,
+		APIKey: codefreshAPIKey,
+	}
+
 	runtimectlConfig := &runtimectl.Config{
+		AppName: runtimectl.AppName,
 		Type:   runtimectlType,
 		Name:   clusterName,
+		Cfapi:  cfapi,
 		Client: clientConfig,
 		ServerCert: &certs.ServerCert{},
 	}

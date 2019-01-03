@@ -65,5 +65,39 @@ spec:
 
 ` 
 
+templatesMap["isser-role-binding.yaml"] = `kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .AppName }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .AppName }}
+roleRef:
+  kind: Role
+  name: {{ .AppName }}
+  apiGroup: rbac.authorization.k8s.io` 
+
+templatesMap["isser-role.yaml"] = `kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .AppName }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["create", "delete"]` 
+
+templatesMap["isser-secret.yaml"] = `apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ .AppName }}
+data:
+  codefresh.token: {{ .Cfapi.APIKey | base64.Encode }}` 
+
+templatesMap["isser-service-account.yaml"] = `apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .AppName }}` 
+
     return  templatesMap
 }
