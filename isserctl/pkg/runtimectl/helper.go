@@ -20,22 +20,25 @@ import (
 	"bytes"
 	"fmt"
 	"text/template"
+
+	"github.com/codefresh-io/isser/isserctl/pkg/store"
+
 	"github.com/golang/glog"
 	"github.com/hairyhenderson/gomplate"
 	gomplateData "github.com/hairyhenderson/gomplate/data"
-	
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/apimachinery/pkg/runtime"
-//	"k8s.io/apimachinery/pkg/runtime/schema"
+	//	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // ExecuteTemplate - executes templates in tpl str with config as values
 // Using template Funcs from gomplate - github.com/hairyhenderson/gomplate
-func ExecuteTemplate(tplStr string, data interface{}) (string, error){
+func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 
 	// gomplate func initializing
 	dataSources := []string{}
@@ -48,7 +51,7 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error){
 	}
 
 	buf := bytes.NewBufferString("")
-	err = template.Execute(buf, data) 
+	err = template.Execute(buf, data)
 	if err != nil {
 		return "", err
 	}
@@ -57,11 +60,11 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error){
 }
 
 // ParseTemplates - parses and exexute templates and return map of strings with obj data
-func ParseTemplates(templatesMap map[string]string, config *Config) (map[string]string, error) {
-	parsedTemplates := make(map[string]string) 
+func ParseTemplates(templatesMap map[string]string, data interface{}) (map[string]string, error) {
+	parsedTemplates := make(map[string]string)
 	for n, tpl := range templatesMap {
 		glog.V(4).Infof("parsing template = %s: ", n)
-		tplEx, err := ExecuteTemplate(tpl, config)
+		tplEx, err := ExecuteTemplate(tpl, data)
 		if err != nil {
 			glog.V(4).Infof("Error: %v\n", err)
 			fmt.Printf("Cannot parse and execute template %s: %v\n ", n, err)
@@ -75,23 +78,23 @@ func ParseTemplates(templatesMap map[string]string, config *Config) (map[string]
 
 // KubeObjectsFromTemplates return map of runtime.Objects from templateMap
 // see https://github.com/kubernetes/client-go/issues/193 for examples
-func KubeObjectsFromTemplates(templatesMap map[string]string, config *Config) (map[string]runtime.Object, error) {
-	parsedTemplates, err := ParseTemplates(templatesMap, config)
+func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}) (map[string]runtime.Object, error) {
+	parsedTemplates, err := ParseTemplates(templatesMap, data)
 	if err != nil {
-		return nil, err	
+		return nil, err
 	}
 
 	// Deserializing all kube objects from parsedTemplates
-	// see https://github.com/kubernetes/client-go/issues/193 for examples	
+	// see https://github.com/kubernetes/client-go/issues/193 for examples
 	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeObjects := make(map[string]runtime.Object)
 	for n, objStr := range parsedTemplates {
 		glog.V(4).Infof("Deserializing template = %s: \n", n)
 		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
-        if err != nil {
+		if err != nil {
 			glog.V(4).Infof("Error: %v \n", err)
 			fmt.Printf("Cannot deserialize kuberentes object %s: %v\n ", n, err)
-			return nil, err	
+			return nil, err
 		}
 		glog.V(4).Infof("deserializing template %s Success: %v\n", n, groupVersionKind)
 		kubeObjects[n] = obj
@@ -99,22 +102,21 @@ func KubeObjectsFromTemplates(templatesMap map[string]string, config *Config) (m
 	return kubeObjects, nil
 }
 
-// NewKubeRESTClientConfig Returns rest.Config 
-func NewKubeRESTClientConfig(config *Config) (*rest.Config, error) {
+// NewKubeRESTClientConfig Returns rest.Config
+func NewKubeRESTClientConfig(s *store.Values) (*rest.Config, error) {
 	var restConfig *rest.Config
 	var err error
-	kubeconfig := config.Client.KubeClient.Kubeconfig
-	kubecontext := config.Client.KubeClient.Context
-	namespace := config.Client.KubeClient.Namespace
-	if *kubeconfig != "" {
+	kubeconfig := s.KubernetesAPI.ConfigPath
+	kubecontext := s.KubernetesAPI.ContextName
+	namespace := s.KubernetesAPI.Namespace
+	if kubeconfig != "" {
 		restConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: *kubeconfig},
+			&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
 			&clientcmd.ConfigOverrides{
-					CurrentContext: *kubecontext,
-					Context: clientcmdapi.Context{
-						Namespace:  *namespace,
-					},
-
+				CurrentContext: kubecontext,
+				Context: clientcmdapi.Context{
+					Namespace: namespace,
+				},
 			}).ClientConfig()
 
 	} else {
@@ -125,10 +127,10 @@ func NewKubeRESTClientConfig(config *Config) (*rest.Config, error) {
 }
 
 // NewKubeClientset - returns clientset
-func NewKubeClientset(config *Config) (*kubernetes.Clientset, error) {
-	kubeClientConfig, err := NewKubeRESTClientConfig(config)
+func NewKubeClientset(s *store.Values) (*kubernetes.Clientset, error) {
+	kubeClientConfig, err := NewKubeRESTClientConfig(s)
 	if err != nil {
-		return nil, err	
+		return nil, err
 	}
 	return kubernetes.NewForConfig(kubeClientConfig)
 }

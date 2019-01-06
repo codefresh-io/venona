@@ -18,16 +18,16 @@ package codefresh
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
+	"time"
+
+	"github.com/codefresh-io/isser/isserctl/pkg/store"
 
 	"archive/zip"
 
-	"github.com/codefresh-io/Isser/isserctl/pkg/certs"
-	"github.com/codefresh-io/Isser/isserctl/pkg/runtimectl"
+	"github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/isser/isserctl/pkg/certs"
+	"github.com/codefresh-io/isser/isserctl/pkg/runtimectl"
 	"github.com/golang/glog"
 )
 
@@ -41,82 +41,39 @@ const (
 
 // CfAPI struct to call Codefresh API
 type CfAPI struct {
-	url    string
-	apiKey string
 }
 
-// NewCfAPI - constructs CfAPI
-func NewCfAPI(url string, apiKey string) (*CfAPI, error) {
-	return &CfAPI{
-		url:    url,
-		apiKey: apiKey,
-	}, nil
-}
-
-func (u *CfAPI) createCfRequest(path string, reqBodyMap map[string]string) (*http.Request, error) {
-
-	reqURL := u.url + "/" + path
-	_, err := url.Parse(reqURL)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := json.Marshal(reqBodyMap)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader := bytes.NewReader(body)
-
-	req, err := http.NewRequest(http.MethodPost, reqURL, bodyReader)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", u.apiKey)
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Codefresh-Agent", codefreshAgent)
-	req.Header.Add("User-Agent", userAgent)
-
-	return req, nil
+// New - constructs CfAPI
+func New() *CfAPI {
+	return &CfAPI{}
 }
 
 // Validate calls codefresh API to validate runtimectlConfig
-func (u *CfAPI) Validate(runtimectlConfig *runtimectl.Config) error {
-
-	reqPath := "api/custom_clusters/validate"
-	glog.V(4).Infof("Entering codefresh.Validate - %s", reqPath)
-
-	var reqBodyMap map[string]string
-	if runtimectlConfig.Type == runtimectl.TypeKubernetesDind {
-		reqBodyMap = make(map[string]string)
-		reqBodyMap["clusterName"] = runtimectlConfig.Name
-		reqBodyMap["namespace"] = *runtimectlConfig.Client.KubeClient.Namespace
+func (u *CfAPI) Validate() error {
+	glog.V(4).Infof("Entering codefresh.Validate")
+	cf := store.GetStore().CodefreshAPI.Client
+	s := store.GetStore()
+	opt := &codefresh.ValidateRuntimeOptions{
+		Namespace: s.KubernetesAPI.Namespace,
+	}
+	if s.ClusterInCodefresh != "" {
+		opt.Cluster = s.ClusterInCodefresh
 	} else {
-		return fmt.Errorf("Unknown runtimectl type %s", runtimectlConfig.Type)
+		opt.Cluster = s.KubernetesAPI.ContextName
 	}
+	err := cf.ValidateRuntimeEnvironment(opt)
 
-	req, err := u.createCfRequest(reqPath, reqBodyMap)
 	if err != nil {
-		return err
+		return fmt.Errorf("Validation failed with error: %s", err.Error())
 	}
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	respBody, _ := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Validation failed: %s", respBody)
-	}
-
-	glog.V(4).Infof("Validation Response %s", respBody)
+	glog.V(4).Infof("Finished validation")
 	return nil
 }
 
 // Sign calls codefresh API to sign certificates
-func (u *CfAPI) Sign(runtimectlConfig *runtimectl.Config) error {
-
+func (u *CfAPI) Sign() error {
+	s := store.GetStore()
 	glog.V(4).Infof("Entering codefresh.Sign")
 	serverCert, err := certs.NewServerCert()
 	if err != nil {
@@ -126,44 +83,20 @@ func (u *CfAPI) Sign(runtimectlConfig *runtimectl.Config) error {
 	glog.V(4).Infof("Generated ServerCerts Csr")
 
 	var certExtraSANs string
-	if runtimectlConfig.Type == runtimectl.TypeKubernetesDind {
-		certExtraSANs = fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io",
-			*runtimectlConfig.Client.KubeClient.Namespace, *runtimectlConfig.Client.KubeClient.Namespace)
+	if "kubernetesDind" == runtimectl.TypeKubernetesDind {
+		namespace := s.KubernetesAPI.Namespace
+		certExtraSANs = fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io", namespace, namespace)
 	} else {
 		certExtraSANs = "IP:127.0.0.1,DNS:*.cf-cd.com,DNS:*.codefresh.io"
 	}
 	glog.V(4).Infof("certExtraSANs = %s", certExtraSANs)
+	byteArray, err := store.GetStore().CodefreshAPI.Client.SignRuntimeEnvironmentCertificate(&codefresh.SignCertificatesOptions{
+		AltName: certExtraSANs,
+		CSR:     serverCert.Csr,
+	})
 
-	reqPath := "api/custom_clusters/signServerCerts"
-	var reqBodyMap map[string]string
-	reqBodyMap = make(map[string]string)
-	reqBodyMap["reqSubjectAltName"] = certExtraSANs
-	reqBodyMap["csr"] = serverCert.Csr
-
-	glog.V(4).Infof("Submitting request to %s", reqPath)
-	req, err := u.createCfRequest(reqPath, reqBodyMap)
-	if err != nil {
-		return err
-	}
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Sign certificates failed: %s", respBody)
-	}
-
-	respBodyReaderAt := bytes.NewReader(respBody)
-	zipReader, err := zip.NewReader(respBodyReaderAt, resp.ContentLength)
+	respBodyReaderAt := bytes.NewReader(byteArray)
+	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	for _, zf := range zipReader.File {
 		buf := new(bytes.Buffer)
 		src, _ := zf.Open()
@@ -196,42 +129,52 @@ func (u *CfAPI) Sign(runtimectlConfig *runtimectl.Config) error {
 	if missingCerts != "" {
 		return fmt.Errorf("Failed to to generate and sign certificates: %s is missing", missingCerts)
 	}
-
-	runtimectlConfig.ServerCert = serverCert
+	s.ServerCert = serverCert
 	return nil
 }
 
 // Register calls codefresh API to register runtimectl environment
-func (u *CfAPI) Register(runtimectlConfig *runtimectl.Config) error {
+func (u *CfAPI) Register() error {
+	glog.V(4).Infof("Entering codefresh.Register")
+	s := store.GetStore()
+	options := &codefresh.CreateRuntimeOptions{
+		Namespace: s.KubernetesAPI.Namespace,
+	}
 
-	reqPath := "api/custom_clusters/register"
-	glog.V(4).Infof("Entering codefresh.Register - %s", reqPath)
-
-	var reqBodyMap map[string]string
-	if runtimectlConfig.Type == runtimectl.TypeKubernetesDind {
-		reqBodyMap = make(map[string]string)
-		reqBodyMap["clusterName"] = runtimectlConfig.Name
-		reqBodyMap["namespace"] = *runtimectlConfig.Client.KubeClient.Namespace
+	if s.ClusterInCodefresh == "" {
+		options.HasAgent = true
+		options.Cluster = s.KubernetesAPI.ContextName
 	} else {
-		return fmt.Errorf("Unknown runtimectl type %s", runtimectlConfig.Type)
+		options.HasAgent = false
+		options.Cluster = s.ClusterInCodefresh
 	}
+	cf := store.GetStore().CodefreshAPI.Client
+	re, err := cf.CreateRuntimeEnvironment(options)
 
-	req, err := u.createCfRequest(reqPath, reqBodyMap)
 	if err != nil {
 		return err
 	}
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	glog.V(4).Infof("Created with name: %s", re.Name)
+
+	glog.V(4).Infof("Generating token for agent")
+	token, err := u.GenerateToken(re.Name)
+	store.GetStore().AgentToken = token
 	if err != nil {
 		return err
 	}
-	respBody, _ := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Register request failed: %s", respBody)
-	}
 
-	glog.V(4).Infof("Register Response %s", respBody)
 	return nil
+}
+
+func (u *CfAPI) GenerateToken(name string) (string, error) {
+	glog.V(4).Infof("Entering codefresh.GenerateToken")
+	cf := store.GetStore().CodefreshAPI.Client
+	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
+	re, err := cf.GenerateToken(tokenName, name)
+	if err != nil {
+		return "", err
+	}
+	glog.V(4).Infof(fmt.Sprintf("Created token: %s", re.Value))
+	return re.Value, nil
 }

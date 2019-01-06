@@ -18,48 +18,49 @@ package runtimectl
 
 import (
 	"fmt"
-//	"github.com/golang/glog"
-//	"k8s.io/client-go/rest"
-//	"k8s.io/client-go/tools/clientcmd"
-//	"k8s.io/client-go/kubernetes/scheme"
-//	"k8s.io/client-go/kubernetes"
+	//	"github.com/golang/glog"
+	//	"k8s.io/client-go/rest"
+	//	"k8s.io/client-go/tools/clientcmd"
+	//	"k8s.io/client-go/kubernetes/scheme"
+	//	"k8s.io/client-go/kubernetes"
 
-//	"k8s.io/apimachinery/pkg/runtime/serializer"
-//	"k8s.io/apimachinery/pkg/runtime/schema"//
-//	"k8s.io/apimachinery/pkg/runtime"
-//	"k8s.io/client-go/rest"
-    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "k8s.io/apimachinery/pkg/api/errors"
-//	"k8s.io/api/core/v1"
+	//	"k8s.io/apimachinery/pkg/runtime/serializer"
+	//	"k8s.io/apimachinery/pkg/runtime/schema"//
+	//	"k8s.io/apimachinery/pkg/runtime"
+	//	"k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	templates "github.com/codefresh-io/Isser/isserctl/templates/kubernetes_dind"
-	"github.com/codefresh-io/Isser/isserctl/obj/kubeobj"
+	//	"k8s.io/api/core/v1"
+
+	"github.com/codefresh-io/isser/isserctl/obj/kubeobj"
+	"github.com/codefresh-io/isser/isserctl/pkg/store"
+	templates "github.com/codefresh-io/isser/isserctl/templates/kubernetes_dind"
 )
 
 // KubernetesDindCtl installs assets on Kubernetes Dind runtimectl Env
 type KubernetesDindCtl struct {
-
 }
 
 // Install runtimectl environment
-func (u *KubernetesDindCtl) Install(config *Config) error {
-
+func (u *KubernetesDindCtl) Install() error {
+	s := store.GetStore()
 	templatesMap := templates.TemplatesMap()
-	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, config)
+	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, s.BuildValues())
 	if err != nil {
-		return err	
-	}	
+		return err
+	}
 
-	kubeClientset, err := NewKubeClientset(config)
+	kubeClientset, err := NewKubeClientset(s)
 	if err != nil {
 		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
-		return err	
+		return err
 	}
-	namespace := config.Client.KubeClient.Namespace
+	namespace := s.KubernetesAPI.Namespace
 	var createErr error
 	var kind, name string
 	for _, obj := range kubeObjects {
-		name, kind, createErr = kubeobj.CreateObject(kubeClientset, obj, *namespace)
+		name, kind, createErr = kubeobj.CreateObject(kubeClientset, obj, namespace)
 
 		if createErr == nil {
 			fmt.Printf("%s \"%s\" created\n ", kind, name)
@@ -79,45 +80,45 @@ func (u *KubernetesDindCtl) Install(config *Config) error {
 	return nil
 }
 
-// GetStatus of runtimectl environment
-func (u *KubernetesDindCtl) GetStatus(config *Config) (*Status, error) {
-	templatesMap := templates.TemplatesMap()
-	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, config)
-	if err != nil {
-		return nil, err	
-	}	
+// // GetStatus of runtimectl environment
+// func (u *KubernetesDindCtl) GetStatus(config *Config) (*Status, error) {
+// 	templatesMap := templates.TemplatesMap()
+// 	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, config)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	kubeClientset, err := NewKubeClientset(config)
-	if err != nil {
-		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
-		return nil, err	
-	}
-	namespace := config.Client.KubeClient.Namespace
-	var getErr error
-	var kind, name, status, statusMessage string
-	
-	status = StatusInstalled
-	for _, obj := range kubeObjects {
-		name, kind, getErr = kubeobj.CheckObject(kubeClientset, obj, *namespace)
-		if getErr == nil {
-			statusMessage += fmt.Sprintf("%s \"%s\" installed\n", kind, name)
-		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {
-            statusMessage += fmt.Sprintf("%s\n", statusError.ErrStatus.Message)
-            status = StatusNotInstalled
-		} else {
-			fmt.Printf("%s \"%s\" failed: %v ", kind, name, getErr)
-			return nil, getErr
-		}
-	}
-	runtimectlStatus := &Status{
-		Status:        status,
-		StatusMessage: statusMessage,
-	}
-	return runtimectlStatus, nil
-}
+// 	kubeClientset, err := NewKubeClientset(config)
+// 	if err != nil {
+// 		fmt.Printf("Cannot create kubernetes clientset: %v\n ", err)
+// 		return nil, err
+// 	}
+// 	namespace := config.Client.KubeClient.Namespace
+// 	var getErr error
+// 	var kind, name, status, statusMessage string
 
-// Delete runtimectl environment
-func (u *KubernetesDindCtl) Delete(config *Config) error {
-	fmt.Printf("To delete isser delete all the object printed by status\n")
-	return nil
-}
+// 	status = StatusInstalled
+// 	for _, obj := range kubeObjects {
+// 		name, kind, getErr = kubeobj.CheckObject(kubeClientset, obj, *namespace)
+// 		if getErr == nil {
+// 			statusMessage += fmt.Sprintf("%s \"%s\" installed\n", kind, name)
+// 		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {
+// 			statusMessage += fmt.Sprintf("%s\n", statusError.ErrStatus.Message)
+// 			status = StatusNotInstalled
+// 		} else {
+// 			fmt.Printf("%s \"%s\" failed: %v ", kind, name, getErr)
+// 			return nil, getErr
+// 		}
+// 	}
+// 	runtimectlStatus := &Status{
+// 		Status:        status,
+// 		StatusMessage: statusMessage,
+// 	}
+// 	return runtimectlStatus, nil
+// }
+
+// // Delete runtimectl environment
+// func (u *KubernetesDindCtl) Delete(config *Config) error {
+// 	fmt.Printf("To delete isser delete all the object printed by status\n")
+// 	return nil
+// }

@@ -65,6 +65,52 @@ spec:
 
 ` 
 
+templatesMap["isser-deployment.yaml"] = `apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }}
+  name: {{ .AppName }}
+  namespace: {{ .Namespace }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .AppName }}
+        version: {{ .Version }}
+    spec:
+      serviceAccountName: {{ .AppName }}
+      containers:
+      - env:
+        - name: SELF_DEPLOYMENT_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CODEFRESH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .AppName }}
+              key: codefresh.token
+        - name: CODEFRESH_HOST
+          value: {{ .CodefreshHost }}
+        - name: AGENT_MODE
+          value: {{ .Mode }}
+        - name: AGENT_NAME
+          value: {{ .AppName }}
+        image: {{ .Image.Name }}:{{ .Image.Tag }}
+        imagePullPolicy: Always
+        name: {{ .AppName }}
+      restartPolicy: Always
+` 
+
 templatesMap["isser-role-binding.yaml"] = `kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -92,7 +138,7 @@ type: Opaque
 metadata:
   name: {{ .AppName }}
 data:
-  codefresh.token: {{ .Cfapi.APIKey | base64.Encode }}` 
+  codefresh.token: {{ .AgentToken | base64.Encode }}` 
 
 templatesMap["isser-service-account.yaml"] = `apiVersion: v1
 kind: ServiceAccount

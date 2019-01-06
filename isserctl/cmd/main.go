@@ -23,19 +23,22 @@ import (
 	"os/user"
 	"path"
 
-	"github.com/codefresh-io/Isser/isserctl/pkg/codefresh"
-	"github.com/codefresh-io/Isser/isserctl/pkg/runtimectl"
-	"github.com/codefresh-io/Isser/isserctl/pkg/certs"
+	codefreshSDK "github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/isser/isserctl/pkg/certs"
+	"github.com/codefresh-io/isser/isserctl/pkg/codefresh"
+	"github.com/codefresh-io/isser/isserctl/pkg/runtimectl"
+	"github.com/codefresh-io/isser/isserctl/pkg/store"
 	"github.com/golang/glog"
 )
 
 const (
 	cmdInstall = "install"
-	cmdStatus = "status"
-	cmdDelete = "delete"
+	cmdStatus  = "status"
+	cmdDelete  = "delete"
 )
+
 var (
-	runtimectlType = runtimectl.TypeKubernetesDind
+	runtimectlType  = runtimectl.TypeKubernetesDind
 	codefreshAPIKey string
 	codefreshURL    string
 
@@ -50,109 +53,103 @@ var (
 func dieIfError(err error) {
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)		
+		os.Exit(1)
 	}
 }
 
 func _stringInList(list []string, s string) bool {
 	for _, a := range list {
-        if a == s {
-            return true
-        }
-    }
-    return false
+		if a == s {
+			return true
+		}
+	}
+	return false
 }
 
-func getruntimectlConfig() (*runtimectl.Config, error) {
+func buildDataStore() {
 
-	var clientConfig runtimectl.ClientConfig
 	if kubeconfig == "" {
 		currentUser, _ := user.Current()
 		kubeconfig = path.Join(currentUser.HomeDir, ".kube", "config")
 	}
-	if runtimectlType == runtimectl.TypeKubernetesDind {
-		clientConfig = runtimectl.ClientConfig{
-			KubeClient: runtimectl.KubernetesClientConfig{
-				Kubeconfig: &kubeconfig,
-				Context:    &kubecontext,
-				Namespace:  &namespace,
+
+	s := store.GetStore()
+	s.AppName = store.ApplicationName
+	s.KubernetesAPI = &store.KubernetesAPI{
+		Namespace:   namespace,
+		ConfigPath:  kubeconfig,
+		ContextName: kubecontext,
+	}
+	s.ClusterInCodefresh = clusterName
+	s.CodefreshAPI = &store.CodefreshAPI{
+		Host:  codefreshURL,
+		Token: codefreshAPIKey,
+		Client: codefreshSDK.New(&codefreshSDK.ClientOptions{
+			Auth: codefreshSDK.AuthOptions{
+				Token: codefreshAPIKey,
 			},
-		}
-	} else {
-		return nil, fmt.Errorf("Unknown runtimectl type %s", runtimectlType)
+			Host: codefreshURL,
+		}),
 	}
-
-	cfapi := runtimectl.CfAPI{
-		URL: codefreshURL,
-		APIKey: codefreshAPIKey,
+	s.Mode = store.ModeInCluster
+	s.Image = &store.Image{
+		Name: "codefresh/isser",
+		Tag:  store.GetLatestVersion(),
 	}
-
-	runtimectlConfig := &runtimectl.Config{
-		AppName: runtimectl.AppName,
-		Type:   runtimectlType,
-		Name:   clusterName,
-		Cfapi:  cfapi,
-		Client: clientConfig,
-		ServerCert: &certs.ServerCert{},
-	}
-	return runtimectlConfig, nil
+	s.ServerCert = &certs.ServerCert{}
 }
 
-func defineCommonFlags(flagset *flag.FlagSet){
+func defineCommonFlags(flagset *flag.FlagSet) {
 	if runtimectlType == runtimectl.TypeKubernetesDind {
 		flagset.StringVar(&kubeconfig, "kubeconfig", "", "Absolute path to the kubeconfig")
 		flagset.StringVar(&kubecontext, "kubecontext", "", "Kubeconfig context name")
 		flagset.StringVar(&namespace, "namespace", "default", "Kubernetes namespace")
 	}
-	flagset.StringVar(&clusterName, "cluster-name", "", "cluster name")
+	flagset.StringVar(&clusterName, "cluster-name", "", "cluster name (if not passed runtime-environment will be created cluster-less)")
 	flagset.StringVar(&v, "v", "2", "glog debug flag - set -v4 for debug")
 }
 
-func processFlags(){
+func processFlags() {
 	flag.Set("alsologtostderr", "true")
 	flag.Set("v", v)
 }
 
-func doInstall(runtimectlConfig *runtimectl.Config) {
-	cfAPI, err := codefresh.NewCfAPI(codefreshURL, codefreshAPIKey)
+func doInstall() {
+	cfAPI := codefresh.New()
+
+	err := cfAPI.Validate()
 	dieIfError(err)
-	
-	err = cfAPI.Validate(runtimectlConfig)
-    dieIfError(err)
 
-	err = cfAPI.Sign(runtimectlConfig)
-    dieIfError(err)
+	err = cfAPI.Sign()
+	dieIfError(err)
 
-	ctl, err := runtimectl.GetCtl(runtimectlConfig)
-    dieIfError(err)
+	err = cfAPI.Register()
+	dieIfError(err)
 
-	err = ctl.Install(runtimectlConfig)
-    dieIfError(err)
-
-	err = cfAPI.Register(runtimectlConfig)
-    dieIfError(err)
+	err = runtimectl.GetCtl().Install()
+	dieIfError(err)
 
 	fmt.Printf("Installation completed Successfully\n")
 }
 
-func printStatus(runtimectlConfig *runtimectl.Config) {
-	ctl, err := runtimectl.GetCtl(runtimectlConfig)
-    dieIfError(err)
-	
-	status, err := ctl.GetStatus(runtimectlConfig)
-	dieIfError(err)
+// func printStatus(runtimectlConfig *runtimectl.Config) {
+// 	ctl, err := runtimectl.GetCtl(runtimectlConfig)
+// 	dieIfError(err)
 
-	fmt.Printf(status.StatusMessage)
-    fmt.Printf("\nStatus: %s\n", status.Status)
-}
+// 	status, err := ctl.GetStatus(runtimectlConfig)
+// 	dieIfError(err)
 
-func doDelete(runtimectlConfig *runtimectl.Config) {
-	ctl, err := runtimectl.GetCtl(runtimectlConfig)
-    dieIfError(err)
-	
-	err = ctl.Delete(runtimectlConfig)
-	dieIfError(err)
-}
+// 	fmt.Printf(status.StatusMessage)
+// 	fmt.Printf("\nStatus: %s\n", status.Status)
+// }
+
+// func doDelete(runtimectlConfig *runtimectl.Config) {
+// 	ctl, err := runtimectl.GetCtl(runtimectlConfig)
+// 	dieIfError(err)
+
+// 	err = ctl.Delete(runtimectlConfig)
+// 	dieIfError(err)
+// }
 
 func main() {
 
@@ -174,45 +171,44 @@ Options:
 	flag.Parse()
 
 	installCommandFlagset := flag.NewFlagSet(cmdInstall, flag.ExitOnError)
-    installCommandFlagset.StringVar(&codefreshAPIKey, "api-key", "", "Codefresh api key (token)")	
+	installCommandFlagset.StringVar(&codefreshAPIKey, "api-key", "", "Codefresh api key (token)")
 	installCommandFlagset.StringVar(&codefreshURL, "url", codefresh.DefaultURL, "Codefresh url")
 
-	statusCommandFlagset := flag.NewFlagSet(cmdStatus, flag.ExitOnError)
+	// statusCommandFlagset := flag.NewFlagSet(cmdStatus, flag.ExitOnError)
 
-	deleteCommandFlagset := flag.NewFlagSet(cmdDelete, flag.ExitOnError)
+	// deleteCommandFlagset := flag.NewFlagSet(cmdDelete, flag.ExitOnError)
 
 	validCommands := []string{cmdInstall, cmdStatus, cmdDelete}
-    if len(os.Args) < 2 {
+	if len(os.Args) < 2 {
 		fmt.Printf("%s\n", usage)
 		os.Exit(0)
-	} else if !_stringInList(validCommands,os.Args[1]) {
+	} else if !_stringInList(validCommands, os.Args[1]) {
 		fmt.Printf("Invalid command %s\n%s", os.Args[1], usage)
 		os.Exit(2)
 	}
 
 	var flagset *flag.FlagSet
-	var cmdFunction func(runtimectlConfig *runtimectl.Config)
+	var cmdFunction func()
 
 	switch os.Args[1] {
 	case cmdInstall:
 		flagset = installCommandFlagset
 		cmdFunction = doInstall
-	case cmdStatus:
-		flagset = statusCommandFlagset
-		cmdFunction = printStatus
-	case cmdDelete:
-		flagset = deleteCommandFlagset
-		cmdFunction = doDelete
+	// case cmdStatus:
+	// 	flagset = statusCommandFlagset
+	// 	cmdFunction = printStatus
+	// case cmdDelete:
+	// 	flagset = deleteCommandFlagset
+	// 	cmdFunction = doDelete
 	default:
 		glog.Errorf("%q is not valid command.\n", os.Args[1])
 		os.Exit(2)
 	}
-	
+
 	defineCommonFlags(flagset)
 	flagset.Parse(os.Args[2:])
 	processFlags()
-	runtimectlConfig, err := getruntimectlConfig()
-	dieIfError(err)
-	cmdFunction(runtimectlConfig)	
+	buildDataStore()
+	cmdFunction()
 
 }

@@ -16,31 +16,20 @@ limitations under the License.
 
 package runtimectl
 
-import (
-	"fmt"
-)
-
 // Ctl Interface to implement
 type Ctl interface {
 
 	// Install runtimectl environment
-	Install(*Config) error
+	Install() error
 
-	// GetStatus of runtimectl environment
-	GetStatus(*Config) (*Status, error)
+	// // GetStatus of runtimectl environment
+	// GetStatus(*Config) (*Status, error)
 
-	// Delete runtimectl environment
-	Delete(*Config) error
+	// // Delete runtimectl environment
+	// Delete(*Config) error
 }
 
 // GetCtl Returns right ctl based on Config object
-func GetCtl(runtimectlConfig *Config) (Ctl, error) {
-	var ctl Ctl
-	var err error
-	if runtimectlConfig.Type == TypeKubernetesDind {
-		ctl = &KubernetesDindCtl{}
-	} else {
-		err = fmt.Errorf("Unknown runtimectl type %s", runtimectlConfig.Type)
-	}
-	return ctl, err
+func GetCtl() Ctl {
+	return &KubernetesDindCtl{}
 }

@@ -22,7 +22,7 @@ We are using generated template.go for serialized kubernetes assets
 package runtimectl
 
 import (
-	"github.com/codefresh-io/Isser/isserctl/pkg/certs"
+	"github.com/codefresh-io/isser/isserctl/pkg/certs"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -52,11 +52,18 @@ type Config struct {
 	// runtimectl Env Name
 	Name string
 
-	AppName string 
+	AppName string
 
-	Client ClientConfig
-	Cfapi CfAPI
-	ServerCert *certs.ServerCert
+	Client        ClientConfig
+	Cfapi         CfAPI
+	ServerCert    *certs.ServerCert
+	Version       string
+	Namespace     string
+	CodefreshHost string
+	Mode          string
+	Image         string
+	Tag           string
+	AgentToken    string
 }
 
 // CfAPI - connection params to Codefresh Api
@@ -83,8 +90,8 @@ type Status struct {
 	StatusMessage string
 }
 
-// KubeRuntimeObject - struct to hold 
+// KubeRuntimeObject - struct to hold
 type KubeRuntimeObject struct {
-	Obj runtime.Object
+	Obj          runtime.Object
 	GroupVersion *schema.GroupVersion
 }

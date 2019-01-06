@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:8f5416c7f59da8600725ae1ff00a99af1da8b04c211ae6f3c8f8bcab0164f650"
+  digest = "1:3b10c6fd33854dc41de2cf78b7bae105da94c2789b6fa5b9ac9e593ea43484ac"
   name = "github.com/Masterminds/goutils"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3391d3790d23d03408670993e957e8f408993c34"
-  version = "v1.0.1"
+  revision = "41ac8693c5c10a92ea1ff5ac3a7f95646f6123b0"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:56e163af366dde541036330e849e5c3885c881a5c2d34cdda4de2813a5849e15"
@@ -22,7 +22,7 @@
   version = "v1.2.1"
 
 [[projects]]
-  digest = "1:8b378b6fbc96469283b6782ad132a7046b2df62359f883f2dea69c1fb09616ce"
+  digest = "1:03e09fa0fb8c8d895f0254f83c69db668d3b60ba882a9495b2d17eefb1e6ee8e"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -61,8 +61,8 @@
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "3991042237b45cf58c9d5f34295942d5533c28c6"
-  version = "v1.16.11"
+  revision = "fb5f514796fc4fdc6afdcf5a675a5b2baa714b9f"
+  version = "v1.16.14"
 
 [[projects]]
   digest = "1:61c00111062779bede790bd19020107310523c974c8ab709e9ac0971ab2ddde7"
@@ -79,6 +79,17 @@
   pruneopts = "UT"
   revision = "2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8"
   version = "v1.3.1"
+
+[[projects]]
+  digest = "1:d0c50987b98eef8c3d377a903315efedeaf7614947ed882bb8c7b7d9f8e1cf5c"
+  name = "github.com/codefresh-io/go-sdk"
+  packages = [
+    "internal",
+    "pkg/codefresh",
+  ]
+  pruneopts = "UT"
+  revision = "29c5b788ac0a880541b601967f965d40f1186ca6"
+  version = "v0.2.1"
 
 [[projects]]
   digest = "1:1cf8b80d775788921f6e309a8d7da4a925780e55e887feca461cda04b8ceea45"
@@ -280,7 +291,7 @@
     "template",
   ]
   pruneopts = "UT"
-  revision = "6d291a969b86c4b633730bfc6b8b9d64c3aafed9"
+  revision = "e92cdb5343bbaf42b0a596937ae0f382270d6759"
 
 [[projects]]
   digest = "1:ea40c24cdbacd054a6ae9de03e62c5f252479b96c716375aace5c120d68647c8"
@@ -348,6 +359,14 @@
   version = "v1.1.5"
 
 [[projects]]
+  digest = "1:0356f3312c9bd1cbeda81505b7fd437501d8e778ab66998ef69f00d7f9b3a0d7"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3ee7d812e62a0804a7d0a324e0249ca2db3476d3"
+  version = "v0.0.4"
+
+[[projects]]
   digest = "1:78bbb1ba5b7c3f2ed0ea1eab57bdd3859aec7e177811563edc41198a760b06af"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -380,6 +399,14 @@
   version = "1.0.1"
 
 [[projects]]
+  digest = "1:abcdbf03ca6ca13d3697e2186edc1f33863bbdac2b3a44dfa39015e8903f7409"
+  name = "github.com/olekukonko/tablewriter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e6d60cf7ba1f42d86d54cdf5508611c4aafb3970"
+  version = "v0.0.1"
+
+[[projects]]
   branch = "master"
   digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
   name = "github.com/petar/GoLLRB"
@@ -407,12 +434,12 @@
   version = "v2.0.7"
 
 [[projects]]
-  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   branch = "master"
@@ -474,11 +501,11 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
+  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
 
 [[projects]]
   branch = "master"
-  digest = "1:37f4a0712bbf9b111cf2951fe0efeea300ce87f7915047d4d1d5806a256ca634"
+  digest = "1:e6051681f454b052aef0f3e6ebbb84a5662c8c1f73c11bc26dc0547d871bc432"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -487,6 +514,7 @@
     "http2",
     "http2/hpack",
     "idna",
+    "publicsuffix",
   ]
   pruneopts = "UT"
   revision = "927f97764cc334a6575f4b7a1584a147864d5723"
@@ -504,14 +532,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:10405139b45e3a97a3842c93984710e30466eb933545f219ad3f5e45246973b4"
+  digest = "1:191cccd950a4aeadb60306062f2bdc2f924d750d0156ec6c691b17211bfd7349"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "9a3f9b0469bbc6b8802087ae5c0af9f61502de01"
+  revision = "badf5585203e739f88c2c6cd34188a6f54b5d619"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -559,6 +587,28 @@
   pruneopts = "UT"
   revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
   version = "v1.4.0"
+
+[[projects]]
+  digest = "1:7fcbedcdf42d726e69027720ccca6d77cd7df9c430db9c7e3d3343dc97b63b01"
+  name = "gopkg.in/h2non/gentleman.v2"
+  packages = [
+    ".",
+    "context",
+    "middleware",
+    "mux",
+    "plugin",
+    "plugins/body",
+    "plugins/bodytype",
+    "plugins/cookies",
+    "plugins/headers",
+    "plugins/multipart",
+    "plugins/query",
+    "plugins/url",
+    "utils",
+  ]
+  pruneopts = "UT"
+  revision = "e0f81be2f4064ea7aa7470e9daddd2dc8e8152c7"
+  version = "v2.0.3"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -659,7 +709,7 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "9c4c366543346abeca2a5cd2c40cf1a30d19a2ec"
+  revision = "849b284f3b756a3fbb5084b09d2718dd41373068"
 
 [[projects]]
   digest = "1:20f641257f6c0c69ddf455a15b63b20bac524b08d90745da796d633724758bac"
@@ -745,10 +795,15 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/codefresh-io/go-sdk/pkg/codefresh",
     "github.com/golang/glog",
     "github.com/hairyhenderson/gomplate",
     "github.com/hairyhenderson/gomplate/data",
+    "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
+    "k8s.io/api/extensions/v1beta1",
+    "k8s.io/api/rbac/v1",
+    "k8s.io/api/rbac/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime",
