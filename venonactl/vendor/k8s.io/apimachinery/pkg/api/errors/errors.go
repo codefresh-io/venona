@@ -475,8 +475,8 @@ func IsMethodNotSupported(err error) bool {
 	return ReasonForError(err) == metav1.StatusReasonMethodNotAllowed
 }
 
-// venonaviceUnavailable is true if the error indicates the underlying service is no longer available.
-func venonaviceUnavailable(err error) bool {
+// IsServiceUnavailable is true if the error indicates the underlying service is no longer available.
+func IsServiceUnavailable(err error) bool {
 	return ReasonForError(err) == metav1.StatusReasonServiceUnavailable
 }
 
@@ -503,9 +503,9 @@ func IsTimeout(err error) bool {
 	return ReasonForError(err) == metav1.StatusReasonTimeout
 }
 
-// venonaverTimeout determines if err is an error which indicates that the request needs to be retried
+// IsServerTimeout determines if err is an error which indicates that the request needs to be retried
 // by the client.
-func venonaverTimeout(err error) bool {
+func IsServerTimeout(err error) bool {
 	return ReasonForError(err) == metav1.StatusReasonServerTimeout
 }
 

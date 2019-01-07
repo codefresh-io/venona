@@ -76,7 +76,7 @@ const (
 	InspectorServiceID                    = "inspector"                    // Inspector.
 	IotServiceID                          = "iot"                          // Iot.
 	IotanalyticsServiceID                 = "iotanalytics"                 // Iotanalytics.
-	KinesvenonaviceID                      = "kinesis"                      // Kinesis.
+	KinesisServiceID                      = "kinesis"                      // Kinesis.
 	KinesisanalyticsServiceID             = "kinesisanalytics"             // Kinesisanalytics.
 	KinesisvideoServiceID                 = "kinesisvideo"                 // Kinesisvideo.
 	KmsServiceID                          = "kms"                          // Kms.
