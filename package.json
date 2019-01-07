@@ -1,5 +1,5 @@
 {
-  "name": "isser",
+  "name": "venona",
   "version": "0.0.1",
   "description": "Codefresh agent to run on Codefresh's runtime environment and execute pipeline",
   "main": "index.js",

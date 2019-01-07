@@ -8,9 +8,9 @@ vcs.xml
 Project_Default.xml
 modules.xml
 misc.xml
-Isser.iml
+venona.iml
 encodings.xml
 yarn-error.log
 .idea/*
 telepresence.log
-isserctl/dist/*
+venonactl/dist/*

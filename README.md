@@ -1,4 +1,4 @@
-# ISSER
+# VENONA
 
 ## Installation
 
@@ -8,9 +8,9 @@
 * [gomplate](https://gomplate.hairyhenderson.ca/) - Used to render K8S resources
 
 
-### Install Isser
+### Install venona
 
-* Create namespace where Isser should run<br />
+* Create namespace where venona should run<br />
 Example: `kubectl create namespace codefresh-runtime`
 * Create a cluster in Codefresh <br />
 Example: `codefresh create clusters --kube-context YOUR_KUBE_CONTEXT --behind-firewall --namespace codefresh-runtime`
@@ -21,7 +21,7 @@ Example: `codefresh create token --name TOKEN_NAME --type runtime-environment --
 * Encode the token and export it as `CODEFRESH_TOKEN_B64_ENCODED` environment variable<br />
 Example: `echo -n "TOKEN" | base64`
 * export environment variables<br />
-Example: `export AGENT_NAME=codefresh-runtime AGENT_VERSION=1 APP_NAME=isser AGENT_NAMESPACE=codefresh-runtime CODEFRESH_HOST=https://g.codefresh.io AGENT_MODE=InCluster AGENT_IMAGE_NAME=codefresh/isser AGENT_IMAGE_TAG=master`
+Example: `export AGENT_NAME=codefresh-runtime AGENT_VERSION=1 APP_NAME=venona AGENT_NAMESPACE=codefresh-runtime CODEFRESH_HOST=https://g.codefresh.io AGENT_MODE=InCluster AGENT_IMAGE_NAME=codefresh/venona AGENT_IMAGE_TAG=master`
 * Render K8S resources <br />
 `gomplate -f kubernetes/template.tmpl --out kubernetes/resources.yaml`
 * Apply resources <br />
