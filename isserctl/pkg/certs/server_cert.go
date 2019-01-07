@@ -23,7 +23,6 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	//"github.com/codefresh-io/Isser/isserctl/pkg/runtimectl"
 )
 
 const (

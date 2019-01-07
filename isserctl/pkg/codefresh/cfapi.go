@@ -21,14 +21,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/codefresh-io/isser/isserctl/pkg/store"
 
 	"archive/zip"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/isser/isserctl/pkg/certs"
-	"github.com/codefresh-io/isser/isserctl/pkg/runtimectl"
-	"github.com/golang/glog"
+	runtimectl "github.com/codefresh-io/isser/isserctl/pkg/operators"
 )
 
 const (
@@ -50,7 +51,7 @@ func New() *CfAPI {
 
 // Validate calls codefresh API to validate runtimectlConfig
 func (u *CfAPI) Validate() error {
-	glog.V(4).Infof("Entering codefresh.Validate")
+	logrus.Debug("Calling codefresh.Validate")
 	cf := store.GetStore().CodefreshAPI.Client
 	s := store.GetStore()
 	opt := &codefresh.ValidateRuntimeOptions{
@@ -67,20 +68,20 @@ func (u *CfAPI) Validate() error {
 		return fmt.Errorf("Validation failed with error: %s", err.Error())
 	}
 
-	glog.V(4).Infof("Finished validation")
+	logrus.Debug("Finished validation")
 	return nil
 }
 
 // Sign calls codefresh API to sign certificates
 func (u *CfAPI) Sign() error {
+	logrus.Debug("Entering codefresh.Sign")
 	s := store.GetStore()
-	glog.V(4).Infof("Entering codefresh.Sign")
 	serverCert, err := certs.NewServerCert()
 	if err != nil {
 		return err
 	}
 
-	glog.V(4).Infof("Generated ServerCerts Csr")
+	logrus.Debug("Generated ServerCerts Csr")
 
 	var certExtraSANs string
 	if "kubernetesDind" == runtimectl.TypeKubernetesDind {
@@ -89,7 +90,7 @@ func (u *CfAPI) Sign() error {
 	} else {
 		certExtraSANs = "IP:127.0.0.1,DNS:*.cf-cd.com,DNS:*.codefresh.io"
 	}
-	glog.V(4).Infof("certExtraSANs = %s", certExtraSANs)
+	logrus.Debugf("certExtraSANs = %s", certExtraSANs)
 	byteArray, err := store.GetStore().CodefreshAPI.Client.SignRuntimeEnvironmentCertificate(&codefresh.SignCertificatesOptions{
 		AltName: certExtraSANs,
 		CSR:     serverCert.Csr,
@@ -97,6 +98,9 @@ func (u *CfAPI) Sign() error {
 
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
+	if err != nil {
+		return err
+	}
 	for _, zf := range zipReader.File {
 		buf := new(bytes.Buffer)
 		src, _ := zf.Open()
@@ -108,7 +112,7 @@ func (u *CfAPI) Sign() error {
 		} else if zf.Name == "cf-server-cert.pem" {
 			serverCert.Cert = buf.String()
 		} else {
-			glog.V(4).Infof("Warning: Unknown filename in sign responce %s", zf.Name)
+			logrus.Debugf("Warning: Unknown filename in sign responce %s", zf.Name)
 		}
 	}
 
@@ -135,7 +139,7 @@ func (u *CfAPI) Sign() error {
 
 // Register calls codefresh API to register runtimectl environment
 func (u *CfAPI) Register() error {
-	glog.V(4).Infof("Entering codefresh.Register")
+	logrus.Debug("Entering codefresh.Register")
 	s := store.GetStore()
 	options := &codefresh.CreateRuntimeOptions{
 		Namespace: s.KubernetesAPI.Namespace,
@@ -148,33 +152,32 @@ func (u *CfAPI) Register() error {
 		options.HasAgent = false
 		options.Cluster = s.ClusterInCodefresh
 	}
-	cf := store.GetStore().CodefreshAPI.Client
+	cf := s.CodefreshAPI.Client
+	logrus.WithFields(logrus.Fields{
+		"Options-Has-Agent": options.HasAgent,
+		"Options-Cluster":   options.Cluster,
+		"Options-Namespace": options.Namespace,
+	}).Debug("Registering runtime environmnet")
 	re, err := cf.CreateRuntimeEnvironment(options)
 
 	if err != nil {
 		return err
 	}
 
-	glog.V(4).Infof("Created with name: %s", re.Name)
-
-	glog.V(4).Infof("Generating token for agent")
-	token, err := u.GenerateToken(re.Name)
-	store.GetStore().AgentToken = token
-	if err != nil {
-		return err
-	}
+	s.RuntimeEnvironment = re.Name
+	logrus.Debugf("Created with name: %s", re.Name)
 
 	return nil
 }
 
 func (u *CfAPI) GenerateToken(name string) (string, error) {
-	glog.V(4).Infof("Entering codefresh.GenerateToken")
+	logrus.Debug("Entering codefresh.GenerateToken")
 	cf := store.GetStore().CodefreshAPI.Client
 	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
 	re, err := cf.GenerateToken(tokenName, name)
 	if err != nil {
 		return "", err
 	}
-	glog.V(4).Infof(fmt.Sprintf("Created token: %s", re.Value))
+	logrus.Debugf(fmt.Sprintf("Created token: %s", re.Value))
 	return re.Value, nil
 }

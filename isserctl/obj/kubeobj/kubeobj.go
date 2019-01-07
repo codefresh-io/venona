@@ -233,3 +233,149 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
     return name, kind, err
 }
 
+// DeleteObject - checks kubernetes object from *runtime.Object. Returns object name, kind and creation error
+func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
+	var propagationPolicy metav1.DeletionPropagation = "Background"
+	var name, kind string
+	var err error
+	switch objT := obj.(type) {
+    
+    case *appsv1.DaemonSet:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.AppsV1().DaemonSets(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *appsv1.Deployment:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.AppsV1().Deployments(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1.ClusterRole:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1().ClusterRoles().Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1.ClusterRoleBinding:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1().ClusterRoleBindings().Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1.Role:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1().Roles(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1.RoleBinding:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1().RoleBindings(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1beta1.ClusterRole:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1beta1().ClusterRoles().Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1beta1.ClusterRoleBinding:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1beta1().ClusterRoleBindings().Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1beta1.Role:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1beta1().Roles(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *rbacv1beta1.RoleBinding:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.RbacV1beta1().RoleBindings(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.ConfigMap:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().ConfigMaps(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.PersistentVolume:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().PersistentVolumes().Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.PersistentVolumeClaim:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.Pod:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().Pods(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.Secret:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.Service:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().Services(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1.ServiceAccount:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.CoreV1().ServiceAccounts(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1beta1.DaemonSet:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *v1beta1.Deployment:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.ExtensionsV1beta1().Deployments(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    default:
+        return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
+    }
+    return name, kind, err
+}
+

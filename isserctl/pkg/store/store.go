@@ -30,6 +30,10 @@ type (
 		KubernetesAPI *KubernetesAPI
 
 		ClusterInCodefresh string
+
+		DryRun bool
+
+		RuntimeEnvironment string
 	}
 
 	KubernetesAPI struct {
