@@ -63,6 +63,7 @@ func GetStore() *Values {
 }
 
 func (s *Values) BuildValues() map[string]interface{} {
+	latestVersion := getLatestVersion()
 	return map[string]interface{}{
 		"ServerCert": map[string]string{
 			"Cert": s.ServerCert.Cert,
@@ -70,12 +71,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Ca":   s.ServerCert.Ca,
 		},
 		"AppName":       ApplicationName,
-		"Version":       "0.0.1", // TODO calculate the latest version
+		"Version":       latestVersion,
 		"CodefreshHost": s.CodefreshAPI.Host,
 		"Mode":          ModeInCluster,
 		"Image": map[string]string{
 			"Name": "codefresh/venona",
-			"Tag":  "latest", // TODO calculate the latest tag
+			"Tag":  latestVersion, // TODO calculate the latest tag
 		},
 		"Namespace":  s.KubernetesAPI.Namespace,
 		"AgentToken": s.AgentToken,
