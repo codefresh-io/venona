@@ -126,6 +126,7 @@ steps:
     fail_fast: false
     when:
       steps:
+      - name: calculate_version
       - name: main_clone
       branch:
         only:
