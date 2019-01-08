@@ -1,0 +1,62 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: dind-volume-provisioner-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: dind-volume-provisioner
+    spec:
+      serviceAccount: volume-provisioner
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: "Exists"
+      # nodeSelector:
+      #   kubernetes.io/role: master
+      #   node-type: app
+      # affinity:
+      #   nodeAffinity:
+      #     preferredDuringSchedulingIgnoredDuringExecution:
+      #       - weight: 30
+      #         preference:
+      #           matchExpressions:
+      #           - key: node-type
+      #             operator: In
+      #             values:
+      #             - dind
+      #             - app
+      #       - weight: 70
+      #         preference:
+      #           matchExpressions:
+      #           - key: kubernetes.io/role
+      #             operator: In
+      #             values:
+      #             - master
+      containers:
+      - name: dind-volume-provisioner
+        # image: codefresh/dind-volume-provisioner:v10-ceph
+        image: codefresh/dind-volume-provisioner:venona-v1
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "300m"
+            memory: "400Mi"
+          limits:
+            cpu: "1000m"
+            memory: "6000Mi"
+        command:
+          - /usr/local/bin/dind-volume-provisioner
+          - -v=4
+          - --resync-period=50s          
+        env:
+        - name: PROVISIONER_NAME
+          value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+       

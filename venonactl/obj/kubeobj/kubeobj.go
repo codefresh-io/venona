@@ -15,6 +15,8 @@ import (
 
     rbacv1beta1 "k8s.io/api/rbac/v1beta1"
     rbacv1 "k8s.io/api/rbac/v1"
+
+	storagev1 "k8s.io/api/storage/v1"
 )
 
 // CreateObject - creates kubernetes object from *runtime.Object. Returns object name, kind and creation error
@@ -73,6 +75,11 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
         name = objT.ObjectMeta.Name
         kind = objT.TypeMeta.Kind
         _, err = clientset.RbacV1beta1().RoleBindings(namespace).Create(objT)
+    
+    case *storagev1.StorageClass:
+        name = objT.ObjectMeta.Name
+        kind = objT.TypeMeta.Kind
+        _, err = clientset.StorageV1().StorageClasses().Create(objT)
     
     case *v1.ConfigMap:
         name = objT.ObjectMeta.Name
@@ -181,6 +188,11 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
         name = objT.ObjectMeta.Name
         kind = objT.TypeMeta.Kind
         _, err = clientset.RbacV1beta1().RoleBindings(namespace).Get(name, metav1.GetOptions{})
+    
+    case *storagev1.StorageClass:
+        name = objT.ObjectMeta.Name
+        kind = objT.TypeMeta.Kind
+        _, err = clientset.StorageV1().StorageClasses().Get(name, metav1.GetOptions{})
     
     case *v1.ConfigMap:
         name = objT.ObjectMeta.Name
@@ -307,6 +319,13 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
         name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
         err = clientset.RbacV1beta1().RoleBindings(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+    
+    case *storagev1.StorageClass:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        err = clientset.StorageV1().StorageClasses().Delete(name, &metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
     
