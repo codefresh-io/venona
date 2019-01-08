@@ -1,19 +1,17 @@
 package codefresh
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"net/url"
-
-	"github.com/codefresh-io/go-sdk/internal"
-
-	"gopkg.in/h2non/gentleman.v2"
-	"gopkg.in/h2non/gentleman.v2/plugins/body"
-	"gopkg.in/h2non/gentleman.v2/plugins/query"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type (
 	Codefresh interface {
-		requestAPI(*requestOptions) (*gentleman.Response, error)
+		requestAPI(*requestOptions) (*http.Response, error)
 		ITokenAPI
 		IPipelineAPI
 		IRuntimeEnvironmentAPI
@@ -21,32 +19,55 @@ type (
 )
 
 func New(opt *ClientOptions) Codefresh {
-	client := gentleman.New()
-	client.URL(opt.Host)
+
 	return &codefresh{
+		host:   opt.Host,
 		token:  opt.Auth.Token,
-		client: client,
+		client: &http.Client{},
 	}
 }
 
-func (c *codefresh) requestAPI(opt *requestOptions) (*gentleman.Response, error) {
-	req := c.client.Request()
-	url, err := url.Parse(opt.path)
-	internal.DieOnError(err)
-	req.Path(url.String())
-	req.Method(opt.method)
-	req.AddHeader("Authorization", c.token)
-	if opt.body != nil {
-		req.Use(body.JSON(opt.body))
-	}
+func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
+	var body []byte
+	finalURL := fmt.Sprintf("%s%s", c.host, opt.path)
 	if opt.qs != nil {
-		for k, v := range opt.qs {
-			req.Use(query.Set(k, v))
-		}
+		finalURL += toQS(opt.qs)
 	}
-	res, _ := req.Send()
-	if res.StatusCode > 400 {
-		return res, fmt.Errorf("Error occured during API invocation\nError: %s", res.String())
+	if opt.body != nil {
+		body, _ = json.Marshal(opt.body)
 	}
-	return res, nil
+	request, err := http.NewRequest(opt.method, finalURL, bytes.NewBuffer(body))
+	request.Header.Set("Authorization", c.token)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := c.client.Do(request)
+	if err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+func toQS(qs map[string]string) string {
+	var arr = []string{}
+	for k, v := range qs {
+		arr = append(arr, fmt.Sprintf("%s=%s", k, v))
+	}
+	return "?" + strings.Join(arr, "&")
+}
+
+func (c *codefresh) decodeResponseInto(resp *http.Response, target interface{}) error {
+	return json.NewDecoder(resp.Body).Decode(target)
+}
+
+func (c *codefresh) getBodyAsString(resp *http.Response) (string, error) {
+	body, err := c.getBodyAsBytes(resp)
+	return string(body), err
+}
+
+func (c *codefresh) getBodyAsBytes(resp *http.Response) ([]byte, error) {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }

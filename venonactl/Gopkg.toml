@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "github.com/codefresh-io/go-sdk"
-  version = "0.2.1"
+  version = "0.3.3"
 
 [[constraint]]
   name = "github.com/hairyhenderson/gomplate"
@@ -50,12 +50,12 @@
   name = "k8s.io/api"
 
 [[constraint]]
-  branch = "master"
+  branch = "release-1.13"
   name = "k8s.io/apimachinery"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "9.0.0"
+  version = "10.0.0"
 
 [prune]
   go-tests = true

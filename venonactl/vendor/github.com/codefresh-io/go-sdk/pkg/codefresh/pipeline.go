@@ -67,7 +67,7 @@ func (c *codefresh) GetPipelines() ([]*Pipeline, error) {
 		path:   "/api/pipelines",
 		method: "GET",
 	})
-	resp.JSON(r)
+	err = c.decodeResponseInto(resp, r)
 	return r.Docs, err
 }
 
@@ -76,5 +76,8 @@ func (c *codefresh) RunPipeline(name string) (string, error) {
 		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		method: "POST",
 	})
-	return resp.String(), err
+	if err != nil {
+		return "", err
+	}
+	return c.getBodyAsString(resp)
 }

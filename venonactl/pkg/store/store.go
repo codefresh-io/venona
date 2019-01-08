@@ -75,7 +75,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"Mode":          ModeInCluster,
 		"Image": map[string]string{
 			"Name": "codefresh/venona",
-			"Tag":  "master", // TODO calculate the latest tag
+			"Tag":  "latest", // TODO calculate the latest tag
 		},
 		"Namespace":  s.KubernetesAPI.Namespace,
 		"AgentToken": s.AgentToken,

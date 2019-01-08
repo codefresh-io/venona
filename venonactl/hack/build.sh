@@ -1,9 +1,8 @@
 #!/bin/bash
 set -e
-DIR=$(dirname $0)
 OUTFILE=${GOPATH}/bin/venonactl
 
-go generate ${DIR}/pkg/operators/types.go
+go generate ${GOPATH}/src/github.com/codefresh-io/venona/venonactl/pkg/operators/types.go
 go build -o $OUTFILE main.go
 
 chmod +x $OUTFILE

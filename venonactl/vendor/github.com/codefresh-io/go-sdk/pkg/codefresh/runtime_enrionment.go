@@ -1,6 +1,10 @@
 package codefresh
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"time"
+)
 
 type (
 	// IRuntimeEnvironmentAPI declers Codefresh runtime environment API
@@ -8,10 +12,50 @@ type (
 		CreateRuntimeEnvironment(*CreateRuntimeOptions) (*RuntimeEnvironment, error)
 		ValidateRuntimeEnvironment(*ValidateRuntimeOptions) error
 		SignRuntimeEnvironmentCertificate(*SignCertificatesOptions) ([]byte, error)
+		GetRuntimeEnvironment(string) (*RuntimeEnvironment, error)
 	}
 
 	RuntimeEnvironment struct {
-		Name string
+		Version               int                   `json:"version"`
+		Metadata              RuntimeMetadata       `json:"metadata"`
+		Extends               []string              `json:"extends"`
+		Description           string                `json:"description"`
+		AccountID             string                `json:"accountId"`
+		RuntimeScheduler      RuntimeScheduler      `json:"runtimeScheduler"`
+		DockerDaemonScheduler DockerDaemonScheduler `json:"dockerDaemonScheduler"`
+		Status                struct {
+			Message   string    `json:"message"`
+			UpdatedAt time.Time `json:"updated_at"`
+		} `json:"status"`
+	}
+
+	RuntimeScheduler struct {
+		Cluster struct {
+			ClusterProvider struct {
+				AccountID string `json:"accountId"`
+				Selector  string `json:"selector"`
+			} `json:"clusterProvider"`
+			Namespace string `json:"namespace"`
+		} `json:"cluster"`
+		UserAccess bool `json:"userAccess"`
+	}
+
+	DockerDaemonScheduler struct {
+		Cluster struct {
+			ClusterProvider struct {
+				AccountID string `json:"accountId"`
+				Selector  string `json:"selector"`
+			} `json:"clusterProvider"`
+			Namespace string `json:"namespace"`
+		} `json:"cluster"`
+		UserAccess bool `json:"userAccess"`
+	}
+
+	RuntimeMetadata struct {
+		Agent        bool   `json:"agent"`
+		Name         string `json:"name"`
+		ChangedBy    string `json:"changedBy"`
+		CreationTime string `json:"creationTime"`
 	}
 
 	CreateRuntimeOptions struct {
@@ -38,7 +82,9 @@ type (
 // CreateRuntimeEnvironment - create Runtime-Environment
 func (c *codefresh) CreateRuntimeEnvironment(opt *CreateRuntimeOptions) (*RuntimeEnvironment, error) {
 	re := &RuntimeEnvironment{
-		Name: fmt.Sprintf("%s/%s", opt.Cluster, opt.Namespace),
+		Metadata: RuntimeMetadata{
+			Name: fmt.Sprintf("%s/%s", opt.Cluster, opt.Namespace),
+		},
 	}
 	body := map[string]interface{}{
 		"clusterName": opt.Cluster,
@@ -89,5 +135,24 @@ func (c *codefresh) SignRuntimeEnvironmentCertificate(opt *SignCertificatesOptio
 	if err != nil {
 		return nil, err
 	}
-	return resp.Bytes(), nil
+	return c.getBodyAsBytes(resp)
+}
+
+func (c *codefresh) GetRuntimeEnvironment(name string) (*RuntimeEnvironment, error) {
+	re := &RuntimeEnvironment{}
+	path := fmt.Sprintf("/api/runtime-environments/%s", url.PathEscape(name))
+	resp, err := c.requestAPI(&requestOptions{
+		path:   path,
+		method: "GET",
+		qs: map[string]string{
+			"extend": "false",
+		},
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, err
+	}
+	c.decodeResponseInto(resp, re)
+	return re, nil
 }

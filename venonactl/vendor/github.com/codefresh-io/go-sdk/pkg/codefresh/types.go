@@ -1,8 +1,6 @@
 package codefresh
 
-import (
-	gentleman "gopkg.in/h2non/gentleman.v2"
-)
+import "net/http"
 
 type (
 	// AuthOptions
@@ -14,14 +12,15 @@ type (
 
 	// Options
 	ClientOptions struct {
-		Auth AuthOptions
-
-		Host string
+		Auth  AuthOptions
+		Debug bool
+		Host  string
 	}
 
 	codefresh struct {
 		token  string
-		client *gentleman.Client
+		host   string
+		client *http.Client
 	}
 
 	requestOptions struct {

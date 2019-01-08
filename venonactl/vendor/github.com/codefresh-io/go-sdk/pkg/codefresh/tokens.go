@@ -52,9 +52,13 @@ func (c *codefresh) GenerateToken(name string, subject string) (*Token, error) {
 			"subjectType":      runtimeEnvironment.String(),
 		},
 	})
+	value, err := c.getBodyAsString(resp)
+	if err != nil {
+		return nil, err
+	}
 	return &Token{
 		Name:  name,
-		Value: resp.String(),
+		Value: value,
 	}, err
 }
 
@@ -64,7 +68,10 @@ func (c *codefresh) GetTokens() ([]*Token, error) {
 		path:   "/api/auth/keys",
 		method: "GET",
 	})
-	tokensAsBytes := []byte(resp.String())
+	tokensAsBytes, err := c.getBodyAsBytes(resp)
+	if err != nil {
+		return nil, err
+	}
 	json.Unmarshal(tokensAsBytes, &emptySlice)
 
 	return emptySlice, err

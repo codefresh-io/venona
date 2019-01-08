@@ -5,24 +5,25 @@
 ### Prerequisite:
 * [Kubernetes](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - Used to create resource in your K8S cluster
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
-* [gomplate](https://gomplate.hairyhenderson.ca/) - Used to render K8S resources
 
 
 ### Install venona
-
+#### Fresh installation
+* Download [venona's](https://github.com/codefresh-io/venona/releases) binary
 * Create namespace where venona should run<br />
 Example: `kubectl create namespace codefresh-runtime`
-* Create a cluster in Codefresh <br />
-Example: `codefresh create clusters --kube-context YOUR_KUBE_CONTEXT --behind-firewall --namespace codefresh-runtime`
-* Create runtime-environment in Codefresh <br />
-Example: `codefresh create re --cluster YOUR_KUBE_CONTEXT --namespace codefresh-runtime --kube-context YOUR_KUBE_CONTEXT`
-* Create token for just created runtime-environment <br />
-Example: `codefresh create token --name TOKEN_NAME --type runtime-environment --subject YOUR_KUBE_CONTEXT/codefresh-runtime`
-* Encode the token and export it as `CODEFRESH_TOKEN_B64_ENCODED` environment variable<br />
-Example: `echo -n "TOKEN" | base64`
-* export environment variables<br />
-Example: `export AGENT_NAME=codefresh-runtime AGENT_VERSION=1 APP_NAME=venona AGENT_NAMESPACE=codefresh-runtime CODEFRESH_HOST=https://g.codefresh.io AGENT_MODE=InCluster AGENT_IMAGE_NAME=codefresh/venona AGENT_IMAGE_TAG=master`
-* Render K8S resources <br />
-`gomplate -f kubernetes/template.tmpl --out kubernetes/resources.yaml`
-* Apply resources <br />
-`kubectl apply -f kubernetes/resources.yaml`
+* Create *new* runtime-environment with Venona's agents installed <br />
+Example: `venona install --kube-namespace codefresh-runtime`
+* Get the status <br />
+Example: `venona status --kube-namespace codefresh-runtime`  
+Example: `kubectl get pods -n codefresh-runtime`
+
+#### Upgrade
+To upgrade existing runtime-environment, a one that was created without Venona's agent, run:
+* Find the name of the environment <br />
+Example: `codefresh get re`
+* Install <br />
+Example: `venona install --skip-runtime-installation --runtime-environment RUNTIME-ENVIRONMENT`
+* Get the status <br />
+Example: `venona status --kube-namespace NAMESPACE`  
+Example: `kubectl get pods -n NAMESPACE`

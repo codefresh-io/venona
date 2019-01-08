@@ -9,11 +9,11 @@ func TemplatesMap() map[string]string {
 templatesMap["cluster-role-binding.venona.yaml"] = `kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .AppName }}
+  name: {{ .AppName }}-{{ .Namespace }}
 subjects:
 - kind: ServiceAccount
   name: {{ .AppName }}
-  namespace: {{ .Env.AGENT_NAMESPACE }}
+  namespace: {{ .Namespace }}
 roleRef:
   kind: ClusterRole
   name: system:discovery

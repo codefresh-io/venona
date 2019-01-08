@@ -19,7 +19,6 @@ package codefresh
 import (
 	"bytes"
 	"fmt"
-	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -164,20 +163,8 @@ func (u *CfAPI) Register() error {
 		return err
 	}
 
-	s.RuntimeEnvironment = re.Name
-	logrus.Debugf("Created with name: %s", re.Name)
+	s.RuntimeEnvironment = re.Metadata.Name
+	logrus.Debugf("Created with name: %s", re.Metadata.Name)
 
 	return nil
-}
-
-func (u *CfAPI) GenerateToken(name string) (string, error) {
-	logrus.Debug("Entering codefresh.GenerateToken")
-	cf := store.GetStore().CodefreshAPI.Client
-	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
-	re, err := cf.GenerateToken(tokenName, name)
-	if err != nil {
-		return "", err
-	}
-	logrus.Debugf(fmt.Sprintf("Created token: %s", re.Value))
-	return re.Value, nil
 }

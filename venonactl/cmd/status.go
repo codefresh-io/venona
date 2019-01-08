@@ -18,6 +18,8 @@ limitations under the License.
 
 import (
 	"github.com/codefresh-io/venona/venonactl/internal"
+	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	"github.com/sirupsen/logrus"
 
 	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/spf13/cobra"
@@ -27,21 +29,37 @@ var headers = []string{"Kind", "Name", "Status", "Message"}
 
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
-	Use:   "status",
+	Use:   "status [name]",
 	Short: "Get status of Codefresh's runtime-environment",
+	Long:  "pass name of the runtime-environment to get staus reported by venona's agent to Codefresh",
 	Run: func(cmd *cobra.Command, args []string) {
-		table := internal.CreateTable()
-		table.SetHeader(headers)
+		if len(args) > 0 {
+			name := args[0]
+			re, err := store.GetStore().CodefreshAPI.Client.GetRuntimeEnvironment(name)
+			internal.DieOnError(err)
+			if re.Metadata.Agent == true {
+				logrus.WithField("Updated_At", re.Status.UpdatedAt).Infof("Venona last reported message: %s", re.Status.Message)
+			} else {
+				logrus.Info("Runtime wasnt configured with Venona's agent")
+			}
+		}
 
-		rows, err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Status()
-		internal.DieOnError(err)
-		table.AppendBulk(rows)
+		if verbose == true {
+			table := internal.CreateTable()
+			table.SetHeader(headers)
 
-		rows, err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Status()
-		internal.DieOnError(err)
-		table.AppendBulk(rows)
+			rows, err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Status()
+			internal.DieOnError(err)
+			table.AppendBulk(rows)
 
-		table.Render()
+			rows, err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Status()
+			internal.DieOnError(err)
+			table.AppendBulk(rows)
+
+			logrus.Infof("\n\nKubernetes resources:")
+			table.Render()
+		}
+
 	},
 }
 
