@@ -13,7 +13,7 @@ const (
 	Default = "latest"
 )
 
-func getLatestVersion() string {
+func GetLatestVersion() string {
 	version := Default
 	client := github.NewClient(nil)
 	releases, _, err := client.Repositories.ListReleases(context.Background(), "codefresh-io", "venona", &github.ListOptions{})

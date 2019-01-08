@@ -63,7 +63,7 @@ func GetStore() *Values {
 }
 
 func (s *Values) BuildValues() map[string]interface{} {
-	latestVersion := getLatestVersion()
+	latestVersion := GetLatestVersion()
 	return map[string]interface{}{
 		"ServerCert": map[string]string{
 			"Cert": s.ServerCert.Cert,
