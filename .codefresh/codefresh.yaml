@@ -1,0 +1,138 @@
+version: '1.0'
+mode: parallel
+stages:
+- Build & Test
+- Release
+steps:
+
+  install_dependencies:
+    title: 'Installing testing dependencies'
+    image: codefresh/node-tester-image:10.13.0
+    commands:
+        - yarn install --frozen-lockfile --non-interactive
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success
+        
+  eslint:
+    title: 'Run eslint'
+    image: codefresh/node-tester-image:10.13.0
+    stage: Build & Test
+    commands:
+    - yarn lint
+    when:
+      steps:
+      - name: install_dependencies
+        on:
+        - success
+    
+  test:
+    title: 'Run tests'
+    image: codefresh/node-tester-image:10.13.0
+    stage: Build & Test
+    commands:
+    - yarn test
+    when:
+      steps:
+      - name: install_dependencies
+        on:
+        - success
+        
+  build:
+    title: "Building production image"
+    type: build
+    stage: Build & Test
+    tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: codefresh/venona
+    when:
+      steps:
+      - name: install_dependencies
+        on:
+        - success
+
+  push:
+    title: "Pushing image to registry with short revision tag"
+    stage: Release
+    type: push
+    candidate: ${{build}}
+    tag: ${{CF_SHORT_REVISION}}
+    registry: "dockerhub"
+    when:
+      steps:
+        - name: build
+
+  push_latest:
+    title: "Pushing image to registry with latest tag"
+    stage: Release
+    type: push
+    candidate: ${{build}}
+    tag: latest
+    registry: "dockerhub"
+    when:
+      branch:
+        only:
+        - master
+      steps:
+        - name: build
+          on:
+          - success
+
+  test_reporting_step:
+    fail_fast: false
+    title: "Generate test reporting"
+    image: codefresh/cf-docker-test-reporting
+    working_directory: '${{CF_VOLUME_PATH}}/venona/'
+    environment:
+     - REPORT_DIR=coverage
+     - REPORT_INDEX_FILE=lcov-report/index.html
+     - BUCKET_NAME=codefresh-test-report
+     - CF_STORAGE_INTEGRATION=testReporting
+    when:
+      steps:
+        - name: test
+          on:
+          - finished
+          
+  CreatingGitTag:
+    title: Push tag to git
+    image: codefresh/cli
+    stage: Release
+    commands:
+    - export VERSION=$(jq -r ".version" package.json)
+    - export OLD_ORIGIN=$(git remote get-url origin)
+    - git remote rm origin
+    - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/venona.git
+    - git tag v$VERSION
+    - git push --tags
+    - git remote rm origin
+    - git remote add origin $OLD_ORIGIN
+    
+    fail_fast: false
+    when:
+      steps:
+      - name: main_clone
+      branch:
+        only:
+        - master
+  
+  ReleasingBinaries:
+    title: Create release in Github with venona CLI
+    image: goreleaser/goreleaser
+    stage: Release
+    working_directory: /go/src/github.com/codefresh-io/venona
+    volumes:
+    - ./venona:/go/src/github.com/codefresh-io/venona
+    fail_fast: false
+    commands:
+    - cd venonactl
+    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
+    when:
+      steps:
+      - name: CreatingGitTag
+        on:
+        - finished
+      branch:
+        only:
+        - master
