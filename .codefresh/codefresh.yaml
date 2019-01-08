@@ -19,7 +19,6 @@ steps:
   calculate_version:
     title: 'Calculate latest version'
     image: codefresh/cli
-    stage: Build & Test
     commands:
         - export VERSION=$(jq -r ".version" package.json)
         - cf_export VERSION
