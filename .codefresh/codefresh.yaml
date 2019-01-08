@@ -21,7 +21,8 @@ steps:
     image: codefresh/cli
     stage: Build & Test
     commands:
-        - cf_export VERSION=$(jq -r ".version" package.json)
+        - export VERSION=$(jq -r ".version" package.json)
+        - cf_export VERSION
     when:
       steps:
       - name: main_clone
