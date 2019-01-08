@@ -1,0 +1,15 @@
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner-{{ .AppName }}
+subjects:
+  - kind: ServiceAccount
+    name: volume-provisioner-{{ .AppName }}
+    namespace: {{ .Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+  apiGroup: rbac.authorization.k8s.io

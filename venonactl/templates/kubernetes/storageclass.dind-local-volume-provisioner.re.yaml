@@ -1,0 +1,10 @@
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: dind-local-volumes-{{ .AppName }}-{{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+parameters:
+  volumeBackend: local
