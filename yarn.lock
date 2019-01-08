@@ -776,9 +776,10 @@ deep-is@~0.1.3:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/deep-is/-/deep-is-0.1.3.tgz#b369d6fb5dbc13eecf524f91b070feedc357cf34"
 
-deepmerge@^2.1.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-2.2.1.tgz#5d3ff22a01c00f645405a2fbc17d0778a1801170"
+deepmerge@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-3.0.0.tgz#ca7903b34bfa1f8c2eab6779280775a411bfc6ba"
+  integrity sha512-a8z8bkgHsAML+uHLqmMS83HHlpy3PvZOOuiTQqaa3wu8ZVg3h0hqHk6aCsGdOnZV2XMM/FRimNGjUh0KCcmHBw==
 
 default-require-extensions@^1.0.0:
   version "1.0.0"
@@ -1333,12 +1334,6 @@ flat-cache@^1.2.1:
 flatstr@^1.0.5, flatstr@^1.0.8:
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/flatstr/-/flatstr-1.0.8.tgz#0e849229751f2b9f6a0919f8e81e1229e84ba901"
-
-fluent-openapi@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/fluent-openapi/-/fluent-openapi-1.0.0.tgz#57ba662c70cfcee3fcc2f62e0e0672001981bc5c"
-  dependencies:
-    lodash.merge "^4.6.1"
 
 for-in@^1.0.1, for-in@^1.0.2:
   version "1.0.2"
@@ -2439,16 +2434,17 @@ kleur@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-2.0.2.tgz#b704f4944d95e255d038f0cb05fb8a602c55a300"
 
-kubernetes-client@^6.4.0:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/kubernetes-client/-/kubernetes-client-6.4.0.tgz#51840b293bc48079625e02da60b5532e816979ad"
+kubernetes-client@^6.7.1:
+  version "6.7.1"
+  resolved "https://registry.yarnpkg.com/kubernetes-client/-/kubernetes-client-6.7.1.tgz#a349fa8e3ac8867cd41797ab4aca7f89977670c3"
+  integrity sha512-+UCWgRHneFXYVwK0IFOWflejw3XTbLlSWersErU5cV8LQYCHqvKelSt7ltqAlzi8JK1VwcpK87JodvLQDJ+UGQ==
   dependencies:
-    deepmerge "^2.1.1"
-    fluent-openapi "^1.0.0"
+    deepmerge "^3.0.0"
     js-yaml "^3.10.0"
     openid-client "^2.4.4"
     qs "^6.5.2"
     request "^2.88.0"
+    swagger-fluent "^3.1.1"
     ws "^6.0.0"
 
 lcid@^1.0.0:
@@ -3950,6 +3946,14 @@ supports-color@^5.3.0:
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.5.0.tgz#e2e69a44ac8772f78a1ec0b35b689df6530efc8f"
   dependencies:
     has-flag "^3.0.0"
+
+swagger-fluent@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/swagger-fluent/-/swagger-fluent-3.1.1.tgz#77371ea846a0ab58b7c8d652414ab1e109690609"
+  integrity sha512-6yBqpyJJZxKQRnN39wa9z8xHlin8zCcDZh7ndj7OMYpGvLhVadX2t6BdaUHt6mmOQwEJJAq71aMkE7aIlOAQSw==
+  dependencies:
+    lodash.merge "^4.6.1"
+    request "^2.88.0"
 
 symbol-tree@^3.2.2:
   version "3.2.2"
