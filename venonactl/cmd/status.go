@@ -44,7 +44,7 @@ var statusCmd = &cobra.Command{
 			}
 		}
 
-		if verbose == true {
+		if cmd.Flag("kube-namespace").Changed == true {
 			table := internal.CreateTable()
 			table.SetHeader(headers)
 
