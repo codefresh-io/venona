@@ -14,7 +14,7 @@ spec:
         prometheus_port: "9100"
         prometheus_scrape: "true"
     spec:
-      serviceAccountName: volume-provisioner
+      serviceAccountName: volume-provisioner-{{ .AppName }}
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"

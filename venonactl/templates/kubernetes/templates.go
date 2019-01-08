@@ -6,11 +6,11 @@ package kubernetes
 func TemplatesMap() map[string]string {
     templatesMap := make(map[string]string)
 
-templatesMap["cluster-role-binding.dind-volume-provisioner.yaml"] = `---
+templatesMap["cluster-role-binding.dind-volume-provisioner.re.yaml"] = `---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: volume-provisioner
+  name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   labels:
     app: dind-volume-provisioner-{{ .AppName }}
 subjects:
@@ -19,7 +19,7 @@ subjects:
     namespace: {{ .Namespace }}
 roleRef:
   kind: ClusterRole
-  name: volume-provisioner-{{ .AppName }}
+  name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   apiGroup: rbac.authorization.k8s.io
 ` 
 
@@ -36,10 +36,10 @@ roleRef:
   name: system:discovery
   apiGroup: rbac.authorization.k8s.io` 
 
-templatesMap["cluster-role.dind-volume-provisioner.yaml"] = `kind: ClusterRole
+templatesMap["cluster-role.dind-volume-provisioner.re.yaml"] = `kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: volume-provisioner-{{ .AppName }}
+  name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   labels:
     app: dind-volume-provisioner
 rules:
@@ -64,7 +64,9 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch", "create", "delete", "patch"]
-
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
 ` 
 
 templatesMap["codefresh-certs-server-secret.re.yaml"] = `apiVersion: v1
@@ -82,7 +84,7 @@ data:
 
 ` 
 
-templatesMap["daemonset.dind-lv-monitor.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["daemonset.dind-lv-monitor.re.yaml"] = `apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: dind-lv-monitor-{{ .AppName }}
@@ -98,7 +100,7 @@ spec:
         prometheus_port: "9100"
         prometheus_scrape: "true"
     spec:
-      serviceAccountName: volume-provisioner
+      serviceAccountName: volume-provisioner-{{ .AppName }}
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
@@ -140,7 +142,7 @@ spec:
           # type: DirectoryOrCreate
 ` 
 
-templatesMap["deployment.dind-volume-provisioner.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["deployment.dind-volume-provisioner.re.yaml"] = `apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: dind-volume-provisioner-{{ .AppName }}
@@ -156,35 +158,13 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
-      serviceAccount: volume-provisioner
+      serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
         operator: "Exists"
-      # nodeSelector:
-      #   kubernetes.io/role: master
-      #   node-type: app
-      # affinity:
-      #   nodeAffinity:
-      #     preferredDuringSchedulingIgnoredDuringExecution:
-      #       - weight: 30
-      #         preference:
-      #           matchExpressions:
-      #           - key: node-type
-      #             operator: In
-      #             values:
-      #             - dind
-      #             - app
-      #       - weight: 70
-      #         preference:
-      #           matchExpressions:
-      #           - key: kubernetes.io/role
-      #             operator: In
-      #             values:
-      #             - master
       containers:
       - name: dind-volume-provisioner
-        # image: codefresh/dind-volume-provisioner:v10-ceph
         image: codefresh/dind-volume-provisioner:venona-v1
         imagePullPolicy: Always
         resources:
@@ -259,10 +239,8 @@ data:
   daemon.json: |
     {
       "hosts": [ "unix:///var/run/docker.sock",
-                 "unix:///var/run/codefresh/docker.sock",
                  "tcp://0.0.0.0:1300"],
-      "storage-driver": "overlay",
-      "storage-opts": ["overlay.override_kernel_check=1"],
+      "storage-driver": "overlay2",
       "tlsverify": true,  
       "tls": true,
       "tlscacert": "/etc/ssl/cf-client/ca.pem",
@@ -328,11 +306,11 @@ metadata:
 data:
   codefresh.token: {{ .AgentToken | base64.Encode }}` 
 
-templatesMap["service-account.dind-volume-provisioner.yaml"] = `---
+templatesMap["service-account.dind-volume-provisioner.re.yaml"] = `---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: volume-provisioner
+  name: volume-provisioner-{{ .AppName }}
   namespace: {{ .Namespace }}
   labels:
     app: dind-volume-provisioner
@@ -344,7 +322,7 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}` 
 
-templatesMap["storageclass.dind-local-volume-provisioner.yaml"] = `---
+templatesMap["storageclass.dind-local-volume-provisioner.re.yaml"] = `---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
