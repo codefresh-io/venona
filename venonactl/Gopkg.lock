@@ -113,6 +113,14 @@
   version = "v0.2.1"
 
 [[projects]]
+  digest = "1:6f9339c912bbdda81302633ad7e99a28dfa5a639c864061f1929510a9a64aa74"
+  name = "github.com/dustin/go-humanize"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:07263fbfa1c038e890b410f730279aa7adc217180f1c2f78c6dc80b3bbe9e819"
   name = "github.com/dustin/gojson"
@@ -795,6 +803,7 @@
   input-imports = [
     "github.com/codefresh-io/go-sdk/pkg/codefresh",
     "github.com/codefresh-io/go-sdk/pkg/utils",
+    "github.com/dustin/go-humanize",
     "github.com/hairyhenderson/gomplate",
     "github.com/hairyhenderson/gomplate/data",
     "github.com/olekukonko/tablewriter",
