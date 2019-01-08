@@ -34,6 +34,3 @@ const (
 	// StatusNotInstalled - status installed
 	StatusNotInstalled = "Not Installed"
 )
-
-// TableRows - array of string arrays
-type TableRows [][]string

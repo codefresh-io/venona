@@ -15,7 +15,7 @@ Example: `kubectl create namespace codefresh-runtime`
 * Create *new* runtime-environment with Venona's agents installed <br />
 Example: `venona install --kube-namespace codefresh-runtime`
 * Get the status <br />
-Example: `venona status --kube-namespace codefresh-runtime`  
+Example: `venona status`  
 Example: `kubectl get pods -n codefresh-runtime`
 
 #### Upgrade
@@ -25,5 +25,5 @@ Example: `codefresh get re`
 * Install <br />
 Example: `venona install --skip-runtime-installation --runtime-environment RUNTIME-ENVIRONMENT`
 * Get the status <br />
-Example: `venona status --kube-namespace NAMESPACE`  
+Example: `venona status RUNTIME-ENVIRONMENT`  
 Example: `kubectl get pods -n NAMESPACE`
