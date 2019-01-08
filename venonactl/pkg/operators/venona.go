@@ -123,7 +123,7 @@ func (u *venonaOperator) Install() error {
 }
 
 // Status of runtimectl environment
-func (u *venonaOperator) Status() (TableRows, error) {
+func (u *venonaOperator) Status() ([][]string, error) {
 	s := store.GetStore()
 	templatesMap := templates.TemplatesMap()
 	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, s.BuildValues())

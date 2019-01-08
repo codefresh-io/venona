@@ -8,7 +8,7 @@ const (
 type (
 	Operator interface {
 		Install() error
-		Status() (TableRows, error)
+		Status() ([][]string, error)
 		Delete() error
 	}
 )

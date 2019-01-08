@@ -14,35 +14,13 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
-      serviceAccount: volume-provisioner
+      serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
         operator: "Exists"
-      # nodeSelector:
-      #   kubernetes.io/role: master
-      #   node-type: app
-      # affinity:
-      #   nodeAffinity:
-      #     preferredDuringSchedulingIgnoredDuringExecution:
-      #       - weight: 30
-      #         preference:
-      #           matchExpressions:
-      #           - key: node-type
-      #             operator: In
-      #             values:
-      #             - dind
-      #             - app
-      #       - weight: 70
-      #         preference:
-      #           matchExpressions:
-      #           - key: kubernetes.io/role
-      #             operator: In
-      #             values:
-      #             - master
       containers:
       - name: dind-volume-provisioner
-        # image: codefresh/dind-volume-provisioner:v10-ceph
         image: codefresh/dind-volume-provisioner:venona-v1
         imagePullPolicy: Always
         resources:

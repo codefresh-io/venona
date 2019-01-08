@@ -1,7 +1,7 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: volume-provisioner-{{ .AppName }}
+  name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   labels:
     app: dind-volume-provisioner
 rules:
@@ -26,4 +26,6 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch", "create", "delete", "patch"]
-
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]

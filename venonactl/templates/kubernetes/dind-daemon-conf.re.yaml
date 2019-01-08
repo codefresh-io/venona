@@ -8,10 +8,8 @@ data:
   daemon.json: |
     {
       "hosts": [ "unix:///var/run/docker.sock",
-                 "unix:///var/run/codefresh/docker.sock",
                  "tcp://0.0.0.0:1300"],
-      "storage-driver": "overlay",
-      "storage-opts": ["overlay.override_kernel_check=1"],
+      "storage-driver": "overlay2",
       "tlsverify": true,  
       "tls": true,
       "tlscacert": "/etc/ssl/cf-client/ca.pem",

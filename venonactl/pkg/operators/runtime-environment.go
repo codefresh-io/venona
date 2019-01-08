@@ -90,7 +90,7 @@ func (u *RuntimeEnvironmentOperator) Install() error {
 	return nil
 }
 
-func (u *RuntimeEnvironmentOperator) Status() (TableRows, error) {
+func (u *RuntimeEnvironmentOperator) Status() ([][]string, error) {
 	s := store.GetStore()
 	templatesMap := templates.TemplatesMap()
 	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, s.BuildValues())

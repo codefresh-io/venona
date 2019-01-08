@@ -1,6 +1,7 @@
 package codefresh
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"time"
@@ -13,6 +14,7 @@ type (
 		ValidateRuntimeEnvironment(*ValidateRuntimeOptions) error
 		SignRuntimeEnvironmentCertificate(*SignCertificatesOptions) ([]byte, error)
 		GetRuntimeEnvironment(string) (*RuntimeEnvironment, error)
+		GetRuntimeEnvironments() ([]*RuntimeEnvironment, error)
 	}
 
 	RuntimeEnvironment struct {
@@ -155,4 +157,19 @@ func (c *codefresh) GetRuntimeEnvironment(name string) (*RuntimeEnvironment, err
 	}
 	c.decodeResponseInto(resp, re)
 	return re, nil
+}
+
+func (c *codefresh) GetRuntimeEnvironments() ([]*RuntimeEnvironment, error) {
+	emptySlice := make([]*RuntimeEnvironment, 0)
+	resp, err := c.requestAPI(&requestOptions{
+		path:   "/api/runtime-environments",
+		method: "GET",
+	})
+	tokensAsBytes, err := c.getBodyAsBytes(resp)
+	if err != nil {
+		return nil, err
+	}
+	json.Unmarshal(tokensAsBytes, &emptySlice)
+
+	return emptySlice, err
 }
