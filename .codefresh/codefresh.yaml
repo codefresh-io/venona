@@ -118,7 +118,7 @@ steps:
     - export OLD_ORIGIN=$(git remote get-url origin)
     - git remote rm origin
     - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/venona.git
-    - git tag v$VERSION
+    - git tag v${{VERSION}}
     - git push --tags
     - git remote rm origin
     - git remote add origin $OLD_ORIGIN
