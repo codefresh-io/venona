@@ -88,7 +88,7 @@
   version = "v1.3.1"
 
 [[projects]]
-  digest = "1:faa1499158d06d26e0c92f37e2b848cc34c53acb36d5f22a733f9450d6e8fe74"
+  digest = "1:b7725d72ae7aa006c12fa9ad977d9d9cfb69e15843c496ec565fa65809392cf6"
   name = "github.com/codefresh-io/go-sdk"
   packages = [
     "internal",
@@ -96,8 +96,8 @@
     "pkg/utils",
   ]
   pruneopts = "UT"
-  revision = "5c1a91179d84e2462fc3e43a855f67a2de6c1ff5"
-  version = "v0.3.3"
+  revision = "23e53b3c65df93ef5bf378086f0f593a9fed9cf6"
+  version = "v0.3.4"
 
 [[projects]]
   digest = "1:1cf8b80d775788921f6e309a8d7da4a925780e55e887feca461cda04b8ceea45"
