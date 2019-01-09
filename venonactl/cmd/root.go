@@ -37,7 +37,6 @@ import (
 
 var verbose bool
 var skipVerionCheck bool
-var strictVersion bool
 
 // variables been set with ldflags flag
 var (
@@ -129,12 +128,10 @@ var rootCmd = &cobra.Command{
 			// the local version and the latest version not match
 			// make sure the command is no venonactl version
 			if !res && strings.Index(fullPath, "version") == -1 {
-				message := fmt.Sprintf("New version is avaliable, please update\nLocal Version: %s\nLatest Version: %s", s.Version.Current.Version, s.Version.Latest.Version)
-				if strictVersion {
-					internal.DieOnError(fmt.Errorf(message))
-				} else {
-					logrus.Info(message)
-				}
+				logrus.WithFields(logrus.Fields{
+					"Local-Version":  s.Version.Current.Version,
+					"Latest-Version": s.Version.Latest.Version,
+				}).Info("New version is avaliable, please update")
 			}
 		}
 		s.AppName = store.ApplicationName
@@ -171,5 +168,4 @@ func init() {
 	rootCmd.PersistentFlags().String("kube-namespace", "default", "Name of the namespace on which venona should be installed")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
 	rootCmd.PersistentFlags().BoolVar(&skipVerionCheck, "skip-version-check", false, "Do not compare current Venona's version with latest")
-	rootCmd.PersistentFlags().BoolVar(&strictVersion, "strict-version", true, "Exist with error if not running latest version")
 }
