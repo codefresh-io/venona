@@ -154,7 +154,7 @@ steps:
   build_binaries:
     title: Build binaries for all platforms - skip publish
     image: goreleaser/goreleaser
-    stage: Release
+    stage: Build & Test
     working_directory: /go/src/github.com/codefresh-io/venona
     volumes:
     - ./venona:/go/src/github.com/codefresh-io/venona
