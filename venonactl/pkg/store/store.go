@@ -18,7 +18,6 @@ type (
 	Values struct {
 		AppName string
 
-		Version    string
 		Mode       string
 		Image      *Image
 		AgentToken string
@@ -34,6 +33,8 @@ type (
 		DryRun bool
 
 		RuntimeEnvironment string
+
+		Version *Version
 	}
 
 	KubernetesAPI struct {
@@ -52,6 +53,23 @@ type (
 		Name string
 		Tag  string
 	}
+
+	Version struct {
+		Current *CurrentVersion
+		Latest  *LatestVersion
+	}
+
+	CurrentVersion struct {
+		Version string
+		Commit  string
+		Date    string
+	}
+	LatestVersion struct {
+		Version   string
+		Commit    string
+		Date      string
+		IsDefault bool
+	}
 )
 
 func GetStore() *Values {
@@ -63,7 +81,6 @@ func GetStore() *Values {
 }
 
 func (s *Values) BuildValues() map[string]interface{} {
-	latestVersion := GetLatestVersion()
 	return map[string]interface{}{
 		"ServerCert": map[string]string{
 			"Cert": s.ServerCert.Cert,
@@ -71,12 +88,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Ca":   s.ServerCert.Ca,
 		},
 		"AppName":       ApplicationName,
-		"Version":       latestVersion,
+		"Version":       s.Version.Latest.Version,
 		"CodefreshHost": s.CodefreshAPI.Host,
 		"Mode":          ModeInCluster,
 		"Image": map[string]string{
 			"Name": "codefresh/venona",
-			"Tag":  latestVersion, // TODO calculate the latest tag
+			"Tag":  s.Version.Latest.Version,
 		},
 		"Namespace":  s.KubernetesAPI.Namespace,
 		"AgentToken": s.AgentToken,

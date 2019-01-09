@@ -46,7 +46,13 @@ var statusCmd = &cobra.Command{
 			internal.DieOnError(err)
 			if re.Metadata.Agent == true {
 				table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
-				table.Append([]string{re.Metadata.Name, re.Status.Message, humanize.Time(re.Status.UpdatedAt)})
+				message := "Not reported any message yet"
+				time := ""
+				if re.Status.Message != "" {
+					message = re.Status.Message
+					time = humanize.Time(re.Status.UpdatedAt)
+				}
+				table.Append([]string{re.Metadata.Name, message, time})
 				table.Render()
 				fmt.Println()
 				printTableWithKubernetesRelatedResources(re)
@@ -62,7 +68,13 @@ var statusCmd = &cobra.Command{
 		table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
 		for _, re := range res {
 			if re.Metadata.Agent == true {
-				table.Append([]string{re.Metadata.Name, re.Status.Message, humanize.Time(re.Status.UpdatedAt)})
+				message := "Not reported any message yet"
+				time := ""
+				if re.Status.Message != "" {
+					message = re.Status.Message
+					time = humanize.Time(re.Status.UpdatedAt)
+				}
+				table.Append([]string{re.Metadata.Name, message, time})
 			}
 		}
 		table.Render()

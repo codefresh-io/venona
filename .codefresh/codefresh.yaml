@@ -150,3 +150,21 @@ steps:
       branch:
         only:
         - master
+
+  build_binaries:
+    title: Build binaries for all platforms - skip publish
+    image: goreleaser/goreleaser
+    stage: Build & Test
+    working_directory: /go/src/github.com/codefresh-io/venona
+    volumes:
+    - ./venona:/go/src/github.com/codefresh-io/venona
+    fail_fast: false
+    commands:
+    - cd venonactl
+    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
+    when:
+      steps:
+      - name: main_clone
+      branch:
+        ignore:
+        - master

@@ -7,14 +7,15 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/google/go-github/github"
+	version "github.com/hashicorp/go-version"
 )
 
 const (
-	Default = "latest"
+	DefaultVersion = "latest"
 )
 
 func GetLatestVersion() string {
-	version := Default
+	version := DefaultVersion
 	client := github.NewClient(nil)
 	releases, _, err := client.Repositories.ListReleases(context.Background(), "codefresh-io", "venona", &github.ListOptions{})
 	if err != nil {
@@ -28,4 +29,20 @@ func GetLatestVersion() string {
 		}
 	}
 	return version
+}
+
+func IsRunningLatestVersion() (bool, error) {
+	s := GetStore()
+	current, err := version.NewVersion(s.Version.Current.Version)
+	if err != nil {
+		return false, err
+	}
+	latest, err := version.NewVersion(s.Version.Latest.Version)
+	if err != nil {
+		return false, err
+	}
+	if current.LessThan(latest) {
+		return false, nil
+	}
+	return true, nil
 }
