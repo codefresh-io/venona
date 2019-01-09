@@ -163,6 +163,8 @@ steps:
     - cd venonactl
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
     when:
+      steps:
+      - name: main_clone
       branch:
         ignore:
         - master
