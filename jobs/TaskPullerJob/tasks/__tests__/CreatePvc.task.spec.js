@@ -17,6 +17,16 @@ describe('CreatePvc task unit tests', () => {
 			const task = new CreatePvcTask(_.noop(), kubernetesAPIMock, logger);
 			return expect(task.run(taskDef)).rejects.toThrowError('Failed to run task CreatePvc: Error!!!');
 		});
+
+		describe('validation', () => {
+			it('should throw error in case the task in not valid', () => {
+				const logger = createLogger();
+				const kubernetesAPIMock = {};
+				const taskDef = {};
+				const task = new CreatePvcTask(_.noop(), kubernetesAPIMock, logger);
+				return expect(task.validate(taskDef)).rejects.toThrowError('child "spec" fails because ["spec" is required]');
+			});
+		});
 	});
 
 	describe('positive', () => {

@@ -230,16 +230,16 @@ describe('Kubernetes API unit tests', () => {
 					name,
 				},
 			};
-			const deletePodSpy = jest.fn();
+			const deletePvcSpy = jest.fn();
 			const getNamespaceSpy = jest.fn();
 			const podSpy = jest.fn();
 			kube.Client.mockImplementationOnce(() => ({
 				api: {
 					v1: {
 						namespaces: getNamespaceSpy.mockImplementation(() => ({
-							pod: podSpy.mockImplementationOnce(() => {
+							persistentvolumeclaim: podSpy.mockImplementationOnce(() => {
 								return {
-									delete: deletePodSpy,
+									delete: deletePvcSpy,
 								};
 							})
 						})),
@@ -247,11 +247,11 @@ describe('Kubernetes API unit tests', () => {
 				},
 			}));
 			return buildKubernetesAPI()
-				.deletePod(createLogger(), fakePod.metadata.namespace, fakePod.metadata.name)
+				.deletePvc(createLogger(), fakePod.metadata.namespace, fakePod.metadata.name)
 				.then(() => {
 					expect(getNamespaceSpy).toHaveBeenCalledWith(namespace);
 					expect(podSpy).toHaveBeenCalledWith(name);
-					expect(deletePodSpy).toHaveBeenCalledWith();
+					expect(deletePvcSpy).toHaveBeenCalledWith();
 				});
 		});
 
