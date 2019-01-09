@@ -20,15 +20,7 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
-
 	"github.com/spf13/cobra"
-)
-
-// variables been set with ldflags flag
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
 )
 
 // versionCmd represents the version command
@@ -36,10 +28,11 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print Venona version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Date: %s\n", date)
-		fmt.Printf("Commit: %s\n", commit)
-		fmt.Printf("Local Version: %s\n", version)
-		fmt.Printf("Latest version: %s\n", store.GetLatestVersion())
+		s := store.GetStore()
+		fmt.Printf("Date: %s\n", s.Version.Current.Date)
+		fmt.Printf("Commit: %s\n", s.Version.Current.Commit)
+		fmt.Printf("Local Version: %s\n", s.Version.Current.Version)
+		fmt.Printf("Latest version: %s\n", s.Version.Latest.Version)
 	},
 }
 

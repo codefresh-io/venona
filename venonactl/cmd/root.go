@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"strings"
 
 	"github.com/codefresh-io/venona/venonactl/internal"
 
@@ -35,12 +36,22 @@ import (
 )
 
 var verbose bool
+var skipVerionCheck bool
+var strictVersion bool
+
+// variables been set with ldflags flag
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "venonactl",
 	Short: "A command line application for Codefresh",
 
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		fullPath := cmd.CommandPath()
 		if verbose == true {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
@@ -86,6 +97,46 @@ var rootCmd = &cobra.Command{
 		}
 
 		s := store.GetStore()
+		s.Version = &store.Version{
+			Current: &store.CurrentVersion{
+				Version: version,
+				Commit:  commit,
+				Date:    date,
+			},
+		}
+
+		s.Image = &store.Image{
+			Name: "codefresh/venona",
+		}
+		if skipVerionCheck {
+			latestVersion := &store.LatestVersion{
+				Version:   store.DefaultVersion,
+				IsDefault: true,
+			}
+			s.Version.Latest = latestVersion
+			logrus.WithFields(logrus.Fields{
+				"Default-Version": store.DefaultVersion,
+				"Image-Tag":       s.Version.Current.Version,
+			}).Debug("Skipping version check")
+		} else {
+			latestVersion := &store.LatestVersion{
+				Version:   store.GetLatestVersion(),
+				IsDefault: false,
+			}
+			s.Image.Tag = latestVersion.Version
+			s.Version.Latest = latestVersion
+			res, _ := store.IsRunningLatestVersion()
+			// the local version and the latest version not match
+			// make sure the command is no venonactl version
+			if !res && strings.Index(fullPath, "version") == -1 {
+				message := fmt.Sprintf("New version is avaliable, please update\nLocal Version: %s\nLatest Version: %s", s.Version.Current.Version, s.Version.Latest.Version)
+				if strictVersion {
+					internal.DieOnError(fmt.Errorf(message))
+				} else {
+					logrus.Info(message)
+				}
+			}
+		}
 		s.AppName = store.ApplicationName
 		s.KubernetesAPI = &store.KubernetesAPI{
 			Namespace:   kubeNamespace,
@@ -99,10 +150,6 @@ var rootCmd = &cobra.Command{
 			Client: client,
 		}
 		s.Mode = store.ModeInCluster
-		s.Image = &store.Image{
-			Name: "codefresh/venona",
-			Tag:  "latest",
-		}
 
 		s.ServerCert = &certs.ServerCert{}
 
@@ -123,4 +170,6 @@ func init() {
 	rootCmd.PersistentFlags().String("kube-config-path", "", "Path to kubeconfig file (default is $HOME/.kube/config)")
 	rootCmd.PersistentFlags().String("kube-namespace", "default", "Name of the namespace on which venona should be installed")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
+	rootCmd.PersistentFlags().BoolVar(&skipVerionCheck, "skip-version-check", false, "Do not compare current Venona's version with latest")
+	rootCmd.PersistentFlags().BoolVar(&strictVersion, "strict-version", true, "Exist with error if not running latest version")
 }

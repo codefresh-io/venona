@@ -53,6 +53,7 @@ var installCmd = &cobra.Command{
 				"venona-Version": version,
 			}).Info("venona version set by user")
 			s.Image.Tag = version
+			s.Version.Latest.Version = version
 		}
 		s.ClusterInCodefresh = clusterName
 		if installOnlyRuntimeEnvironment == true && skipRuntimeInstallation == true {

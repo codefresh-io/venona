@@ -313,6 +313,14 @@
   revision = "e92cdb5343bbaf42b0a596937ae0f382270d6759"
 
 [[projects]]
+  digest = "1:950caca7dfcf796419232ba996c9c3539d09f26af27ba848c4508e604c13efbb"
+  name = "github.com/hashicorp/go-version"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d40cf49b3a77bba84a7afdbd7f1dc295d114efb1"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:01c267930c063d047b1044d6b2bff0ad967faf37ba639a3eec16a013a16d5f3d"
   name = "github.com/hashicorp/hcl"
@@ -823,6 +831,7 @@
     "github.com/google/go-github/github",
     "github.com/hairyhenderson/gomplate",
     "github.com/hairyhenderson/gomplate/data",
+    "github.com/hashicorp/go-version",
     "github.com/olekukonko/tablewriter",
     "github.com/sirupsen/logrus",
     "github.com/spf13/cobra",
