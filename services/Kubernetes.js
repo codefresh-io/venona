@@ -8,6 +8,8 @@ const ERROR_MESSAGES = {
 	FAILED_TO_INIT: 'Failed to complete Kubernetes service initialization',
 	FAILED_TO_CREATE_POD: 'Failed to create Kubernetes pod',
 	FAILED_TO_DELETE_POD: 'Failed to delete Kubernetes pod',
+	FAILED_TO_CREATE_PVC: 'Failed to create Kubernetes pvc',
+	FAILED_TO_DELETE_PVC: 'Failed to delete Kubernetes pvc',
 };
 
 
@@ -64,6 +66,26 @@ class Kubernetes {
 			return Promise.resolve();
 		} catch (err) {
 			throw new Error(`${ERROR_MESSAGES.FAILED_TO_DELETE_POD} with message: ${err.message}`);
+		}
+	}
+
+	async createPvc(logger, spec) {
+		try {
+			await this.client.api.v1.namespaces(spec.metadata.namespace).persistentvolumeclaim.post({ body: spec });
+			logger.info('Pvc created');
+			return Promise.resolve();
+		} catch (err) {
+			throw new Error(`${ERROR_MESSAGES.FAILED_TO_CREATE_PVC} with message: ${err.message}`);
+		}
+	}
+
+	async deletePvc(logger, namespace, name) {
+		try {
+			await this.client.api.v1.namespaces(namespace).persistentvolumeclaim(name).delete();
+			logger.info('Pvc deleted');
+			return Promise.resolve();
+		} catch (err) {
+			throw new Error(`${ERROR_MESSAGES.FAILED_TO_DELETE_PVC} with message: ${err.message}`);
 		}
 	}
 }
