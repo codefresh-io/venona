@@ -173,4 +173,103 @@ describe('Kubernetes API unit tests', () => {
 			return expect(buildKubernetesAPI().deletePod(createLogger(), '', '')).rejects.toThrowError('Failed to delete Kubernetes pod with message');
 		});
 	});
+
+	describe('createPvc', () => {
+		it('Should create a pvc successfully', () => {
+			const desiredNamespace = 'fake-namespace';
+			const fakePvc = {
+				metadata: {
+					namespace: desiredNamespace,
+					name: 'pvc',
+				},
+			};
+			const createPvcSpy = jest.fn();
+			const getNamespaceSpy = jest.fn();
+			kube.Client.mockImplementationOnce(() => ({
+				api: {
+					v1: {
+						namespaces: getNamespaceSpy.mockImplementation(() => ({
+							persistentvolumeclaim: {
+								post: createPvcSpy,
+							},
+						})),
+					},
+				},
+			}));
+			return buildKubernetesAPI()
+				.createPvc(createLogger(), fakePvc)
+				.then(() => {
+					expect(getNamespaceSpy).toHaveBeenCalledWith(desiredNamespace);
+					expect(createPvcSpy).toHaveBeenCalledWith({ body: fakePvc });
+				});
+		});
+
+		it('Should throw an error', () => {
+			kube.Client.mockImplementationOnce(() => ({
+				api: {
+					v1: {
+						namespaces: jest.fn(() => ({
+							persistentvolumeclaim: {
+								post: jest.fn().mockRejectedValue(new Error('Error to make api call')),
+							},
+						})),
+					},
+				},
+			}));
+			return expect(buildKubernetesAPI().createPvc(createLogger(), { metadata: { name: 'fake-name' } })).rejects.toThrowError('Failed to create Kubernetes pvc with message');
+		});
+	});
+
+	describe('deletePvc', () => {
+		it('Should delete a pod successfully', () => {
+			const namespace = 'fake-namespace';
+			const name = 'pod';
+			const fakePod = {
+				metadata: {
+					namespace,
+					name,
+				},
+			};
+			const deletePvcSpy = jest.fn();
+			const getNamespaceSpy = jest.fn();
+			const podSpy = jest.fn();
+			kube.Client.mockImplementationOnce(() => ({
+				api: {
+					v1: {
+						namespaces: getNamespaceSpy.mockImplementation(() => ({
+							persistentvolumeclaim: podSpy.mockImplementationOnce(() => {
+								return {
+									delete: deletePvcSpy,
+								};
+							})
+						})),
+					},
+				},
+			}));
+			return buildKubernetesAPI()
+				.deletePvc(createLogger(), fakePod.metadata.namespace, fakePod.metadata.name)
+				.then(() => {
+					expect(getNamespaceSpy).toHaveBeenCalledWith(namespace);
+					expect(podSpy).toHaveBeenCalledWith(name);
+					expect(deletePvcSpy).toHaveBeenCalledWith();
+				});
+		});
+
+		it('Should throw an error when pod deletion failed', () => {
+			kube.Client.mockImplementationOnce(() => ({
+				api: {
+					v1: {
+						namespaces: jest.fn(() => ({
+							persistentvolumeclaim: jest.fn(() => {
+								return {
+									delete: jest.fn().mockRejectedValue(new Error('Error to make api call')),
+								};
+							}),
+						})),
+					},
+				},
+			}));
+			return expect(buildKubernetesAPI().deletePvc(createLogger(), '', '')).rejects.toThrowError('Failed to delete Kubernetes pvc with message');
+		});
+	});
 });
