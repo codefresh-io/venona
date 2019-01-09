@@ -6,6 +6,8 @@
 
 ### Prerequisite:
 * [Kubernetes](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - Used to create resource in your K8S cluster
+    * Kubernetes cluter version > 1.10 
+    * [Instuction](#Install-on-cluster-version-<-1.10) to install on cluster version < 1.10
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
 
 
@@ -19,6 +21,24 @@ Example: `venona install --kube-namespace codefresh-runtime`
 * Get the status <br />
 Example: `venona status`  
 Example: `kubectl get pods -n codefresh-runtime`
+
+
+#### Install on cluster version < 1.10
+Venona's agent is trying to load avaliables apis using api `/openapi/v2` endpoint
+Add this endpoint to ClusterRole `system:discovery` under `rules[0].nonResourceURLs`
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:discovery
+rules:
+- nonResourceURLs:
+  - ...other_resources
+  - /openapi
+  - /openapi/*
+  verbs:
+  - get
+```
 
 #### Upgrade
 To upgrade existing runtime-environment, a one that was created without Venona's agent, run:
