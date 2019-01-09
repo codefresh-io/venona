@@ -101,6 +101,7 @@ spec:
         prometheus_scrape: "true"
     spec:
       serviceAccountName: volume-provisioner-{{ .AppName }}
+      # Debug:       
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
@@ -119,7 +120,7 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-
+#              Debug:                  
 #            - name: DRY_RUN
 #              value: "1"
 #            - name: DEBUG
@@ -139,7 +140,6 @@ spec:
       - name: dind-volume-dir
         hostPath:
           path: /opt/codefresh/dind-volumes
-          # type: DirectoryOrCreate
 ` 
 
 templatesMap["deployment.dind-volume-provisioner.re.yaml"] = `apiVersion: extensions/v1beta1
