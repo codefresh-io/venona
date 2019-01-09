@@ -294,8 +294,9 @@ metadata:
   namespace: {{ .Namespace }}
 rules:
 - apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["create", "delete"]` 
+  resources: ["pods", "persistentvolumeclaims"]
+  verbs: ["get", "create", "delete"]
+` 
 
 templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
