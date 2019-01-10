@@ -89,14 +89,14 @@ func init() {
 }
 
 func installRuntimeEnvironment() {
-	err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
-	internal.DieOnError(err)
-
 	cfAPI := codefresh.New()
-	err = cfAPI.Validate()
+	err := cfAPI.Validate()
 	internal.DieOnError(err)
 
 	err = cfAPI.Sign()
+	internal.DieOnError(err)
+
+	err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
 	internal.DieOnError(err)
 
 	err = cfAPI.Register()
