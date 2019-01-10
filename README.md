@@ -17,6 +17,9 @@
 
 #### Fresh installation
 * Download [venona's](https://github.com/codefresh-io/venona/releases) binary
+  * With homebrew: 
+    * `brew tap codefresh-io/venona`
+    * `brew install venona`
 * Create namespace where venona should run<br />
 Example: `kubectl create namespace codefresh-runtime`
 * Create *new* runtime-environment with Venona's agents installed <br />
