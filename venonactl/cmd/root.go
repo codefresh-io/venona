@@ -43,6 +43,9 @@ var (
 	version = "dev"
 	commit  = "none"
 	date    = "unknown"
+	// set to false by default, when running hack/build.sh will change to true
+	// to prevent version checking during development
+	localDevFlow = "false"
 )
 
 var rootCmd = &cobra.Command{
@@ -107,7 +110,7 @@ var rootCmd = &cobra.Command{
 		s.Image = &store.Image{
 			Name: "codefresh/venona",
 		}
-		if skipVerionCheck {
+		if skipVerionCheck || localDevFlow == "true" {
 			latestVersion := &store.LatestVersion{
 				Version:   store.DefaultVersion,
 				IsDefault: true,
