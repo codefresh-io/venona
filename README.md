@@ -6,7 +6,7 @@
 
 ### Prerequisite:
 * [Kubernetes](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - Used to create resource in your K8S cluster
-  * Kube Version > 10:
+  * Kube Version > 1.10:
     * [Instuction](#Install-on-cluster-version-<-1.10) to install on cluster version < 1.10
   * Disk size 50GB per node
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
