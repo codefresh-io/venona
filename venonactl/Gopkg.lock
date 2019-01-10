@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:5ad08b0e14866764a6d7475eb11c9cf05cad9a52c442593bdfa544703ff77f61"
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  pruneopts = "UT"
+  revision = "0ebda48a7f143b1cce9eb37a8c1106ac762a3430"
+  version = "v0.34.0"
+
+[[projects]]
   digest = "1:3b10c6fd33854dc41de2cf78b7bae105da94c2789b6fa5b9ac9e593ea43484ac"
   name = "github.com/Masterminds/goutils"
   packages = ["."]
@@ -575,11 +583,14 @@
   revision = "0ed95abb35c445290478a5348a7b38bb154135fd"
 
 [[projects]]
-  digest = "1:9359217acc6040b4be710ce34473acef28023ad39bfafecea34ffaea7f1e1890"
+  digest = "1:ad764db92ed977f803ff0f59a7a957bf65cc4e8ae9dfd08228e1f54ea40392e0"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
+    "google",
     "internal",
+    "jws",
+    "jwt",
   ]
   pruneopts = "UT"
   revision = "a6bd8cefa1811bd24b86f8902872e4e8225f74c4"
@@ -626,13 +637,16 @@
   revision = "f51c12702a4d776e4c1fa9b0fabab841babae631"
 
 [[projects]]
-  digest = "1:6f3bd49ddf2e104e52062774d797714371fac1b8bddfd8e124ce78e6b2264a10"
+  digest = "1:fa026a5c59bd2df343ec4a3538e6288dcf4e2ec5281d743ae82c120affe6926a"
   name = "google.golang.org/appengine"
   packages = [
+    ".",
     "internal",
+    "internal/app_identity",
     "internal/base",
     "internal/datastore",
     "internal/log",
+    "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
     "urlfetch",
@@ -743,7 +757,7 @@
   revision = "2b1284ed4c93a43499e781493253e2ac5959c4fd"
 
 [[projects]]
-  digest = "1:20f641257f6c0c69ddf455a15b63b20bac524b08d90745da796d633724758bac"
+  digest = "1:c98af9b5828d3cd550e8f3c915d2e03db012a8e06cb0683db3ac74b76207dc5f"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -786,8 +800,10 @@
     "pkg/apis/clientauthentication/v1beta1",
     "pkg/version",
     "plugin/pkg/client/auth/exec",
+    "plugin/pkg/client/auth/gcp",
     "rest",
     "rest/watch",
+    "third_party/forked/golang/template",
     "tools/auth",
     "tools/clientcmd",
     "tools/clientcmd/api",
@@ -801,6 +817,7 @@
     "util/flowcontrol",
     "util/homedir",
     "util/integer",
+    "util/jsonpath",
   ]
   pruneopts = "UT"
   revision = "e64494209f554a6723674bd494d69445fb76a1d4"
@@ -846,6 +863,7 @@
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/scheme",
+    "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/tools/clientcmd/api",
