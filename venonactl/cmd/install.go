@@ -89,8 +89,11 @@ func init() {
 }
 
 func installRuntimeEnvironment() {
+	err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
+	internal.DieOnError(err)
+
 	cfAPI := codefresh.New()
-	err := cfAPI.Validate()
+	err = cfAPI.Validate()
 	internal.DieOnError(err)
 
 	err = cfAPI.Sign()
@@ -99,8 +102,6 @@ func installRuntimeEnvironment() {
 	err = cfAPI.Register()
 	internal.DieOnError(err)
 
-	err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
-	internal.DieOnError(err)
 }
 
 func installvenona() {

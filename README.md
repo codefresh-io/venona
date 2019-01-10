@@ -6,12 +6,15 @@
 
 ### Prerequisite:
 * [Kubernetes](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - Used to create resource in your K8S cluster
-    * Kubernetes cluter version > 1.10 
+  * Kube Version > 1.10:
     * [Instuction](#Install-on-cluster-version-<-1.10) to install on cluster version < 1.10
+  * Disk size 50GB per node
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
+  * Authenticated context exist under `$HOME/.cfconfig` or authenticate with [Codefesh CLI](https://codefresh-io.github.io/cli/getting-started/#authenticate)
 
 
 ### Install venona
+
 #### Fresh installation
 * Download [venona's](https://github.com/codefresh-io/venona/releases) binary
 * Create namespace where venona should run<br />
@@ -40,12 +43,21 @@ rules:
   - get
 ```
 
+
+
+
+
+
+#### Install on GCP
+  * Make sure your user has `Kubernetes Engine Cluster Admin` role in google console
+  * Bind your user with cluster-admin kubernetes clusterrole `kubectl create clusterrolebinding NAME --clusterrole cluster-admin --user YOUR_USER`
+
 #### Upgrade
 To upgrade existing runtime-environment, a one that was created without Venona's agent, run:
-* Find the name of the environment <br />
-Example: `codefresh get re`
+* Find the name of the cluster was linked to that runtime environment <br />
+Example: `codefresh get cluster`
 * Install <br />
-Example: `venona install --skip-runtime-installation --runtime-environment RUNTIME-ENVIRONMENT`
+Example: `venona install --cluster-name CLUSTER`
 * Get the status <br />
 Example: `venona status RUNTIME-ENVIRONMENT`  
 Example: `kubectl get pods -n NAMESPACE`
