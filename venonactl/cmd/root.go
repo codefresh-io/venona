@@ -23,6 +23,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/spf13/viper"
+
 	"github.com/codefresh-io/venona/venonactl/internal"
 
 	"github.com/sirupsen/logrus"
@@ -164,11 +166,16 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().String("cfconfig", "", "Config file (default is $HOME/.cfconfig)")
+	viper.AutomaticEnv()
+	viper.BindEnv("kubeconfig", "KUBECONFIG")
+	viper.BindEnv("cfconfig", "CFCONFIG")
+
+	rootCmd.PersistentFlags().String("cfconfig", viper.GetString("cfconfig"), "Config file (default is $HOME/.cfconfig) [$CFCONFIG]")
 	rootCmd.PersistentFlags().String("context", "", "Name of the context from --cfconfig (default is current-context)")
 	rootCmd.PersistentFlags().String("kube-context-name", "", "Name of the kubernetes context (default is current-context)")
-	rootCmd.PersistentFlags().String("kube-config-path", "", "Path to kubeconfig file (default is $HOME/.kube/config)")
+	rootCmd.PersistentFlags().String("kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 	rootCmd.PersistentFlags().String("kube-namespace", "default", "Name of the namespace on which venona should be installed")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
 	rootCmd.PersistentFlags().BoolVar(&skipVerionCheck, "skip-version-check", false, "Do not compare current Venona's version with latest")
+
 }
