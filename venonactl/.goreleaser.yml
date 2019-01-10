@@ -32,7 +32,6 @@ brew:
     owner: codefresh-io
     name: homebrew-venona
   folder: Formula
-  caveats: "venona --help"
   description: "venona --help"
   homepage: "http://docs.codefresh.io"
   commit_author:
