@@ -37,8 +37,6 @@ brew:
   commit_author:
     name: Oleg Sucharevich
     email: olegs@codefresh.io
-  test: |
-      bin.install "venona"
 
   install: |
-      system "#{bin}/venona version"
+      bin.install "venona"
