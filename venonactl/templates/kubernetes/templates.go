@@ -120,6 +120,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: VOLUME_PARENT_DIR
+              value: /var/lib/codefresh/dind-volumes
 #              Debug:                  
 #            - name: DRY_RUN
 #              value: "1"
@@ -133,13 +135,13 @@ spec:
 #              value: "20"
 
           volumeMounts:
-          - mountPath: /opt/codefresh/dind-volumes
+          - mountPath: /var/lib/codefresh/dind-volumes
             readOnly: false
             name: dind-volume-dir
       volumes:
       - name: dind-volume-dir
         hostPath:
-          path: /opt/codefresh/dind-volumes
+          path: /var/lib/codefresh/codefresh/dind-volumes
 ` 
 
 templatesMap["deployment.dind-volume-provisioner.re.yaml"] = `apiVersion: extensions/v1beta1
@@ -165,7 +167,7 @@ spec:
         operator: "Exists"
       containers:
       - name: dind-volume-provisioner
-        image: codefresh/dind-volume-provisioner:venona-v1
+        image: codefresh/dind-volume-provisioner:venona-v2
         imagePullPolicy: Always
         resources:
           requests:
