@@ -12,9 +12,12 @@ import (
 type (
 	Codefresh interface {
 		requestAPI(*requestOptions) (*http.Response, error)
-		ITokenAPI
-		IPipelineAPI
-		IRuntimeEnvironmentAPI
+		decodeResponseInto(*http.Response, interface{}) error
+		getBodyAsString(*http.Response) (string, error)
+		getBodyAsBytes(*http.Response) ([]byte, error)
+		Pipelines() IPipelineAPI
+		Tokens() ITokenAPI
+		RuntimeEnvironments() IRuntimeEnvironmentAPI
 	}
 )
 
@@ -25,6 +28,18 @@ func New(opt *ClientOptions) Codefresh {
 		token:  opt.Auth.Token,
 		client: &http.Client{},
 	}
+}
+
+func (c *codefresh) Pipelines() IPipelineAPI {
+	return newPipelineAPI(c)
+}
+
+func (c *codefresh) Tokens() ITokenAPI {
+	return newTokenAPI(c)
+}
+
+func (c *codefresh) RuntimeEnvironments() IRuntimeEnvironmentAPI {
+	return newRuntimeEnvironmentAPI(c)
 }
 
 func (c *codefresh) requestAPI(opt *requestOptions) (*http.Response, error) {
