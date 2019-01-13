@@ -46,7 +46,7 @@ func (u *venonaOperator) Install() error {
 	logrus.Debug("Generating token for agent")
 	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
 	logrus.Debugf("Token candidate name: %s", tokenName)
-	token, err := s.CodefreshAPI.Client.GenerateToken(tokenName, s.RuntimeEnvironment)
+	token, err := s.CodefreshAPI.Client.Tokens().Create(tokenName, s.RuntimeEnvironment)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err

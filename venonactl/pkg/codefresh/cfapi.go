@@ -61,7 +61,7 @@ func (u *CfAPI) Validate() error {
 	} else {
 		opt.Cluster = s.KubernetesAPI.ContextName
 	}
-	err := cf.ValidateRuntimeEnvironment(opt)
+	err := cf.RuntimeEnvironments().Validate(opt)
 
 	if err != nil {
 		return fmt.Errorf("Validation failed with error: %s", err.Error())
@@ -90,7 +90,7 @@ func (u *CfAPI) Sign() error {
 		certExtraSANs = "IP:127.0.0.1,DNS:*.cf-cd.com,DNS:*.codefresh.io"
 	}
 	logrus.Debugf("certExtraSANs = %s", certExtraSANs)
-	byteArray, err := store.GetStore().CodefreshAPI.Client.SignRuntimeEnvironmentCertificate(&codefresh.SignCertificatesOptions{
+	byteArray, err := store.GetStore().CodefreshAPI.Client.RuntimeEnvironments().SignCertificate(&codefresh.SignCertificatesOptions{
 		AltName: certExtraSANs,
 		CSR:     serverCert.Csr,
 	})
@@ -157,7 +157,7 @@ func (u *CfAPI) Register() error {
 		"Options-Cluster":   options.Cluster,
 		"Options-Namespace": options.Namespace,
 	}).Debug("Registering runtime environmnet")
-	re, err := cf.CreateRuntimeEnvironment(options)
+	re, err := cf.RuntimeEnvironments().Create(options)
 
 	if err != nil {
 		return err
