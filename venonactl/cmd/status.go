@@ -38,12 +38,19 @@ var statusCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
 		table := internal.CreateTable()
-
+		contextName := ""
+		kubeContextFlag := cmd.Flag("kube-context-name")
+		if kubeContextFlag != nil {
+			contextName = kubeContextFlag.Value.String()
+		}
 		// When requested status for specific runtime
 		if len(args) > 0 {
 			name := args[0]
-			re, err := s.CodefreshAPI.Client.GetRuntimeEnvironment(name)
+			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
 			internal.DieOnError(err)
+			if re == nil {
+				internal.DieOnError(fmt.Errorf("Runtime-Environment %s not found", name))
+			}
 			if re.Metadata.Agent == true {
 				table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
 				message := "Not reported any message yet"
@@ -55,15 +62,15 @@ var statusCmd = &cobra.Command{
 				table.Append([]string{re.Metadata.Name, message, time})
 				table.Render()
 				fmt.Println()
-				printTableWithKubernetesRelatedResources(re)
+				printTableWithKubernetesRelatedResources(re, contextName)
 			} else {
-				logrus.Warnf("%s has not Venona's agent", re.Metadata.Name)
+				logrus.Warnf("Runtime-Environment %s has not Venona's agent", name)
 			}
 			return
 		}
 
 		// When requested status for all runtimes
-		res, err := s.CodefreshAPI.Client.GetRuntimeEnvironments()
+		res, err := s.CodefreshAPI.Client.RuntimeEnvironments().List()
 		internal.DieOnError(err)
 		table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
 		for _, re := range res {
@@ -84,12 +91,15 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment) {
+func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string) {
 	table := internal.CreateTable()
 	table.SetHeader([]string{"Kind", "Name", "Status"})
 	s := store.GetStore()
 	if re.RuntimeScheduler.Cluster.Namespace != "" {
-		s.KubernetesAPI.ContextName = re.RuntimeScheduler.Cluster.ClusterProvider.Selector
+		if context == "" {
+			context = re.RuntimeScheduler.Cluster.ClusterProvider.Selector
+		}
+		s.KubernetesAPI.ContextName = context
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
 
 		rows, err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Status()
@@ -104,4 +114,5 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment) 
 
 func init() {
 	rootCmd.AddCommand(statusCmd)
+	statusCmd.Flags().String("kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
 }

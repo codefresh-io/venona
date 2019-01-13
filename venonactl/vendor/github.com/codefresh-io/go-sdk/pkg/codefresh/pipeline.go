@@ -9,8 +9,8 @@ import (
 type (
 	// IPipelineAPI declers Codefresh pipeline API
 	IPipelineAPI interface {
-		GetPipelines() ([]*Pipeline, error)
-		RunPipeline(string) (string, error)
+		List() ([]*Pipeline, error)
+		Run(string) (string, error)
 	}
 
 	PipelineMetadata struct {
@@ -58,26 +58,34 @@ type (
 		Docs  []*Pipeline `json:"docs"`
 		Count int         `json:"count"`
 	}
+
+	pipeline struct {
+		codefresh Codefresh
+	}
 )
 
-// GetPipelines - returns pipelines from API
-func (c *codefresh) GetPipelines() ([]*Pipeline, error) {
+func newPipelineAPI(codefresh Codefresh) IPipelineAPI {
+	return &pipeline{codefresh}
+}
+
+// Get - returns pipelines from API
+func (p *pipeline) List() ([]*Pipeline, error) {
 	r := &getPipelineResponse{}
-	resp, err := c.requestAPI(&requestOptions{
+	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   "/api/pipelines",
 		method: "GET",
 	})
-	err = c.decodeResponseInto(resp, r)
+	err = p.codefresh.decodeResponseInto(resp, r)
 	return r.Docs, err
 }
 
-func (c *codefresh) RunPipeline(name string) (string, error) {
-	resp, err := c.requestAPI(&requestOptions{
+func (p *pipeline) Run(name string) (string, error) {
+	resp, err := p.codefresh.requestAPI(&requestOptions{
 		path:   fmt.Sprintf("/api/pipelines/run/%s", url.PathEscape(name)),
 		method: "POST",
 	})
 	if err != nil {
 		return "", err
 	}
-	return c.getBodyAsString(resp)
+	return p.codefresh.getBodyAsString(resp)
 }

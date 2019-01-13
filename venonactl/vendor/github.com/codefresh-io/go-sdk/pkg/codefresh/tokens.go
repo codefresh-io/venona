@@ -7,8 +7,8 @@ import (
 
 type (
 	ITokenAPI interface {
-		GenerateToken(name string, subject string) (*Token, error)
-		GetTokens() ([]*Token, error)
+		Create(name string, subject string) (*Token, error)
+		List() ([]*Token, error)
 	}
 
 	Token struct {
@@ -22,26 +22,32 @@ type (
 		} `json:"subject"`
 		Value string
 	}
-)
 
-type (
 	tokenSubjectType int
 
 	getTokensReponse struct {
 		Tokens []*Token
 	}
+
+	token struct {
+		codefresh Codefresh
+	}
 )
 
 const (
-	runtimeEnvironment tokenSubjectType = 0
+	runtimeEnvironmentSubject tokenSubjectType = 0
 )
+
+func newTokenAPI(codefresh Codefresh) ITokenAPI {
+	return &token{codefresh}
+}
 
 func (s tokenSubjectType) String() string {
 	return [...]string{"runtime-environment"}[s]
 }
 
-func (c *codefresh) GenerateToken(name string, subject string) (*Token, error) {
-	resp, err := c.requestAPI(&requestOptions{
+func (t *token) Create(name string, subject string) (*Token, error) {
+	resp, err := t.codefresh.requestAPI(&requestOptions{
 		path:   "/api/auth/key",
 		method: "POST",
 		body: map[string]interface{}{
@@ -49,10 +55,10 @@ func (c *codefresh) GenerateToken(name string, subject string) (*Token, error) {
 		},
 		qs: map[string]string{
 			"subjectReference": subject,
-			"subjectType":      runtimeEnvironment.String(),
+			"subjectType":      runtimeEnvironmentSubject.String(),
 		},
 	})
-	value, err := c.getBodyAsString(resp)
+	value, err := t.codefresh.getBodyAsString(resp)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +68,13 @@ func (c *codefresh) GenerateToken(name string, subject string) (*Token, error) {
 	}, err
 }
 
-func (c *codefresh) GetTokens() ([]*Token, error) {
+func (t *token) List() ([]*Token, error) {
 	emptySlice := make([]*Token, 0)
-	resp, err := c.requestAPI(&requestOptions{
+	resp, err := t.codefresh.requestAPI(&requestOptions{
 		path:   "/api/auth/keys",
 		method: "GET",
 	})
-	tokensAsBytes, err := c.getBodyAsBytes(resp)
+	tokensAsBytes, err := t.codefresh.getBodyAsBytes(resp)
 	if err != nil {
 		return nil, err
 	}
