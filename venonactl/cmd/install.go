@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
@@ -42,8 +43,22 @@ var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install Codefresh's runtime-environment",
 	Run: func(cmd *cobra.Command, args []string) {
-		version := cmd.Flag("venona-version").Value.String()
 		s := store.GetStore()
+
+		kubeContextName := cmd.Flag("kube-context-name").Value.String()
+		kubeNamespace := cmd.Flag("kube-namespace").Value.String()
+
+		if kubeContextName == "" {
+			config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
+			kubeContextName = config.CurrentContext
+			logrus.WithFields(logrus.Fields{
+				"Kube-Context-Name": kubeContextName,
+			}).Debug("Kube Context is not set, using current context")
+		}
+		s.KubernetesAPI.ContextName = kubeContextName
+		s.KubernetesAPI.Namespace = kubeNamespace
+
+		version := cmd.Flag("venona-version").Value.String()
 		if dryRun == true {
 			s.DryRun = dryRun
 			logrus.Info("Running in dry-run mode")
@@ -86,6 +101,8 @@ func init() {
 	installCmd.Flags().String("runtime-environment", "", "if --skip-runtime-installation set, will try to configure venona on current runtime-environment")
 	installCmd.Flags().BoolVar(&installOnlyRuntimeEnvironment, "only-runtime-environment", false, "Set to true to onlky configure namespace as runtime-environment for Codefresh")
 	installCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Set to true to simulate installation")
+	installCmd.Flags().String("kube-namespace", "default", "Name of the namespace on which venona should be installed")
+	installCmd.Flags().String("kube-context-name", "", "Name of the kubernetes context on which venona should be installed (default is current-context)")
 }
 
 func installRuntimeEnvironment() {
