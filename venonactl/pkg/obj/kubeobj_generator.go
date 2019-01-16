@@ -60,7 +60,7 @@ var functionsMap map[string]string = map[string]string{
 	"rbacv1.Role":               "RbacV1().Roles(namespace)",
 	"rbacv1.RoleBinding":        "RbacV1().RoleBindings(namespace)",
 
-	"storagev1.StorageClass":    "StorageV1().StorageClasses()",
+	"storagev1.StorageClass": "StorageV1().StorageClasses()",
 }
 
 var packageTemplate = template.Must(template.New("").Parse(
@@ -139,6 +139,24 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
         return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
     }
     return name, kind, err
+}
+
+// GetRemoteObject - gets kubernetes object from *runtime.Object. Returns object name, kind and creation error
+func GetRemoteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (runtime.Object, error){
+	
+	var name string
+	var err error
+	var remote runtime.Object
+	switch objT := obj.(type) {
+    {{ range $key, $value := .FunctionsMap }}
+    case *{{ $key }}:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.{{ $value }}.Get(name, metav1.GetOptions{})
+    {{ end }}
+    default:
+        return nil, fmt.Errorf("Unknown object type %T\n ", objT)
+    }
+    return remote, err
 }
 
 `))

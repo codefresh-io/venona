@@ -398,3 +398,97 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
     return name, kind, err
 }
 
+// GetRemoteObject - gets kubernetes object from *runtime.Object. Returns object name, kind and creation error
+func GetRemoteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (runtime.Object, error){
+	
+	var name string
+	var err error
+	var remote runtime.Object
+	switch objT := obj.(type) {
+    
+    case *appsv1.DaemonSet:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.AppsV1().DaemonSets(namespace).Get(name, metav1.GetOptions{})
+    
+    case *appsv1.Deployment:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+    
+    case *rbacv1.ClusterRole:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1().ClusterRoles().Get(name, metav1.GetOptions{})
+    
+    case *rbacv1.ClusterRoleBinding:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1().ClusterRoleBindings().Get(name, metav1.GetOptions{})
+    
+    case *rbacv1.Role:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1().Roles(namespace).Get(name, metav1.GetOptions{})
+    
+    case *rbacv1.RoleBinding:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1().RoleBindings(namespace).Get(name, metav1.GetOptions{})
+    
+    case *rbacv1beta1.ClusterRole:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1beta1().ClusterRoles().Get(name, metav1.GetOptions{})
+    
+    case *rbacv1beta1.ClusterRoleBinding:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1beta1().ClusterRoleBindings().Get(name, metav1.GetOptions{})
+    
+    case *rbacv1beta1.Role:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1beta1().Roles(namespace).Get(name, metav1.GetOptions{})
+    
+    case *rbacv1beta1.RoleBinding:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.RbacV1beta1().RoleBindings(namespace).Get(name, metav1.GetOptions{})
+    
+    case *storagev1.StorageClass:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.StorageV1().StorageClasses().Get(name, metav1.GetOptions{})
+    
+    case *v1.ConfigMap:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1.PersistentVolume:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().PersistentVolumes().Get(name, metav1.GetOptions{})
+    
+    case *v1.PersistentVolumeClaim:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1.Pod:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().Pods(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1.Secret:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1.Service:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1.ServiceAccount:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.CoreV1().ServiceAccounts(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1beta1.DaemonSet:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Get(name, metav1.GetOptions{})
+    
+    case *v1beta1.Deployment:
+        name = objT.ObjectMeta.Name
+        remote, err = clientset.ExtensionsV1beta1().Deployments(namespace).Get(name, metav1.GetOptions{})
+    
+    default:
+        return nil, fmt.Errorf("Unknown object type %T\n ", objT)
+    }
+    return remote, err
+}
+
