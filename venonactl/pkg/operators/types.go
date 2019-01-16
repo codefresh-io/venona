@@ -13,12 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-/*
-We are using generated template.go for serialized kubernetes assets
-*/
-//go:generate go run github.com/codefresh-io/venona/venonactl/templates kubernetes
-//go:generate go run github.com/codefresh-io/venona/venonactl/obj kubernetes
 package operators
 
 const (

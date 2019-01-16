@@ -25,9 +25,9 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/internal"
 
-	"github.com/codefresh-io/venona/venonactl/obj/kubeobj"
+	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
-	templates "github.com/codefresh-io/venona/venonactl/templates/kubernetes"
+	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
