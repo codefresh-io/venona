@@ -85,9 +85,9 @@ func GetStore() *Values {
 func (s *Values) BuildValues() map[string]interface{} {
 	return map[string]interface{}{
 		"ServerCert": map[string]string{
-			"Cert": s.ServerCert.Cert,
-			"Key":  s.ServerCert.Key,
-			"Ca":   s.ServerCert.Ca,
+			"Cert": base64.StdEncoding.EncodeToString([]byte(s.ServerCert.Cert)),
+			"Key":  base64.StdEncoding.EncodeToString([]byte(s.ServerCert.Key)),
+			"Ca":   base64.StdEncoding.EncodeToString([]byte(s.ServerCert.Ca)),
 		},
 		"AppName":       ApplicationName,
 		"Version":       s.Version.Latest.Version,

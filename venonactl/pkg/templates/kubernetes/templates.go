@@ -78,9 +78,9 @@ metadata:
   name: codefresh-certs-server
   namespace: {{ .Namespace }}
 data:
-  server-cert.pem: {{ .ServerCert.Cert | base64.Encode  }}
-  server-key.pem: {{ .ServerCert.Key | base64.Encode  }}
-  ca.pem: {{ .ServerCert.Ca | base64.Encode  }}
+  server-cert.pem: {{ .ServerCert.Cert }}
+  server-key.pem: {{ .ServerCert.Key }}
+  ca.pem: {{ .ServerCert.Ca }}
 
 ` 
 
