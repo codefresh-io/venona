@@ -1,7 +1,0 @@
-.git
-bin
-report.xml
-./gomplate
-*.cid
-*.iid
-*.out
