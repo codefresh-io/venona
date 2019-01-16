@@ -25,9 +25,6 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
-	"github.com/hairyhenderson/gomplate"
-	gomplateData "github.com/hairyhenderson/gomplate/data"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -38,15 +35,9 @@ import (
 )
 
 // ExecuteTemplate - executes templates in tpl str with config as values
-// Using template Funcs from gomplate - github.com/hairyhenderson/gomplate
 func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 
-	// gomplate func initializing
-	dataSources := []string{}
-	dataSourceHeaders := []string{}
-	d, _ := gomplateData.NewData(dataSources, dataSourceHeaders)
-
-	template, err := template.New("").Funcs(gomplate.Funcs(d)).Parse(tplStr)
+	template, err := template.New("").Parse(tplStr)
 	if err != nil {
 		return "", err
 	}

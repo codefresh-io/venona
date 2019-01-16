@@ -4,10 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v21/github"
 	version "github.com/hashicorp/go-version"
+	"github.com/sirupsen/logrus"
 )
 
 const (

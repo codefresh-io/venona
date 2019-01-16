@@ -1,6 +1,8 @@
 package store
 
 import (
+	"encoding/base64"
+
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
 )
@@ -83,9 +85,9 @@ func GetStore() *Values {
 func (s *Values) BuildValues() map[string]interface{} {
 	return map[string]interface{}{
 		"ServerCert": map[string]string{
-			"Cert": s.ServerCert.Cert,
-			"Key":  s.ServerCert.Key,
-			"Ca":   s.ServerCert.Ca,
+			"Cert": base64.StdEncoding.EncodeToString([]byte(s.ServerCert.Cert)),
+			"Key":  base64.StdEncoding.EncodeToString([]byte(s.ServerCert.Key)),
+			"Ca":   base64.StdEncoding.EncodeToString([]byte(s.ServerCert.Ca)),
 		},
 		"AppName":       ApplicationName,
 		"Version":       s.Version.Latest.Version,
@@ -96,6 +98,6 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Tag":  s.Version.Latest.Version,
 		},
 		"Namespace":  s.KubernetesAPI.Namespace,
-		"AgentToken": s.AgentToken,
+		"AgentToken": base64.StdEncoding.EncodeToString([]byte(s.AgentToken)),
 	}
 }
