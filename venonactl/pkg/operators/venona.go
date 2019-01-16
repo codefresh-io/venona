@@ -17,6 +17,7 @@ limitations under the License.
 package operators
 
 import (
+	"github.com/codefresh-io/venona/venonactl/pkg/kube"
 	"fmt"
 	"regexp"
 	"time"
@@ -207,3 +208,43 @@ func (u *venonaOperator) Delete() error {
 	}
 	return nil
 }
+
+func (u *venonaOperator) Upgrade() error {
+	s := store.GetStore()
+	kubeObjects, err := getKubeObjectsFromTempalte(s.BuildValues())
+	if err != nil {
+		return err
+	}
+
+	kubeClientset, err := NewKubeClientset(s)
+	if err != nil {
+		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return err
+	}
+	namespace := s.KubernetesAPI.Namespace
+
+	for fileName, local := range kubeObjects {
+		match, _ := regexp.MatchString("deployment.venona.yaml", fileName)
+		if match != true {
+			logrus.WithFields(logrus.Fields{
+				"Operator": VenonaOperatorType,
+				"Pattern":  venonaInstallPattern,
+			}).Debugf("Skipping upgrade of %s: pattern not match", local)
+			continue
+		}
+		remote, err := kubeobj.GetRemoteObject(kubeClientset, local, namespace)
+		if err != nil {
+			return err
+		}
+		// localYaml, err := yaml.Marshal(&local)
+		remoteYaml, err := yaml.Marshal(&remote)
+		// c := bytes.NewBufferString(string(localYaml))
+		// t := bytes.NewBufferString(string(remoteYaml))
+		// err := client.Update(namespace, c, t, true, false, 3000, true)
+		fmt.Printf("Remote object:\n%v\n", string(remoteYaml))
+
+	}
+
+	return nil
+}
+
