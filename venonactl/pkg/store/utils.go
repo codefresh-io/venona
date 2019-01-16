@@ -1,8 +1,12 @@
 package store
 
 import (
-	// "github.com/google/go-github/github"
+	"context"
+	"strings"
+
+	"github.com/google/go-github/v21/github"
 	version "github.com/hashicorp/go-version"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -11,18 +15,18 @@ const (
 
 func GetLatestVersion() string {
 	version := DefaultVersion
-	// client := github.NewClient(nil)
-	// releases, _, err := client.Repositories.ListReleases(context.Background(), "codefresh-io", "venona", &github.ListOptions{})
-	// if err != nil {
-	// 	logrus.Errorf("Request to get latest version of venona been rejected , setting version to latest. Original error: %s", err.Error())
-	// 	return version
-	// }
-	// for _, release := range releases {
-	// 	name := strings.Split(*release.Name, "v")
-	// 	if len(name) == 2 {
-	// 		return name[1]
-	// 	}
-	// }
+	client := github.NewClient(nil)
+	releases, _, err := client.Repositories.ListReleases(context.Background(), "codefresh-io", "venona", &github.ListOptions{})
+	if err != nil {
+		logrus.Errorf("Request to get latest version of venona been rejected , setting version to latest. Original error: %s", err.Error())
+		return version
+	}
+	for _, release := range releases {
+		name := strings.Split(*release.Name, "v")
+		if len(name) == 2 {
+			return name[1]
+		}
+	}
 	return version
 }
 
