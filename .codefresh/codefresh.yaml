@@ -141,6 +141,7 @@ steps:
     fail_fast: false
     commands:
     - cd venonactl
+    - go mod download
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
     when:
       steps:
@@ -161,6 +162,7 @@ steps:
     fail_fast: false
     commands:
     - cd venonactl
+    - go mod download
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
     when:
       steps:
