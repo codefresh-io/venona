@@ -60,7 +60,7 @@ var functionsMap map[string]string = map[string]string{
 	"rbacv1.Role":               "RbacV1().Roles(namespace)",
 	"rbacv1.RoleBinding":        "RbacV1().RoleBindings(namespace)",
 
-	"storagev1.StorageClass":    "StorageV1().StorageClasses()",
+	"storagev1.StorageClass": "StorageV1().StorageClasses()",
 }
 
 var packageTemplate = template.Must(template.New("").Parse(
@@ -134,6 +134,23 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
         err = clientset.{{ $value }}.Delete(name, &metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
+    {{ end }}
+    default:
+        return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
+    }
+    return name, kind, err
+}
+
+// ReplaceObject - replaces kubernetes object from *runtime.Object. Returns object name, kind and creation error
+func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
+	var name, kind string
+	var err error
+	switch objT := obj.(type) {
+    {{ range $key, $value := .FunctionsMap }}
+    case *{{ $key }}:
+        name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+        _, err = clientset.{{ $value }}.Update(objT)
     {{ end }}
     default:
         return "", "", fmt.Errorf("Unknown object type %T\n ", objT)

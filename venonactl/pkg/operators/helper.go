@@ -24,6 +24,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -124,4 +125,9 @@ func NewKubeClientset(s *store.Values) (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 	return kubernetes.NewForConfig(kubeClientConfig)
+}
+
+func getKubeObjectsFromTempalte(values map[string]interface{}) (map[string]runtime.Object, error) {
+	templatesMap := templates.TemplatesMap()
+	return KubeObjectsFromTemplates(templatesMap, values)
 }
