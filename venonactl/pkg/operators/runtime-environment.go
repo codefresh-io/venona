@@ -174,3 +174,7 @@ func (u *RuntimeEnvironmentOperator) Delete() error {
 	}
 	return nil
 }
+
+func (u *RuntimeEnvironmentOperator) Upgrade() error {
+	return nil
+}

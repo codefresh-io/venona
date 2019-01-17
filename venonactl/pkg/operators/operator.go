@@ -10,6 +10,7 @@ type (
 		Install() error
 		Status() ([][]string, error)
 		Delete() error
+		Upgrade() error
 	}
 )
 

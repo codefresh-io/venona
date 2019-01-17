@@ -207,3 +207,63 @@ func (u *venonaOperator) Delete() error {
 	}
 	return nil
 }
+
+func (u *venonaOperator) Upgrade() error {
+
+	// replace of sa creates new secert with sa creds
+	// avoid it till patch fully implemented
+	var skipUpgradeFor = map[string]interface{}{
+		"service-account.venona.yaml": nil,
+	}
+
+	var err error
+	s := store.GetStore()
+
+	kubeClientset, err := NewKubeClientset(s)
+	if err != nil {
+		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return err
+	}
+
+	namespace := s.KubernetesAPI.Namespace
+
+	// special case when we need to get the token from the remote to no regenrate it
+	// whole flow should be more like kubectl apply that build a patch
+	// based on remote object and candidate object
+	secret, err := kubeClientset.CoreV1().Secrets(namespace).Get(s.AppName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	token := secret.Data["codefresh.token"]
+	s.AgentToken = string(token)
+
+	kubeObjects, err := getKubeObjectsFromTempalte(s.BuildValues())
+	if err != nil {
+		return err
+	}
+
+	for fileName, local := range kubeObjects {
+		match, _ := regexp.MatchString(venonaInstallPattern, fileName)
+		if match != true {
+			logrus.WithFields(logrus.Fields{
+				"Operator": VenonaOperatorType,
+				"Pattern":  venonaInstallPattern,
+			}).Debugf("Skipping upgrade of %s: pattern not match", fileName)
+			continue
+		}
+
+		if _, ok := skipUpgradeFor[fileName]; ok {
+			logrus.WithFields(logrus.Fields{
+				"Operator": VenonaOperatorType,
+			}).Debugf("Skipping upgrade of %s: should be ignored", fileName)
+			continue
+		}
+
+		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, namespace)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
