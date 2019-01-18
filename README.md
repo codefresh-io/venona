@@ -28,7 +28,8 @@
   > `kubectl get pods -n codefresh-runtime`
 
 #### Install on cluster version < 1.10
-Venona's agent is trying to load avaliables apis using api `/openapi/v2` endpoint
+* Make sure the `PersistentLocalVolumes` [feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/) is turned on
+* Venona's agent is trying to load avaliables apis using api `/openapi/v2` endpoint
 Add this endpoint to ClusterRole `system:discovery` under `rules[0].nonResourceURLs`
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
