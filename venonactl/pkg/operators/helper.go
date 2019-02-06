@@ -21,15 +21,17 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/sirupsen/logrus"
+	// import all cloud providers auth clients
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
+	"github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
