@@ -39,9 +39,15 @@ const (
 	userAgent      = "venona-ctl"
 )
 
-// CfAPI struct to call Codefresh API
-type CfAPI struct {
-}
+type (
+	// CfAPI struct to call Codefresh API
+	CfAPI struct {
+	}
+
+	RegisterOptions struct {
+		MarkDefaultRuntime bool
+	}
+)
 
 // New - constructs CfAPI
 func New() *CfAPI {
@@ -137,7 +143,7 @@ func (u *CfAPI) Sign() error {
 }
 
 // Register calls codefresh API to register runtimectl environment
-func (u *CfAPI) Register() error {
+func (u *CfAPI) Register(opt *RegisterOptions) error {
 	logrus.Debug("Entering codefresh.Register")
 	s := store.GetStore()
 	options := &codefresh.CreateRuntimeOptions{
@@ -165,6 +171,14 @@ func (u *CfAPI) Register() error {
 
 	s.RuntimeEnvironment = re.Metadata.Name
 	logrus.Debugf("Created with name: %s", re.Metadata.Name)
+
+	if opt.MarkDefaultRuntime {
+		logrus.Debug("Setting runtime as deault")
+		_, err := cf.RuntimeEnvironments().Default(re.Metadata.Name)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
