@@ -36,6 +36,7 @@ var (
 	dryRun                        bool
 	skipRuntimeInstallation       bool
 	installOnlyRuntimeEnvironment bool
+	setDefaultRuntime             bool
 )
 
 // installCmd represents the install command
@@ -103,6 +104,7 @@ func init() {
 	installCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().String("kube-namespace", "default", "Name of the namespace on which venona should be installed")
 	installCmd.Flags().String("kube-context-name", "", "Name of the kubernetes context on which venona should be installed (default is current-context)")
+	installCmd.Flags().BoolVar(&setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 }
 
 func installRuntimeEnvironment() {
@@ -116,9 +118,10 @@ func installRuntimeEnvironment() {
 	err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
 	internal.DieOnError(err)
 
-	err = cfAPI.Register()
+	err = cfAPI.Register(&codefresh.RegisterOptions{
+		MarkDefaultRuntime: setDefaultRuntime,
+	})
 	internal.DieOnError(err)
-
 }
 
 func installvenona() {
