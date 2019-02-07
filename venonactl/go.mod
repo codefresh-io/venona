@@ -3,11 +3,10 @@ module github.com/codefresh-io/venona/venonactl
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.4.3 // indirect
 	github.com/Azure/go-autorest v11.4.0+incompatible // indirect
-	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/codefresh-io/go-sdk v0.5.1
+	github.com/codefresh-io/go-sdk v0.8.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gogo/protobuf v0.0.0-20171007142547-342cbe0a0415 // indirect
+	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c // indirect
 	github.com/google/go-github/v21 v21.0.0
 	github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367 // indirect
@@ -16,15 +15,13 @@ require (
 	github.com/gregjones/httpcache v0.0.0-20170728041850-787624de3eb7 // indirect
 	github.com/hashicorp/go-version v1.1.0
 	github.com/imdario/mergo v0.3.5 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be // indirect
-	github.com/mattn/go-runewidth v0.0.4 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/olekukonko/tablewriter v0.0.1
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/sirupsen/logrus v1.3.0
-	github.com/spf13/afero v1.2.0 // indirect
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
 	go.opencensus.io v0.19.0 // indirect
