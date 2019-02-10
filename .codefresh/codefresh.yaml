@@ -174,7 +174,7 @@ steps:
     image_name: codefresh/venonacli
     when:
       steps:
-      - name: build_binaries
+      - name: release_binaries
         on:
         - success
 
