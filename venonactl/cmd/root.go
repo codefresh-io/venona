@@ -47,6 +47,13 @@ var (
 	// set to false by default, when running hack/build.sh will change to true
 	// to prevent version checking during development
 	localDevFlow = "false"
+
+	configPath string
+	cfAPIHost  string
+	cfAPIToken string
+	cfContext  string
+
+	kubeConfigPath string
 )
 
 var rootCmd = &cobra.Command{
@@ -59,23 +66,30 @@ var rootCmd = &cobra.Command{
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 
-		configPath := cmd.Flag("cfconfig").Value.String()
 		if configPath == "" {
 			configPath = fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
 		}
-		context, err := sdkUtils.ReadAuthContext(configPath, cmd.Flag("context").Value.String())
-		if err != nil {
-			return err
+
+		if cfAPIHost == "" && cfAPIToken == "" {
+			context, err := sdkUtils.ReadAuthContext(configPath, cfContext)
+			if err != nil {
+				return err
+			}
+			cfAPIHost = context.URL
+			cfAPIToken = context.Token
+
+			logrus.WithFields(logrus.Fields{
+				"Context-Name":   context.Name,
+				"Codefresh-Host": cfAPIHost,
+			}).Debug("Using codefresh context")
+		} else {
+			logrus.Debug("Using creentials from environment variables")
 		}
-		logrus.WithFields(logrus.Fields{
-			"Context-Name":   context.Name,
-			"Codefresh-Host": context.URL,
-		}).Debug("Using codefresh context")
 		client := codefresh.New(&codefresh.ClientOptions{
 			Auth: codefresh.AuthOptions{
-				Token: context.Token,
+				Token: cfAPIToken,
 			},
-			Host: context.URL,
+			Host: cfAPIHost,
 		})
 
 		s := store.GetStore()
@@ -118,8 +132,6 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		kubeConfigPath := cmd.Flag("kube-config-path").Value.String()
-
 		if kubeConfigPath == "" {
 			currentUser, _ := user.Current()
 			kubeConfigPath = path.Join(currentUser.HomeDir, ".kube", "config")
@@ -134,8 +146,8 @@ var rootCmd = &cobra.Command{
 		}
 		s.ClusterInCodefresh = clusterName
 		s.CodefreshAPI = &store.CodefreshAPI{
-			Host:   context.URL,
-			Token:  context.Token,
+			Host:   cfAPIHost,
+			Token:  cfAPIToken,
 			Client: client,
 		}
 		s.Mode = store.ModeInCluster
@@ -157,9 +169,15 @@ func init() {
 	viper.BindEnv("kubeconfig", "KUBECONFIG")
 	viper.BindEnv("cfconfig", "CFCONFIG")
 
-	rootCmd.PersistentFlags().String("cfconfig", viper.GetString("cfconfig"), "Config file (default is $HOME/.cfconfig) [$CFCONFIG]")
-	rootCmd.PersistentFlags().String("context", "", "Name of the context from --cfconfig (default is current-context)")
-	rootCmd.PersistentFlags().String("kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
+	viper.BindEnv("apihost", "API_HOST")
+	viper.BindEnv("apitoken", "API_TOKEN")
+
+	rootCmd.PersistentFlags().StringVar(&configPath, "cfconfig", viper.GetString("cfconfig"), "Config file (default is $HOME/.cfconfig) [$CFCONFIG]")
+	rootCmd.PersistentFlags().StringVar(&cfAPIHost, "api-host", viper.GetString("apihost"), "Host of codefresh [$API_HOST]")
+	rootCmd.PersistentFlags().StringVar(&cfAPIToken, "api-token", viper.GetString("apitoken"), "Codefresh API token [$API_TOKEN]")
+	rootCmd.PersistentFlags().StringVar(&cfContext, "context", "", "Name of the context from --cfconfig (default is current-context)")
+
+	rootCmd.PersistentFlags().StringVar(&kubeConfigPath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
 	rootCmd.PersistentFlags().BoolVar(&skipVerionCheck, "skip-version-check", false, "Do not compare current Venona's version with latest")
 
