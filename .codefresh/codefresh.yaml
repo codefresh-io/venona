@@ -170,8 +170,8 @@ steps:
     type: build
     stage: Build & Test
     tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+    working_directory: ${{main_clone}}/venonactl
     image_name: codefresh/venonacli
-    dockerfile: venonactl/Dockerfile
     when:
       steps:
       - name: build_binaries
