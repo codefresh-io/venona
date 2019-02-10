@@ -29,6 +29,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
 	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -37,6 +38,9 @@ var (
 	skipRuntimeInstallation       bool
 	installOnlyRuntimeEnvironment bool
 	setDefaultRuntime             bool
+
+	kubeNamespace   string
+	kubeContextName string
 )
 
 // installCmd represents the install command
@@ -46,15 +50,15 @@ var installCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
 
-		kubeContextName := cmd.Flag("kube-context-name").Value.String()
-		kubeNamespace := cmd.Flag("kube-namespace").Value.String()
-
 		if kubeContextName == "" {
 			config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
 			kubeContextName = config.CurrentContext
 			logrus.WithFields(logrus.Fields{
 				"Kube-Context-Name": kubeContextName,
 			}).Debug("Kube Context is not set, using current context")
+		}
+		if kubeNamespace == "" {
+			kubeNamespace = "default"
 		}
 		s.KubernetesAPI.ContextName = kubeContextName
 		s.KubernetesAPI.Namespace = kubeNamespace
@@ -96,14 +100,18 @@ var installCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(installCmd)
+
+	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
+	viper.BindEnv("kube-context", "KUBE_CONTEXT")
+
 	installCmd.Flags().StringVar(&clusterName, "cluster-name", "", "cluster name (if not passed runtime-environment will be created cluster-less)")
 	installCmd.Flags().String("venona-version", "", "Version of venona to install (default is the latest)")
 	installCmd.Flags().BoolVar(&skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().String("runtime-environment", "", "if --skip-runtime-installation set, will try to configure venona on current runtime-environment")
 	installCmd.Flags().BoolVar(&installOnlyRuntimeEnvironment, "only-runtime-environment", false, "Set to true to onlky configure namespace as runtime-environment for Codefresh")
 	installCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Set to true to simulate installation")
-	installCmd.Flags().String("kube-namespace", "default", "Name of the namespace on which venona should be installed")
-	installCmd.Flags().String("kube-context-name", "", "Name of the kubernetes context on which venona should be installed (default is current-context)")
+	installCmd.Flags().StringVar(&kubeNamespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
+	installCmd.Flags().StringVar(&kubeContextName, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installCmd.Flags().BoolVar(&setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 }
 
