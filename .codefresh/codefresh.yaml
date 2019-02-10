@@ -164,3 +164,31 @@ steps:
       branch:
         ignore:
         - master
+
+  build_cli_image:
+    title: "Building venona cli image"
+    type: build
+    stage: Build & Test
+    tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: codefresh/venonacli
+    dockerfile: venonactl/Dockerfile
+    when:
+      steps:
+      - name: build_binaries
+        on:
+        - success
+
+  push_cli_image:
+    title: "Push image with venona cli"
+    stage: Release
+    type: push
+    candidate: ${{build_cli_image}}
+    tags:
+    - latest
+    - ${{VERSION}}
+    registry: "dockerhub"
+    when:
+      steps:
+        - name: build_cli_image
+          on:
+          - success
