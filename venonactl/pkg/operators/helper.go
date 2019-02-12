@@ -122,11 +122,17 @@ func NewKubeRESTClientConfig(s *store.Values) (*rest.Config, error) {
 
 // NewKubeClientset - returns clientset
 func NewKubeClientset(s *store.Values) (*kubernetes.Clientset, error) {
-	kubeClientConfig, err := NewKubeRESTClientConfig(s)
+	var config *rest.Config
+	var err error
+	if s.KubernetesAPI.InCluster {
+		config, err = rest.InClusterConfig()
+	} else {
+		config, err = NewKubeRESTClientConfig(s)
+	}
 	if err != nil {
 		return nil, err
 	}
-	return kubernetes.NewForConfig(kubeClientConfig)
+	return kubernetes.NewForConfig(config)
 }
 
 func getKubeObjectsFromTempalte(values map[string]interface{}) (map[string]runtime.Object, error) {

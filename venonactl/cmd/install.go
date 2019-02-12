@@ -41,6 +41,7 @@ var (
 
 	kubeNamespace   string
 	kubeContextName string
+	inCluster       bool
 )
 
 // installCmd represents the install command
@@ -60,6 +61,9 @@ var installCmd = &cobra.Command{
 		if kubeNamespace == "" {
 			kubeNamespace = "default"
 		}
+
+		s.KubernetesAPI.InCluster = inCluster
+
 		s.KubernetesAPI.ContextName = kubeContextName
 		s.KubernetesAPI.Namespace = kubeNamespace
 
@@ -113,6 +117,7 @@ func init() {
 	installCmd.Flags().StringVar(&kubeNamespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installCmd.Flags().StringVar(&kubeContextName, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installCmd.Flags().BoolVar(&setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
+	installCmd.Flags().BoolVar(&inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 }
 
 func installRuntimeEnvironment() {
