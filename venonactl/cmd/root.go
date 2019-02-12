@@ -134,10 +134,12 @@ var rootCmd = &cobra.Command{
 
 		if kubeConfigPath == "" {
 			currentUser, _ := user.Current()
-			kubeConfigPath = path.Join(currentUser.HomeDir, ".kube", "config")
-			logrus.WithFields(logrus.Fields{
-				"Kube-Config-Path": kubeConfigPath,
-			}).Debug("Path to kubeconfig not set, using default")
+			if currentUser != nil {
+				kubeConfigPath = path.Join(currentUser.HomeDir, ".kube", "config")
+				logrus.WithFields(logrus.Fields{
+					"Kube-Config-Path": kubeConfigPath,
+				}).Debug("Path to kubeconfig not set, using default")
+			}
 		}
 
 		s.AppName = store.ApplicationName

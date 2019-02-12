@@ -43,6 +43,7 @@ type (
 		ConfigPath  string
 		Namespace   string
 		ContextName string
+		InCluster   bool
 	}
 
 	CodefreshAPI struct {
