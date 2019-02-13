@@ -29,6 +29,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print Venona version",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
+		buildBasicStore()
 		fmt.Printf("Date: %s\n", s.Version.Current.Date)
 		fmt.Printf("Commit: %s\n", s.Version.Current.Commit)
 		fmt.Printf("Local Version: %s\n", s.Version.Current.Version)
