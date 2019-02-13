@@ -56,6 +56,7 @@ var deleteCmd = &cobra.Command{
 		if kubeContextFlag != nil {
 			contextName = kubeContextFlag.Value.String()
 		}
+		s.KubernetesAPI.InCluster = inCluster
 		for _, name := range args {
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
 			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
@@ -114,6 +115,7 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 	deleteCmd.Flags().String("kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
 	deleteCmd.Flags().StringVar(&revertTo, "revert-to", "", "Set to the name of the runtime-environment to set as default")
+	deleteCmd.Flags().BoolVar(&inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 }
 
 func collectError(errors []DeletionError, err error, reName string, op string) []DeletionError {
