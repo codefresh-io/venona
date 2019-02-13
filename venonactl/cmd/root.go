@@ -76,6 +76,10 @@ var rootCmd = &cobra.Command{
 			},
 		}
 
+		s.Image = &store.Image{
+			Name: "codefresh/venona",
+		}
+
 		if skipVerionCheck || localDevFlow == "true" {
 			latestVersion := &store.LatestVersion{
 				Version:   store.DefaultVersion,
@@ -134,9 +138,6 @@ var rootCmd = &cobra.Command{
 			Host: cfAPIHost,
 		})
 
-		s.Image = &store.Image{
-			Name: "codefresh/venona",
-		}
 		if kubeConfigPath == "" {
 			currentUser, _ := user.Current()
 			if currentUser != nil {
