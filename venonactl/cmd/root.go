@@ -62,8 +62,50 @@ var rootCmd = &cobra.Command{
 
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		fullPath := cmd.CommandPath()
+		isVersionTarget := strings.Index(fullPath, "version") != -1
 		if verbose == true {
 			logrus.SetLevel(logrus.DebugLevel)
+		}
+
+		s := store.GetStore()
+		s.Version = &store.Version{
+			Current: &store.CurrentVersion{
+				Version: version,
+				Commit:  commit,
+				Date:    date,
+			},
+		}
+
+		if skipVerionCheck || localDevFlow == "true" {
+			latestVersion := &store.LatestVersion{
+				Version:   store.DefaultVersion,
+				IsDefault: true,
+			}
+			s.Version.Latest = latestVersion
+			logrus.WithFields(logrus.Fields{
+				"Default-Version": store.DefaultVersion,
+				"Image-Tag":       s.Version.Current.Version,
+			}).Debug("Skipping version check")
+		} else {
+			latestVersion := &store.LatestVersion{
+				Version:   store.GetLatestVersion(),
+				IsDefault: false,
+			}
+			s.Image.Tag = latestVersion.Version
+			s.Version.Latest = latestVersion
+			res, _ := store.IsRunningLatestVersion()
+			// the local version and the latest version not match
+			// make sure the command is no venonactl version
+			if !res && !isVersionTarget {
+				logrus.WithFields(logrus.Fields{
+					"Local-Version":  s.Version.Current.Version,
+					"Latest-Version": s.Version.Latest.Version,
+				}).Info("New version is avaliable, please update")
+			}
+		}
+
+		if isVersionTarget {
+			return nil
 		}
 
 		if configPath == "" {
@@ -92,46 +134,9 @@ var rootCmd = &cobra.Command{
 			Host: cfAPIHost,
 		})
 
-		s := store.GetStore()
-		s.Version = &store.Version{
-			Current: &store.CurrentVersion{
-				Version: version,
-				Commit:  commit,
-				Date:    date,
-			},
-		}
-
 		s.Image = &store.Image{
 			Name: "codefresh/venona",
 		}
-		if skipVerionCheck || localDevFlow == "true" {
-			latestVersion := &store.LatestVersion{
-				Version:   store.DefaultVersion,
-				IsDefault: true,
-			}
-			s.Version.Latest = latestVersion
-			logrus.WithFields(logrus.Fields{
-				"Default-Version": store.DefaultVersion,
-				"Image-Tag":       s.Version.Current.Version,
-			}).Debug("Skipping version check")
-		} else {
-			latestVersion := &store.LatestVersion{
-				Version:   store.GetLatestVersion(),
-				IsDefault: false,
-			}
-			s.Image.Tag = latestVersion.Version
-			s.Version.Latest = latestVersion
-			res, _ := store.IsRunningLatestVersion()
-			// the local version and the latest version not match
-			// make sure the command is no venonactl version
-			if !res && strings.Index(fullPath, "version") == -1 {
-				logrus.WithFields(logrus.Fields{
-					"Local-Version":  s.Version.Current.Version,
-					"Latest-Version": s.Version.Latest.Version,
-				}).Info("New version is avaliable, please update")
-			}
-		}
-
 		if kubeConfigPath == "" {
 			currentUser, _ := user.Current()
 			if currentUser != nil {
@@ -153,7 +158,6 @@ var rootCmd = &cobra.Command{
 			Client: client,
 		}
 		s.Mode = store.ModeInCluster
-
 		s.ServerCert = &certs.ServerCert{}
 
 		return nil
