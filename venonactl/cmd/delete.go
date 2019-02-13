@@ -18,6 +18,7 @@ limitations under the License.
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
@@ -32,6 +33,10 @@ type DeletionError struct {
 	operation string
 	name      string
 }
+
+var (
+	revertTo string
+)
 
 // deleteCmd represents the status command
 var deleteCmd = &cobra.Command{
@@ -53,24 +58,14 @@ var deleteCmd = &cobra.Command{
 		}
 		for _, name := range args {
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
-			if err != nil {
-				errors = append(errors, DeletionError{
-					err:       err,
-					name:      name,
-					operation: "Get Runtime-Environment from Codefresh",
-				})
-				continue
+			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
+
+			if revertTo != "" {
+				_, err := s.CodefreshAPI.Client.RuntimeEnvironments().Default(revertTo)
+				errors = collectError(errors, err, name, fmt.Sprintf("Revert Runtime-Environment to: %s", revertTo))
 			}
 			deleted, err := s.CodefreshAPI.Client.RuntimeEnvironments().Delete(name)
-
-			if err != nil {
-				errors = append(errors, DeletionError{
-					err:       err,
-					name:      name,
-					operation: "Delete Runtime-Environment from Codefresh",
-				})
-				continue
-			}
+			errors = collectError(errors, err, name, "Delete Runtime-Environment from Codefresh")
 
 			if deleted {
 				if contextName == "" {
@@ -118,4 +113,16 @@ var deleteCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(deleteCmd)
 	deleteCmd.Flags().String("kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
+	deleteCmd.Flags().StringVar(&revertTo, "revert-to", "", "Set to the name of the runtime-environment to set as default")
+}
+
+func collectError(errors []DeletionError, err error, reName string, op string) []DeletionError {
+	if err == nil {
+		return errors
+	}
+	return append(errors, DeletionError{
+		err:       err,
+		name:      reName,
+		operation: op,
+	})
 }
