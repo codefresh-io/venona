@@ -54,6 +54,10 @@ var deleteCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
+		prepareLogger()
+		buildBasicStore()
+		extendStoreWithCodefershClient()
+		extendStoreWithKubeClient()
 		var errors []DeletionError
 		s.KubernetesAPI.InCluster = deleteCmdOptions.kube.inCluster
 		for _, name := range args {
