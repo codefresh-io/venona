@@ -145,5 +145,8 @@ func prepareLogger() {
 }
 
 func isUsingDefaultStorageClass(sc string) bool {
+	if sc == "" {
+		return true
+	}
 	return strings.HasPrefix(sc, runtimectl.DefaultStorageClassNamePrefix)
 }
