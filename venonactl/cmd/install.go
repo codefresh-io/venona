@@ -130,20 +130,37 @@ func init() {
 }
 
 func installRuntimeEnvironment() {
-	cfAPI := codefresh.New()
-	err := cfAPI.Validate()
-	internal.DieOnError(err)
+	s := store.GetStore()
+	registerWithAgent := true
+	name := s.KubernetesAPI.ContextName
+	if s.ClusterInCodefresh != "" {
+		registerWithAgent = false
+		name = s.ClusterInCodefresh
+	}
+	opt := &codefresh.APIOptions{
+		Logger:            logrus.New(),
+		CodefreshHost:     s.CodefreshAPI.Host,
+		CodefreshToken:    s.CodefreshAPI.Token,
+		ClusterName:       name,
+		ClusterNamespace:  s.KubernetesAPI.Namespace,
+		RegisterWithAgent: registerWithAgent,
+		MarkAsDefault:     installCmdOptions.setDefaultRuntime,
+	}
+	cf := codefresh.NewCodefreshAPI(opt)
 
-	err = cfAPI.Sign()
+	cert, err := cf.Sign()
+	internal.DieOnError(err)
+	err = cf.Validate()
 	internal.DieOnError(err)
 
 	err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
 	internal.DieOnError(err)
 
-	err = cfAPI.Register(&codefresh.RegisterOptions{
-		MarkDefaultRuntime: installCmdOptions.setDefaultRuntime,
-	})
+	re, err := cf.Register()
 	internal.DieOnError(err)
+
+	s.RuntimeEnvironment = re.Metadata.Name
+	s.ServerCert = cert
 }
 
 func installvenona() {
