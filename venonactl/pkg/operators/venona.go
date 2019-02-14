@@ -23,8 +23,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
-
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
@@ -66,7 +64,7 @@ func (u *venonaOperator) Install() error {
 
 	kubeClientset, err := NewKubeClientset(s)
 	if err != nil {
-		internal.DieOnError(fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err))
+		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
 	namespace := s.KubernetesAPI.Namespace
 	var createErr error

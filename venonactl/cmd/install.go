@@ -24,8 +24,6 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
-
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
 	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/spf13/cobra"
@@ -91,14 +89,14 @@ var installCmd = &cobra.Command{
 		}
 		s.ClusterInCodefresh = installCmdOptions.clusterNameInCodefresh
 		if installCmdOptions.installOnlyRuntimeEnvironment == true && installCmdOptions.skipRuntimeInstallation == true {
-			internal.DieOnError(fmt.Errorf("Cannot use both flags skip-runtime-installation and only-runtime-environment"))
+			dieOnError(fmt.Errorf("Cannot use both flags skip-runtime-installation and only-runtime-environment"))
 		}
 		if installCmdOptions.installOnlyRuntimeEnvironment == true {
 			registerRuntimeEnvironment()
 			return
 		} else if installCmdOptions.skipRuntimeInstallation == true {
 			if installCmdOptions.runtimeEnvironmentName == "" {
-				internal.DieOnError(fmt.Errorf("runtime-environment flag is required when using flag skip-runtime-installation"))
+				dieOnError(fmt.Errorf("runtime-environment flag is required when using flag skip-runtime-installation"))
 			}
 			s.RuntimeEnvironment = installCmdOptions.runtimeEnvironmentName
 			logrus.Info("Skipping installation of runtime environment, installing venona only")
@@ -158,15 +156,15 @@ func registerRuntimeEnvironment() {
 	cf := codefresh.NewCodefreshAPI(opt)
 
 	cert, err := cf.Sign()
-	internal.DieOnError(err)
+	dieOnError(err)
 	err = cf.Validate()
-	internal.DieOnError(err)
+	dieOnError(err)
 
 	err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
-	internal.DieOnError(err)
+	dieOnError(err)
 
 	re, err := cf.Register()
-	internal.DieOnError(err)
+	dieOnError(err)
 
 	s.RuntimeEnvironment = re.Metadata.Name
 	s.ServerCert = cert
@@ -174,10 +172,10 @@ func registerRuntimeEnvironment() {
 
 func installvenona() {
 	err := runtimectl.GetOperator(runtimectl.VenonaOperatorType).Install()
-	internal.DieOnError(err)
+	dieOnError(err)
 }
 
 func configureVolumeProvisioner() {
 	err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Install()
-	internal.DieOnError(err)
+	dieOnError(err)
 }

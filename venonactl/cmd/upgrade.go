@@ -19,7 +19,6 @@ limitations under the License.
 import (
 	"errors"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
 	"github.com/codefresh-io/venona/venonactl/pkg/operators"
 	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
@@ -68,7 +67,7 @@ var upgradeCmd = &cobra.Command{
 			operators.GetOperator(operators.VenonaOperatorType).Upgrade()
 			if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
 				err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
-				internal.DieOnError(err)
+				dieOnError(err)
 			}
 		}
 	},

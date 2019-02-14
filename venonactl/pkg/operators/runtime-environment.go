@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
 	"github.com/sirupsen/logrus"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
@@ -49,7 +48,7 @@ func (u *RuntimeEnvironmentOperator) Install() error {
 
 	kubeClientset, err := NewKubeClientset(s)
 	if err != nil {
-		internal.DieOnError(fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err))
+		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
 	namespace := s.KubernetesAPI.Namespace
 	var createErr error
