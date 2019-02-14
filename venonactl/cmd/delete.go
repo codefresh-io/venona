@@ -34,9 +34,13 @@ type DeletionError struct {
 	name      string
 }
 
-var (
+var deleteCmdOptions struct {
+	kube struct {
+		inCluster bool
+		context   string
+	}
 	revertTo string
-)
+}
 
 // deleteCmd represents the status command
 var deleteCmd = &cobra.Command{
@@ -50,27 +54,27 @@ var deleteCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
+		prepareLogger()
+		buildBasicStore()
+		extendStoreWithCodefershClient()
+		extendStoreWithKubeClient()
 		var errors []DeletionError
-		contextName := ""
-		kubeContextFlag := cmd.Flag("kube-context-name")
-		if kubeContextFlag != nil {
-			contextName = kubeContextFlag.Value.String()
-		}
-		s.KubernetesAPI.InCluster = inCluster
+		s.KubernetesAPI.InCluster = deleteCmdOptions.kube.inCluster
 		for _, name := range args {
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
 			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
 
-			if revertTo != "" {
-				_, err := s.CodefreshAPI.Client.RuntimeEnvironments().Default(revertTo)
-				errors = collectError(errors, err, name, fmt.Sprintf("Revert Runtime-Environment to: %s", revertTo))
+			if deleteCmdOptions.revertTo != "" {
+				_, err := s.CodefreshAPI.Client.RuntimeEnvironments().Default(deleteCmdOptions.revertTo)
+				errors = collectError(errors, err, name, fmt.Sprintf("Revert Runtime-Environment to: %s", deleteCmdOptions.revertTo))
 			}
 			deleted, err := s.CodefreshAPI.Client.RuntimeEnvironments().Delete(name)
 			errors = collectError(errors, err, name, "Delete Runtime-Environment from Codefresh")
 
 			if deleted {
-				if contextName == "" {
-					contextName = re.RuntimeScheduler.Cluster.ClusterProvider.Selector
+				contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
+				if contextName != "" {
+					contextName = deleteCmdOptions.kube.context
 				}
 				s.KubernetesAPI.ContextName = contextName
 				s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
@@ -83,6 +87,18 @@ var deleteCmd = &cobra.Command{
 					})
 					continue
 				}
+				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
+					err = runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
+					if err != nil {
+						errors = append(errors, DeletionError{
+							err:       err,
+							name:      name,
+							operation: "Delete volume provisioner related components",
+						})
+						continue
+					}
+				}
+
 				if re.Metadata.Agent {
 					err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Delete()
 					if err != nil {
@@ -94,6 +110,7 @@ var deleteCmd = &cobra.Command{
 						continue
 					}
 				}
+
 				logrus.Infof("Deleted %s", name)
 			}
 
@@ -113,9 +130,9 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-	deleteCmd.Flags().String("kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
-	deleteCmd.Flags().StringVar(&revertTo, "revert-to", "", "Set to the name of the runtime-environment to set as default")
-	deleteCmd.Flags().BoolVar(&inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
+	deleteCmd.Flags().StringVar(&deleteCmdOptions.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
+	deleteCmd.Flags().StringVar(&deleteCmdOptions.revertTo, "revert-to", "", "Set to the name of the runtime-environment to set as default")
+	deleteCmd.Flags().BoolVar(&deleteCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 }
 
 func collectError(errors []DeletionError, err error, reName string, op string) []DeletionError {

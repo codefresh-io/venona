@@ -30,19 +30,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var statusCmdOpt struct {
+	kube struct {
+		context string
+	}
+	dryRun bool
+}
+
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status [name]",
 	Short: "Get status of Codefresh's runtime-environment",
 	Long:  "Pass the name of the runtime environment to see more details information about the underlying resources",
 	Run: func(cmd *cobra.Command, args []string) {
+		prepareLogger()
+		buildBasicStore()
+		extendStoreWithCodefershClient()
+		extendStoreWithKubeClient()
+
 		s := store.GetStore()
 		table := internal.CreateTable()
-		contextName := ""
-		kubeContextFlag := cmd.Flag("kube-context-name")
-		if kubeContextFlag != nil {
-			contextName = kubeContextFlag.Value.String()
-		}
 		// When requested status for specific runtime
 		if len(args) > 0 {
 			name := args[0]
@@ -62,7 +69,7 @@ var statusCmd = &cobra.Command{
 				table.Append([]string{re.Metadata.Name, message, time})
 				table.Render()
 				fmt.Println()
-				printTableWithKubernetesRelatedResources(re, contextName)
+				printTableWithKubernetesRelatedResources(re, statusCmdOpt.kube.context)
 			} else {
 				logrus.Warnf("Runtime-Environment %s has not Venona's agent", name)
 			}
@@ -114,5 +121,5 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 
 func init() {
 	rootCmd.AddCommand(statusCmd)
-	statusCmd.Flags().String("kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
+	statusCmd.Flags().StringVar(&statusCmdOpt.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
 }

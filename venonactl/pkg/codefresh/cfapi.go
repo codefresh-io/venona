@@ -20,83 +20,89 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
-
 	"archive/zip"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
-)
-
-const (
-	// DefaultURL - by default it is Codefresh Production
-	DefaultURL = "https://g.codefresh.io"
-
-	codefreshAgent = "venona-ctl"
-	userAgent      = "venona-ctl"
 )
 
 type (
-	// CfAPI struct to call Codefresh API
-	CfAPI struct {
+	API interface {
+		RuntimeEnvironmentRegistrator
 	}
 
-	RegisterOptions struct {
-		MarkDefaultRuntime bool
+	APIOptions struct {
+		Logger                logger
+		CodefreshHost         string
+		CodefreshToken        string
+		ClusterName           string
+		ClusterNamespace      string
+		RegisterWithAgent     bool
+		MarkAsDefault         bool
+		StorageClass          string
+		IsDefaultStorageClass bool
+	}
+
+	RuntimeEnvironmentRegistrator interface {
+		Validate() error
+		Sign() (*certs.ServerCert, error)
+		Register() (*codefresh.RuntimeEnvironment, error)
+	}
+
+	api struct {
+		logger                logger
+		codefresh             codefresh.Codefresh
+		clustername           string
+		clusternamespace      string
+		registerWithAgent     bool
+		markAsDefault         bool
+		storageClass          string
+		isDefaultStorageClass bool
+	}
+
+	logger interface {
+		Debug(args ...interface{})
+		Debugf(format string, args ...interface{})
 	}
 )
 
-// New - constructs CfAPI
-func New() *CfAPI {
-	return &CfAPI{}
+// NewCodefreshAPI - creates new codefresh api
+func NewCodefreshAPI(opt *APIOptions) API {
+	return &api{
+		logger: opt.Logger,
+		codefresh: codefresh.New(&codefresh.ClientOptions{
+			Auth: codefresh.AuthOptions{
+				Token: opt.CodefreshToken,
+			},
+			Host: opt.CodefreshHost,
+		}),
+		clustername:           opt.ClusterName,
+		clusternamespace:      opt.ClusterNamespace,
+		registerWithAgent:     opt.RegisterWithAgent,
+		storageClass:          opt.StorageClass,
+		isDefaultStorageClass: opt.IsDefaultStorageClass,
+	}
 }
 
-// Validate calls codefresh API to validate runtimectlConfig
-func (u *CfAPI) Validate() error {
-	logrus.Debug("Calling codefresh.Validate")
-	cf := store.GetStore().CodefreshAPI.Client
-	s := store.GetStore()
-	opt := &codefresh.ValidateRuntimeOptions{
-		Namespace: s.KubernetesAPI.Namespace,
+func (a *api) Validate() error {
+	a.logger.Debug("Validating runtime-environment")
+	opt := codefresh.ValidateRuntimeOptions{
+		Cluster:   a.clustername,
+		Namespace: a.clusternamespace,
 	}
-	if s.ClusterInCodefresh != "" {
-		opt.Cluster = s.ClusterInCodefresh
-	} else {
-		opt.Cluster = s.KubernetesAPI.ContextName
-	}
-	err := cf.RuntimeEnvironments().Validate(opt)
-
-	if err != nil {
-		return fmt.Errorf("Validation failed with error: %s", err.Error())
-	}
-
-	logrus.Debug("Finished validation")
-	return nil
+	return a.codefresh.RuntimeEnvironments().Validate(&opt)
 }
 
-// Sign calls codefresh API to sign certificates
-func (u *CfAPI) Sign() error {
-	logrus.Debug("Entering codefresh.Sign")
-	s := store.GetStore()
+func (a *api) Sign() (*certs.ServerCert, error) {
+	a.logger.Debug("Signing runtime-environment")
 	serverCert, err := certs.NewServerCert()
 	if err != nil {
-		return err
+		return nil, err
 	}
+	certExtraSANs := fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io", a.clusternamespace, a.clusternamespace)
+	a.logger.Debugf("certExtraSANs = %s", certExtraSANs)
 
-	logrus.Debug("Generated ServerCerts Csr")
-
-	var certExtraSANs string
-	if "kubernetesDind" == runtimectl.TypeKubernetesDind {
-		namespace := s.KubernetesAPI.Namespace
-		certExtraSANs = fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io", namespace, namespace)
-	} else {
-		certExtraSANs = "IP:127.0.0.1,DNS:*.cf-cd.com,DNS:*.codefresh.io"
-	}
-	logrus.Debugf("certExtraSANs = %s", certExtraSANs)
-	byteArray, err := store.GetStore().CodefreshAPI.Client.RuntimeEnvironments().SignCertificate(&codefresh.SignCertificatesOptions{
+	byteArray, err := a.codefresh.RuntimeEnvironments().SignCertificate(&codefresh.SignCertificatesOptions{
 		AltName: certExtraSANs,
 		CSR:     serverCert.Csr,
 	})
@@ -104,7 +110,7 @@ func (u *CfAPI) Sign() error {
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, zf := range zipReader.File {
 		buf := new(bytes.Buffer)
@@ -117,7 +123,7 @@ func (u *CfAPI) Sign() error {
 		} else if zf.Name == "cf-server-cert.pem" {
 			serverCert.Cert = buf.String()
 		} else {
-			logrus.Debugf("Warning: Unknown filename in sign responce %s", zf.Name)
+			a.logger.Debugf("Warning: Unknown filename in sign responce %s", zf.Name)
 		}
 	}
 
@@ -136,49 +142,38 @@ func (u *CfAPI) Sign() error {
 		missingCerts += " ca"
 	}
 	if missingCerts != "" {
-		return fmt.Errorf("Failed to to generate and sign certificates: %s is missing", missingCerts)
+		return nil, fmt.Errorf("Failed to to generate and sign certificates: %s is missing", missingCerts)
 	}
-	s.ServerCert = serverCert
-	return nil
+
+	// update store with certs
+	return serverCert, nil
 }
 
-// Register calls codefresh API to register runtimectl environment
-func (u *CfAPI) Register(opt *RegisterOptions) error {
-	logrus.Debug("Entering codefresh.Register")
-	s := store.GetStore()
+func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
+	a.logger.Debug("Registering runtime-environment")
 	options := &codefresh.CreateRuntimeOptions{
-		Namespace: s.KubernetesAPI.Namespace,
+		Namespace: a.clusternamespace,
+		HasAgent:  a.registerWithAgent,
+		Cluster:   a.clustername,
 	}
 
-	if s.ClusterInCodefresh == "" {
-		options.HasAgent = true
-		options.Cluster = s.KubernetesAPI.ContextName
-	} else {
-		options.HasAgent = false
-		options.Cluster = s.ClusterInCodefresh
+	options.StorageClass = fmt.Sprintf("%s-%s", a.storageClass, a.clusternamespace)
+	if !a.isDefaultStorageClass {
+		options.StorageClass = a.storageClass
 	}
-	cf := s.CodefreshAPI.Client
-	logrus.WithFields(logrus.Fields{
-		"Options-Has-Agent": options.HasAgent,
-		"Options-Cluster":   options.Cluster,
-		"Options-Namespace": options.Namespace,
-	}).Debug("Registering runtime environmnet")
-	re, err := cf.RuntimeEnvironments().Create(options)
 
+	re, err := a.codefresh.RuntimeEnvironments().Create(options)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	s.RuntimeEnvironment = re.Metadata.Name
-	logrus.Debugf("Created with name: %s", re.Metadata.Name)
-
-	if opt.MarkDefaultRuntime {
-		logrus.Debug("Setting runtime as deault")
-		_, err := cf.RuntimeEnvironments().Default(re.Metadata.Name)
+	if a.markAsDefault {
+		a.logger.Debug("Setting runtime as deault")
+		_, err := a.codefresh.RuntimeEnvironments().Default(re.Metadata.Name)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return re, nil
 }

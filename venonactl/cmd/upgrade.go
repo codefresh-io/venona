@@ -19,10 +19,20 @@ limitations under the License.
 import (
 	"errors"
 
+	"github.com/codefresh-io/venona/venonactl/internal"
 	"github.com/codefresh-io/venona/venonactl/pkg/operators"
+	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+var upgradeCmdOpt struct {
+	kube struct {
+		context string
+	}
+	dryRun bool
+}
 
 // upgradeCmd represents the upgrade command
 var upgradeCmd = &cobra.Command{
@@ -40,18 +50,32 @@ var upgradeCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		kubeContextFlag := cmd.Flag("kube-context-name")
+		prepareLogger()
+		buildBasicStore()
+		extendStoreWithCodefershClient()
+		extendStoreWithKubeClient()
+
 		re, _ := s.CodefreshAPI.Client.RuntimeEnvironments().Get(args[0])
 		contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
-		if kubeContextFlag != nil {
-			contextName = kubeContextFlag.Value.String()
+		if upgradeCmdOpt.kube.context != "" {
+			contextName = upgradeCmdOpt.kube.context
 		}
 		s.KubernetesAPI.ContextName = contextName
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
-		operators.GetOperator(operators.VenonaOperatorType).Upgrade()
+		if upgradeCmdOpt.dryRun {
+			logrus.Info("Running in dry-run mode")
+		} else {
+			operators.GetOperator(operators.VenonaOperatorType).Upgrade()
+			if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
+				err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
+				internal.DieOnError(err)
+			}
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(upgradeCmd)
+	upgradeCmd.Flags().StringVar(&upgradeCmdOpt.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
+	upgradeCmd.Flags().BoolVar(&upgradeCmdOpt.dryRun, "dry-run", false, "Set to to actually upgrade the kubernetes components")
 }

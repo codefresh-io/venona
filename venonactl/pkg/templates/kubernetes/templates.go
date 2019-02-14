@@ -6,7 +6,7 @@ package kubernetes
 func TemplatesMap() map[string]string {
     templatesMap := make(map[string]string)
 
-templatesMap["cluster-role-binding.dind-volume-provisioner.re.yaml"] = `---
+templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -36,7 +36,7 @@ roleRef:
   name: system:discovery
   apiGroup: rbac.authorization.k8s.io` 
 
-templatesMap["cluster-role.dind-volume-provisioner.re.yaml"] = `kind: ClusterRole
+templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
@@ -84,7 +84,7 @@ data:
 
 ` 
 
-templatesMap["daemonset.dind-lv-monitor.re.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: dind-lv-monitor-{{ .AppName }}
@@ -144,7 +144,7 @@ spec:
           path: /var/lib/codefresh/codefresh/dind-volumes
 ` 
 
-templatesMap["deployment.dind-volume-provisioner.re.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: dind-volume-provisioner-{{ .AppName }}
@@ -309,7 +309,7 @@ metadata:
 data:
   codefresh.token: {{ .AgentToken }}` 
 
-templatesMap["service-account.dind-volume-provisioner.re.yaml"] = `---
+templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -325,7 +325,7 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}` 
 
-templatesMap["storageclass.dind-local-volume-provisioner.re.yaml"] = `---
+templatesMap["storageclass.dind-local-volume-provisioner.vp.yaml"] = `---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
