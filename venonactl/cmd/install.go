@@ -76,7 +76,7 @@ var installCmd = &cobra.Command{
 		s.KubernetesAPI.ContextName = installCmdOptions.kube.context
 		s.KubernetesAPI.Namespace = installCmdOptions.kube.namespace
 
-		if installCmdOptions.dryRun == true {
+		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun
 			logrus.Info("Running in dry-run mode")
 		}
