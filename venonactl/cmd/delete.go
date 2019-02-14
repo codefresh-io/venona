@@ -87,6 +87,18 @@ var deleteCmd = &cobra.Command{
 					})
 					continue
 				}
+				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
+					err = runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
+					if err != nil {
+						errors = append(errors, DeletionError{
+							err:       err,
+							name:      name,
+							operation: "Delete volume provisioner related components",
+						})
+						continue
+					}
+				}
+
 				if re.Metadata.Agent {
 					err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Delete()
 					if err != nil {
@@ -98,6 +110,7 @@ var deleteCmd = &cobra.Command{
 						continue
 					}
 				}
+
 				logrus.Infof("Deleted %s", name)
 			}
 

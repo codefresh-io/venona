@@ -19,7 +19,9 @@ limitations under the License.
 import (
 	"errors"
 
+	"github.com/codefresh-io/venona/venonactl/internal"
 	"github.com/codefresh-io/venona/venonactl/pkg/operators"
+	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -64,6 +66,10 @@ var upgradeCmd = &cobra.Command{
 			logrus.Info("Running in dry-run mode")
 		} else {
 			operators.GetOperator(operators.VenonaOperatorType).Upgrade()
+			if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
+				err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
+				internal.DieOnError(err)
+			}
 		}
 	},
 }

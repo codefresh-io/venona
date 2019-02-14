@@ -5,10 +5,12 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"strings"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
+	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/sirupsen/logrus"
 )
@@ -140,4 +142,8 @@ func prepareLogger() {
 	if verbose == true {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
+}
+
+func isUsingDefaultStorageClass(sc string) bool {
+	return strings.HasPrefix(sc, runtimectl.DefaultStorageClassNamePrefix)
 }

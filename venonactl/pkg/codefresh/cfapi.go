@@ -32,13 +32,15 @@ type (
 	}
 
 	APIOptions struct {
-		Logger            logger
-		CodefreshHost     string
-		CodefreshToken    string
-		ClusterName       string
-		ClusterNamespace  string
-		RegisterWithAgent bool
-		MarkAsDefault     bool
+		Logger                logger
+		CodefreshHost         string
+		CodefreshToken        string
+		ClusterName           string
+		ClusterNamespace      string
+		RegisterWithAgent     bool
+		MarkAsDefault         bool
+		StorageClass          string
+		IsDefaultStorageClass bool
 	}
 
 	RuntimeEnvironmentRegistrator interface {
@@ -48,12 +50,14 @@ type (
 	}
 
 	api struct {
-		logger            logger
-		codefresh         codefresh.Codefresh
-		clustername       string
-		clusternamespace  string
-		registerWithAgent bool
-		markAsDefault     bool
+		logger                logger
+		codefresh             codefresh.Codefresh
+		clustername           string
+		clusternamespace      string
+		registerWithAgent     bool
+		markAsDefault         bool
+		storageClass          string
+		isDefaultStorageClass bool
 	}
 
 	logger interface {
@@ -72,9 +76,11 @@ func NewCodefreshAPI(opt *APIOptions) API {
 			},
 			Host: opt.CodefreshHost,
 		}),
-		clustername:       opt.ClusterName,
-		clusternamespace:  opt.ClusterNamespace,
-		registerWithAgent: opt.RegisterWithAgent,
+		clustername:           opt.ClusterName,
+		clusternamespace:      opt.ClusterNamespace,
+		registerWithAgent:     opt.RegisterWithAgent,
+		storageClass:          opt.StorageClass,
+		isDefaultStorageClass: opt.IsDefaultStorageClass,
 	}
 }
 
@@ -149,6 +155,11 @@ func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 		Namespace: a.clusternamespace,
 		HasAgent:  a.registerWithAgent,
 		Cluster:   a.clustername,
+	}
+
+	options.StorageClass = fmt.Sprintf("%s-%s", a.storageClass, a.clusternamespace)
+	if !a.isDefaultStorageClass {
+		options.StorageClass = a.storageClass
 	}
 
 	re, err := a.codefresh.RuntimeEnvironments().Create(options)

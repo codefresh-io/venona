@@ -40,7 +40,8 @@ var installCmdOptions struct {
 		inCluster bool
 		context   string
 	}
-	venona struct {
+	storageClass string
+	venona       struct {
 		version string
 	}
 	setDefaultRuntime             bool
@@ -93,7 +94,7 @@ var installCmd = &cobra.Command{
 			internal.DieOnError(fmt.Errorf("Cannot use both flags skip-runtime-installation and only-runtime-environment"))
 		}
 		if installCmdOptions.installOnlyRuntimeEnvironment == true {
-			installRuntimeEnvironment()
+			registerRuntimeEnvironment()
 			return
 		} else if installCmdOptions.skipRuntimeInstallation == true {
 			if installCmdOptions.runtimeEnvironmentName == "" {
@@ -103,8 +104,13 @@ var installCmd = &cobra.Command{
 			logrus.Info("Skipping installation of runtime environment, installing venona only")
 			installvenona()
 		} else {
-			installRuntimeEnvironment()
+			registerRuntimeEnvironment()
 			installvenona()
+		}
+		if isUsingDefaultStorageClass(installCmdOptions.storageClass) {
+			configureVolumeProvisioner()
+		} else {
+			logrus.Info("Non default StorageClass is set, skipping installation of volume provisioner")
 		}
 		logrus.Info("Installation completed Successfully\n")
 	},
@@ -121,6 +127,7 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.runtimeEnvironmentName, "runtime-environment", "", "if --skip-runtime-installation set, will try to configure venona on current runtime-environment")
 	installCmd.Flags().StringVar(&installCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installCmd.Flags().StringVar(&installCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
+	installCmd.Flags().StringVar(&installCmdOptions.storageClass, "storage-class", "", "Set a name of your custom storage class, note: this will not install volume provisioning components")
 
 	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
@@ -129,7 +136,7 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 }
 
-func installRuntimeEnvironment() {
+func registerRuntimeEnvironment() {
 	s := store.GetStore()
 	registerWithAgent := true
 	name := s.KubernetesAPI.ContextName
@@ -138,13 +145,15 @@ func installRuntimeEnvironment() {
 		name = s.ClusterInCodefresh
 	}
 	opt := &codefresh.APIOptions{
-		Logger:            logrus.New(),
-		CodefreshHost:     s.CodefreshAPI.Host,
-		CodefreshToken:    s.CodefreshAPI.Token,
-		ClusterName:       name,
-		ClusterNamespace:  s.KubernetesAPI.Namespace,
-		RegisterWithAgent: registerWithAgent,
-		MarkAsDefault:     installCmdOptions.setDefaultRuntime,
+		Logger:                logrus.New(),
+		CodefreshHost:         s.CodefreshAPI.Host,
+		CodefreshToken:        s.CodefreshAPI.Token,
+		ClusterName:           name,
+		ClusterNamespace:      s.KubernetesAPI.Namespace,
+		RegisterWithAgent:     registerWithAgent,
+		MarkAsDefault:         installCmdOptions.setDefaultRuntime,
+		StorageClass:          installCmdOptions.storageClass,
+		IsDefaultStorageClass: isUsingDefaultStorageClass(installCmdOptions.storageClass),
 	}
 	cf := codefresh.NewCodefreshAPI(opt)
 
@@ -165,5 +174,10 @@ func installRuntimeEnvironment() {
 
 func installvenona() {
 	err := runtimectl.GetOperator(runtimectl.VenonaOperatorType).Install()
+	internal.DieOnError(err)
+}
+
+func configureVolumeProvisioner() {
+	err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Install()
 	internal.DieOnError(err)
 }

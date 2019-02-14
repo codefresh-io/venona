@@ -3,7 +3,7 @@ module github.com/codefresh-io/venona/venonactl
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.4.3 // indirect
 	github.com/Azure/go-autorest v11.4.0+incompatible // indirect
-	github.com/codefresh-io/go-sdk v0.9.0
+	github.com/codefresh-io/go-sdk v0.10.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gogo/protobuf v1.2.0 // indirect
