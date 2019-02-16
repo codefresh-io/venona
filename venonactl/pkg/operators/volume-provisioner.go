@@ -18,15 +18,11 @@ package operators
 
 import (
 	"fmt"
-	"regexp"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // VolumeProvisionerOperator installs assets on Kubernetes Dind runtimectl Env
@@ -40,138 +36,55 @@ const (
 // Install runtimectl environment
 func (u *VolumeProvisionerOperator) Install() error {
 	s := store.GetStore()
-	templatesMap := templates.TemplatesMap()
-	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, s.BuildValues())
-	if err != nil {
-		return err
-	}
-
-	kubeClientset, err := NewKubeClientset(s)
+	cs, err := NewKubeClientset(s)
 	if err != nil {
 		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
-	namespace := s.KubernetesAPI.Namespace
-	var createErr error
-	var kind, name string
-	for fileName, obj := range kubeObjects {
-		match, _ := regexp.MatchString(VolumeInstallPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VolumeProvisionerOperatorType,
-				"Pattern":  venonaInstallPattern,
-			}).Debugf("Skipping installation of %s: pattern not match", fileName)
-			continue
-		}
-		if store.GetStore().DryRun == true {
-			logrus.WithFields(logrus.Fields{
-				"File-Name": fileName,
-				"Operator":  VolumeProvisionerOperatorType,
-			}).Debugf("%v", obj)
-			continue
-		}
-		name, kind, createErr = kubeobj.CreateObject(kubeClientset, obj, namespace)
-
-		if createErr == nil {
-			logrus.Debugf("%s \"%s\" created\n ", kind, name)
-		} else if statusError, errIsStatusError := createErr.(*errors.StatusError); errIsStatusError {
-			if statusError.ErrStatus.Reason == metav1.StatusReasonAlreadyExists {
-				logrus.Debugf("%s \"%s\" already exists\n", kind, name)
-			} else {
-				logrus.Debugf("%s \"%s\" failed: %v ", kind, name, statusError)
-				return statusError
-			}
-		} else {
-			logrus.Debugf("%s \"%s\" failed: %v ", kind, name, createErr)
-			return createErr
-		}
-	}
-
-	return nil
+	return install(&installOptions{
+		templates:      templates.TemplatesMap(),
+		templateValues: s.BuildValues(),
+		kubeClientSet:  cs,
+		namespace:      s.KubernetesAPI.Namespace,
+		matchPattern:   VolumeInstallPattern,
+		dryRun:         s.DryRun,
+		operatorType:   VolumeProvisionerOperatorType,
+	})
 }
 
 func (u *VolumeProvisionerOperator) Status() ([][]string, error) {
 	s := store.GetStore()
-	templatesMap := templates.TemplatesMap()
-	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, s.BuildValues())
-	if err != nil {
-		return nil, err
-	}
-
-	kubeClientset, err := NewKubeClientset(s)
+	cs, err := NewKubeClientset(s)
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil, err
 	}
-	namespace := s.KubernetesAPI.Namespace
-	var getErr error
-	var kind, name string
-	var rows [][]string
-	for fileName, obj := range kubeObjects {
-		match, _ := regexp.MatchString(VolumeInstallPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VolumeProvisionerOperatorType,
-				"Pattern":  VolumeInstallPattern,
-			}).Debugf("Skipping status check of %s: pattern not match", fileName)
-			continue
-		}
-		name, kind, getErr = kubeobj.CheckObject(kubeClientset, obj, namespace)
-		if getErr == nil {
-			rows = append(rows, []string{kind, name, StatusInstalled})
-		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {
-			rows = append(rows, []string{kind, name, StatusNotInstalled, statusError.ErrStatus.Message})
-		} else {
-			logrus.Debugf("%s \"%s\" failed: %v ", kind, name, getErr)
-			return nil, getErr
-		}
+	opt := &statusOptions{
+		templates:      templates.TemplatesMap(),
+		templateValues: s.BuildValues(),
+		kubeClientSet:  cs,
+		namespace:      s.KubernetesAPI.Namespace,
+		matchPattern:   VolumeInstallPattern,
+		operatorType:   VolumeProvisionerOperatorType,
 	}
-
-	return rows, nil
+	return status(opt)
 }
 
 func (u *VolumeProvisionerOperator) Delete() error {
 	s := store.GetStore()
-	templatesMap := templates.TemplatesMap()
-	kubeObjects, err := KubeObjectsFromTemplates(templatesMap, s.BuildValues())
-	if err != nil {
-		return err
-	}
-
-	kubeClientset, err := NewKubeClientset(s)
+	cs, err := NewKubeClientset(s)
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
-		return err
+		return nil
 	}
-	namespace := s.KubernetesAPI.Namespace
-	var kind, name string
-	var deleteError error
-	for fileName, obj := range kubeObjects {
-		match, _ := regexp.MatchString(VolumeInstallPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VolumeProvisionerOperatorType,
-				"Pattern":  VolumeInstallPattern,
-			}).Debugf("Skipping deletion of %s: pattern not match", fileName)
-			continue
-		}
-		kind, name, deleteError = kubeobj.DeleteObject(kubeClientset, obj, namespace)
-		if deleteError == nil {
-			logrus.Debugf("%s \"%s\" deleted\n ", kind, name)
-		} else if statusError, errIsStatusError := deleteError.(*errors.StatusError); errIsStatusError {
-			if statusError.ErrStatus.Reason == metav1.StatusReasonAlreadyExists {
-				logrus.Debugf("%s \"%s\" already exists\n", kind, name)
-			} else if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
-				logrus.Debugf("%s \"%s\" not found\n", kind, name)
-			} else {
-				logrus.Errorf("%s \"%s\" failed: %v ", kind, name, statusError)
-				return statusError
-			}
-		} else {
-			logrus.Errorf("%s \"%s\" failed: %v ", kind, name, deleteError)
-			return deleteError
-		}
+	opt := &deleteOptions{
+		templates:      templates.TemplatesMap(),
+		templateValues: s.BuildValues(),
+		kubeClientSet:  cs,
+		namespace:      s.KubernetesAPI.Namespace,
+		matchPattern:   VolumeInstallPattern,
+		operatorType:   VolumeProvisionerOperatorType,
 	}
-	return nil
+	return delete(opt)
 }
 
 func (u *VolumeProvisionerOperator) Upgrade() error {
