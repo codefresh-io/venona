@@ -24,7 +24,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/sirupsen/logrus"
 
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 )
 
@@ -78,7 +78,7 @@ var deleteCmd = &cobra.Command{
 				}
 				s.KubernetesAPI.ContextName = contextName
 				s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
-				err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Delete()
+				err = plugins.GetOperator(plugins.RuntimeEnvironmentOperatorType).Delete()
 				if err != nil {
 					errors = append(errors, DeletionError{
 						err:       err,
@@ -88,7 +88,7 @@ var deleteCmd = &cobra.Command{
 					continue
 				}
 				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
-					err = runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
+					err = plugins.GetOperator(plugins.VolumeProvisionerOperatorType).Delete()
 					if err != nil {
 						errors = append(errors, DeletionError{
 							err:       err,
@@ -100,7 +100,7 @@ var deleteCmd = &cobra.Command{
 				}
 
 				if re.Metadata.Agent {
-					err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Delete()
+					err = plugins.GetOperator(plugins.VenonaOperatorType).Delete()
 					if err != nil {
 						errors = append(errors, DeletionError{
 							err:       err,

@@ -25,7 +25,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -159,8 +159,7 @@ func registerRuntimeEnvironment() {
 	dieOnError(err)
 	err = cf.Validate()
 	dieOnError(err)
-
-	err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Install()
+	err = plugins.GetOperator(plugins.RuntimeEnvironmentOperatorType).Install()
 	dieOnError(err)
 
 	re, err := cf.Register()
@@ -171,11 +170,11 @@ func registerRuntimeEnvironment() {
 }
 
 func installvenona() {
-	err := runtimectl.GetOperator(runtimectl.VenonaOperatorType).Install()
+	err := plugins.GetOperator(plugins.VenonaOperatorType).Install()
 	dieOnError(err)
 }
 
 func configureVolumeProvisioner() {
-	err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Install()
+	err := plugins.GetOperator(plugins.VolumeProvisionerOperatorType).Install()
 	dieOnError(err)
 }

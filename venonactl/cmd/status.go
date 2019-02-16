@@ -22,7 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	humanize "github.com/dustin/go-humanize"
 
@@ -108,10 +108,10 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 		s.KubernetesAPI.ContextName = context
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
 
-		rows, err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Status()
+		rows, err := plugins.GetOperator(plugins.RuntimeEnvironmentOperatorType).Status()
 		dieOnError(err)
 		table.AppendBulk(rows)
-		rows, err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Status()
+		rows, err = plugins.GetOperator(plugins.VenonaOperatorType).Status()
 		dieOnError(err)
 		table.AppendBulk(rows)
 	}

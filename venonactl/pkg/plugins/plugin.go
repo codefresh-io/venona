@@ -1,4 +1,4 @@
-package operators
+package plugins
 
 import (
 	"regexp"
