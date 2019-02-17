@@ -10,7 +10,7 @@ import (
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
-	plugins "github.com/codefresh-io/venona/venonactl/pkg/plugins"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
