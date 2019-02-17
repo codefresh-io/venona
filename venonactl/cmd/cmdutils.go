@@ -10,8 +10,9 @@ import (
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 )
 
@@ -148,5 +149,24 @@ func isUsingDefaultStorageClass(sc string) bool {
 	if sc == "" {
 		return true
 	}
-	return strings.HasPrefix(sc, runtimectl.DefaultStorageClassNamePrefix)
+	return strings.HasPrefix(sc, plugins.DefaultStorageClassNamePrefix)
+}
+
+func dieOnError(err error) {
+	if err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+}
+
+func createTable() *tablewriter.Table {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetBorder(false)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetRowLine(false)
+	table.SetHeaderLine(false)
+	table.SetColumnSeparator(" ")
+	table.SetColWidth(100)
+	return table
 }

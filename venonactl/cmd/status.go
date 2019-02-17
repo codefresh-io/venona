@@ -22,8 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
-	"github.com/codefresh-io/venona/venonactl/internal"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	humanize "github.com/dustin/go-humanize"
 
@@ -49,14 +48,14 @@ var statusCmd = &cobra.Command{
 		extendStoreWithKubeClient()
 
 		s := store.GetStore()
-		table := internal.CreateTable()
+		table := createTable()
 		// When requested status for specific runtime
 		if len(args) > 0 {
 			name := args[0]
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
-			internal.DieOnError(err)
+			dieOnError(err)
 			if re == nil {
-				internal.DieOnError(fmt.Errorf("Runtime-Environment %s not found", name))
+				dieOnError(fmt.Errorf("Runtime-Environment %s not found", name))
 			}
 			if re.Metadata.Agent == true {
 				table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
@@ -78,7 +77,7 @@ var statusCmd = &cobra.Command{
 
 		// When requested status for all runtimes
 		res, err := s.CodefreshAPI.Client.RuntimeEnvironments().List()
-		internal.DieOnError(err)
+		dieOnError(err)
 		table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
 		for _, re := range res {
 			if re.Metadata.Agent == true {
@@ -99,7 +98,9 @@ var statusCmd = &cobra.Command{
 }
 
 func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string) {
-	table := internal.CreateTable()
+	builder := plugins.NewBuilder()
+
+	table := createTable()
 	table.SetHeader([]string{"Kind", "Name", "Status"})
 	s := store.GetStore()
 	if re.RuntimeScheduler.Cluster.Namespace != "" {
@@ -108,13 +109,16 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 		}
 		s.KubernetesAPI.ContextName = context
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
+		builder.
+			Add(plugins.RuntimeEnvironmentPluginType).
+			Add(plugins.VenonaPluginType).
+			Add(plugins.VolumeProvisionerPluginType)
 
-		rows, err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Status()
-		internal.DieOnError(err)
-		table.AppendBulk(rows)
-		rows, err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Status()
-		internal.DieOnError(err)
-		table.AppendBulk(rows)
+		for _, p := range builder.Get() {
+			rows, err := p.Status(nil)
+			dieOnError(err)
+			table.AppendBulk(rows)
+		}
 	}
 	table.Render()
 }

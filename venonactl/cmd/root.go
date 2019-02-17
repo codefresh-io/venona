@@ -19,8 +19,6 @@ limitations under the License.
 import (
 	"github.com/spf13/viper"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
-
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +30,7 @@ var rootCmd = &cobra.Command{
 // Execute - execute the root command
 func Execute() {
 	err := rootCmd.Execute()
-	internal.DieOnError(err)
+	dieOnError(err)
 }
 
 func init() {

@@ -18,13 +18,12 @@ limitations under the License.
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/sirupsen/logrus"
 
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 )
 
@@ -61,15 +60,17 @@ var deleteCmd = &cobra.Command{
 		var errors []DeletionError
 		s.KubernetesAPI.InCluster = deleteCmdOptions.kube.inCluster
 		for _, name := range args {
+			builder := plugins.NewBuilder()
+
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
-			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
+			errors = collectError(errors, err, name)
 
 			if deleteCmdOptions.revertTo != "" {
 				_, err := s.CodefreshAPI.Client.RuntimeEnvironments().Default(deleteCmdOptions.revertTo)
-				errors = collectError(errors, err, name, fmt.Sprintf("Revert Runtime-Environment to: %s", deleteCmdOptions.revertTo))
+				errors = collectError(errors, err, name)
 			}
 			deleted, err := s.CodefreshAPI.Client.RuntimeEnvironments().Delete(name)
-			errors = collectError(errors, err, name, "Delete Runtime-Environment from Codefresh")
+			errors = collectError(errors, err, name)
 
 			if deleted {
 				contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
@@ -78,37 +79,19 @@ var deleteCmd = &cobra.Command{
 				}
 				s.KubernetesAPI.ContextName = contextName
 				s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
-				err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Delete()
-				if err != nil {
-					errors = append(errors, DeletionError{
-						err:       err,
-						name:      name,
-						operation: "Delete Runtime-Environment Kubernetes resoruces",
-					})
-					continue
-				}
+
+				builder.Add(plugins.RuntimeEnvironmentPluginType)
 				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
-					err = runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
-					if err != nil {
-						errors = append(errors, DeletionError{
-							err:       err,
-							name:      name,
-							operation: "Delete volume provisioner related components",
-						})
-						continue
-					}
+					builder.Add(plugins.VolumeProvisionerPluginType)
 				}
 
 				if re.Metadata.Agent {
-					err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Delete()
-					if err != nil {
-						errors = append(errors, DeletionError{
-							err:       err,
-							name:      name,
-							operation: "Delete Venona's agent Kubernetes resoruces",
-						})
-						continue
-					}
+					builder.Add(plugins.VenonaPluginType)
+				}
+
+				for _, p := range builder.Get() {
+					err := p.Delete(nil)
+					collectError(errors, err, name)
 				}
 
 				logrus.Infof("Deleted %s", name)
@@ -135,13 +118,12 @@ func init() {
 	deleteCmd.Flags().BoolVar(&deleteCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 }
 
-func collectError(errors []DeletionError, err error, reName string, op string) []DeletionError {
+func collectError(errors []DeletionError, err error, reName string) []DeletionError {
 	if err == nil {
 		return errors
 	}
 	return append(errors, DeletionError{
-		err:       err,
-		name:      reName,
-		operation: op,
+		err:  err,
+		name: reName,
 	})
 }
