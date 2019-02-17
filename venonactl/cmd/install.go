@@ -122,7 +122,7 @@ var installCmd = &cobra.Command{
 		if isDefault {
 			builder.Add(plugins.VolumeProvisionerPluginType)
 		} else {
-			logrus.Info("Non default StorageClass is set, skipping installation of volume provisioner")
+			logrus.Info("Custom StorageClass is set, skipping installation of default volume provisioner")
 		}
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
