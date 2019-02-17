@@ -18,7 +18,6 @@ limitations under the License.
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
@@ -64,14 +63,14 @@ var deleteCmd = &cobra.Command{
 			builder := plugins.NewBuilder()
 
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
-			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
+			errors = collectError(errors, err, name)
 
 			if deleteCmdOptions.revertTo != "" {
 				_, err := s.CodefreshAPI.Client.RuntimeEnvironments().Default(deleteCmdOptions.revertTo)
-				errors = collectError(errors, err, name, fmt.Sprintf("Revert Runtime-Environment to: %s", deleteCmdOptions.revertTo))
+				errors = collectError(errors, err, name)
 			}
 			deleted, err := s.CodefreshAPI.Client.RuntimeEnvironments().Delete(name)
-			errors = collectError(errors, err, name, "Delete Runtime-Environment from Codefresh")
+			errors = collectError(errors, err, name)
 
 			if deleted {
 				contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
@@ -82,20 +81,17 @@ var deleteCmd = &cobra.Command{
 				s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
 
 				builder.Add(plugins.RuntimeEnvironmentPluginType)
-				// operation Delete Runtime-Environment Kubernetes resoruces
 				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
 					builder.Add(plugins.VolumeProvisionerPluginType)
-					// operation Delete volume provisioner related components
 				}
 
 				if re.Metadata.Agent {
 					builder.Add(plugins.VenonaPluginType)
-					// operation Delete Venona's agent Kubernetes resoruces
 				}
 
 				for _, p := range builder.Get() {
 					err := p.Delete(nil)
-					collectError(errors, err, name, "")
+					collectError(errors, err, name)
 				}
 
 				logrus.Infof("Deleted %s", name)
@@ -122,13 +118,12 @@ func init() {
 	deleteCmd.Flags().BoolVar(&deleteCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 }
 
-func collectError(errors []DeletionError, err error, reName string, op string) []DeletionError {
+func collectError(errors []DeletionError, err error, reName string) []DeletionError {
 	if err == nil {
 		return errors
 	}
 	return append(errors, DeletionError{
-		err:       err,
-		name:      reName,
-		operation: op,
+		err:  err,
+		name: reName,
 	})
 }
