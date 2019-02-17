@@ -24,7 +24,6 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -59,6 +58,16 @@ var installCmd = &cobra.Command{
 		extendStoreWithCodefershClient()
 		extendStoreWithKubeClient()
 
+		builder := plugins.NewBuilder()
+		builderInstallOpt := &plugins.InstallOptions{
+			CodefreshHost:         s.CodefreshAPI.Host,
+			CodefreshToken:        s.CodefreshAPI.Token,
+			ClusterNamespace:      s.KubernetesAPI.Namespace,
+			MarkAsDefault:         installCmdOptions.setDefaultRuntime,
+			StorageClass:          installCmdOptions.storageClass,
+			IsDefaultStorageClass: isUsingDefaultStorageClass(installCmdOptions.storageClass),
+		}
+
 		if installCmdOptions.kube.context == "" {
 			config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
 			installCmdOptions.kube.context = config.CurrentContext
@@ -92,23 +101,36 @@ var installCmd = &cobra.Command{
 			dieOnError(fmt.Errorf("Cannot use both flags skip-runtime-installation and only-runtime-environment"))
 		}
 		if installCmdOptions.installOnlyRuntimeEnvironment == true {
-			registerRuntimeEnvironment()
-			return
+			builder.Add(plugins.RuntimeEnvironmentPluginType)
 		} else if installCmdOptions.skipRuntimeInstallation == true {
 			if installCmdOptions.runtimeEnvironmentName == "" {
 				dieOnError(fmt.Errorf("runtime-environment flag is required when using flag skip-runtime-installation"))
 			}
 			s.RuntimeEnvironment = installCmdOptions.runtimeEnvironmentName
 			logrus.Info("Skipping installation of runtime environment, installing venona only")
-			installvenona()
+			builder.Add(plugins.VenonaPluginType)
 		} else {
-			registerRuntimeEnvironment()
-			installvenona()
+			builder.
+				Add(plugins.RuntimeEnvironmentPluginType).
+				Add(plugins.VenonaPluginType)
 		}
 		if isUsingDefaultStorageClass(installCmdOptions.storageClass) {
-			configureVolumeProvisioner()
+			builder.Add(plugins.VolumeProvisionerPluginType)
 		} else {
 			logrus.Info("Non default StorageClass is set, skipping installation of volume provisioner")
+		}
+
+		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
+		builderInstallOpt.RegisterWithAgent = true
+		if s.ClusterInCodefresh != "" {
+			builderInstallOpt.ClusterName = s.ClusterInCodefresh
+			builderInstallOpt.RegisterWithAgent = false
+		}
+
+		for _, p := range builder.Get() {
+			if err := p.Install(builderInstallOpt); err != nil {
+				dieOnError(err)
+			}
 		}
 		logrus.Info("Installation completed Successfully\n")
 	},
@@ -132,49 +154,4 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.installOnlyRuntimeEnvironment, "only-runtime-environment", false, "Set to true to onlky configure namespace as runtime-environment for Codefresh")
 	installCmd.Flags().BoolVar(&installCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
-}
-
-func registerRuntimeEnvironment() {
-	s := store.GetStore()
-	registerWithAgent := true
-	name := s.KubernetesAPI.ContextName
-	if s.ClusterInCodefresh != "" {
-		registerWithAgent = false
-		name = s.ClusterInCodefresh
-	}
-	opt := &codefresh.APIOptions{
-		Logger:                logrus.New(),
-		CodefreshHost:         s.CodefreshAPI.Host,
-		CodefreshToken:        s.CodefreshAPI.Token,
-		ClusterName:           name,
-		ClusterNamespace:      s.KubernetesAPI.Namespace,
-		RegisterWithAgent:     registerWithAgent,
-		MarkAsDefault:         installCmdOptions.setDefaultRuntime,
-		StorageClass:          installCmdOptions.storageClass,
-		IsDefaultStorageClass: isUsingDefaultStorageClass(installCmdOptions.storageClass),
-	}
-	cf := codefresh.NewCodefreshAPI(opt)
-
-	cert, err := cf.Sign()
-	dieOnError(err)
-	err = cf.Validate()
-	dieOnError(err)
-	err = plugins.GetOperator(plugins.RuntimeEnvironmentOperatorType).Install()
-	dieOnError(err)
-
-	re, err := cf.Register()
-	dieOnError(err)
-
-	s.RuntimeEnvironment = re.Metadata.Name
-	s.ServerCert = cert
-}
-
-func installvenona() {
-	err := plugins.GetOperator(plugins.VenonaOperatorType).Install()
-	dieOnError(err)
-}
-
-func configureVolumeProvisioner() {
-	err := plugins.GetOperator(plugins.VolumeProvisionerOperatorType).Install()
-	dieOnError(err)
 }

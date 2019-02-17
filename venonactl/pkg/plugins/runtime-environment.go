@@ -21,37 +21,72 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
-// RuntimeEnvironmentOperator installs assets on Kubernetes Dind runtimectl Env
-type RuntimeEnvironmentOperator struct {
+// runtimeEnvironmentPlugin installs assets on Kubernetes Dind runtimectl Env
+type runtimeEnvironmentPlugin struct {
 }
 
 const (
-	RuntimeInstallPattern = ".*.re.yaml"
+	runtimeEnvironmentFilesPattern = ".*.re.yaml"
 )
 
 // Install runtimectl environment
-func (u *RuntimeEnvironmentOperator) Install() error {
+func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions) error {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
 		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
-	return install(&installOptions{
+
+	cfOpt := &codefresh.APIOptions{
+		Logger:                logrus.New(),
+		CodefreshHost:         opt.CodefreshHost,
+		CodefreshToken:        opt.CodefreshToken,
+		ClusterName:           opt.ClusterName,
+		RegisterWithAgent:     opt.RegisterWithAgent,
+		ClusterNamespace:      s.KubernetesAPI.Namespace,
+		MarkAsDefault:         opt.MarkAsDefault,
+		StorageClass:          opt.StorageClass,
+		IsDefaultStorageClass: opt.IsDefaultStorageClass,
+	}
+	cf := codefresh.NewCodefreshAPI(cfOpt)
+	cert, err := cf.Sign()
+	if err != nil {
+		return err
+	}
+	s.ServerCert = cert
+
+	if err := cf.Validate(); err != nil {
+		return err
+	}
+
+	err = install(&installOptions{
 		templates:      templates.TemplatesMap(),
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   RuntimeInstallPattern,
-		operatorType:   RuntimeEnvironmentOperatorType,
+		matchPattern:   runtimeEnvironmentFilesPattern,
+		operatorType:   RuntimeEnvironmentPluginType,
 		dryRun:         s.DryRun,
 	})
+	if err != nil {
+		return nil
+	}
+
+	re, err := cf.Register()
+	if err != nil {
+		return err
+	}
+	s.RuntimeEnvironment = re.Metadata.Name
+
+	return nil
 }
 
-func (u *RuntimeEnvironmentOperator) Status() ([][]string, error) {
+func (u *runtimeEnvironmentPlugin) Status(_ *StatusOptions) ([][]string, error) {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -63,13 +98,13 @@ func (u *RuntimeEnvironmentOperator) Status() ([][]string, error) {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   RuntimeInstallPattern,
-		operatorType:   RuntimeEnvironmentOperatorType,
+		matchPattern:   runtimeEnvironmentFilesPattern,
+		operatorType:   RuntimeEnvironmentPluginType,
 	}
 	return status(opt)
 }
 
-func (u *RuntimeEnvironmentOperator) Delete() error {
+func (u *runtimeEnvironmentPlugin) Delete(_ *DeleteOptions) error {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -81,12 +116,12 @@ func (u *RuntimeEnvironmentOperator) Delete() error {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   RuntimeInstallPattern,
-		operatorType:   RuntimeEnvironmentOperatorType,
+		matchPattern:   runtimeEnvironmentFilesPattern,
+		operatorType:   RuntimeEnvironmentPluginType,
 	}
 	return delete(opt)
 }
 
-func (u *RuntimeEnvironmentOperator) Upgrade() error {
+func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions) error {
 	return nil
 }

@@ -61,6 +61,8 @@ var deleteCmd = &cobra.Command{
 		var errors []DeletionError
 		s.KubernetesAPI.InCluster = deleteCmdOptions.kube.inCluster
 		for _, name := range args {
+			builder := plugins.NewBuilder()
+
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
 			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
 
@@ -78,37 +80,22 @@ var deleteCmd = &cobra.Command{
 				}
 				s.KubernetesAPI.ContextName = contextName
 				s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
-				err = plugins.GetOperator(plugins.RuntimeEnvironmentOperatorType).Delete()
-				if err != nil {
-					errors = append(errors, DeletionError{
-						err:       err,
-						name:      name,
-						operation: "Delete Runtime-Environment Kubernetes resoruces",
-					})
-					continue
-				}
+
+				builder.Add(plugins.RuntimeEnvironmentPluginType)
+				// operation Delete Runtime-Environment Kubernetes resoruces
 				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
-					err = plugins.GetOperator(plugins.VolumeProvisionerOperatorType).Delete()
-					if err != nil {
-						errors = append(errors, DeletionError{
-							err:       err,
-							name:      name,
-							operation: "Delete volume provisioner related components",
-						})
-						continue
-					}
+					builder.Add(plugins.VolumeProvisionerPluginType)
+					// operation Delete volume provisioner related components
 				}
 
 				if re.Metadata.Agent {
-					err = plugins.GetOperator(plugins.VenonaOperatorType).Delete()
-					if err != nil {
-						errors = append(errors, DeletionError{
-							err:       err,
-							name:      name,
-							operation: "Delete Venona's agent Kubernetes resoruces",
-						})
-						continue
-					}
+					builder.Add(plugins.VenonaPluginType)
+					// operation Delete Venona's agent Kubernetes resoruces
+				}
+
+				for _, p := range builder.Get() {
+					err := p.Delete(nil)
+					collectError(errors, err, name, "")
 				}
 
 				logrus.Infof("Deleted %s", name)

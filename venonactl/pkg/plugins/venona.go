@@ -29,16 +29,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// venonaOperator installs assets on Kubernetes Dind runtimectl Env
-type venonaOperator struct {
+// venonaPlugin installs assets on Kubernetes Dind runtimectl Env
+type venonaPlugin struct {
 }
 
 const (
-	venonaInstallPattern = ".*.venona.yaml"
+	venonaFilesPattern = ".*.venona.yaml"
 )
 
 // Install runtimectl environment
-func (u *venonaOperator) Install() error {
+func (u *venonaPlugin) Install(_ *InstallOptions) error {
 	s := store.GetStore()
 	logrus.Debug("Generating token for agent")
 	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
@@ -64,14 +64,14 @@ func (u *venonaOperator) Install() error {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   venonaInstallPattern,
+		matchPattern:   venonaFilesPattern,
 		dryRun:         s.DryRun,
-		operatorType:   VolumeProvisionerOperatorType,
+		operatorType:   VolumeProvisionerPluginType,
 	})
 }
 
 // Status of runtimectl environment
-func (u *venonaOperator) Status() ([][]string, error) {
+func (u *venonaPlugin) Status(_ *StatusOptions) ([][]string, error) {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -83,13 +83,13 @@ func (u *venonaOperator) Status() ([][]string, error) {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   venonaInstallPattern,
-		operatorType:   VenonaOperatorType,
+		matchPattern:   venonaFilesPattern,
+		operatorType:   VenonaPluginType,
 	}
 	return status(opt)
 }
 
-func (u *venonaOperator) Delete() error {
+func (u *venonaPlugin) Delete(_ *DeleteOptions) error {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -101,13 +101,13 @@ func (u *venonaOperator) Delete() error {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   venonaInstallPattern,
-		operatorType:   VolumeProvisionerOperatorType,
+		matchPattern:   venonaFilesPattern,
+		operatorType:   VolumeProvisionerPluginType,
 	}
 	return delete(opt)
 }
 
-func (u *venonaOperator) Upgrade() error {
+func (u *venonaPlugin) Upgrade(_ *UpgradeOptions) error {
 
 	// replace of sa creates new secert with sa creds
 	// avoid it till patch fully implemented
@@ -142,18 +142,18 @@ func (u *venonaOperator) Upgrade() error {
 	}
 
 	for fileName, local := range kubeObjects {
-		match, _ := regexp.MatchString(venonaInstallPattern, fileName)
+		match, _ := regexp.MatchString(venonaFilesPattern, fileName)
 		if match != true {
 			logrus.WithFields(logrus.Fields{
-				"Operator": VenonaOperatorType,
-				"Pattern":  venonaInstallPattern,
+				"Operator": VenonaPluginType,
+				"Pattern":  venonaFilesPattern,
 			}).Debugf("Skipping upgrade of %s: pattern not match", fileName)
 			continue
 		}
 
 		if _, ok := skipUpgradeFor[fileName]; ok {
 			logrus.WithFields(logrus.Fields{
-				"Operator": VenonaOperatorType,
+				"Operator": VenonaPluginType,
 			}).Debugf("Skipping upgrade of %s: should be ignored", fileName)
 			continue
 		}

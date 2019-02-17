@@ -11,18 +11,47 @@ import (
 )
 
 const (
-	RuntimeEnvironmentOperatorType = "runtime-environment"
-	VenonaOperatorType             = "venona"
-	VolumeProvisionerOperatorType  = "volume-provisioner"
-	DefaultStorageClassNamePrefix  = "dind-local-volumes-venona"
+	RuntimeEnvironmentPluginType  = "runtime-environment"
+	VenonaPluginType              = "venona"
+	VolumeProvisionerPluginType   = "volume-provisioner"
+	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
 )
 
 type (
-	Operator interface {
-		Install() error
-		Status() ([][]string, error)
-		Delete() error
-		Upgrade() error
+	Plugin interface {
+		Install(*InstallOptions) error
+		Status(*StatusOptions) ([][]string, error)
+		Delete(*DeleteOptions) error
+		Upgrade(*UpgradeOptions) error
+	}
+
+	PluginBuilder interface {
+		Add(string) PluginBuilder
+		Get() []Plugin
+	}
+
+	pb struct {
+		plugins []Plugin
+	}
+
+	InstallOptions struct {
+		CodefreshHost         string
+		CodefreshToken        string
+		ClusterName           string
+		ClusterNamespace      string
+		RegisterWithAgent     bool
+		MarkAsDefault         bool
+		StorageClass          string
+		IsDefaultStorageClass bool
+	}
+
+	DeleteOptions struct {
+	}
+
+	UpgradeOptions struct {
+	}
+
+	StatusOptions struct {
 	}
 
 	installOptions struct {
@@ -54,17 +83,32 @@ type (
 	}
 )
 
-func GetOperator(t string) Operator {
-	if t == VenonaOperatorType {
-		return &venonaOperator{}
+func NewBuilder() PluginBuilder {
+	return &pb{
+		plugins: []Plugin{},
+	}
+}
+
+func (p *pb) Add(name string) PluginBuilder {
+	p.plugins = append(p.plugins, build(name))
+	return p
+}
+
+func (p *pb) Get() []Plugin {
+	return p.plugins
+}
+
+func build(t string) Plugin {
+	if t == VenonaPluginType {
+		return &venonaPlugin{}
 	}
 
-	if t == RuntimeEnvironmentOperatorType {
-		return &RuntimeEnvironmentOperator{}
+	if t == RuntimeEnvironmentPluginType {
+		return &runtimeEnvironmentPlugin{}
 	}
 
-	if t == VolumeProvisionerOperatorType {
-		return &VolumeProvisionerOperator{}
+	if t == VolumeProvisionerPluginType {
+		return &volumeProvisionerPlugin{}
 	}
 
 	return nil
@@ -81,15 +125,15 @@ func install(opt *installOptions) error {
 		match, _ := regexp.MatchString(opt.matchPattern, fileName)
 		if match != true {
 			logrus.WithFields(logrus.Fields{
-				"Operator": opt.operatorType,
-				"Pattern":  opt.matchPattern,
+				"Plugin":  opt.operatorType,
+				"Pattern": opt.matchPattern,
 			}).Debugf("Skipping installation of %s: pattern not match", fileName)
 			continue
 		}
 		if opt.dryRun == true {
 			logrus.WithFields(logrus.Fields{
 				"File-Name": fileName,
-				"Operator":  opt.operatorType,
+				"Plugin":    opt.operatorType,
 			}).Debugf("%v", obj)
 			continue
 		}
@@ -127,8 +171,8 @@ func status(opt *statusOptions) ([][]string, error) {
 		match, _ := regexp.MatchString(opt.operatorType, fileName)
 		if match != true {
 			logrus.WithFields(logrus.Fields{
-				"Operator": opt.operatorType,
-				"Pattern":  opt.matchPattern,
+				"Plugin":  opt.operatorType,
+				"Pattern": opt.matchPattern,
 			}).Debugf("Skipping status check of %s: pattern not match", fileName)
 			continue
 		}
@@ -156,8 +200,8 @@ func delete(opt *deleteOptions) error {
 		match, _ := regexp.MatchString(opt.matchPattern, fileName)
 		if match != true {
 			logrus.WithFields(logrus.Fields{
-				"Operator": opt.operatorType,
-				"Pattern":  opt.matchPattern,
+				"Plugin":  opt.operatorType,
+				"Pattern": opt.matchPattern,
 			}).Debugf("Skipping deletion of %s: pattern not match", fileName)
 			continue
 		}

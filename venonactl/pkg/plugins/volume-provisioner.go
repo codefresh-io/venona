@@ -25,16 +25,16 @@ import (
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
-// VolumeProvisionerOperator installs assets on Kubernetes Dind runtimectl Env
-type VolumeProvisionerOperator struct {
+// volumeProvisionerPlugin installs assets on Kubernetes Dind runtimectl Env
+type volumeProvisionerPlugin struct {
 }
 
 const (
-	VolumeInstallPattern = ".*.vp.yaml"
+	volumeProvisionerFilesPattern = ".*.vp.yaml"
 )
 
 // Install runtimectl environment
-func (u *VolumeProvisionerOperator) Install() error {
+func (u *volumeProvisionerPlugin) Install(_ *InstallOptions) error {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -45,13 +45,13 @@ func (u *VolumeProvisionerOperator) Install() error {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   VolumeInstallPattern,
+		matchPattern:   volumeProvisionerFilesPattern,
 		dryRun:         s.DryRun,
-		operatorType:   VolumeProvisionerOperatorType,
+		operatorType:   VolumeProvisionerPluginType,
 	})
 }
 
-func (u *VolumeProvisionerOperator) Status() ([][]string, error) {
+func (u *volumeProvisionerPlugin) Status(_ *StatusOptions) ([][]string, error) {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -63,13 +63,13 @@ func (u *VolumeProvisionerOperator) Status() ([][]string, error) {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   VolumeInstallPattern,
-		operatorType:   VolumeProvisionerOperatorType,
+		matchPattern:   volumeProvisionerFilesPattern,
+		operatorType:   VolumeProvisionerPluginType,
 	}
 	return status(opt)
 }
 
-func (u *VolumeProvisionerOperator) Delete() error {
+func (u *volumeProvisionerPlugin) Delete(_ *DeleteOptions) error {
 	s := store.GetStore()
 	cs, err := NewKubeClientset(s)
 	if err != nil {
@@ -81,12 +81,12 @@ func (u *VolumeProvisionerOperator) Delete() error {
 		templateValues: s.BuildValues(),
 		kubeClientSet:  cs,
 		namespace:      s.KubernetesAPI.Namespace,
-		matchPattern:   VolumeInstallPattern,
-		operatorType:   VolumeProvisionerOperatorType,
+		matchPattern:   volumeProvisionerFilesPattern,
+		operatorType:   VolumeProvisionerPluginType,
 	}
 	return delete(opt)
 }
 
-func (u *VolumeProvisionerOperator) Upgrade() error {
+func (u *volumeProvisionerPlugin) Upgrade(_ *UpgradeOptions) error {
 	return nil
 }

@@ -53,6 +53,8 @@ var upgradeCmd = &cobra.Command{
 		extendStoreWithCodefershClient()
 		extendStoreWithKubeClient()
 
+		builder := plugins.NewBuilder()
+
 		re, _ := s.CodefreshAPI.Client.RuntimeEnvironments().Get(args[0])
 		contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
 		if upgradeCmdOpt.kube.context != "" {
@@ -63,9 +65,14 @@ var upgradeCmd = &cobra.Command{
 		if upgradeCmdOpt.dryRun {
 			logrus.Info("Running in dry-run mode")
 		} else {
-			plugins.GetOperator(plugins.VenonaOperatorType).Upgrade()
+			builder.Add(plugins.VenonaPluginType)
 			if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
-				err := plugins.GetOperator(plugins.VolumeProvisionerOperatorType).Delete()
+				builder.Add(plugins.VolumeProvisionerPluginType)
+			}
+			builder.Add(plugins.RuntimeEnvironmentPluginType)
+		}
+		for _, p := range builder.Get() {
+			if err := p.Upgrade(nil); err != nil {
 				dieOnError(err)
 			}
 		}

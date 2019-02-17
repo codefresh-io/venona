@@ -98,6 +98,8 @@ var statusCmd = &cobra.Command{
 }
 
 func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string) {
+	builder := plugins.NewBuilder()
+
 	table := createTable()
 	table.SetHeader([]string{"Kind", "Name", "Status"})
 	s := store.GetStore()
@@ -107,13 +109,16 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 		}
 		s.KubernetesAPI.ContextName = context
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
+		builder.
+			Add(plugins.RuntimeEnvironmentPluginType).
+			Add(plugins.VenonaPluginType).
+			Add(plugins.VolumeProvisionerPluginType)
 
-		rows, err := plugins.GetOperator(plugins.RuntimeEnvironmentOperatorType).Status()
-		dieOnError(err)
-		table.AppendBulk(rows)
-		rows, err = plugins.GetOperator(plugins.VenonaOperatorType).Status()
-		dieOnError(err)
-		table.AppendBulk(rows)
+		for _, p := range builder.Get() {
+			rows, err := p.Status(nil)
+			dieOnError(err)
+			table.AppendBulk(rows)
+		}
 	}
 	table.Render()
 }
