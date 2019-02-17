@@ -59,13 +59,18 @@ var installCmd = &cobra.Command{
 		extendStoreWithKubeClient()
 
 		builder := plugins.NewBuilder()
+		isDefault := isUsingDefaultStorageClass(installCmdOptions.storageClass)
+
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost:         s.CodefreshAPI.Host,
 			CodefreshToken:        s.CodefreshAPI.Token,
 			ClusterNamespace:      s.KubernetesAPI.Namespace,
 			MarkAsDefault:         installCmdOptions.setDefaultRuntime,
 			StorageClass:          installCmdOptions.storageClass,
-			IsDefaultStorageClass: isUsingDefaultStorageClass(installCmdOptions.storageClass),
+			IsDefaultStorageClass: isDefault,
+		}
+		if isDefault {
+			builderInstallOpt.StorageClass = plugins.DefaultStorageClassNamePrefix
 		}
 
 		if installCmdOptions.kube.context == "" {
@@ -114,7 +119,7 @@ var installCmd = &cobra.Command{
 				Add(plugins.RuntimeEnvironmentPluginType).
 				Add(plugins.VenonaPluginType)
 		}
-		if isUsingDefaultStorageClass(installCmdOptions.storageClass) {
+		if isDefault {
 			builder.Add(plugins.VolumeProvisionerPluginType)
 		} else {
 			logrus.Info("Non default StorageClass is set, skipping installation of volume provisioner")
