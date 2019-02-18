@@ -23,6 +23,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
@@ -37,35 +38,41 @@ const (
 	venonaFilesPattern = ".*.venona.yaml"
 )
 
-// Install runtimectl environment
-func (u *venonaPlugin) Install(_ *InstallOptions) error {
-	s := store.GetStore()
+// Install venona agent
+func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	logrus.Debug("Generating token for agent")
 	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
 	logrus.Debugf("Token candidate name: %s", tokenName)
-	token, err := s.CodefreshAPI.Client.Tokens().Create(tokenName, s.RuntimeEnvironment)
+
+	client := codefresh.New(&codefresh.ClientOptions{
+		Auth: codefresh.AuthOptions{
+			Token: opt.CodefreshToken,
+		},
+		Host: opt.CodefreshHost,
+	})
+
+	token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
 	if err != nil {
-		logrus.Error(err.Error())
-		return err
+		return nil, err
 	}
 	logrus.Debugf(fmt.Sprintf("Created token: %s", token.Value))
 
 	store.GetStore().AgentToken = token.Value
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	cs, err := NewKubeClientset(s)
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
-	return install(&installOptions{
+	return v, install(&installOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      opt.ClusterNamespace,
 		matchPattern:   venonaFilesPattern,
-		dryRun:         s.DryRun,
+		dryRun:         opt.DryRun,
 		operatorType:   VolumeProvisionerPluginType,
 	})
 }

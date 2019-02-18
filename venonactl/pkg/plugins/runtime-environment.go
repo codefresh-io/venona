@@ -17,6 +17,7 @@ limitations under the License.
 package plugins
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -35,11 +36,10 @@ const (
 )
 
 // Install runtimectl environment
-func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
 
 	cfOpt := &codefresh.APIOptions{
@@ -48,7 +48,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions) error {
 		CodefreshToken:        opt.CodefreshToken,
 		ClusterName:           opt.ClusterName,
 		RegisterWithAgent:     opt.RegisterWithAgent,
-		ClusterNamespace:      s.KubernetesAPI.Namespace,
+		ClusterNamespace:      opt.ClusterNamespace,
 		MarkAsDefault:         opt.MarkAsDefault,
 		StorageClass:          opt.StorageClass,
 		IsDefaultStorageClass: opt.IsDefaultStorageClass,
@@ -56,34 +56,38 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions) error {
 	cf := codefresh.NewCodefreshAPI(cfOpt)
 	cert, err := cf.Sign()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.ServerCert = cert
+	v["ServerCert"] = map[string]string{
+		"Cert": base64.StdEncoding.EncodeToString([]byte(cert.Cert)),
+		"Key":  base64.StdEncoding.EncodeToString([]byte(cert.Key)),
+		"Ca":   base64.StdEncoding.EncodeToString([]byte(cert.Ca)),
+	}
 
 	if err := cf.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 
 	err = install(&installOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      opt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
-		dryRun:         s.DryRun,
+		dryRun:         opt.DryRun,
 	})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	re, err := cf.Register()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.RuntimeEnvironment = re.Metadata.Name
+	v["RuntimeEnvironment"] = re.Metadata.Name
 
-	return nil
+	return v, nil
 }
 
 func (u *runtimeEnvironmentPlugin) Status(_ *StatusOptions) ([][]string, error) {

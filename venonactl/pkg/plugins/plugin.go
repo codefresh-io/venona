@@ -19,7 +19,7 @@ const (
 
 type (
 	Plugin interface {
-		Install(*InstallOptions) error
+		Install(*InstallOptions, Values) (Values, error)
 		Status(*StatusOptions) ([][]string, error)
 		Delete(*DeleteOptions) error
 		Upgrade(*UpgradeOptions) error
@@ -34,6 +34,8 @@ type (
 		plugins []Plugin
 	}
 
+	Values map[string]interface{}
+
 	InstallOptions struct {
 		CodefreshHost         string
 		CodefreshToken        string
@@ -43,6 +45,10 @@ type (
 		MarkAsDefault         bool
 		StorageClass          string
 		IsDefaultStorageClass bool
+		KubeBuilder           interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		DryRun bool
 	}
 
 	DeleteOptions struct {
@@ -62,6 +68,9 @@ type (
 		matchPattern   string
 		operatorType   string
 		dryRun         bool
+		kubeBuilder    interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
 	}
 
 	statusOptions struct {

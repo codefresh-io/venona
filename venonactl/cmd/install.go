@@ -22,6 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/codefresh-io/venona/venonactl/pkg/kube"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
@@ -68,6 +69,7 @@ var installCmd = &cobra.Command{
 			MarkAsDefault:         installCmdOptions.setDefaultRuntime,
 			StorageClass:          installCmdOptions.storageClass,
 			IsDefaultStorageClass: isDefault,
+			DryRun:                installCmdOptions.dryRun,
 		}
 		if isDefault {
 			builderInstallOpt.StorageClass = plugins.DefaultStorageClassNamePrefix
@@ -131,9 +133,17 @@ var installCmd = &cobra.Command{
 			builderInstallOpt.ClusterName = s.ClusterInCodefresh
 			builderInstallOpt.RegisterWithAgent = false
 		}
-
+		builderInstallOpt.KubeBuilder = kube.New(&kube.Options{
+			ContextName:      builderInstallOpt.ClusterName,
+			Namespace:        builderInstallOpt.ClusterNamespace,
+			PathToKubeConfig: s.KubernetesAPI.ConfigPath,
+			InCluster:        s.KubernetesAPI.InCluster,
+		})
+		values := s.BuildValues()
+		var err error
 		for _, p := range builder.Get() {
-			if err := p.Install(builderInstallOpt); err != nil {
+			values, err = p.Install(builderInstallOpt, values)
+			if err != nil {
 				dieOnError(err)
 			}
 		}

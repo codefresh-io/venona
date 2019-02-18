@@ -34,19 +34,18 @@ const (
 )
 
 // Install runtimectl environment
-func (u *volumeProvisionerPlugin) Install(_ *InstallOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 	}
-	return install(&installOptions{
+	return v, install(&installOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      opt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
-		dryRun:         s.DryRun,
+		dryRun:         opt.DryRun,
 		operatorType:   VolumeProvisionerPluginType,
 	})
 }
