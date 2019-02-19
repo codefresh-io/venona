@@ -91,6 +91,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Latest.Version,
 		},
-		"Namespace": s.KubernetesAPI.Namespace,
+		"Namespace":  s.KubernetesAPI.Namespace,
+		"AgentToken": "",
+		"ServerCert": map[string]string{
+			"Cert": "",
+			"Key":  "",
+			"Ca":   "",
+		},
 	}
 }

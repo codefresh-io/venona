@@ -65,7 +65,6 @@ var installCmd = &cobra.Command{
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost:         s.CodefreshAPI.Host,
 			CodefreshToken:        s.CodefreshAPI.Token,
-			ClusterNamespace:      s.KubernetesAPI.Namespace,
 			MarkAsDefault:         installCmdOptions.setDefaultRuntime,
 			StorageClass:          installCmdOptions.storageClass,
 			IsDefaultStorageClass: isDefault,
@@ -135,10 +134,12 @@ var installCmd = &cobra.Command{
 		}
 		builderInstallOpt.KubeBuilder = kube.New(&kube.Options{
 			ContextName:      builderInstallOpt.ClusterName,
-			Namespace:        builderInstallOpt.ClusterNamespace,
+			Namespace:        s.KubernetesAPI.Namespace,
 			PathToKubeConfig: s.KubernetesAPI.ConfigPath,
 			InCluster:        s.KubernetesAPI.InCluster,
 		})
+		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
+
 		values := s.BuildValues()
 		var err error
 		for _, p := range builder.Get() {
