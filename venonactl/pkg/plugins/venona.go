@@ -17,8 +17,8 @@ limitations under the License.
 package plugins
 
 import (
+	"encoding/base64"
 	"fmt"
-	"regexp"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -56,8 +56,7 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 		return nil, err
 	}
 	logrus.Debugf(fmt.Sprintf("Created token: %s", token.Value))
-
-	store.GetStore().AgentToken = token.Value
+	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +113,7 @@ func (u *venonaPlugin) Delete(_ *DeleteOptions) error {
 	return delete(opt)
 }
 
-func (u *venonaPlugin) Upgrade(_ *UpgradeOptions) error {
+func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
 	// replace of sa creates new secert with sa creds
 	// avoid it till patch fully implemented
@@ -123,41 +122,30 @@ func (u *venonaPlugin) Upgrade(_ *UpgradeOptions) error {
 	}
 
 	var err error
-	s := store.GetStore()
 
-	kubeClientset, err := NewKubeClientset(s)
+	kubeClientset, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
-		return err
+		return nil, err
 	}
-
-	namespace := s.KubernetesAPI.Namespace
 
 	// special case when we need to get the token from the remote to no regenrate it
 	// whole flow should be more like kubectl apply that build a patch
 	// based on remote object and candidate object
-	secret, err := kubeClientset.CoreV1().Secrets(namespace).Get(s.AppName, metav1.GetOptions{})
+
+	secret, err := kubeClientset.CoreV1().Secrets(opt.ClusterNamespace).Get(opt.Name, metav1.GetOptions{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	token := secret.Data["codefresh.token"]
-	s.AgentToken = string(token)
+	v["AgentToken"] = string(token)
 
-	kubeObjects, err := getKubeObjectsFromTempalte(s.BuildValues())
+	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for fileName, local := range kubeObjects {
-		match, _ := regexp.MatchString(venonaFilesPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VenonaPluginType,
-				"Pattern":  venonaFilesPattern,
-			}).Debugf("Skipping upgrade of %s: pattern not match", fileName)
-			continue
-		}
-
 		if _, ok := skipUpgradeFor[fileName]; ok {
 			logrus.WithFields(logrus.Fields{
 				"Operator": VenonaPluginType,
@@ -165,11 +153,11 @@ func (u *venonaPlugin) Upgrade(_ *UpgradeOptions) error {
 			continue
 		}
 
-		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, namespace)
+		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return v, nil
 }

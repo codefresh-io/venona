@@ -86,6 +86,6 @@ func (u *volumeProvisionerPlugin) Delete(_ *DeleteOptions) error {
 	return delete(opt)
 }
 
-func (u *volumeProvisionerPlugin) Upgrade(_ *UpgradeOptions) error {
-	return nil
+func (u *volumeProvisionerPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+	return v, nil
 }

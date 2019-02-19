@@ -54,6 +54,13 @@ var upgradeCmd = &cobra.Command{
 		extendStoreWithKubeClient()
 
 		builder := plugins.NewBuilder()
+		builderUpgradeOpt := &plugins.UpgradeOptions{
+			CodefreshHost:    s.CodefreshAPI.Host,
+			CodefreshToken:   s.CodefreshAPI.Token,
+			ClusterNamespace: s.KubernetesAPI.Namespace,
+			DryRun:           upgradeCmdOpt.dryRun,
+			Name:             s.AppName,
+		}
 
 		re, _ := s.CodefreshAPI.Client.RuntimeEnvironments().Get(args[0])
 		contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
@@ -71,8 +78,11 @@ var upgradeCmd = &cobra.Command{
 			}
 			builder.Add(plugins.RuntimeEnvironmentPluginType)
 		}
+		var err error
+		values := s.BuildValues()
 		for _, p := range builder.Get() {
-			if err := p.Upgrade(nil); err != nil {
+			values, err = p.Upgrade(builderUpgradeOpt, values)
+			if err != nil {
 				dieOnError(err)
 			}
 		}

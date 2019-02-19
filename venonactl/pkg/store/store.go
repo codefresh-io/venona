@@ -1,8 +1,6 @@
 package store
 
 import (
-	"encoding/base64"
-
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
 )
@@ -93,7 +91,6 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Latest.Version,
 		},
-		"Namespace":  s.KubernetesAPI.Namespace,
-		"AgentToken": base64.StdEncoding.EncodeToString([]byte(s.AgentToken)),
+		"Namespace": s.KubernetesAPI.Namespace,
 	}
 }

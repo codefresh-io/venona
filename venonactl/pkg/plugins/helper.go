@@ -19,6 +19,7 @@ package plugins
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"text/template"
 
 	// import all cloud providers auth clients
@@ -55,9 +56,16 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 }
 
 // ParseTemplates - parses and exexute templates and return map of strings with obj data
-func ParseTemplates(templatesMap map[string]string, data interface{}) (map[string]string, error) {
+func ParseTemplates(templatesMap map[string]string, data interface{}, pattern string) (map[string]string, error) {
 	parsedTemplates := make(map[string]string)
 	for n, tpl := range templatesMap {
+		match, _ := regexp.MatchString(pattern, n)
+		if match != true {
+			logrus.WithFields(logrus.Fields{
+				"Pattern": pattern,
+			}).Debugf("Skipping parsing of %s: pattern not match", n)
+			continue
+		}
 		logrus.Debugf("parsing template = %s: ", n)
 		tplEx, err := ExecuteTemplate(tpl, data)
 		if err != nil {
@@ -72,8 +80,8 @@ func ParseTemplates(templatesMap map[string]string, data interface{}) (map[strin
 
 // KubeObjectsFromTemplates return map of runtime.Objects from templateMap
 // see https://github.com/kubernetes/client-go/issues/193 for examples
-func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}) (map[string]runtime.Object, error) {
-	parsedTemplates, err := ParseTemplates(templatesMap, data)
+func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, pattern string) (map[string]runtime.Object, error) {
+	parsedTemplates, err := ParseTemplates(templatesMap, data, pattern)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +143,7 @@ func NewKubeClientset(s *store.Values) (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func getKubeObjectsFromTempalte(values map[string]interface{}) (map[string]runtime.Object, error) {
+func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string) (map[string]runtime.Object, error) {
 	templatesMap := templates.TemplatesMap()
-	return KubeObjectsFromTemplates(templatesMap, values)
+	return KubeObjectsFromTemplates(templatesMap, values, pattern)
 }

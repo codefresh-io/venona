@@ -1,8 +1,6 @@
 package plugins
 
 import (
-	"regexp"
-
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -22,7 +20,7 @@ type (
 		Install(*InstallOptions, Values) (Values, error)
 		Status(*StatusOptions) ([][]string, error)
 		Delete(*DeleteOptions) error
-		Upgrade(*UpgradeOptions) error
+		Upgrade(*UpgradeOptions, Values) (Values, error)
 	}
 
 	PluginBuilder interface {
@@ -55,6 +53,15 @@ type (
 	}
 
 	UpgradeOptions struct {
+		CodefreshHost    string
+		CodefreshToken   string
+		ClusterName      string
+		ClusterNamespace string
+		Name             string
+		KubeBuilder      interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		DryRun bool
 	}
 
 	StatusOptions struct {
@@ -125,20 +132,12 @@ func build(t string) Plugin {
 
 func install(opt *installOptions) error {
 
-	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues)
+	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern)
 	if err != nil {
 		return err
 	}
 
 	for fileName, obj := range kubeObjects {
-		match, _ := regexp.MatchString(opt.matchPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Plugin":  opt.operatorType,
-				"Pattern": opt.matchPattern,
-			}).Debugf("Skipping installation of %s: pattern not match", fileName)
-			continue
-		}
 		if opt.dryRun == true {
 			logrus.WithFields(logrus.Fields{
 				"File-Name": fileName,
@@ -169,22 +168,14 @@ func install(opt *installOptions) error {
 }
 
 func status(opt *statusOptions) ([][]string, error) {
-	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues)
+	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern)
 	if err != nil {
 		return nil, err
 	}
 	var getErr error
 	var kind, name string
 	var rows [][]string
-	for fileName, obj := range kubeObjects {
-		match, _ := regexp.MatchString(opt.operatorType, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Plugin":  opt.operatorType,
-				"Pattern": opt.matchPattern,
-			}).Debugf("Skipping status check of %s: pattern not match", fileName)
-			continue
-		}
+	for _, obj := range kubeObjects {
 		name, kind, getErr = kubeobj.CheckObject(opt.kubeClientSet, obj, opt.namespace)
 		if getErr == nil {
 			rows = append(rows, []string{kind, name, StatusInstalled})
@@ -199,21 +190,14 @@ func status(opt *statusOptions) ([][]string, error) {
 }
 
 func delete(opt *deleteOptions) error {
-	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues)
+
+	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern)
 	if err != nil {
 		return err
 	}
 	var kind, name string
 	var deleteError error
-	for fileName, obj := range kubeObjects {
-		match, _ := regexp.MatchString(opt.matchPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Plugin":  opt.operatorType,
-				"Pattern": opt.matchPattern,
-			}).Debugf("Skipping deletion of %s: pattern not match", fileName)
-			continue
-		}
+	for _, obj := range kubeObjects {
 		kind, name, deleteError = kubeobj.DeleteObject(opt.kubeClientSet, obj, opt.namespace)
 		if deleteError == nil {
 			logrus.Debugf("%s \"%s\" deleted\n ", kind, name)

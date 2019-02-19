@@ -126,6 +126,6 @@ func (u *runtimeEnvironmentPlugin) Delete(_ *DeleteOptions) error {
 	return delete(opt)
 }
 
-func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions) error {
-	return nil
+func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+	return v, nil
 }
