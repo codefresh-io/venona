@@ -25,7 +25,6 @@ import (
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -77,36 +76,34 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 }
 
 // Status of runtimectl environment
-func (u *venonaPlugin) Status(_ *StatusOptions) ([][]string, error) {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil, err
 	}
 	opt := &statusOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
 	return status(opt)
 }
 
-func (u *venonaPlugin) Delete(_ *DeleteOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}

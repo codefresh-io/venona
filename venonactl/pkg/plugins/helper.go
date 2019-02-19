@@ -25,17 +25,11 @@ import (
 	// import all cloud providers auth clients
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	"github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 // ExecuteTemplate - executes templates in tpl str with config as values
@@ -102,45 +96,6 @@ func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, 
 		kubeObjects[n] = obj
 	}
 	return kubeObjects, nil
-}
-
-// NewKubeRESTClientConfig Returns rest.Config
-func NewKubeRESTClientConfig(s *store.Values) (*rest.Config, error) {
-	var restConfig *rest.Config
-	var err error
-	kubeconfig := s.KubernetesAPI.ConfigPath
-	kubecontext := s.KubernetesAPI.ContextName
-	namespace := s.KubernetesAPI.Namespace
-	if kubeconfig != "" {
-		restConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
-			&clientcmd.ConfigOverrides{
-				CurrentContext: kubecontext,
-				Context: clientcmdapi.Context{
-					Namespace: namespace,
-				},
-			}).ClientConfig()
-
-	} else {
-		restConfig, err = rest.InClusterConfig()
-	}
-
-	return restConfig, err
-}
-
-// NewKubeClientset - returns clientset
-func NewKubeClientset(s *store.Values) (*kubernetes.Clientset, error) {
-	var config *rest.Config
-	var err error
-	if s.KubernetesAPI.InCluster {
-		config, err = rest.InClusterConfig()
-	} else {
-		config, err = NewKubeRESTClientConfig(s)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return kubernetes.NewForConfig(config)
 }
 
 func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string) (map[string]runtime.Object, error) {

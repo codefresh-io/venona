@@ -113,9 +113,12 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 			Add(plugins.RuntimeEnvironmentPluginType).
 			Add(plugins.VenonaPluginType).
 			Add(plugins.VolumeProvisionerPluginType)
-
+		statusOpt := &plugins.StatusOptions{
+			KubeBuilder:      getKubeClientBuilder(context, re.RuntimeScheduler.Cluster.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+			ClusterNamespace: s.KubernetesAPI.Namespace,
+		}
 		for _, p := range builder.Get() {
-			rows, err := p.Status(nil)
+			rows, err := p.Status(statusOpt, s.BuildValues())
 			dieOnError(err)
 			table.AppendBulk(rows)
 		}

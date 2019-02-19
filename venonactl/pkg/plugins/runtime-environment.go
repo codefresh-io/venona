@@ -23,7 +23,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
@@ -90,36 +89,34 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	return v, nil
 }
 
-func (u *runtimeEnvironmentPlugin) Status(_ *StatusOptions) ([][]string, error) {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil, err
 	}
 	opt := &statusOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
 	}
 	return status(opt)
 }
 
-func (u *runtimeEnvironmentPlugin) Delete(_ *DeleteOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
 	}

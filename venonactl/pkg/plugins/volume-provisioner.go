@@ -21,7 +21,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
@@ -50,36 +49,34 @@ func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values
 	})
 }
 
-func (u *volumeProvisionerPlugin) Status(_ *StatusOptions) ([][]string, error) {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *volumeProvisionerPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil, err
 	}
 	opt := &statusOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
 	return status(opt)
 }
 
-func (u *volumeProvisionerPlugin) Delete(_ *DeleteOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *volumeProvisionerPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
 		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}

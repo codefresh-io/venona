@@ -18,8 +18,8 @@ const (
 type (
 	Plugin interface {
 		Install(*InstallOptions, Values) (Values, error)
-		Status(*StatusOptions) ([][]string, error)
-		Delete(*DeleteOptions) error
+		Status(*StatusOptions, Values) ([][]string, error)
+		Delete(*DeleteOptions, Values) error
 		Upgrade(*UpgradeOptions, Values) (Values, error)
 	}
 
@@ -50,6 +50,10 @@ type (
 	}
 
 	DeleteOptions struct {
+		KubeBuilder interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		ClusterNamespace string
 	}
 
 	UpgradeOptions struct {
@@ -65,6 +69,10 @@ type (
 	}
 
 	StatusOptions struct {
+		KubeBuilder interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		ClusterNamespace string
 	}
 
 	installOptions struct {

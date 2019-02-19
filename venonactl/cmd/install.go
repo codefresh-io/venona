@@ -22,7 +22,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/kube"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
@@ -132,12 +131,7 @@ var installCmd = &cobra.Command{
 			builderInstallOpt.ClusterName = s.ClusterInCodefresh
 			builderInstallOpt.RegisterWithAgent = false
 		}
-		builderInstallOpt.KubeBuilder = kube.New(&kube.Options{
-			ContextName:      builderInstallOpt.ClusterName,
-			Namespace:        s.KubernetesAPI.Namespace,
-			PathToKubeConfig: s.KubernetesAPI.ConfigPath,
-			InCluster:        s.KubernetesAPI.InCluster,
-		})
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 
 		values := s.BuildValues()

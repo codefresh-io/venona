@@ -71,7 +71,7 @@ var deleteCmd = &cobra.Command{
 			}
 			deleted, err := s.CodefreshAPI.Client.RuntimeEnvironments().Delete(name)
 			errors = collectError(errors, err, name)
-
+			deleteOptions := &plugins.DeleteOptions{}
 			if deleted {
 				contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
 				if contextName != "" {
@@ -89,8 +89,10 @@ var deleteCmd = &cobra.Command{
 					builder.Add(plugins.VenonaPluginType)
 				}
 
+				deleteOptions.KubeBuilder = getKubeClientBuilder(contextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+				deleteOptions.ClusterNamespace = re.RuntimeScheduler.Cluster.Namespace
 				for _, p := range builder.Get() {
-					err := p.Delete(nil)
+					err := p.Delete(deleteOptions, s.BuildValues())
 					collectError(errors, err, name)
 				}
 

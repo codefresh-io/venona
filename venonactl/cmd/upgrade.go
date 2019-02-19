@@ -78,6 +78,9 @@ var upgradeCmd = &cobra.Command{
 			}
 			builder.Add(plugins.RuntimeEnvironmentPluginType)
 		}
+
+		builderUpgradeOpt.KubeBuilder = getKubeClientBuilder(upgradeCmdOpt.kube.context, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+
 		var err error
 		values := s.BuildValues()
 		for _, p := range builder.Get() {

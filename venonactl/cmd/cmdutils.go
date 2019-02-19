@@ -10,6 +10,7 @@ import (
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
+	"github.com/codefresh-io/venona/venonactl/pkg/kube"
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
@@ -169,4 +170,13 @@ func createTable() *tablewriter.Table {
 	table.SetColumnSeparator(" ")
 	table.SetColWidth(100)
 	return table
+}
+
+func getKubeClientBuilder(context string, namespace string, path string, inCluster bool) kube.Kube {
+	return kube.New(&kube.Options{
+		ContextName:      context,
+		Namespace:        namespace,
+		PathToKubeConfig: path,
+		InCluster:        inCluster,
+	})
 }
