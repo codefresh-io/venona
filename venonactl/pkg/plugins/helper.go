@@ -25,8 +25,8 @@ import (
 	// import all cloud providers auth clients
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
-	"github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -50,23 +50,20 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 }
 
 // ParseTemplates - parses and exexute templates and return map of strings with obj data
-func ParseTemplates(templatesMap map[string]string, data interface{}, pattern string) (map[string]string, error) {
+func ParseTemplates(templatesMap map[string]string, data interface{}, pattern string, logger logger.Logger) (map[string]string, error) {
 	parsedTemplates := make(map[string]string)
 	for n, tpl := range templatesMap {
 		match, _ := regexp.MatchString(pattern, n)
 		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Pattern": pattern,
-			}).Debugf("Skipping parsing of %s: pattern not match", n)
+			logger.Debug("Skipping parsing, pattern does not match", "Pattern", pattern, "Name", n)
 			continue
 		}
-		logrus.Debugf("parsing template = %s: ", n)
+		logger.Debug("parsing template", "Name", n)
 		tplEx, err := ExecuteTemplate(tpl, data)
 		if err != nil {
-			logrus.Errorf("Cannot parse and execute template %s: %v\n ", n, err)
+			logger.Error("Failed to parse and execute template", "Name", n)
 			return nil, err
 		}
-		logrus.Debugf("parsing template Success\n")
 		parsedTemplates[n] = tplEx
 	}
 	return parsedTemplates, nil
@@ -74,8 +71,8 @@ func ParseTemplates(templatesMap map[string]string, data interface{}, pattern st
 
 // KubeObjectsFromTemplates return map of runtime.Objects from templateMap
 // see https://github.com/kubernetes/client-go/issues/193 for examples
-func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, pattern string) (map[string]runtime.Object, error) {
-	parsedTemplates, err := ParseTemplates(templatesMap, data, pattern)
+func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, pattern string, logger logger.Logger) (map[string]runtime.Object, error) {
+	parsedTemplates, err := ParseTemplates(templatesMap, data, pattern, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -85,20 +82,19 @@ func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, 
 	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeObjects := make(map[string]runtime.Object)
 	for n, objStr := range parsedTemplates {
-		logrus.Debugf("Deserializing template = %s: \n", n)
+		logger.Debug("Deserializing template", "Name", n)
 		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
 		if err != nil {
-			logrus.Errorf("Error: %v \n", err)
-			fmt.Printf("Cannot deserialize kuberentes object %s: %v\n ", n, err)
+			logger.Error(fmt.Sprintf("Cannot deserialize kuberentes object %s: %v", n, err))
 			return nil, err
 		}
-		logrus.Debugf("deserializing template %s Success: %v\n", n, groupVersionKind)
+		logger.Debug("deserializing template success", "Name", n, "Group", groupVersionKind.Group)
 		kubeObjects[n] = obj
 	}
 	return kubeObjects, nil
 }
 
-func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string) (map[string]runtime.Object, error) {
+func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string, logger logger.Logger) (map[string]runtime.Object, error) {
 	templatesMap := templates.TemplatesMap()
-	return KubeObjectsFromTemplates(templatesMap, values, pattern)
+	return KubeObjectsFromTemplates(templatesMap, values, pattern, logger)
 }

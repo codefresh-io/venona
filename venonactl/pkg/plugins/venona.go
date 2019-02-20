@@ -21,9 +21,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,6 +30,7 @@ import (
 
 // venonaPlugin installs assets on Kubernetes Dind runtimectl Env
 type venonaPlugin struct {
+	logger logger.Logger
 }
 
 const (
@@ -39,9 +39,9 @@ const (
 
 // Install venona agent
 func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
-	logrus.Debug("Generating token for agent")
+	u.logger.Debug("Generating token for agent")
 	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
-	logrus.Debugf("Token candidate name: %s", tokenName)
+	u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
 
 	client := codefresh.New(&codefresh.ClientOptions{
 		Auth: codefresh.AuthOptions{
@@ -54,7 +54,7 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	if err != nil {
 		return nil, err
 	}
-	logrus.Debugf(fmt.Sprintf("Created token: %s", token.Value))
+	u.logger.Debug("Token created")
 	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
 	if err != nil {
 		return nil, err
@@ -62,9 +62,11 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return nil, err
 	}
 	return v, install(&installOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
 		kubeClientSet:  cs,
@@ -79,10 +81,11 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 	opt := &statusOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
 		kubeClientSet:  cs,
@@ -96,10 +99,11 @@ func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, e
 func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil
 	}
 	opt := &deleteOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
 		kubeClientSet:  cs,
@@ -122,7 +126,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
 	kubeClientset, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 
@@ -144,9 +148,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
 	for fileName, local := range kubeObjects {
 		if _, ok := skipUpgradeFor[fileName]; ok {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VenonaPluginType,
-			}).Debugf("Skipping upgrade of %s: should be ignored", fileName)
+			u.logger.Debug(fmt.Sprintf("Skipping upgrade of %s: should be ignored", fileName))
 			continue
 		}
 

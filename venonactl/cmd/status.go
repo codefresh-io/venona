@@ -19,9 +19,8 @@ limitations under the License.
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	humanize "github.com/dustin/go-humanize"
@@ -42,11 +41,11 @@ var statusCmd = &cobra.Command{
 	Short: "Get status of Codefresh's runtime-environment",
 	Long:  "Pass the name of the runtime environment to see more details information about the underlying resources",
 	Run: func(cmd *cobra.Command, args []string) {
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
+		lgr := createLogger("Status", verbose)
 
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
 		s := store.GetStore()
 		table := createTable()
 		// When requested status for specific runtime
@@ -68,9 +67,9 @@ var statusCmd = &cobra.Command{
 				table.Append([]string{re.Metadata.Name, message, time})
 				table.Render()
 				fmt.Println()
-				printTableWithKubernetesRelatedResources(re, statusCmdOpt.kube.context)
+				printTableWithKubernetesRelatedResources(re, statusCmdOpt.kube.context, lgr)
 			} else {
-				logrus.Warnf("Runtime-Environment %s has not Venona's agent", name)
+				lgr.Debug("Runtime-Environment has not Venona's agent", "Name", name)
 			}
 			return
 		}
@@ -97,8 +96,8 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string) {
-	builder := plugins.NewBuilder()
+func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string, logger logger.Logger) {
+	builder := plugins.NewBuilder(logger)
 
 	table := createTable()
 	table.SetHeader([]string{"Kind", "Name", "Status"})

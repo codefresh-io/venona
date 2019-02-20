@@ -19,13 +19,13 @@ package plugins
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
 // volumeProvisionerPlugin installs assets on Kubernetes Dind runtimectl Env
 type volumeProvisionerPlugin struct {
+	logger logger.Logger
 }
 
 const (
@@ -36,7 +36,7 @@ const (
 func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v", err)
 	}
 	return v, install(&installOptions{
 		templates:      templates.TemplatesMap(),
@@ -46,19 +46,21 @@ func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values
 		matchPattern:   volumeProvisionerFilesPattern,
 		dryRun:         opt.DryRun,
 		operatorType:   VolumeProvisionerPluginType,
+		logger:         u.logger,
 	})
 }
 
 func (u *volumeProvisionerPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 	opt := &statusOptions{
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
 		kubeClientSet:  cs,
+		logger:         u.logger,
 		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
@@ -69,12 +71,13 @@ func (u *volumeProvisionerPlugin) Status(statusOpt *StatusOptions, v Values) ([]
 func (u *volumeProvisionerPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
+		logger:         u.logger,
 		kubeClientSet:  cs,
 		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,

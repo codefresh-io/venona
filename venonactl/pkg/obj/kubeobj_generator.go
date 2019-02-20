@@ -24,8 +24,6 @@ import (
 	"runtime"
 	"strings"
 	"text/template"
-
-	"github.com/sirupsen/logrus"
 )
 
 /*
@@ -179,9 +177,7 @@ func main() {
 	outfileName := path.Join(folderName, "kubeobj.go")
 	outfile, err := os.Create(outfileName)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"File-Name": outfileName,
-		}).Errorf("ERROR: cannot create out file %v \n", err)
+		fmt.Printf("ERROR: cannot create out file %v", err)
 		os.Exit(1)
 	}
 	defer outfile.Close()

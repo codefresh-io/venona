@@ -18,10 +18,10 @@ limitations under the License.
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
-	"github.com/sirupsen/logrus"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
@@ -53,14 +53,14 @@ var deleteCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
+		lgr := createLogger("Delete", verbose)
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
 		var errors []DeletionError
 		s.KubernetesAPI.InCluster = deleteCmdOptions.kube.inCluster
 		for _, name := range args {
-			builder := plugins.NewBuilder()
+			builder := plugins.NewBuilder(lgr)
 
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
 			errors = collectError(errors, err, name)
@@ -96,20 +96,18 @@ var deleteCmd = &cobra.Command{
 					collectError(errors, err, name)
 				}
 
-				logrus.Infof("Deleted %s", name)
+				lgr.Info("Deletion completed", "Name", name)
 			}
 
 		}
 
 		if len(errors) > 0 {
 			for _, e := range errors {
-				logrus.WithFields(logrus.Fields{
-					"runtime-environment": e.name,
-				}).Errorf("Failed during operation %s with error %s", e.operation, e.err.Error())
+				lgr.Error(fmt.Sprintf("Error %s", e.err.Error()), "Name", e.name, "Operation", e.operation)
 			}
 			os.Exit(1)
 		}
-		logrus.Info("Deletion completed")
+		lgr.Info("Deletion completed")
 	},
 }
 

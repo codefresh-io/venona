@@ -21,7 +21,6 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -48,12 +47,11 @@ var upgradeCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
-
-		builder := plugins.NewBuilder()
+		lgr := createLogger("Upgrade", verbose)
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
+		builder := plugins.NewBuilder(lgr)
 		builderUpgradeOpt := &plugins.UpgradeOptions{
 			CodefreshHost:    s.CodefreshAPI.Host,
 			CodefreshToken:   s.CodefreshAPI.Token,
@@ -70,7 +68,7 @@ var upgradeCmd = &cobra.Command{
 		s.KubernetesAPI.ContextName = contextName
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
 		if upgradeCmdOpt.dryRun {
-			logrus.Info("Running in dry-run mode")
+			lgr.Info("Running in dry-run mode")
 		} else {
 			builder.Add(plugins.VenonaPluginType)
 			if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {

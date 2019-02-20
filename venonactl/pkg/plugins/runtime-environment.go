@@ -20,14 +20,14 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
 // runtimeEnvironmentPlugin installs assets on Kubernetes Dind runtimectl Env
 type runtimeEnvironmentPlugin struct {
+	logger logger.Logger
 }
 
 const (
@@ -38,11 +38,11 @@ const (
 func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v ", err)
 	}
 
 	cfOpt := &codefresh.APIOptions{
-		Logger:                logrus.New(),
+		Logger:                u.logger,
 		CodefreshHost:         opt.CodefreshHost,
 		CodefreshToken:        opt.CodefreshToken,
 		ClusterName:           opt.ClusterName,
@@ -68,6 +68,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	}
 
 	err = install(&installOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
 		kubeClientSet:  cs,
@@ -92,7 +93,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 	opt := &statusOptions{
@@ -102,6 +103,7 @@ func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([
 		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
+		logger:         u.logger,
 	}
 	return status(opt)
 }
@@ -109,7 +111,7 @@ func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([
 func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil
 	}
 	opt := &deleteOptions{
@@ -119,6 +121,7 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
+		logger:         u.logger,
 	}
 	return delete(opt)
 }

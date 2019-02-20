@@ -1,8 +1,10 @@
 package plugins
 
 import (
+	"fmt"
+
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
-	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -29,6 +31,7 @@ type (
 	}
 
 	pb struct {
+		logger  logger.Logger
 		plugins []Plugin
 	}
 
@@ -86,6 +89,7 @@ type (
 		kubeBuilder    interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
+		logger logger.Logger
 	}
 
 	statusOptions struct {
@@ -95,6 +99,7 @@ type (
 		namespace      string
 		matchPattern   string
 		operatorType   string
+		logger         logger.Logger
 	}
 
 	deleteOptions struct {
@@ -104,17 +109,19 @@ type (
 		namespace      string
 		matchPattern   string
 		operatorType   string
+		logger         logger.Logger
 	}
 )
 
-func NewBuilder() PluginBuilder {
+func NewBuilder(logger logger.Logger) PluginBuilder {
 	return &pb{
+		logger:  logger,
 		plugins: []Plugin{},
 	}
 }
 
 func (p *pb) Add(name string) PluginBuilder {
-	p.plugins = append(p.plugins, build(name))
+	p.plugins = append(p.plugins, build(name, p.logger))
 	return p
 }
 
@@ -122,17 +129,23 @@ func (p *pb) Get() []Plugin {
 	return p.plugins
 }
 
-func build(t string) Plugin {
+func build(t string, logger logger.Logger) Plugin {
 	if t == VenonaPluginType {
-		return &venonaPlugin{}
+		return &venonaPlugin{
+			logger: logger.New("Plugin", VenonaPluginType),
+		}
 	}
 
 	if t == RuntimeEnvironmentPluginType {
-		return &runtimeEnvironmentPlugin{}
+		return &runtimeEnvironmentPlugin{
+			logger: logger.New("Plugin", RuntimeEnvironmentPluginType),
+		}
 	}
 
 	if t == VolumeProvisionerPluginType {
-		return &volumeProvisionerPlugin{}
+		return &volumeProvisionerPlugin{
+			logger: logger.New("Plugin", VolumeProvisionerPluginType),
+		}
 	}
 
 	return nil
@@ -140,17 +153,14 @@ func build(t string) Plugin {
 
 func install(opt *installOptions) error {
 
-	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern)
+	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {
 		return err
 	}
 
 	for fileName, obj := range kubeObjects {
 		if opt.dryRun == true {
-			logrus.WithFields(logrus.Fields{
-				"File-Name": fileName,
-				"Plugin":    opt.operatorType,
-			}).Debugf("%v", obj)
+			opt.logger.Debug(fmt.Sprintf("%v", obj), "File-Name", fileName)
 			continue
 		}
 		var createErr error
@@ -158,16 +168,16 @@ func install(opt *installOptions) error {
 		name, kind, createErr = kubeobj.CreateObject(opt.kubeClientSet, obj, opt.namespace)
 
 		if createErr == nil {
-			logrus.Debugf("%s \"%s\" created\n ", kind, name)
+			opt.logger.Debug(fmt.Sprintf("%s \"%s\" created", kind, name))
 		} else if statusError, errIsStatusError := createErr.(*errors.StatusError); errIsStatusError {
 			if statusError.ErrStatus.Reason == metav1.StatusReasonAlreadyExists {
-				logrus.Debugf("%s \"%s\" already exists\n", kind, name)
+				opt.logger.Debug(fmt.Sprintf("%s \"%s\" already exists", kind, name))
 			} else {
-				logrus.Debugf("%s \"%s\" failed: %v ", kind, name, statusError)
+				opt.logger.Debug(fmt.Sprintf("%s \"%s\" failed: %v ", kind, name, statusError))
 				return statusError
 			}
 		} else {
-			logrus.Debugf("%s \"%s\" failed: %v ", kind, name, createErr)
+			opt.logger.Debug(fmt.Sprintf("%s \"%s\" failed: %v ", kind, name, createErr))
 			return createErr
 		}
 	}
@@ -176,7 +186,7 @@ func install(opt *installOptions) error {
 }
 
 func status(opt *statusOptions) ([][]string, error) {
-	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern)
+	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +200,7 @@ func status(opt *statusOptions) ([][]string, error) {
 		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {
 			rows = append(rows, []string{kind, name, StatusNotInstalled, statusError.ErrStatus.Message})
 		} else {
-			logrus.Debugf("%s \"%s\" failed: %v ", kind, name, getErr)
+			opt.logger.Debug(fmt.Sprintf("%s \"%s\" failed: %v ", kind, name, getErr))
 			return nil, getErr
 		}
 	}
@@ -199,7 +209,7 @@ func status(opt *statusOptions) ([][]string, error) {
 
 func delete(opt *deleteOptions) error {
 
-	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern)
+	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {
 		return err
 	}
@@ -208,18 +218,18 @@ func delete(opt *deleteOptions) error {
 	for _, obj := range kubeObjects {
 		kind, name, deleteError = kubeobj.DeleteObject(opt.kubeClientSet, obj, opt.namespace)
 		if deleteError == nil {
-			logrus.Debugf("%s \"%s\" deleted\n ", kind, name)
+			opt.logger.Debug(fmt.Sprintf("%s \"%s\" deleted", kind, name))
 		} else if statusError, errIsStatusError := deleteError.(*errors.StatusError); errIsStatusError {
 			if statusError.ErrStatus.Reason == metav1.StatusReasonAlreadyExists {
-				logrus.Debugf("%s \"%s\" already exists\n", kind, name)
+				opt.logger.Debug(fmt.Sprintf("%s \"%s\" already exist", kind, name))
 			} else if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
-				logrus.Debugf("%s \"%s\" not found\n", kind, name)
+				opt.logger.Debug(fmt.Sprintf("%s \"%s\" not found", kind, name))
 			} else {
-				logrus.Errorf("%s \"%s\" failed: %v ", kind, name, statusError)
+				opt.logger.Error(fmt.Sprintf("%s \"%s\" failed: %v ", kind, name, statusError))
 				return statusError
 			}
 		} else {
-			logrus.Errorf("%s \"%s\" failed: %v ", kind, name, deleteError)
+			opt.logger.Error(fmt.Sprintf("%s \"%s\" failed: %v ", kind, name, deleteError))
 			return deleteError
 		}
 	}
