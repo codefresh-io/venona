@@ -17,97 +17,104 @@ limitations under the License.
 package plugins
 
 import (
+	"encoding/base64"
 	"fmt"
-	"regexp"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
+	"github.com/codefresh-io/go-sdk/pkg/codefresh"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // venonaPlugin installs assets on Kubernetes Dind runtimectl Env
 type venonaPlugin struct {
+	logger logger.Logger
 }
 
 const (
 	venonaFilesPattern = ".*.venona.yaml"
 )
 
-// Install runtimectl environment
-func (u *venonaPlugin) Install(_ *InstallOptions) error {
-	s := store.GetStore()
-	logrus.Debug("Generating token for agent")
+// Install venona agent
+func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	u.logger.Debug("Generating token for agent")
 	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
-	logrus.Debugf("Token candidate name: %s", tokenName)
-	token, err := s.CodefreshAPI.Client.Tokens().Create(tokenName, s.RuntimeEnvironment)
-	if err != nil {
-		logrus.Error(err.Error())
-		return err
-	}
-	logrus.Debugf(fmt.Sprintf("Created token: %s", token.Value))
+	u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
 
-	store.GetStore().AgentToken = token.Value
+	client := codefresh.New(&codefresh.ClientOptions{
+		Auth: codefresh.AuthOptions{
+			Token: opt.CodefreshToken,
+		},
+		Host: opt.CodefreshHost,
+	})
+
+	token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
 	if err != nil {
-		return err
+		return nil, err
+	}
+	u.logger.Debug("Token created")
+	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
+	if err != nil {
+		return nil, err
 	}
 
-	cs, err := NewKubeClientset(s)
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return nil, err
 	}
-	return install(&installOptions{
+	return v, install(&installOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      opt.ClusterNamespace,
 		matchPattern:   venonaFilesPattern,
-		dryRun:         s.DryRun,
+		dryRun:         opt.DryRun,
 		operatorType:   VolumeProvisionerPluginType,
 	})
 }
 
 // Status of runtimectl environment
-func (u *venonaPlugin) Status(_ *StatusOptions) ([][]string, error) {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 	opt := &statusOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
 	return status(opt)
 }
 
-func (u *venonaPlugin) Delete(_ *DeleteOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil
 	}
 	opt := &deleteOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
 	return delete(opt)
 }
 
-func (u *venonaPlugin) Upgrade(_ *UpgradeOptions) error {
+func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
 	// replace of sa creates new secert with sa creds
 	// avoid it till patch fully implemented
@@ -116,53 +123,40 @@ func (u *venonaPlugin) Upgrade(_ *UpgradeOptions) error {
 	}
 
 	var err error
-	s := store.GetStore()
 
-	kubeClientset, err := NewKubeClientset(s)
+	kubeClientset, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
-		return err
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return nil, err
 	}
-
-	namespace := s.KubernetesAPI.Namespace
 
 	// special case when we need to get the token from the remote to no regenrate it
 	// whole flow should be more like kubectl apply that build a patch
 	// based on remote object and candidate object
-	secret, err := kubeClientset.CoreV1().Secrets(namespace).Get(s.AppName, metav1.GetOptions{})
+
+	secret, err := kubeClientset.CoreV1().Secrets(opt.ClusterNamespace).Get(opt.Name, metav1.GetOptions{})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	token := secret.Data["codefresh.token"]
-	s.AgentToken = string(token)
+	v["AgentToken"] = string(token)
 
-	kubeObjects, err := getKubeObjectsFromTempalte(s.BuildValues())
+	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for fileName, local := range kubeObjects {
-		match, _ := regexp.MatchString(venonaFilesPattern, fileName)
-		if match != true {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VenonaPluginType,
-				"Pattern":  venonaFilesPattern,
-			}).Debugf("Skipping upgrade of %s: pattern not match", fileName)
-			continue
-		}
-
 		if _, ok := skipUpgradeFor[fileName]; ok {
-			logrus.WithFields(logrus.Fields{
-				"Operator": VenonaPluginType,
-			}).Debugf("Skipping upgrade of %s: should be ignored", fileName)
+			u.logger.Debug(fmt.Sprintf("Skipping upgrade of %s: should be ignored", fileName))
 			continue
 		}
 
-		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, namespace)
+		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return v, nil
 }

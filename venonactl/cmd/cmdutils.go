@@ -10,10 +10,11 @@ import (
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
+	"github.com/codefresh-io/venona/venonactl/pkg/kube"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -36,7 +37,7 @@ var (
 	skipVerionCheck bool
 )
 
-func buildBasicStore() {
+func buildBasicStore(logger logger.Logger) {
 	s := store.GetStore()
 	s.Version = &store.Version{
 		Current: &store.CurrentVersion{
@@ -62,13 +63,10 @@ func buildBasicStore() {
 			IsDefault: true,
 		}
 		s.Version.Latest = latestVersion
-		logrus.WithFields(logrus.Fields{
-			"Default-Version": store.DefaultVersion,
-			"Image-Tag":       s.Version.Current.Version,
-		}).Debug("Skipping version check")
+		logger.Debug("Skipping version check")
 	} else {
 		latestVersion := &store.LatestVersion{
-			Version:   store.GetLatestVersion(),
+			Version:   store.GetLatestVersion(logger),
 			IsDefault: false,
 		}
 		s.Image.Tag = latestVersion.Version
@@ -77,15 +75,14 @@ func buildBasicStore() {
 		// the local version and the latest version not match
 		// make sure the command is no venonactl version
 		if !res {
-			logrus.WithFields(logrus.Fields{
-				"Local-Version":  s.Version.Current.Version,
-				"Latest-Version": s.Version.Latest.Version,
-			}).Info("New version is avaliable, please update")
+			logger.Info("New version is avaliable, please update",
+				"Local-Version", s.Version.Current.Version,
+				"Latest-Version", s.Version.Latest.Version)
 		}
 	}
 }
 
-func extendStoreWithCodefershClient() error {
+func extendStoreWithCodefershClient(logger logger.Logger) error {
 	s := store.GetStore()
 	if configPath == "" {
 		configPath = fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
@@ -98,13 +95,9 @@ func extendStoreWithCodefershClient() error {
 		}
 		cfAPIHost = context.URL
 		cfAPIToken = context.Token
-
-		logrus.WithFields(logrus.Fields{
-			"Context-Name":   context.Name,
-			"Codefresh-Host": cfAPIHost,
-		}).Debug("Using codefresh context")
+		logger.Debug("Using codefresh context", "Context-Name", context.Name, "Host", cfAPIHost)
 	} else {
-		logrus.Debug("Using creentials from environment variables")
+		logger.Debug("Reading creentials from environment variables")
 	}
 
 	client := codefresh.New(&codefresh.ClientOptions{
@@ -122,26 +115,18 @@ func extendStoreWithCodefershClient() error {
 	return nil
 }
 
-func extendStoreWithKubeClient() {
+func extendStoreWithKubeClient(logger logger.Logger) {
 	s := store.GetStore()
 	if kubeConfigPath == "" {
 		currentUser, _ := user.Current()
 		if currentUser != nil {
 			kubeConfigPath = path.Join(currentUser.HomeDir, ".kube", "config")
-			logrus.WithFields(logrus.Fields{
-				"Kube-Config-Path": kubeConfigPath,
-			}).Debug("Path to kubeconfig not set, using default")
+			logger.Debug("Path to kubeconfig not set, using default")
 		}
 	}
 
 	s.KubernetesAPI = &store.KubernetesAPI{
 		ConfigPath: kubeConfigPath,
-	}
-}
-
-func prepareLogger() {
-	if verbose == true {
-		logrus.SetLevel(logrus.DebugLevel)
 	}
 }
 
@@ -154,7 +139,7 @@ func isUsingDefaultStorageClass(sc string) bool {
 
 func dieOnError(err error) {
 	if err != nil {
-		logrus.Error(err)
+		fmt.Printf("Error: %s", err.Error())
 		os.Exit(1)
 	}
 }
@@ -169,4 +154,23 @@ func createTable() *tablewriter.Table {
 	table.SetColumnSeparator(" ")
 	table.SetColWidth(100)
 	return table
+}
+
+func getKubeClientBuilder(context string, namespace string, path string, inCluster bool) kube.Kube {
+	return kube.New(&kube.Options{
+		ContextName:      context,
+		Namespace:        namespace,
+		PathToKubeConfig: path,
+		InCluster:        inCluster,
+	})
+}
+
+func createLogger(command string, verbose bool) logger.Logger {
+	logFile := "venonalog.json"
+	os.Remove(logFile)
+	return logger.New(&logger.Options{
+		Command:   command,
+		Verbose:   verbose,
+		LogToFile: logFile,
+	})
 }

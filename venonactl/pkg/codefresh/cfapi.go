@@ -61,8 +61,7 @@ type (
 	}
 
 	logger interface {
-		Debug(args ...interface{})
-		Debugf(format string, args ...interface{})
+		Debug(message string, args ...interface{})
 	}
 )
 
@@ -100,7 +99,7 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 		return nil, err
 	}
 	certExtraSANs := fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io", a.clusternamespace, a.clusternamespace)
-	a.logger.Debugf("certExtraSANs = %s", certExtraSANs)
+	a.logger.Debug(fmt.Sprintf("certExtraSANs = %s", certExtraSANs))
 
 	byteArray, err := a.codefresh.RuntimeEnvironments().SignCertificate(&codefresh.SignCertificatesOptions{
 		AltName: certExtraSANs,
@@ -123,7 +122,7 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 		} else if zf.Name == "cf-server-cert.pem" {
 			serverCert.Cert = buf.String()
 		} else {
-			a.logger.Debugf("Warning: Unknown filename in sign responce %s", zf.Name)
+			a.logger.Debug(fmt.Sprintf("Warning: Unknown filename in sign responce %s", zf.Name))
 		}
 	}
 

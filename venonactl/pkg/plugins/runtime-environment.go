@@ -17,17 +17,17 @@ limitations under the License.
 package plugins
 
 import (
+	"encoding/base64"
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
 // runtimeEnvironmentPlugin installs assets on Kubernetes Dind runtimectl Env
 type runtimeEnvironmentPlugin struct {
+	logger logger.Logger
 }
 
 const (
@@ -35,20 +35,19 @@ const (
 )
 
 // Install runtimectl environment
-func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v ", err)
 	}
 
 	cfOpt := &codefresh.APIOptions{
-		Logger:                logrus.New(),
+		Logger:                u.logger,
 		CodefreshHost:         opt.CodefreshHost,
 		CodefreshToken:        opt.CodefreshToken,
 		ClusterName:           opt.ClusterName,
 		RegisterWithAgent:     opt.RegisterWithAgent,
-		ClusterNamespace:      s.KubernetesAPI.Namespace,
+		ClusterNamespace:      opt.ClusterNamespace,
 		MarkAsDefault:         opt.MarkAsDefault,
 		StorageClass:          opt.StorageClass,
 		IsDefaultStorageClass: opt.IsDefaultStorageClass,
@@ -56,72 +55,77 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions) error {
 	cf := codefresh.NewCodefreshAPI(cfOpt)
 	cert, err := cf.Sign()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.ServerCert = cert
+	v["ServerCert"] = map[string]string{
+		"Cert": base64.StdEncoding.EncodeToString([]byte(cert.Cert)),
+		"Key":  base64.StdEncoding.EncodeToString([]byte(cert.Key)),
+		"Ca":   base64.StdEncoding.EncodeToString([]byte(cert.Ca)),
+	}
 
 	if err := cf.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 
 	err = install(&installOptions{
+		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      opt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
-		dryRun:         s.DryRun,
+		dryRun:         opt.DryRun,
 	})
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	re, err := cf.Register()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.RuntimeEnvironment = re.Metadata.Name
+	v["RuntimeEnvironment"] = re.Metadata.Name
 
-	return nil
+	return v, nil
 }
 
-func (u *runtimeEnvironmentPlugin) Status(_ *StatusOptions) ([][]string, error) {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 	opt := &statusOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
+		logger:         u.logger,
 	}
 	return status(opt)
 }
 
-func (u *runtimeEnvironmentPlugin) Delete(_ *DeleteOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   runtimeEnvironmentFilesPattern,
 		operatorType:   RuntimeEnvironmentPluginType,
+		logger:         u.logger,
 	}
 	return delete(opt)
 }
 
-func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions) error {
-	return nil
+func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+	return v, nil
 }

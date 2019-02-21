@@ -19,14 +19,13 @@ package plugins
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
 // volumeProvisionerPlugin installs assets on Kubernetes Dind runtimectl Env
 type volumeProvisionerPlugin struct {
+	logger logger.Logger
 }
 
 const (
@@ -34,59 +33,59 @@ const (
 )
 
 // Install runtimectl environment
-func (u *volumeProvisionerPlugin) Install(_ *InstallOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return fmt.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v", err)
 	}
-	return install(&installOptions{
+	return v, install(&installOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      opt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
-		dryRun:         s.DryRun,
+		dryRun:         opt.DryRun,
 		operatorType:   VolumeProvisionerPluginType,
+		logger:         u.logger,
 	})
 }
 
-func (u *volumeProvisionerPlugin) Status(_ *StatusOptions) ([][]string, error) {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *volumeProvisionerPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 	opt := &statusOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		logger:         u.logger,
+		namespace:      statusOpt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
 	return status(opt)
 }
 
-func (u *volumeProvisionerPlugin) Delete(_ *DeleteOptions) error {
-	s := store.GetStore()
-	cs, err := NewKubeClientset(s)
+func (u *volumeProvisionerPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
-		logrus.Errorf("Cannot create kubernetes clientset: %v\n ", err)
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
-		templateValues: s.BuildValues(),
+		templateValues: v,
+		logger:         u.logger,
 		kubeClientSet:  cs,
-		namespace:      s.KubernetesAPI.Namespace,
+		namespace:      deleteOpt.ClusterNamespace,
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
 	return delete(opt)
 }
 
-func (u *volumeProvisionerPlugin) Upgrade(_ *UpgradeOptions) error {
-	return nil
+func (u *volumeProvisionerPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+	return v, nil
 }

@@ -19,7 +19,6 @@ limitations under the License.
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
@@ -53,21 +52,21 @@ var installCmd = &cobra.Command{
 	Short: "Install Codefresh's runtime-environment",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
+		lgr := createLogger("Install", verbose)
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
 
-		builder := plugins.NewBuilder()
+		builder := plugins.NewBuilder(lgr)
 		isDefault := isUsingDefaultStorageClass(installCmdOptions.storageClass)
 
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost:         s.CodefreshAPI.Host,
 			CodefreshToken:        s.CodefreshAPI.Token,
-			ClusterNamespace:      s.KubernetesAPI.Namespace,
 			MarkAsDefault:         installCmdOptions.setDefaultRuntime,
 			StorageClass:          installCmdOptions.storageClass,
 			IsDefaultStorageClass: isDefault,
+			DryRun:                installCmdOptions.dryRun,
 		}
 		if isDefault {
 			builderInstallOpt.StorageClass = plugins.DefaultStorageClassNamePrefix
@@ -76,9 +75,7 @@ var installCmd = &cobra.Command{
 		if installCmdOptions.kube.context == "" {
 			config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
 			installCmdOptions.kube.context = config.CurrentContext
-			logrus.WithFields(logrus.Fields{
-				"Kube-Context-Name": installCmdOptions.kube.context,
-			}).Debug("Kube Context is not set, using current context")
+			lgr.Debug("Kube Context is not set, using current context", "Kube-Context-Name", installCmdOptions.kube.context)
 		}
 		if installCmdOptions.kube.namespace == "" {
 			installCmdOptions.kube.namespace = "default"
@@ -91,13 +88,11 @@ var installCmd = &cobra.Command{
 
 		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun
-			logrus.Info("Running in dry-run mode")
+			lgr.Info("Running in dry-run mode")
 		}
 		if installCmdOptions.venona.version != "" {
 			version := installCmdOptions.venona.version
-			logrus.WithFields(logrus.Fields{
-				"venona-Version": version,
-			}).Info("venona version set by user")
+			lgr.Info("Version set manually", "version", version)
 			s.Image.Tag = version
 			s.Version.Latest.Version = version
 		}
@@ -112,7 +107,7 @@ var installCmd = &cobra.Command{
 				dieOnError(fmt.Errorf("runtime-environment flag is required when using flag skip-runtime-installation"))
 			}
 			s.RuntimeEnvironment = installCmdOptions.runtimeEnvironmentName
-			logrus.Info("Skipping installation of runtime environment, installing venona only")
+			lgr.Info("Skipping installation of runtime environment, installing venona only")
 			builder.Add(plugins.VenonaPluginType)
 		} else {
 			builder.
@@ -122,7 +117,7 @@ var installCmd = &cobra.Command{
 		if isDefault {
 			builder.Add(plugins.VolumeProvisionerPluginType)
 		} else {
-			logrus.Info("Custom StorageClass is set, skipping installation of default volume provisioner")
+			lgr.Info("Custom StorageClass is set, skipping installation of default volume provisioner")
 		}
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
@@ -131,13 +126,18 @@ var installCmd = &cobra.Command{
 			builderInstallOpt.ClusterName = s.ClusterInCodefresh
 			builderInstallOpt.RegisterWithAgent = false
 		}
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 
+		values := s.BuildValues()
+		var err error
 		for _, p := range builder.Get() {
-			if err := p.Install(builderInstallOpt); err != nil {
+			values, err = p.Install(builderInstallOpt, values)
+			if err != nil {
 				dieOnError(err)
 			}
 		}
-		logrus.Info("Installation completed Successfully\n")
+		lgr.Info("Installation completed Successfully")
 	},
 }
 
