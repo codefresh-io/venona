@@ -105,13 +105,20 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 		AltName: certExtraSANs,
 		CSR:     serverCert.Csr,
 	})
+	if err != nil {
+		a.logger.Debug("Failed to sign certificate")
+		return nil, err
+	}
 
+	a.logger.Debug("Certificate was signed")
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	if err != nil {
+		a.logger.Debug("Failed to create zip reader from given certificate")
 		return nil, err
 	}
 	for _, zf := range zipReader.File {
+		a.logger.Debug("Reading file ", "name", zf.Name)
 		buf := new(bytes.Buffer)
 		src, _ := zf.Open()
 		defer src.Close()
