@@ -98,6 +98,9 @@ func extendStoreWithCodefershClient(logger logger.Logger) error {
 		logger.Debug("Using codefresh context", "Context-Name", context.Name, "Host", cfAPIHost)
 	} else {
 		logger.Debug("Reading creentials from environment variables")
+		if cfAPIHost == "" {
+			cfAPIHost = "https://g.codefresh.io"
+		}
 	}
 
 	client := codefresh.New(&codefresh.ClientOptions{
