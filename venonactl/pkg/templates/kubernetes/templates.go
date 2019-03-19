@@ -167,7 +167,7 @@ spec:
         operator: "Exists"
       containers:
       - name: dind-volume-provisioner
-        image: codefresh/dind-volume-provisioner:venona-v2
+        image: {{ .VolumeProvisionerImage.Name }}:{{ .VolumeProvisionerImage.Tag }}
         imagePullPolicy: Always
         resources:
           requests:
