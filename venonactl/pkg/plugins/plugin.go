@@ -150,6 +150,12 @@ func build(t string, logger logger.Logger) Plugin {
 		}
 	}
 
+	if t == EnginePluginType {
+		return &enginePlugin{
+			logger: logger.New("Plugin", EnginePluginType),
+		}
+	}
+
 	return nil
 }
 
