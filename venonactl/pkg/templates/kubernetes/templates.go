@@ -29,11 +29,11 @@ metadata:
   name: {{ .AppName }}-{{ .Namespace }}-engine
 subjects:
 - kind: ServiceAccount
-  name: {{ .AppName }}
+  name: engine
   namespace: {{ .Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .AppName }}-{{ .Namespace }}-engine
+  name: cluster-admin
   apiGroup: rbac.authorization.k8s.io` 
 
 templatesMap["cluster-role-binding.venona.yaml"] = `kind: ClusterRoleBinding
