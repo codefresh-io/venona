@@ -14,8 +14,8 @@ github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24
 github.com/census-instrumentation/opencensus-proto v0.1.0-0.20181214143942-ba49f56771b8 h1:gUqsFVdUKoRHNg8fkFd8gB5OOEa/g5EwlAHznb4zjbI=
 github.com/census-instrumentation/opencensus-proto v0.1.0-0.20181214143942-ba49f56771b8/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/codefresh-io/go-sdk v0.10.0 h1:xgfkapCLrx2FHofWq9LRsH0bLcNgwPZWQZTttCvMUng=
-github.com/codefresh-io/go-sdk v0.10.0/go.mod h1:U8c2f9/Vb2SXFbeKHSzofUOp3N78pDC3YdshFsUfdgc=
+github.com/codefresh-io/go-sdk v0.13.0 h1:puGXvsMISaA3yoFsnf5YSziR8IEHBlATG+KQPvCflrY=
+github.com/codefresh-io/go-sdk v0.13.0/go.mod h1:U8c2f9/Vb2SXFbeKHSzofUOp3N78pDC3YdshFsUfdgc=
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/go-etcd v2.0.0+incompatible/go.mod h1:Jez6KQU2B/sWsbdaef3ED8NzMklzPG4d5KIOhIy30Tk=
 github.com/coreos/go-semver v0.2.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=

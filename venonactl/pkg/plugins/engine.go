@@ -17,49 +17,25 @@ limitations under the License.
 package plugins
 
 import (
-	"encoding/base64"
 	"fmt"
-	"time"
 
-	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// venonaPlugin installs assets on Kubernetes Dind runtimectl Env
-type venonaPlugin struct {
+// enginePlugin installs assets on Kubernetes Dind runtimectl Env
+type enginePlugin struct {
 	logger logger.Logger
 }
 
 const (
-	venonaFilesPattern = ".*.venona.yaml"
+	engineFilesPattern = ".*.engine.yaml"
 )
 
 // Install venona agent
-func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
-	u.logger.Debug("Generating token for agent")
-	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
-	u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
-
-	client := codefresh.New(&codefresh.ClientOptions{
-		Auth: codefresh.AuthOptions{
-			Token: opt.CodefreshToken,
-		},
-		Host: opt.CodefreshHost,
-	})
-
-	token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
-	if err != nil {
-		return nil, err
-	}
-	u.logger.Debug("Token created")
-	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
-	if err != nil {
-		return nil, err
-	}
-
+func (u *enginePlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -71,14 +47,14 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 		templateValues: v,
 		kubeClientSet:  cs,
 		namespace:      opt.ClusterNamespace,
-		matchPattern:   venonaFilesPattern,
+		matchPattern:   engineFilesPattern,
 		dryRun:         opt.DryRun,
-		operatorType:   VenonaPluginType,
+		operatorType:   EnginePluginType,
 	})
 }
 
 // Status of runtimectl environment
-func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *enginePlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -90,13 +66,13 @@ func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, e
 		templateValues: v,
 		kubeClientSet:  cs,
 		namespace:      statusOpt.ClusterNamespace,
-		matchPattern:   venonaFilesPattern,
-		operatorType:   VenonaPluginType,
+		matchPattern:   engineFilesPattern,
+		operatorType:   EnginePluginType,
 	}
 	return status(opt)
 }
 
-func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *enginePlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -108,13 +84,13 @@ func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		templateValues: v,
 		kubeClientSet:  cs,
 		namespace:      deleteOpt.ClusterNamespace,
-		matchPattern:   venonaFilesPattern,
-		operatorType:   VenonaPluginType,
+		matchPattern:   engineFilesPattern,
+		operatorType:   EnginePluginType,
 	}
 	return delete(opt)
 }
 
-func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *enginePlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
 	// replace of sa creates new secert with sa creds
 	// avoid it till patch fully implemented
@@ -141,7 +117,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	token := secret.Data["codefresh.token"]
 	v["AgentToken"] = string(token)
 
-	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
+	kubeObjects, err := getKubeObjectsFromTempalte(v, engineFilesPattern, u.logger)
 	if err != nil {
 		return nil, err
 	}

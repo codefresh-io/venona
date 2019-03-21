@@ -345,7 +345,7 @@ metadata:
 templatesMap["service-account.engine.yaml"] = `apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .AppName }}-engine
+  name: engine
   namespace: {{ .Namespace }}` 
 
 templatesMap["service-account.venona.yaml"] = `apiVersion: v1

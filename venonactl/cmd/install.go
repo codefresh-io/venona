@@ -44,6 +44,7 @@ var installCmdOptions struct {
 	installOnlyRuntimeEnvironment bool
 	skipRuntimeInstallation       bool
 	runtimeEnvironmentName        string
+	kubernetesRunnerType          bool
 }
 
 // installCmd represents the install command
@@ -67,7 +68,13 @@ var installCmd = &cobra.Command{
 			StorageClass:          installCmdOptions.storageClass,
 			IsDefaultStorageClass: isDefault,
 			DryRun:                installCmdOptions.dryRun,
+			KubernetesRunnerType:  installCmdOptions.kubernetesRunnerType,
 		}
+
+		if installCmdOptions.kubernetesRunnerType {
+			builder.Add(plugins.EnginePluginType)
+		}
+
 		if isDefault {
 			builderInstallOpt.StorageClass = plugins.DefaultStorageClassNamePrefix
 		}
@@ -159,4 +166,5 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.installOnlyRuntimeEnvironment, "only-runtime-environment", false, "Set to true to onlky configure namespace as runtime-environment for Codefresh")
 	installCmd.Flags().BoolVar(&installCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
+	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 }
