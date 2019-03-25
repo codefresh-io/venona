@@ -14,6 +14,7 @@ const (
 	RuntimeEnvironmentPluginType  = "runtime-environment"
 	VenonaPluginType              = "venona"
 	VolumeProvisionerPluginType   = "volume-provisioner"
+	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
 )
 
@@ -49,7 +50,8 @@ type (
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
-		DryRun bool
+		DryRun               bool
+		KubernetesRunnerType bool
 	}
 
 	DeleteOptions struct {
@@ -145,6 +147,12 @@ func build(t string, logger logger.Logger) Plugin {
 	if t == VolumeProvisionerPluginType {
 		return &volumeProvisionerPlugin{
 			logger: logger.New("Plugin", VolumeProvisionerPluginType),
+		}
+	}
+
+	if t == EnginePluginType {
+		return &enginePlugin{
+			logger: logger.New("Plugin", EnginePluginType),
 		}
 	}
 

@@ -21,7 +21,7 @@ func New(o *Options) Logger {
 		"Command": o.Command,
 	})
 	handlers := []log.Handler{}
-	lvl := log.LvlError
+	lvl := log.LvlInfo
 	if o.Verbose {
 		lvl = log.LvlDebug
 	}

@@ -51,7 +51,9 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		MarkAsDefault:         opt.MarkAsDefault,
 		StorageClass:          opt.StorageClass,
 		IsDefaultStorageClass: opt.IsDefaultStorageClass,
+		KubernetesRunnerType:  opt.KubernetesRunnerType,
 	}
+
 	cf := codefresh.NewCodefreshAPI(cfOpt)
 	cert, err := cf.Sign()
 	if err != nil {
