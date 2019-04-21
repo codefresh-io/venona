@@ -52,6 +52,7 @@ type (
 		}
 		DryRun               bool
 		KubernetesRunnerType bool
+		DockerDaemonParams   string
 	}
 
 	DeleteOptions struct {

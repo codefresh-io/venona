@@ -45,6 +45,7 @@ var installCmdOptions struct {
 	skipRuntimeInstallation       bool
 	runtimeEnvironmentName        string
 	kubernetesRunnerType          bool
+	dockerDaemonParams            string
 }
 
 // installCmd represents the install command
@@ -69,6 +70,7 @@ var installCmd = &cobra.Command{
 			IsDefaultStorageClass: isDefault,
 			DryRun:                installCmdOptions.dryRun,
 			KubernetesRunnerType:  installCmdOptions.kubernetesRunnerType,
+			DockerDaemonParams:    installCmdOptions.dockerDaemonParams,
 		}
 
 		if installCmdOptions.kubernetesRunnerType {
@@ -160,6 +162,7 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installCmd.Flags().StringVar(&installCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installCmd.Flags().StringVar(&installCmdOptions.storageClass, "storage-class", "", "Set a name of your custom storage class, note: this will not install volume provisioning components")
+	installCmd.Flags().StringVar(&installCmdOptions.dockerDaemonParams, "dockerd-params", "", "Params to be added to each workflow for the docker daemon (https://docs.docker.com/engine/reference/commandline/dockerd/)")
 
 	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
