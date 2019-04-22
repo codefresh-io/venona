@@ -42,7 +42,6 @@ type (
 		StorageClass          string
 		IsDefaultStorageClass bool
 		KubernetesRunnerType  bool
-		DockerDaemonParams    string
 	}
 
 	RuntimeEnvironmentRegistrator interface {
@@ -61,7 +60,6 @@ type (
 		storageClass          string
 		isDefaultStorageClass bool
 		kubernetesRunnerType  bool
-		dockerDaemonParams    string
 	}
 
 	logger interface {
@@ -85,7 +83,6 @@ func NewCodefreshAPI(opt *APIOptions) API {
 		storageClass:          opt.StorageClass,
 		isDefaultStorageClass: opt.IsDefaultStorageClass,
 		kubernetesRunnerType:  opt.KubernetesRunnerType,
-		dockerDaemonParams:    opt.DockerDaemonParams,
 	}
 }
 
@@ -164,10 +161,9 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 	a.logger.Debug("Registering runtime-environment")
 	options := &codefresh.CreateRuntimeOptions{
-		Namespace:          a.clusternamespace,
-		HasAgent:           a.registerWithAgent,
-		Cluster:            a.clustername,
-		DockerDaemonParams: a.dockerDaemonParams,
+		Namespace: a.clusternamespace,
+		HasAgent:  a.registerWithAgent,
+		Cluster:   a.clustername,
 	}
 	if a.kubernetesRunnerType {
 		options.RunnerType = codefresh.KubernetesRunnerType
