@@ -69,7 +69,7 @@ List of the resources that will be created
 After a successfull installation of Venona, you'll be able to run a Codefresh pipeline on the configured cluster.  
 However, the pipeline itself dosent have any permission to connect to the hosted cluster.  
 To make it work you need to add the cluster to Codefresh (make sure the service acount has all the permissions you need)
-> codefresh create cluster --kube-context CONTEXT_NAME --namesapce NAMESPACE --serviceaccount SERVICE_ACCOUNT --behind-firewall
+> codefresh create cluster --kube-context CONTEXT_NAME --namespace NAMESPACE --serviceaccount SERVICE_ACCOUNT --behind-firewall
 
 #### Upgrade
 To upgrade existing runtime-environment, a one that was created without Venona's agent, run:
