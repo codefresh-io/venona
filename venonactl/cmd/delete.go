@@ -22,9 +22,8 @@ import (
 	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
-	"github.com/sirupsen/logrus"
 
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 )
 
@@ -54,23 +53,25 @@ var deleteCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
+		lgr := createLogger("Delete", verbose)
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
 		var errors []DeletionError
 		s.KubernetesAPI.InCluster = deleteCmdOptions.kube.inCluster
 		for _, name := range args {
+			builder := plugins.NewBuilder(lgr)
+
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
-			errors = collectError(errors, err, name, "Get Runtime-Environment from Codefresh")
+			errors = collectError(errors, err, name)
 
 			if deleteCmdOptions.revertTo != "" {
 				_, err := s.CodefreshAPI.Client.RuntimeEnvironments().Default(deleteCmdOptions.revertTo)
-				errors = collectError(errors, err, name, fmt.Sprintf("Revert Runtime-Environment to: %s", deleteCmdOptions.revertTo))
+				errors = collectError(errors, err, name)
 			}
 			deleted, err := s.CodefreshAPI.Client.RuntimeEnvironments().Delete(name)
-			errors = collectError(errors, err, name, "Delete Runtime-Environment from Codefresh")
-
+			errors = collectError(errors, err, name)
+			deleteOptions := &plugins.DeleteOptions{}
 			if deleted {
 				contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
 				if contextName != "" {
@@ -78,53 +79,35 @@ var deleteCmd = &cobra.Command{
 				}
 				s.KubernetesAPI.ContextName = contextName
 				s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
-				err = runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Delete()
-				if err != nil {
-					errors = append(errors, DeletionError{
-						err:       err,
-						name:      name,
-						operation: "Delete Runtime-Environment Kubernetes resoruces",
-					})
-					continue
-				}
+
+				builder.Add(plugins.RuntimeEnvironmentPluginType)
 				if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
-					err = runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
-					if err != nil {
-						errors = append(errors, DeletionError{
-							err:       err,
-							name:      name,
-							operation: "Delete volume provisioner related components",
-						})
-						continue
-					}
+					builder.Add(plugins.VolumeProvisionerPluginType)
 				}
 
 				if re.Metadata.Agent {
-					err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Delete()
-					if err != nil {
-						errors = append(errors, DeletionError{
-							err:       err,
-							name:      name,
-							operation: "Delete Venona's agent Kubernetes resoruces",
-						})
-						continue
-					}
+					builder.Add(plugins.VenonaPluginType)
 				}
 
-				logrus.Infof("Deleted %s", name)
+				deleteOptions.KubeBuilder = getKubeClientBuilder(contextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+				deleteOptions.ClusterNamespace = re.RuntimeScheduler.Cluster.Namespace
+				for _, p := range builder.Get() {
+					err := p.Delete(deleteOptions, s.BuildValues())
+					collectError(errors, err, name)
+				}
+
+				lgr.Info("Deletion completed", "Name", name)
 			}
 
 		}
 
 		if len(errors) > 0 {
 			for _, e := range errors {
-				logrus.WithFields(logrus.Fields{
-					"runtime-environment": e.name,
-				}).Errorf("Failed during operation %s with error %s", e.operation, e.err.Error())
+				lgr.Error(fmt.Sprintf("Error %s", e.err.Error()), "Name", e.name, "Operation", e.operation)
 			}
 			os.Exit(1)
 		}
-		logrus.Info("Deletion completed")
+		lgr.Info("Deletion completed")
 	},
 }
 
@@ -135,13 +118,12 @@ func init() {
 	deleteCmd.Flags().BoolVar(&deleteCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 }
 
-func collectError(errors []DeletionError, err error, reName string, op string) []DeletionError {
+func collectError(errors []DeletionError, err error, reName string) []DeletionError {
 	if err == nil {
 		return errors
 	}
 	return append(errors, DeletionError{
-		err:       err,
-		name:      reName,
-		operation: op,
+		err:  err,
+		name: reName,
 	})
 }

@@ -19,11 +19,8 @@ limitations under the License.
 import (
 	"errors"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
-	"github.com/codefresh-io/venona/venonactl/pkg/operators"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -50,10 +47,18 @@ var upgradeCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
+		lgr := createLogger("Upgrade", verbose)
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
+		builder := plugins.NewBuilder(lgr)
+		builderUpgradeOpt := &plugins.UpgradeOptions{
+			CodefreshHost:    s.CodefreshAPI.Host,
+			CodefreshToken:   s.CodefreshAPI.Token,
+			ClusterNamespace: s.KubernetesAPI.Namespace,
+			DryRun:           upgradeCmdOpt.dryRun,
+			Name:             s.AppName,
+		}
 
 		re, _ := s.CodefreshAPI.Client.RuntimeEnvironments().Get(args[0])
 		contextName := re.RuntimeScheduler.Cluster.ClusterProvider.Selector
@@ -63,12 +68,23 @@ var upgradeCmd = &cobra.Command{
 		s.KubernetesAPI.ContextName = contextName
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
 		if upgradeCmdOpt.dryRun {
-			logrus.Info("Running in dry-run mode")
+			lgr.Info("Running in dry-run mode")
 		} else {
-			operators.GetOperator(operators.VenonaOperatorType).Upgrade()
+			builder.Add(plugins.VenonaPluginType)
 			if isUsingDefaultStorageClass(re.RuntimeScheduler.Pvcs.Dind.StorageClassName) {
-				err := runtimectl.GetOperator(runtimectl.VolumeProvisionerOperatorType).Delete()
-				internal.DieOnError(err)
+				builder.Add(plugins.VolumeProvisionerPluginType)
+			}
+			builder.Add(plugins.RuntimeEnvironmentPluginType)
+		}
+
+		builderUpgradeOpt.KubeBuilder = getKubeClientBuilder(upgradeCmdOpt.kube.context, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+
+		var err error
+		values := s.BuildValues()
+		for _, p := range builder.Get() {
+			values, err = p.Upgrade(builderUpgradeOpt, values)
+			if err != nil {
+				dieOnError(err)
 			}
 		}
 	},

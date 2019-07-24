@@ -19,8 +19,6 @@ limitations under the License.
 import (
 	"github.com/spf13/viper"
 
-	"github.com/codefresh-io/venona/venonactl/internal"
-
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +30,7 @@ var rootCmd = &cobra.Command{
 // Execute - execute the root command
 func Execute() {
 	err := rootCmd.Execute()
-	internal.DieOnError(err)
+	dieOnError(err)
 }
 
 func init() {
@@ -40,12 +38,12 @@ func init() {
 	viper.BindEnv("kubeconfig", "KUBECONFIG")
 	viper.BindEnv("cfconfig", "CFCONFIG")
 
-	viper.BindEnv("apihost", "API_HOST")
-	viper.BindEnv("apitoken", "API_TOKEN")
+	viper.BindEnv("apihost", "CODEFRESH_API_HOST")
+	viper.BindEnv("apitoken", "CODEFRESH_API_TOKEN")
 
 	rootCmd.PersistentFlags().StringVar(&configPath, "cfconfig", viper.GetString("cfconfig"), "Config file (default is $HOME/.cfconfig) [$CFCONFIG]")
-	rootCmd.PersistentFlags().StringVar(&cfAPIHost, "api-host", viper.GetString("apihost"), "Host of codefresh [$API_HOST]")
-	rootCmd.PersistentFlags().StringVar(&cfAPIToken, "api-token", viper.GetString("apitoken"), "Codefresh API token [$API_TOKEN]")
+	rootCmd.PersistentFlags().StringVar(&cfAPIHost, "api-host", viper.GetString("apihost"), "Host of codefresh [$CODEFRESH_API_HOST]")
+	rootCmd.PersistentFlags().StringVar(&cfAPIToken, "api-token", viper.GetString("apitoken"), "Codefresh API token [$CODEFRESH_API_TOKEN]")
 	rootCmd.PersistentFlags().StringVar(&cfContext, "context", "", "Name of the context from --cfconfig (default is current-context)")
 
 	rootCmd.PersistentFlags().StringVar(&kubeConfigPath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")

@@ -14,27 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package operators
+package plugins
 
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"text/template"
 
 	// import all cloud providers auth clients
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
-	"github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 // ExecuteTemplate - executes templates in tpl str with config as values
@@ -55,16 +50,20 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 }
 
 // ParseTemplates - parses and exexute templates and return map of strings with obj data
-func ParseTemplates(templatesMap map[string]string, data interface{}) (map[string]string, error) {
+func ParseTemplates(templatesMap map[string]string, data interface{}, pattern string, logger logger.Logger) (map[string]string, error) {
 	parsedTemplates := make(map[string]string)
 	for n, tpl := range templatesMap {
-		logrus.Debugf("parsing template = %s: ", n)
+		match, _ := regexp.MatchString(pattern, n)
+		if match != true {
+			logger.Debug("Skipping parsing, pattern does not match", "Pattern", pattern, "Name", n)
+			continue
+		}
+		logger.Debug("parsing template", "Name", n)
 		tplEx, err := ExecuteTemplate(tpl, data)
 		if err != nil {
-			logrus.Errorf("Cannot parse and execute template %s: %v\n ", n, err)
+			logger.Error("Failed to parse and execute template", "Name", n)
 			return nil, err
 		}
-		logrus.Debugf("parsing template Success\n")
 		parsedTemplates[n] = tplEx
 	}
 	return parsedTemplates, nil
@@ -72,8 +71,8 @@ func ParseTemplates(templatesMap map[string]string, data interface{}) (map[strin
 
 // KubeObjectsFromTemplates return map of runtime.Objects from templateMap
 // see https://github.com/kubernetes/client-go/issues/193 for examples
-func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}) (map[string]runtime.Object, error) {
-	parsedTemplates, err := ParseTemplates(templatesMap, data)
+func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, pattern string, logger logger.Logger) (map[string]runtime.Object, error) {
+	parsedTemplates, err := ParseTemplates(templatesMap, data, pattern, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -83,59 +82,19 @@ func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}) 
 	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeObjects := make(map[string]runtime.Object)
 	for n, objStr := range parsedTemplates {
-		logrus.Debugf("Deserializing template = %s: \n", n)
+		logger.Debug("Deserializing template", "Name", n)
 		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
 		if err != nil {
-			logrus.Errorf("Error: %v \n", err)
-			fmt.Printf("Cannot deserialize kuberentes object %s: %v\n ", n, err)
+			logger.Error(fmt.Sprintf("Cannot deserialize kuberentes object %s: %v", n, err))
 			return nil, err
 		}
-		logrus.Debugf("deserializing template %s Success: %v\n", n, groupVersionKind)
+		logger.Debug("deserializing template success", "Name", n, "Group", groupVersionKind.Group)
 		kubeObjects[n] = obj
 	}
 	return kubeObjects, nil
 }
 
-// NewKubeRESTClientConfig Returns rest.Config
-func NewKubeRESTClientConfig(s *store.Values) (*rest.Config, error) {
-	var restConfig *rest.Config
-	var err error
-	kubeconfig := s.KubernetesAPI.ConfigPath
-	kubecontext := s.KubernetesAPI.ContextName
-	namespace := s.KubernetesAPI.Namespace
-	if kubeconfig != "" {
-		restConfig, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
-			&clientcmd.ConfigOverrides{
-				CurrentContext: kubecontext,
-				Context: clientcmdapi.Context{
-					Namespace: namespace,
-				},
-			}).ClientConfig()
-
-	} else {
-		restConfig, err = rest.InClusterConfig()
-	}
-
-	return restConfig, err
-}
-
-// NewKubeClientset - returns clientset
-func NewKubeClientset(s *store.Values) (*kubernetes.Clientset, error) {
-	var config *rest.Config
-	var err error
-	if s.KubernetesAPI.InCluster {
-		config, err = rest.InClusterConfig()
-	} else {
-		config, err = NewKubeRESTClientConfig(s)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return kubernetes.NewForConfig(config)
-}
-
-func getKubeObjectsFromTempalte(values map[string]interface{}) (map[string]runtime.Object, error) {
+func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string, logger logger.Logger) (map[string]runtime.Object, error) {
 	templatesMap := templates.TemplatesMap()
-	return KubeObjectsFromTemplates(templatesMap, values)
+	return KubeObjectsFromTemplates(templatesMap, values, pattern, logger)
 }

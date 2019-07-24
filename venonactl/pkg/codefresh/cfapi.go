@@ -41,6 +41,7 @@ type (
 		MarkAsDefault         bool
 		StorageClass          string
 		IsDefaultStorageClass bool
+		KubernetesRunnerType  bool
 	}
 
 	RuntimeEnvironmentRegistrator interface {
@@ -58,11 +59,11 @@ type (
 		markAsDefault         bool
 		storageClass          string
 		isDefaultStorageClass bool
+		kubernetesRunnerType  bool
 	}
 
 	logger interface {
-		Debug(args ...interface{})
-		Debugf(format string, args ...interface{})
+		Debug(message string, args ...interface{})
 	}
 )
 
@@ -81,6 +82,7 @@ func NewCodefreshAPI(opt *APIOptions) API {
 		registerWithAgent:     opt.RegisterWithAgent,
 		storageClass:          opt.StorageClass,
 		isDefaultStorageClass: opt.IsDefaultStorageClass,
+		kubernetesRunnerType:  opt.KubernetesRunnerType,
 	}
 }
 
@@ -100,19 +102,26 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 		return nil, err
 	}
 	certExtraSANs := fmt.Sprintf("IP:127.0.0.1,DNS:dind,DNS:*.dind.%s,DNS:*.dind.%s.svc,DNS:*.cf-cd.com,DNS:*.codefresh.io", a.clusternamespace, a.clusternamespace)
-	a.logger.Debugf("certExtraSANs = %s", certExtraSANs)
+	a.logger.Debug(fmt.Sprintf("certExtraSANs = %s", certExtraSANs))
 
 	byteArray, err := a.codefresh.RuntimeEnvironments().SignCertificate(&codefresh.SignCertificatesOptions{
 		AltName: certExtraSANs,
 		CSR:     serverCert.Csr,
 	})
+	if err != nil {
+		a.logger.Debug("Failed to sign certificate")
+		return nil, err
+	}
 
+	a.logger.Debug("Certificate was signed")
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	if err != nil {
+		a.logger.Debug("Failed to create zip reader from given certificate")
 		return nil, err
 	}
 	for _, zf := range zipReader.File {
+		a.logger.Debug("Reading file ", "name", zf.Name)
 		buf := new(bytes.Buffer)
 		src, _ := zf.Open()
 		defer src.Close()
@@ -123,7 +132,7 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 		} else if zf.Name == "cf-server-cert.pem" {
 			serverCert.Cert = buf.String()
 		} else {
-			a.logger.Debugf("Warning: Unknown filename in sign responce %s", zf.Name)
+			a.logger.Debug(fmt.Sprintf("Warning: Unknown filename in sign responce %s", zf.Name))
 		}
 	}
 
@@ -155,6 +164,9 @@ func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 		Namespace: a.clusternamespace,
 		HasAgent:  a.registerWithAgent,
 		Cluster:   a.clustername,
+	}
+	if a.kubernetesRunnerType {
+		options.RunnerType = codefresh.KubernetesRunnerType
 	}
 
 	options.StorageClass = fmt.Sprintf("%s-%s", a.storageClass, a.clusternamespace)

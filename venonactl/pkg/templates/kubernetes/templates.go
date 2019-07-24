@@ -23,6 +23,19 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ` 
 
+templatesMap["cluster-role-binding.engine.yaml"] = `kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .AppName }}-{{ .Namespace }}-engine
+subjects:
+- kind: ServiceAccount
+  name: engine
+  namespace: {{ .Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io` 
+
 templatesMap["cluster-role-binding.venona.yaml"] = `kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -67,6 +80,16 @@ rules:
   - apiGroups: [""]
     resources: ["endpoints"]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
+` 
+
+templatesMap["cluster-role.engine.yaml"] = `kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .AppName }}-{{ .Namespace }}-engine
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "persistentvolumeclaims"]
+    verbs: ["get", "create", "delete", "list"]
 ` 
 
 templatesMap["codefresh-certs-server-secret.re.yaml"] = `apiVersion: v1
@@ -167,7 +190,7 @@ spec:
         operator: "Exists"
       containers:
       - name: dind-volume-provisioner
-        image: codefresh/dind-volume-provisioner:venona-v2
+        image: {{ .VolumeProvisionerImage.Name }}:{{ .VolumeProvisionerImage.Tag }}
         imagePullPolicy: Always
         resources:
           requests:
@@ -318,6 +341,12 @@ metadata:
   labels:
     app: dind-volume-provisioner
 ` 
+
+templatesMap["service-account.engine.yaml"] = `apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: engine
+  namespace: {{ .Namespace }}` 
 
 templatesMap["service-account.venona.yaml"] = `apiVersion: v1
 kind: ServiceAccount

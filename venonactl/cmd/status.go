@@ -19,11 +19,9 @@ limitations under the License.
 import (
 	"fmt"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
-	"github.com/codefresh-io/venona/venonactl/internal"
-	runtimectl "github.com/codefresh-io/venona/venonactl/pkg/operators"
+	"github.com/codefresh-io/venona/venonactl/pkg/logger"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	humanize "github.com/dustin/go-humanize"
 
@@ -43,20 +41,20 @@ var statusCmd = &cobra.Command{
 	Short: "Get status of Codefresh's runtime-environment",
 	Long:  "Pass the name of the runtime environment to see more details information about the underlying resources",
 	Run: func(cmd *cobra.Command, args []string) {
-		prepareLogger()
-		buildBasicStore()
-		extendStoreWithCodefershClient()
-		extendStoreWithKubeClient()
+		lgr := createLogger("Status", verbose)
 
+		buildBasicStore(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithKubeClient(lgr)
 		s := store.GetStore()
-		table := internal.CreateTable()
+		table := createTable()
 		// When requested status for specific runtime
 		if len(args) > 0 {
 			name := args[0]
 			re, err := s.CodefreshAPI.Client.RuntimeEnvironments().Get(name)
-			internal.DieOnError(err)
+			dieOnError(err)
 			if re == nil {
-				internal.DieOnError(fmt.Errorf("Runtime-Environment %s not found", name))
+				dieOnError(fmt.Errorf("Runtime-Environment %s not found", name))
 			}
 			if re.Metadata.Agent == true {
 				table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
@@ -69,16 +67,16 @@ var statusCmd = &cobra.Command{
 				table.Append([]string{re.Metadata.Name, message, time})
 				table.Render()
 				fmt.Println()
-				printTableWithKubernetesRelatedResources(re, statusCmdOpt.kube.context)
+				printTableWithKubernetesRelatedResources(re, statusCmdOpt.kube.context, lgr)
 			} else {
-				logrus.Warnf("Runtime-Environment %s has not Venona's agent", name)
+				lgr.Debug("Runtime-Environment has not Venona's agent", "Name", name)
 			}
 			return
 		}
 
 		// When requested status for all runtimes
 		res, err := s.CodefreshAPI.Client.RuntimeEnvironments().List()
-		internal.DieOnError(err)
+		dieOnError(err)
 		table.SetHeader([]string{"Runtime Name", "Last Message", "Reported"})
 		for _, re := range res {
 			if re.Metadata.Agent == true {
@@ -98,8 +96,10 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string) {
-	table := internal.CreateTable()
+func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string, logger logger.Logger) {
+	builder := plugins.NewBuilder(logger)
+
+	table := createTable()
 	table.SetHeader([]string{"Kind", "Name", "Status"})
 	s := store.GetStore()
 	if re.RuntimeScheduler.Cluster.Namespace != "" {
@@ -108,13 +108,19 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 		}
 		s.KubernetesAPI.ContextName = context
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
-
-		rows, err := runtimectl.GetOperator(runtimectl.RuntimeEnvironmentOperatorType).Status()
-		internal.DieOnError(err)
-		table.AppendBulk(rows)
-		rows, err = runtimectl.GetOperator(runtimectl.VenonaOperatorType).Status()
-		internal.DieOnError(err)
-		table.AppendBulk(rows)
+		builder.
+			Add(plugins.RuntimeEnvironmentPluginType).
+			Add(plugins.VenonaPluginType).
+			Add(plugins.VolumeProvisionerPluginType)
+		statusOpt := &plugins.StatusOptions{
+			KubeBuilder:      getKubeClientBuilder(context, re.RuntimeScheduler.Cluster.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+			ClusterNamespace: s.KubernetesAPI.Namespace,
+		}
+		for _, p := range builder.Get() {
+			rows, err := p.Status(statusOpt, s.BuildValues())
+			dieOnError(err)
+			table.AppendBulk(rows)
+		}
 	}
 	table.Render()
 }
