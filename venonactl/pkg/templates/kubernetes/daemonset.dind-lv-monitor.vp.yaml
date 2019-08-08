@@ -55,4 +55,4 @@ spec:
       volumes:
       - name: dind-volume-dir
         hostPath:
-          path: /var/lib/codefresh/codefresh/dind-volumes
+          path: /var/lib/codefresh/dind-volumes
