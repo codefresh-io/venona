@@ -53,11 +53,10 @@ var upgradeCmd = &cobra.Command{
 		extendStoreWithKubeClient(lgr)
 		builder := plugins.NewBuilder(lgr)
 		builderUpgradeOpt := &plugins.UpgradeOptions{
-			CodefreshHost:    s.CodefreshAPI.Host,
-			CodefreshToken:   s.CodefreshAPI.Token,
-			ClusterNamespace: s.KubernetesAPI.Namespace,
-			DryRun:           upgradeCmdOpt.dryRun,
-			Name:             s.AppName,
+			CodefreshHost:  s.CodefreshAPI.Host,
+			CodefreshToken: s.CodefreshAPI.Token,
+			DryRun:         upgradeCmdOpt.dryRun,
+			Name:           s.AppName,
 		}
 
 		re, _ := s.CodefreshAPI.Client.RuntimeEnvironments().Get(args[0])
@@ -67,6 +66,9 @@ var upgradeCmd = &cobra.Command{
 		}
 		s.KubernetesAPI.ContextName = contextName
 		s.KubernetesAPI.Namespace = re.RuntimeScheduler.Cluster.Namespace
+
+		builderUpgradeOpt.ClusterNamespace = s.KubernetesAPI.Namespace
+
 		if upgradeCmdOpt.dryRun {
 			lgr.Info("Running in dry-run mode")
 		} else {
