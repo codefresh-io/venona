@@ -103,6 +103,8 @@ func extendStoreWithCodefershClient(logger logger.Logger) error {
 		}
 	}
 
+	logger.Debug("Creating codefresh client", "host", cfAPIHost, "token", cfAPIToken)
+
 	client := codefresh.New(&codefresh.ClientOptions{
 		Auth: codefresh.AuthOptions{
 			Token: cfAPIToken,
