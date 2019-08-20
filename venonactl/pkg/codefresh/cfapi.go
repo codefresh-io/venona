@@ -42,6 +42,7 @@ type (
 		StorageClass          string
 		IsDefaultStorageClass bool
 		KubernetesRunnerType  bool
+		BuildNodeSelector     map[string]string
 	}
 
 	RuntimeEnvironmentRegistrator interface {
@@ -60,6 +61,7 @@ type (
 		storageClass          string
 		isDefaultStorageClass bool
 		kubernetesRunnerType  bool
+		buildNodeSelector     map[string]string
 	}
 
 	logger interface {
@@ -83,6 +85,7 @@ func NewCodefreshAPI(opt *APIOptions) API {
 		storageClass:          opt.StorageClass,
 		isDefaultStorageClass: opt.IsDefaultStorageClass,
 		kubernetesRunnerType:  opt.KubernetesRunnerType,
+		buildNodeSelector:     opt.BuildNodeSelector,
 	}
 }
 
@@ -167,6 +170,9 @@ func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 	}
 	if a.kubernetesRunnerType {
 		options.RunnerType = codefresh.KubernetesRunnerType
+	}
+	if len(a.buildNodeSelector) != 0 {
+		options.NodeSelector = a.buildNodeSelector
 	}
 
 	options.StorageClass = fmt.Sprintf("%s-%s", a.storageClass, a.clusternamespace)

@@ -17,7 +17,9 @@ limitations under the License.
 */
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -32,9 +34,10 @@ var installCmdOptions struct {
 	dryRun                 bool
 	clusterNameInCodefresh string
 	kube                   struct {
-		namespace string
-		inCluster bool
-		context   string
+		namespace    string
+		inCluster    bool
+		context      string
+		nodeSelector string
 	}
 	storageClass string
 	venona       struct {
@@ -45,6 +48,7 @@ var installCmdOptions struct {
 	skipRuntimeInstallation       bool
 	runtimeEnvironmentName        string
 	kubernetesRunnerType          bool
+	buildNodeSelector             string
 }
 
 // installCmd represents the install command
@@ -89,9 +93,14 @@ var installCmd = &cobra.Command{
 		}
 
 		s.KubernetesAPI.InCluster = installCmdOptions.kube.inCluster
-
 		s.KubernetesAPI.ContextName = installCmdOptions.kube.context
 		s.KubernetesAPI.Namespace = installCmdOptions.kube.namespace
+
+		kns, err := parseNodeSelector(installCmdOptions.kube.nodeSelector)
+		if err != nil {
+			dieOnError(err)
+		}
+		s.KubernetesAPI.NodeSelector = kns.String()
 
 		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun
@@ -136,8 +145,14 @@ var installCmd = &cobra.Command{
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 
+		bns, err := parseNodeSelector(installCmdOptions.buildNodeSelector)
+		if err != nil {
+			dieOnError(err)
+		}
+		s.CodefreshAPI.BuildNodeSelector = bns
+		builderInstallOpt.BuildNodeSelector = bns
+
 		values := s.BuildValues()
-		var err error
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -160,6 +175,8 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installCmd.Flags().StringVar(&installCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installCmd.Flags().StringVar(&installCmdOptions.storageClass, "storage-class", "", "Set a name of your custom storage class, note: this will not install volume provisioning components")
+	installCmd.Flags().StringVar(&installCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
+	installCmd.Flags().StringVar(&installCmdOptions.buildNodeSelector, "build-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona build resources (default is no node selector)")
 
 	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
@@ -167,4 +184,27 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+
+}
+
+type nodeSelector map[string]string
+
+func parseNodeSelector(s string) (nodeSelector, error) {
+	if s == "" {
+		return nodeSelector{}, nil
+	}
+	v := strings.Split(s, "=")
+	if len(v) != 2 {
+		return nil, errors.New("node selector must be in form \"key=value\"")
+	}
+	return nodeSelector{v[0]: v[1]}, nil
+}
+
+// String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
+func (ns nodeSelector) String() string {
+	var s string
+	for k, v := range ns {
+		s = fmt.Sprintf("%s: %s", k, v)
+	}
+	return s
 }

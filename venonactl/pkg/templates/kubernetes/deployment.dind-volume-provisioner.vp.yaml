@@ -14,6 +14,10 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+        {{ .NodeSelector }}
+      {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
       - effect: NoSchedule
@@ -33,8 +37,7 @@ spec:
         command:
           - /usr/local/bin/dind-volume-provisioner
           - -v=4
-          - --resync-period=50s          
+          - --resync-period=50s
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-       

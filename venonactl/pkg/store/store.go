@@ -38,16 +38,18 @@ type (
 	}
 
 	KubernetesAPI struct {
-		ConfigPath  string
-		Namespace   string
-		ContextName string
-		InCluster   bool
+		ConfigPath   string
+		Namespace    string
+		ContextName  string
+		InCluster    bool
+		NodeSelector string
 	}
 
 	CodefreshAPI struct {
-		Host   string
-		Token  string
-		Client codefresh.Codefresh
+		Host              string
+		Token             string
+		Client            codefresh.Codefresh
+		BuildNodeSelector map[string]string
 	}
 
 	Image struct {
@@ -93,10 +95,11 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"VolumeProvisionerImage": map[string]string{
 			"Name": "codefresh/dind-volume-provisioner",
-			"Tag": "v13",
+			"Tag":  "v13",
 		},
-		"Namespace":  s.KubernetesAPI.Namespace,
-		"AgentToken": "",
+		"Namespace":    s.KubernetesAPI.Namespace,
+		"NodeSelector": s.KubernetesAPI.NodeSelector,
+		"AgentToken":   "",
 		"ServerCert": map[string]string{
 			"Cert": "",
 			"Key":  "",
