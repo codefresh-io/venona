@@ -124,10 +124,14 @@ spec:
         prometheus_scrape: "true"
     spec:
       serviceAccountName: volume-provisioner-{{ .AppName }}
-      # Debug:       
+      # Debug:
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+        {{ .NodeSelector }}
+      {{ end }}
       tolerations:
         - key: 'codefresh/dind'
           operator: 'Exists'
@@ -145,7 +149,7 @@ spec:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
               value: /var/lib/codefresh/dind-volumes
-#              Debug:                  
+#              Debug:
 #            - name: DRY_RUN
 #              value: "1"
 #            - name: DEBUG
@@ -164,7 +168,7 @@ spec:
       volumes:
       - name: dind-volume-dir
         hostPath:
-          path: /var/lib/codefresh/codefresh/dind-volumes
+          path: /var/lib/codefresh/dind-volumes
 ` 
 
 templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: extensions/v1beta1
@@ -183,6 +187,10 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+        {{ .NodeSelector }}
+      {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
       - effect: NoSchedule
@@ -202,11 +210,11 @@ spec:
         command:
           - /usr/local/bin/dind-volume-provisioner
           - -v=4
-          - --resync-period=50s          
+          - --resync-period=50s
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-       ` 
+` 
 
 templatesMap["deployment.venona.yaml"] = `apiVersion: extensions/v1beta1
 kind: Deployment
@@ -231,6 +239,10 @@ spec:
         version: {{ .Version }}
     spec:
       serviceAccountName: {{ .AppName }}
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+        {{ .NodeSelector }}
+      {{ end }}
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME

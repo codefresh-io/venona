@@ -15,10 +15,14 @@ spec:
         prometheus_scrape: "true"
     spec:
       serviceAccountName: volume-provisioner-{{ .AppName }}
-      # Debug:       
+      # Debug:
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+        {{ .NodeSelector }}
+      {{ end }}
       tolerations:
         - key: 'codefresh/dind'
           operator: 'Exists'
@@ -36,7 +40,7 @@ spec:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
               value: /var/lib/codefresh/dind-volumes
-#              Debug:                  
+#              Debug:
 #            - name: DRY_RUN
 #              value: "1"
 #            - name: DEBUG

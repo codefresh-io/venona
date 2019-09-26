@@ -21,6 +21,10 @@ spec:
         version: {{ .Version }}
     spec:
       serviceAccountName: {{ .AppName }}
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+        {{ .NodeSelector }}
+      {{ end }}
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME
