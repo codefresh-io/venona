@@ -156,8 +156,8 @@ steps:
     commands:
     - cd venonactl
     - apk add git curl
-    - curl -L https://github.com/goreleaser/goreleaser/releases/download/v0.118.1/goreleaser_Linux_x86_64.tar.gz > /bin/goreleaser
-    - chmod +x /bin/goreleaser
+    - curl -L https://github.com/goreleaser/goreleaser/releases/download/v0.118.1/goreleaser_Linux_x86_64.tar.gz | tar xz
+    - mv goreleaser /bin/goreleaser
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
     when:
       steps:
