@@ -141,7 +141,7 @@ steps:
     - apk add git curl
     - curl -L https://github.com/goreleaser/goreleaser/releases/download/v0.118.1/goreleaser_Linux_x86_64.tar.gz | tar xz
     - mv goreleaser /bin/goreleaser
-    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
+    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate
     when:
       steps:
       - name: create_git_tag
