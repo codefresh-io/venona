@@ -49,6 +49,7 @@ var installCmdOptions struct {
 	runtimeEnvironmentName        string
 	kubernetesRunnerType          bool
 	buildNodeSelector             string
+	buildAnnotations              []string
 }
 
 // installCmd represents the install command
@@ -145,6 +146,17 @@ var installCmd = &cobra.Command{
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 
+		annotations := make(map[string]string)
+		for _, annotation := range installCmdOptions.buildAnnotations {
+			v := strings.Split(annotation, "=")
+			if len(v) != 2 {
+				dieOnError(errors.New("annotations must be in form \"key=value\""))
+			}
+			annotations[v[0]] = v[1]
+		}
+
+		builderInstallOpt.Annotations = annotations
+
 		bns, err := parseNodeSelector(installCmdOptions.buildNodeSelector)
 		if err != nil {
 			dieOnError(err)
@@ -177,6 +189,7 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.storageClass, "storage-class", "", "Set a name of your custom storage class, note: this will not install volume provisioning components")
 	installCmd.Flags().StringVar(&installCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
 	installCmd.Flags().StringVar(&installCmdOptions.buildNodeSelector, "build-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona build resources (default is no node selector)")
+	installCmd.Flags().StringArrayVar(&installCmdOptions.buildAnnotations, "build-annotations", []string{}, "The kubernetes metadata.annotations as \"key=value\" to be used by venona build resources (default is no node selector)")
 
 	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")

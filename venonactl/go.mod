@@ -3,7 +3,7 @@ module github.com/codefresh-io/venona/venonactl
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.4.3 // indirect
 	github.com/Azure/go-autorest v11.4.0+incompatible // indirect
-	github.com/codefresh-io/go-sdk v0.16.0
+	github.com/codefresh-io/go-sdk v0.17.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/google/go-github/v21 v21.0.0
 	github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367 // indirect
@@ -25,12 +25,14 @@ require (
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.4.0
 	go.opencensus.io v0.19.0 // indirect
-	golang.org/x/sys v0.0.0-20190912141932-bc967efca4b8 // indirect
+	golang.org/x/sys v0.0.0-20191002091554-b397fe3ad8ed // indirect
 	golang.org/x/text v0.3.2 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect
+	gopkg.in/yaml.v2 v2.2.3 // indirect
 	k8s.io/api v0.0.0-20181221193117-173ce66c1e39
 	k8s.io/apimachinery v0.0.0-20181127025237-2b1284ed4c93
 	k8s.io/client-go v10.0.0+incompatible
@@ -39,3 +41,5 @@ require (
 )
 
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20181218151757-9b75e4fe745a
+
+go 1.13

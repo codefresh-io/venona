@@ -53,6 +53,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		IsDefaultStorageClass: opt.IsDefaultStorageClass,
 		KubernetesRunnerType:  opt.KubernetesRunnerType,
 		BuildNodeSelector:     opt.BuildNodeSelector,
+		Annootaions:           opt.Annotations,
 	}
 
 	cf := codefresh.NewCodefreshAPI(cfOpt)
