@@ -53,6 +53,7 @@ type (
 		DryRun               bool
 		KubernetesRunnerType bool
 		BuildNodeSelector    map[string]string
+		Annotations          map[string]string
 	}
 
 	DeleteOptions struct {
