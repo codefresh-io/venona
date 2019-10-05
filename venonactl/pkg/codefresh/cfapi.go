@@ -43,7 +43,7 @@ type (
 		IsDefaultStorageClass bool
 		KubernetesRunnerType  bool
 		BuildNodeSelector     map[string]string
-		Annootaions           map[string]string
+		Annotations           map[string]string
 	}
 
 	RuntimeEnvironmentRegistrator interface {
@@ -88,7 +88,7 @@ func NewCodefreshAPI(opt *APIOptions) API {
 		isDefaultStorageClass: opt.IsDefaultStorageClass,
 		kubernetesRunnerType:  opt.KubernetesRunnerType,
 		buildNodeSelector:     opt.BuildNodeSelector,
-		annotations:           opt.Annootaions,
+		annotations:           opt.Annotations,
 	}
 }
 
