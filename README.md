@@ -50,6 +50,24 @@ rules:
   * Bind your user with cluster-admin kubernetes clusterrole
     > `kubectl create clusterrolebinding NAME --clusterrole cluster-admin --user YOUR_USER`
 
+#### Install on GKE using local SSD's
+  * This setup assumes you've created a node pool with locally attached SSD's. [Terraform node pool](https://www.terraform.io/docs/providers/google/r/container_cluster.html#node_config) options for GKE.
+  * Ensure you've configured your cluster with the steps detailed in the Install on GCP section.
+  * Delete and recreate the dind-local-volumes-venona-<namespace> StorageClass, ensuring that the volumeParentDir field is set:
+```
+parameters:
+  volumeBackend: local
+  volumeParentDir: /mnt/disks/ssd0/codefresh/dind-volumes
+```
+  * Dump your runtime-environment config to your local disk via: `codefresh get runtime-environments <runtime env  name> -o yaml`
+  * Edit the nodeSelector param for the `runtimeScheduler` to ensure the dind pods / volumes only exist on local-ssd nodes.
+```
+nodeSelector:
+  cloud.google.com/gke-local-ssd: true
+```
+  * Save the file and patch `codefresh patch runtime-environments -f ./mycustom-runtime.yaml`
+  * Edit dind-lv-monitor-venona DaemonSet and set env var `VOLUME_PARENT_DIR: /mnt/disks/ssd0/codefresh/dind-volumes`. Once it's done delete old pods of DS dind-lv-monitor-venona to let the new changes take effect.
+
 #### Kubernetes RBAC
 Installation of Venona on Kubernetes cluster installing 2 groups of objects,
 Each one has own RBAC needs and therefore, created roles(and cluster-roles)
@@ -80,3 +98,4 @@ Example: `venona install --cluster-name CLUSTER`
 * Get the status <br />
 Example: `venona status RUNTIME-ENVIRONMENT`  
 Example: `kubectl get pods -n NAMESPACE`
+
