@@ -59,7 +59,7 @@ parameters:
   volumeBackend: local
   volumeParentDir: /mnt/disks/ssd0/codefresh/dind-volumes
 ```
-  * Dump your runtime-environment config to your local disk via: `codefresh get runtime-environments <runtime env  name> -o yaml`
+  * Dump your runtime-environment config to your local disk via: `codefresh get runtime-environments <runtime env  name> -o yaml > mycustom-runtime.yaml`
   * Edit the nodeSelector param for the `runtimeScheduler` to ensure the dind pods / volumes only exist on local-ssd nodes.
 ```
 nodeSelector:
