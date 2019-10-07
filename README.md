@@ -98,4 +98,3 @@ Example: `venona install --cluster-name CLUSTER`
 * Get the status <br />
 Example: `venona status RUNTIME-ENVIRONMENT`  
 Example: `kubectl get pods -n NAMESPACE`
-
