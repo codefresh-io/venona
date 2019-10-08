@@ -30,6 +30,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	clusterNameMaxLength = 20
+	namespaceMaxLength = 20
+)
+
 var installCmdOptions struct {
 	dryRun                 bool
 	clusterNameInCodefresh string
@@ -219,10 +224,10 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 }
 
 func validateInstallOptions(opts plugins.InstallOptions) (error)  {
-	if len(opts.ClusterName) > 20 {
+	if len(opts.ClusterName) > clusterNameMaxLength {
 		return errors.New("cluster name lenght is limited to 20")
 	}
-	if len(opts.ClusterNamespace) > 20 {
+	if len(opts.ClusterNamespace) > namespaceMaxLength {
 		return errors.New("cluster namespace is limited to 20")
 	} 	
 	return nil
