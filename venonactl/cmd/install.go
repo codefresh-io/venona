@@ -164,6 +164,11 @@ var installCmd = &cobra.Command{
 		s.CodefreshAPI.BuildNodeSelector = bns
 		builderInstallOpt.BuildNodeSelector = bns
 
+		err = validateInstallOptions(*builderInstallOpt)
+		if err != nil {
+			dieOnError(err)
+		}
+
 		values := s.BuildValues()
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
@@ -211,6 +216,16 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 		return nil, errors.New("node selector must be in form \"key=value\"")
 	}
 	return nodeSelector{v[0]: v[1]}, nil
+}
+
+func validateInstallOptions(opts plugins.InstallOptions) (error)  {
+	if len(opts.ClusterName) > 20 {
+		return errors.New("cluster name lenght is limited to 20")
+	}
+	if len(opts.ClusterNamespace) > 20 {
+		return errors.New("cluster namespace is limited to 20")
+	} 	
+	return nil
 }
 
 // String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
