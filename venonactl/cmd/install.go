@@ -169,7 +169,7 @@ var installCmd = &cobra.Command{
 		s.CodefreshAPI.BuildNodeSelector = bns
 		builderInstallOpt.BuildNodeSelector = bns
 
-		err = validateInstallOptions(*builderInstallOpt)
+		err = validateInstallOptions(builderInstallOpt)
 		if err != nil {
 			dieOnError(err)
 		}
@@ -223,7 +223,7 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 	return nodeSelector{v[0]: v[1]}, nil
 }
 
-func validateInstallOptions(opts plugins.InstallOptions) (error)  {
+func validateInstallOptions(opts* plugins.InstallOptions) (error)  {
 	if len(opts.ClusterName) > clusterNameMaxLength {
 		return errors.New(fmt.Sprintf("cluster name lenght is limited to %d", clusterNameMaxLength))
 	}
