@@ -30,6 +30,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	clusterNameMaxLength = 20
+	namespaceMaxLength = 20
+)
+
 var installCmdOptions struct {
 	dryRun                 bool
 	clusterNameInCodefresh string
@@ -164,6 +169,11 @@ var installCmd = &cobra.Command{
 		s.CodefreshAPI.BuildNodeSelector = bns
 		builderInstallOpt.BuildNodeSelector = bns
 
+		err = validateInstallOptions(builderInstallOpt)
+		if err != nil {
+			dieOnError(err)
+		}
+
 		values := s.BuildValues()
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
@@ -211,6 +221,16 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 		return nil, errors.New("node selector must be in form \"key=value\"")
 	}
 	return nodeSelector{v[0]: v[1]}, nil
+}
+
+func validateInstallOptions(opts* plugins.InstallOptions) (error)  {
+	if len(opts.ClusterName) > clusterNameMaxLength {
+		return errors.New(fmt.Sprintf("cluster name lenght is limited to %d", clusterNameMaxLength))
+	}
+	if len(opts.ClusterNamespace) > namespaceMaxLength {
+		return errors.New(fmt.Sprintf("cluster namespace is limited to %d", namespaceMaxLength))
+	} 	
+	return nil
 }
 
 // String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
