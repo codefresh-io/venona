@@ -52,7 +52,7 @@ rules:
 
 #### Install on GKE using local SSD's
   * This setup assumes you've created a node pool with locally attached SSD's. [Terraform node pool](https://www.terraform.io/docs/providers/google/r/container_cluster.html#node_config) options for GKE.
-  * Recommended: venona can only accept a cluster name of less than 20 characters. This is more than the GKE default. A good way to get around this is to [rename your kubernetes context using kubectl](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-rename-context-em-) or [kubectx](https://github.com/ahmetb/kubectx).
+  * Note: venona can only accept a cluster name of less than 20 characters. This is more than the GKE default. A good way to get around this is to [rename your kubernetes context using kubectl](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-rename-context-em-) or [kubectx](https://github.com/ahmetb/kubectx).
   * Ensure you've configured your cluster with the steps detailed in the Install on GCP section.
   * Delete and recreate the dind-local-volumes-venona-<namespace> StorageClass, ensuring that the volumeParentDir field is set:
 ```
