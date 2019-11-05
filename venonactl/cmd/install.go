@@ -225,10 +225,10 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 
 func validateInstallOptions(opts* plugins.InstallOptions) (error)  {
 	if len(opts.ClusterName) > clusterNameMaxLength {
-		return errors.New(fmt.Sprintf("cluster name lenght is limited to %d", clusterNameMaxLength))
+		return errors.New(fmt.Sprintf("cluster name length is limited to %d", clusterNameMaxLength))
 	}
 	if len(opts.ClusterNamespace) > namespaceMaxLength {
-		return errors.New(fmt.Sprintf("cluster namespace is limited to %d", namespaceMaxLength))
+		return errors.New(fmt.Sprintf("cluster namespace length is limited to %d", namespaceMaxLength))
 	} 	
 	return nil
 }

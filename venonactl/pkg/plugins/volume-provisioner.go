@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
+	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
 
@@ -86,6 +87,24 @@ func (u *volumeProvisionerPlugin) Delete(deleteOpt *DeleteOptions, v Values) err
 	return delete(opt)
 }
 
-func (u *volumeProvisionerPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+	var err error
+	kubeClientset, err := opt.KubeBuilder.BuildClient()
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return nil, err
+	}
+	kubeObjects, err := getKubeObjectsFromTempalte(v, volumeProvisionerFilesPattern, u.logger)
+	if err != nil {
+		return nil, err
+	}
+	for _, local := range kubeObjects {
+
+		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return v, nil
+
 }
