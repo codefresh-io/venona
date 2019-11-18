@@ -95,7 +95,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"VolumeProvisionerImage": map[string]string{
 			"Name": "codefresh/dind-volume-provisioner",
-			"Tag":  "v13",
+			"Tag":  "v17",
 		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,

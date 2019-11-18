@@ -38,7 +38,7 @@
 | --kube-context-name | string | Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT] |
 | --kube-namespace | string | Name of the namespace on which venona should be installed [$KUBE_NAMESPACE] |
 | --kubernetes-runner-type | string | Set the runner type to kubernetes (alpha feature) |
-| --only-runtime-environment | boolean | Set to true to onlky configure namespace as runtime-environment for Codefresh |
+| --only-runtime-environment | boolean | Set to true to only configure namespace as runtime-environment for Codefresh |
 | --runtime-environment | string | if --skip-runtime-installation set, will try to configure venona on current runtime-environment |
 | --set-default | boolean | Mark the install runtime-environment as default one after installation |
 | --skip-runtime-installation | boolean | Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name |
