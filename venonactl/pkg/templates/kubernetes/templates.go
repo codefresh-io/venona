@@ -107,7 +107,7 @@ data:
 
 ` 
 
-templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: dind-lv-monitor-{{ .AppName }}
@@ -115,6 +115,9 @@ metadata:
   labels:
     app: dind-lv-monitor
 spec:
+  selector:
+    matchLabels:
+      app: dind-lv-monitor
   template:
     metadata:
       labels:
@@ -171,7 +174,7 @@ spec:
           path: /var/lib/codefresh/dind-volumes
 ` 
 
-templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dind-volume-provisioner-{{ .AppName }}
@@ -179,6 +182,9 @@ metadata:
   labels:
     app: dind-volume-provisioner
 spec:
+  selector:
+    matchLabels:
+      app: dind-volume-provisioner
   replicas: 1
   strategy:
     type: Recreate
@@ -216,7 +222,7 @@ spec:
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 ` 
 
-templatesMap["deployment.venona.yaml"] = `apiVersion: extensions/v1beta1
+templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -225,6 +231,10 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .AppName }}
+      version: {{ .Version }}
   replicas: 1
   revisionHistoryLimit: 5
   strategy:

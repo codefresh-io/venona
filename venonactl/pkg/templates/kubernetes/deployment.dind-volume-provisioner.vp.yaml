@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dind-volume-provisioner-{{ .AppName }}
@@ -6,6 +6,9 @@ metadata:
   labels:
     app: dind-volume-provisioner
 spec:
+  selector:
+    matchLabels:
+      app: dind-volume-provisioner
   replicas: 1
   strategy:
     type: Recreate

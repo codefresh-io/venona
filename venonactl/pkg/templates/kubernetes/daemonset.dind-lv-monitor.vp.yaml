@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: dind-lv-monitor-{{ .AppName }}
@@ -6,6 +6,9 @@ metadata:
   labels:
     app: dind-lv-monitor
 spec:
+  selector:
+    matchLabels:
+      app: dind-lv-monitor
   template:
     metadata:
       labels:
