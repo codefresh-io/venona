@@ -22,9 +22,22 @@ steps:
     commands:
         - export VERSION=$(jq -r ".version" package.json)
         - cf_export VERSION
+        # - export FILE_VERSION= $(cat ./venonactl/VERSION)
+        - cf_export FILE_VERSION=$(cat ./venonactl/VERSION)
     when:
       steps:
       - name: main_clone
+        on:
+        - success
+
+  validate_version:
+    title: 'validate package version equal VERSION file'
+    image: node:alpine
+    commands:
+        - if [ $VERSION != $FILE_VERSION ] ; then exit 1 ; else echo "version are equal"; fi;
+    when:
+      steps:
+      - name: calculate_version
         on:
         - success
 
