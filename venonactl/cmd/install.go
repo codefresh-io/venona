@@ -20,6 +20,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"encoding/json"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -34,6 +37,12 @@ const (
 	clusterNameMaxLength = 20
 	namespaceMaxLength = 20
 )
+
+type toleration struct {
+	Key      string  `json:key`
+    Operator string  `json:operator`
+    Effect   string  `json:effect`
+} 
 
 var installCmdOptions struct {
 	dryRun                 bool
@@ -55,6 +64,7 @@ var installCmdOptions struct {
 	kubernetesRunnerType          bool
 	buildNodeSelector             string
 	buildAnnotations              []string
+	tolerationJsonString          string
 }
 
 // installCmd represents the install command
@@ -107,6 +117,20 @@ var installCmd = &cobra.Command{
 			dieOnError(err)
 		}
 		s.KubernetesAPI.NodeSelector = kns.String()
+
+		if installCmdOptions.tolerationJsonString != "" {
+			
+			data, err := ioutil.ReadFile(installCmdOptions.tolerationJsonString)
+			if err != nil {
+				dieOnError(err)
+			}
+			tolerations, err := parseToleration(string(data))
+			if err != nil {
+				dieOnError(err)
+			}
+			s.KubernetesAPI.Tolerations = tolerations
+		}
+		
 
 		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun
@@ -200,6 +224,7 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
 	installCmd.Flags().StringVar(&installCmdOptions.buildNodeSelector, "build-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona build resources (default is no node selector)")
 	installCmd.Flags().StringArrayVar(&installCmdOptions.buildAnnotations, "build-annotations", []string{}, "The kubernetes metadata.annotations as \"key=value\" to be used by venona build resources (default is no node selector)")
+	installCmd.Flags().StringVar(&installCmdOptions.tolerationJsonString, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 
 	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
@@ -221,6 +246,23 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 		return nil, errors.New("node selector must be in form \"key=value\"")
 	}
 	return nodeSelector{v[0]: v[1]}, nil
+}
+
+func parseToleration(s string) (string, error)  {
+	if s == "" {
+		return "", nil
+	}
+	data := []toleration{}
+	err := json.Unmarshal([]byte(s), &data);
+	if (err != nil) {
+		return "", errors.New("can not parse tolerations")
+	}
+	y, err := yaml.Marshal(&data)
+	if (err != nil) {
+		return "", errors.New("can not marshel tolerations to yaml")
+	}
+	d := fmt.Sprintf("\n%s", string(y))
+	return d, nil
 }
 
 func validateInstallOptions(opts* plugins.InstallOptions) (error)  {

@@ -43,6 +43,7 @@ type (
 		ContextName  string
 		InCluster    bool
 		NodeSelector string
+		Tolerations  string
 	}
 
 	CodefreshAPI struct {
@@ -99,6 +100,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
+		"Tolerations": s.KubernetesAPI.Tolerations,
 		"AgentToken":   "",
 		"ServerCert": map[string]string{
 			"Cert": "",

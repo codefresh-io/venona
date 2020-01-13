@@ -253,6 +253,10 @@ spec:
       nodeSelector:
         {{ .NodeSelector }}
       {{ end }}
+      {{ if ne .Tolerations "" }}
+      tolerations:
+        {{ .Tolerations | indent 8 }}
+      {{ end }}
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME
