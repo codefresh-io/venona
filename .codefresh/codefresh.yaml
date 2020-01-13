@@ -34,7 +34,7 @@ steps:
     title: 'validate package version equal VERSION file'
     image: node:alpine
     commands:
-        - if [ $VERSION != $FILE_VERSION ]] ; then exit 1 ; else echo "version are equal"; fi;
+        - if [ $VERSION != $FILE_VERSION ] ; then exit 1 ; else echo "version are equal"; fi;
     when:
       steps:
       - name: calculate_version
