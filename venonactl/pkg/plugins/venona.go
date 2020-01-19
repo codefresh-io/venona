@@ -120,6 +120,11 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	// avoid it till patch fully implemented
 	var skipUpgradeFor = map[string]interface{}{
 		"service-account.venona.yaml": nil,
+		"deployment.venona.yaml": nil,
+	}
+
+	var deletePriorUpgrade = map[string]interface{}{
+		"deployment.venona.yaml": nil,
 	}
 
 	var err error
@@ -147,6 +152,37 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	}
 
 	for fileName, local := range kubeObjects {
+		if _, ok := deletePriorUpgrade[fileName]; ok {
+			u.logger.Debug(fmt.Sprintf("Deleting previous deplopyment of %s", fileName))
+			delOpt := &deleteOptions{
+				logger:         u.logger,
+				templates:      templates.TemplatesMap(),
+				templateValues: v,
+				kubeClientSet:  kubeClientset,
+				namespace:      opt.ClusterNamespace,
+				matchPattern:   fileName,
+				operatorType:   VenonaPluginType,
+			}
+			err := delete(delOpt)
+			if err != nil {
+				return nil, err
+			}
+			installOpt := &installOptions{
+				logger:         u.logger,
+				templates:      templates.TemplatesMap(),
+				templateValues: v,
+				kubeClientSet:  kubeClientset,
+				namespace:      opt.ClusterNamespace,
+				matchPattern:   fileName,
+				dryRun:         opt.DryRun,
+				operatorType:   VenonaPluginType,
+			}
+			err = install(installOpt)
+			if err != nil {
+				return nil, err
+			}
+		}
+		
 		if _, ok := skipUpgradeFor[fileName]; ok {
 			u.logger.Debug(fmt.Sprintf("Skipping upgrade of %s: should be ignored", fileName))
 			continue
