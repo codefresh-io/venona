@@ -28,6 +28,8 @@ type (
 
 		KubernetesAPI *KubernetesAPI
 
+		AgentAPI      *AgentAPI
+
 		ClusterInCodefresh string
 
 		DryRun bool
@@ -51,6 +53,10 @@ type (
 		Token             string
 		Client            codefresh.Codefresh
 		BuildNodeSelector map[string]string
+	}
+
+	AgentAPI struct {
+		Token            string
 	}
 
 	Image struct {
@@ -101,7 +107,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
 		"Tolerations": s.KubernetesAPI.Tolerations,
-		"AgentToken":   "",
+		"AgentToken":   s.AgentAPI.Token,
 		"ServerCert": map[string]string{
 			"Cert": "",
 			"Key":  "",
