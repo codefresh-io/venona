@@ -20,11 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"encoding/json"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-
-	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 
@@ -35,14 +30,8 @@ import (
 
 const (
 	clusterNameMaxLength = 20
-	namespaceMaxLength = 20
+	namespaceMaxLength   = 20
 )
-
-type toleration struct {
-	Key      string  `json:key`
-    Operator string  `json:operator`
-    Effect   string  `json:effect`
-} 
 
 var installCmdOptions struct {
 	dryRun                 bool
@@ -64,19 +53,21 @@ var installCmdOptions struct {
 	kubernetesRunnerType          bool
 	buildNodeSelector             string
 	buildAnnotations              []string
-	tolerationJsonString          string
+	tolerationJSONString          string
 }
 
 // installCmd represents the install command
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install Codefresh's runtime-environment",
+	Deprecated: "This command is deprecated, use install-agent and install-runtime",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
 		lgr := createLogger("Install", verbose)
 		buildBasicStore(lgr)
 		extendStoreWithCodefershClient(lgr)
 		extendStoreWithKubeClient(lgr)
+		extendStoreWithAgentAPI(lgr)
 
 		builder := plugins.NewBuilder(lgr)
 		isDefault := isUsingDefaultStorageClass(installCmdOptions.storageClass)
@@ -99,18 +90,7 @@ var installCmd = &cobra.Command{
 			builderInstallOpt.StorageClass = plugins.DefaultStorageClassNamePrefix
 		}
 
-		if installCmdOptions.kube.context == "" {
-			config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
-			installCmdOptions.kube.context = config.CurrentContext
-			lgr.Debug("Kube Context is not set, using current context", "Kube-Context-Name", installCmdOptions.kube.context)
-		}
-		if installCmdOptions.kube.namespace == "" {
-			installCmdOptions.kube.namespace = "default"
-		}
-
-		s.KubernetesAPI.InCluster = installCmdOptions.kube.inCluster
-		s.KubernetesAPI.ContextName = installCmdOptions.kube.context
-		s.KubernetesAPI.Namespace = installCmdOptions.kube.namespace
+		fillKubernetesAPI(lgr, installCmdOptions.kube.context, installCmdOptions.kube.namespace, installCmdOptions.kube.inCluster)
 
 		kns, err := parseNodeSelector(installCmdOptions.kube.nodeSelector)
 		if err != nil {
@@ -118,19 +98,13 @@ var installCmd = &cobra.Command{
 		}
 		s.KubernetesAPI.NodeSelector = kns.String()
 
-		if installCmdOptions.tolerationJsonString != "" {
-			
-			data, err := ioutil.ReadFile(installCmdOptions.tolerationJsonString)
-			if err != nil {
-				dieOnError(err)
-			}
-			tolerations, err := parseToleration(string(data))
-			if err != nil {
-				dieOnError(err)
-			}
+		tolerations, err := getTolerationFromPath(installCmdOptions.tolerationJSONString)
+		if err != nil {
+			dieOnError(err)
+		}
+		if tolerations != "" {
 			s.KubernetesAPI.Tolerations = tolerations
 		}
-		
 
 		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun
@@ -224,7 +198,7 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
 	installCmd.Flags().StringVar(&installCmdOptions.buildNodeSelector, "build-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona build resources (default is no node selector)")
 	installCmd.Flags().StringArrayVar(&installCmdOptions.buildAnnotations, "build-annotations", []string{}, "The kubernetes metadata.annotations as \"key=value\" to be used by venona build resources (default is no node selector)")
-	installCmd.Flags().StringVar(&installCmdOptions.tolerationJsonString, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
+	installCmd.Flags().StringVar(&installCmdOptions.tolerationJSONString, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 
 	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
@@ -235,43 +209,13 @@ func init() {
 
 }
 
-type nodeSelector map[string]string
-
-func parseNodeSelector(s string) (nodeSelector, error) {
-	if s == "" {
-		return nodeSelector{}, nil
-	}
-	v := strings.Split(s, "=")
-	if len(v) != 2 {
-		return nil, errors.New("node selector must be in form \"key=value\"")
-	}
-	return nodeSelector{v[0]: v[1]}, nil
-}
-
-func parseToleration(s string) (string, error)  {
-	if s == "" {
-		return "", nil
-	}
-	data := []toleration{}
-	err := json.Unmarshal([]byte(s), &data);
-	if (err != nil) {
-		return "", errors.New("can not parse tolerations")
-	}
-	y, err := yaml.Marshal(&data)
-	if (err != nil) {
-		return "", errors.New("can not marshel tolerations to yaml")
-	}
-	d := fmt.Sprintf("\n%s", string(y))
-	return d, nil
-}
-
-func validateInstallOptions(opts* plugins.InstallOptions) (error)  {
+func validateInstallOptions(opts *plugins.InstallOptions) error {
 	if len(opts.ClusterName) > clusterNameMaxLength {
 		return errors.New(fmt.Sprintf("cluster name length is limited to %d", clusterNameMaxLength))
 	}
 	if len(opts.ClusterNamespace) > namespaceMaxLength {
 		return errors.New(fmt.Sprintf("cluster namespace length is limited to %d", namespaceMaxLength))
-	} 	
+	}
 	return nil
 }
 
