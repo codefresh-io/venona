@@ -7,6 +7,7 @@ function build() {
 		metadata: {
 			version,
 			mode: process.env.AGENT_MODE,
+			id: process.env.AGENT_ID,
 		},
 		logger: {
 			...(!process.env.LOGGER_MODE && {
