@@ -274,6 +274,8 @@ spec:
           value: {{ .Mode }}
         - name: AGENT_NAME
           value: {{ .AppName }}
+        - name: AGENT_ID
+          value: {{ .AgentId }}
         image: {{ .Image.Name }}:{{ .Image.Tag }}
         imagePullPolicy: Always
         name: {{ .AppName }}

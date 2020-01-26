@@ -57,6 +57,7 @@ type (
 
 	AgentAPI struct {
 		Token            string
+		Id               string
 	}
 
 	Image struct {
@@ -108,6 +109,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
 		"Tolerations": s.KubernetesAPI.Tolerations,
 		"AgentToken":   s.AgentAPI.Token,
+		"AgentId":      s.AgentAPI.Id,
 		"ServerCert": map[string]string{
 			"Cert": "",
 			"Key":  "",

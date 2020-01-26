@@ -249,5 +249,6 @@ func extendStoreWithAgentAPI(logger logger.Logger)  {
 	logger.Debug("Using agent's token", "Token", installAgentCmdOptions.agentToken)
 	s.AgentAPI = &store.AgentAPI{
 		Token:  base64.StdEncoding.EncodeToString([]byte(installAgentCmdOptions.agentToken)),
+		Id: installAgentCmdOptions.agentID,
 	}
 }

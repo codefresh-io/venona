@@ -38,12 +38,13 @@ var installAgentCmdOptions struct {
 		version string
 	}
 	agentToken                    string
+	agentID                       string
 	kubernetesRunnerType          bool
 	tolerationJSONString          string
 }
 
 var installAgentCmd = &cobra.Command{
-	Use: "install-agent",
+	Use: "agent",
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
@@ -54,12 +55,19 @@ var installAgentCmd = &cobra.Command{
 		fillCodefreshAPI(lgr)
 		builder := plugins.NewBuilder(lgr)
 
+		if cfAPIHost == "" {
+			cfAPIHost = "https://g.codefresh.io"
+		}
 		builderInstallOpt := &plugins.InstallOptions{
+			CodefreshHost:         cfAPIHost,
 		}
 
 		if installAgentCmdOptions.agentToken == "" {
 			dieOnError(fmt.Errorf("Agent token is required in order to install agent"))
-	
+		}
+
+		if installAgentCmdOptions.agentID == "" {
+			dieOnError(fmt.Errorf("Agent id is required in order to install agent"))
 		}
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
@@ -100,18 +108,19 @@ var installAgentCmd = &cobra.Command{
 				dieOnError(err)
 			}
 		}
-		lgr.Info("Installation completed Successfully")
+		lgr.Info("Agent installation completed Successfully")
 
 	},
 
 }
 
 func init()  {
-	rootCmd.AddCommand(installAgentCmd)
+	installCommand.AddCommand(installAgentCmd)
 
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.agentToken, "agentToken", "", "Agent token created by codefresh")
+	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.agentID, "agentId", "", "Agent id created by codefresh")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.venona.version, "venona-version", "", "Version of venona to install (default is the latest)")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
