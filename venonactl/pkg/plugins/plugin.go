@@ -54,6 +54,7 @@ type (
 		KubernetesRunnerType bool
 		BuildNodeSelector    map[string]string
 		Annotations          map[string]string
+		RuntimeEnvironment   string
 	}
 
 	DeleteOptions struct {

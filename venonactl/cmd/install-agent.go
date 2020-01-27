@@ -50,7 +50,7 @@ var installAgentCmd = &cobra.Command{
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose)
 		buildBasicStore(lgr)
-		extendStoreWithAgentAPI(lgr)
+		extendStoreWithAgentAPI(lgr, installAgentCmdOptions.agentToken, installAgentCmdOptions.agentID)
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
 		builder := plugins.NewBuilder(lgr)

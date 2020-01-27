@@ -85,11 +85,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		return nil, err
 	}
 
-	re, err := cf.Register()
-	if err != nil {
-		return nil, err
-	}
-	v["RuntimeEnvironment"] = re.Metadata.Name
+	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
 
 	return v, nil
 }

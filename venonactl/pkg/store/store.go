@@ -106,6 +106,8 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Tag":  "v18",
 		},
 		"Namespace":    s.KubernetesAPI.Namespace,
+		"ConfigPath":   s.KubernetesAPI.ConfigPath,
+		"Context":		s.KubernetesAPI.ContextName,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
 		"Tolerations": s.KubernetesAPI.Tolerations,
 		"AgentToken":   s.AgentAPI.Token,

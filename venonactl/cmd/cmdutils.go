@@ -244,11 +244,11 @@ func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCl
 	
 }
 
-func extendStoreWithAgentAPI(logger logger.Logger)  {
+func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)  {
 	s := store.GetStore()
-	logger.Debug("Using agent's token", "Token", installAgentCmdOptions.agentToken)
+	logger.Debug("Using agent's token", "Token", token)
 	s.AgentAPI = &store.AgentAPI{
-		Token:  base64.StdEncoding.EncodeToString([]byte(installAgentCmdOptions.agentToken)),
-		Id: installAgentCmdOptions.agentID,
+		Token:  base64.StdEncoding.EncodeToString([]byte(token)),
+		Id: agentID,
 	}
 }
