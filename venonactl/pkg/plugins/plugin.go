@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
+	RuntimeAttachType			  = "runtime-attach"
 )
 
 type (
@@ -48,6 +50,11 @@ type (
 		StorageClass          string
 		IsDefaultStorageClass bool
 		KubeBuilder           interface {
+			BuildClient() (*kubernetes.Clientset, error)
+			BuildConfig() clientcmd.ClientConfig
+			
+		}
+		AgentKubeBuilder	  interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
 		DryRun               bool
@@ -159,6 +166,11 @@ func build(t string, logger logger.Logger) Plugin {
 		}
 	}
 
+	if t == RuntimeAttachType {
+		return &runtimeAttachPlugin{
+			logger: logger.New("Plugin", RuntimeAttachType),
+		}
+	}
 	return nil
 }
 

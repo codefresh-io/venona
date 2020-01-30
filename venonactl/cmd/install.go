@@ -22,7 +22,7 @@ import (
 
 var installCommand = &cobra.Command{
 	Use:   "install",
-	Short: "Install agent's components",
+	Short: "Install agent and runtime components",
 }
 
 func init() {

@@ -101,7 +101,7 @@ var installRuntimeCmd = &cobra.Command{
 			lgr.Info("Custom StorageClass is set, skipping installation of default volume provisioner")
 		}
 
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		var err error
 		values := s.BuildValues()
 		for _, p := range builder.Get() {

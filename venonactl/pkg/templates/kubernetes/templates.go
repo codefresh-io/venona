@@ -351,6 +351,15 @@ rules:
   verbs: ["get", "create", "delete"]
 ` 
 
+templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ .RuntimeEnvironment }}
+  namespace: {{ .Namespace }}
+data:
+  kube.config: {{ .RuntimeEnvironmentConfig }}` 
+
 templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque

@@ -71,6 +71,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		return nil, err
 	}
 
+	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
 	err = install(&installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
@@ -84,8 +85,6 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	if err != nil {
 		return nil, err
 	}
-
-	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
 
 	return v, nil
 }
