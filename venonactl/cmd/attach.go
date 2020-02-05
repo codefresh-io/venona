@@ -29,6 +29,7 @@ var attachRuntimeCmdOptions struct {
 		namespace string
 		inCluster bool
 		context   string
+		serviceAccount string
 	}
 	kubeVenona struct {
 		namespace string
@@ -62,6 +63,10 @@ var attachRuntimeCmd = &cobra.Command{
 		}
 		if attachRuntimeCmdOptions.kubeVenona.context == "" {
 			attachRuntimeCmdOptions.kubeVenona.context = installRuntimeCmdOptions.kube.context
+		}
+
+		if attachRuntimeCmdOptions.kube.serviceAccount == "" {
+			attachRuntimeCmdOptions.kube.serviceAccount = "default" 
 		}
 
 		builderInstallOpt := &plugins.InstallOptions{
@@ -102,9 +107,11 @@ func init() {
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.runtimeEnvironmentName, "runtimeName", viper.GetString("runtimeName"), "Name of the runtime as in codefresh")
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.serviceAccount, "serviceAccount", viper.GetString("serviceAccount"), "Name of the service account in the runtime cluster, defaut is default \"default\"")
+
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.namespace, "kube-namespace-agent", viper.GetString("kube-namespace-agent"), "Name of the namespace where venona is installed [$KUBE_NAMESPACE]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.context, "kube-context-name-agent", viper.GetString("kube-context-agent"), "Name of the kubernetes context on which venona is installed (default is current-context) [$KUBE_CONTEXT]")
-	attachRuntimeCmd.PersistentFlags().StringVar(&attachRuntimeCmdOptions.kubeVenona.kubePath, "kube-config-path-agent", viper.GetString("kubeconfig-agent"), "Path to kubeconfig file (default is $HOME/.kube/config) for agent [$KUBECONFIG]")
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.kubePath, "kube-config-path-agent", viper.GetString("kubeconfig-agent"), "Path to kubeconfig file (default is $HOME/.kube/config) for agent [$KUBECONFIG]")
 
 }

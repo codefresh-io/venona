@@ -5,9 +5,8 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
-	"k8s.io/client-go/tools/clientcmd"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
-
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type runtimeAttachPlugin struct {
@@ -19,17 +18,33 @@ const (
 )
 
 func saveKubeConfig(opt *InstallOptions, v Values) (Values, error) {
-	config := opt.KubeBuilder.BuildConfig() // on the runtime cluster
-	rc, err := config.RawConfig()
+	
+	config, err := opt.KubeBuilder.BuildConfig().ClientConfig()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to get raw kubernetes config: %v", err)
+		return nil, fmt.Errorf("Failed to get client config on runtime cluster: %v", err)
 	}
-	d, err := clientcmd.Write(rc)
+	
+	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to persist raw kubernetes config: %v", err)
+		return nil, fmt.Errorf("Failed to create client on runtime cluster: %v", err)
 	}
 
-	v["RuntimeEnvironmentConfig"] = fmt.Sprintf("%s", base64.StdEncoding.EncodeToString([]byte(string(d))))
+	// get default service account for the namespace
+	var getOpt metav1.GetOptions
+	sa, err := cs.CoreV1().ServiceAccounts(opt.ClusterNamespace).Get("default", getOpt)
+
+	secretRef := sa.Secrets[0]
+	secret, err := cs.CoreV1().Secrets(opt.ClusterNamespace).Get(secretRef.Name, getOpt)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to get secret from service account on runtime cluster: %v", err)
+	}
+
+	crt := secret.Data["ca.crt"]
+	token := secret.Data["token"]
+
+	v["RuntimeEnvironmentConfigCrt"] = fmt.Sprintf("%s", base64.StdEncoding.EncodeToString(crt))
+	v["RuntimeEnvironmentConfigToken"] = fmt.Sprintf("%s", base64.StdEncoding.EncodeToString(token))
+	v["RuntimeEnvrionmentConfigHost"] = fmt.Sprintf("%s", base64.StdEncoding.EncodeToString([]byte (config.Host)))
 	return v, nil
 }
 
@@ -66,7 +81,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 
 }
 
-func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error)  {
+func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
@@ -83,7 +98,7 @@ func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]st
 		logger:         u.logger,
 	}
 	return status(opt)
-	
+
 }
 
 func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {

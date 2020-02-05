@@ -358,7 +358,9 @@ metadata:
   name: {{ .RuntimeEnvironment }}
   namespace: {{ .Namespace }}
 data:
-  kube.config: {{ .RuntimeEnvironmentConfig }}` 
+  kube.crt: {{ .RuntimeEnvironmentConfigCrt }}
+  kube.token: {{ .RuntimeEnvironmentConfigToken }}
+  kube.host: {{ .RuntimeEnvrionmentConfigHost }}` 
 
 templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
