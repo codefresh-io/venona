@@ -29,6 +29,7 @@ var attachRuntimeCmdOptions struct {
 		namespace string
 		inCluster bool
 		context   string
+		kubePath  string
 		serviceAccount string
 	}
 	kubeVenona struct {
@@ -69,13 +70,20 @@ var attachRuntimeCmd = &cobra.Command{
 			attachRuntimeCmdOptions.kube.serviceAccount = "default" 
 		}
 
+		if attachRuntimeCmdOptions.kube.kubePath == "" {
+			attachRuntimeCmdOptions.kube.kubePath = kubeConfigPath
+		}
+
 		builderInstallOpt := &plugins.InstallOptions{
 			ClusterNamespace: attachRuntimeCmdOptions.kubeVenona.namespace,
 			RuntimeEnvironment: attachRuntimeCmdOptions.runtimeEnvironmentName,
+			RuntimeClusterName: attachRuntimeCmdOptions.kube.namespace,
+			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
+			
 		}
 
 		// runtime
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kube.context, attachRuntimeCmdOptions.kube.namespace, attachRuntimeCmdOptions.kube.kubePath, false)
 
 		// agent
 		builderInstallOpt.AgentKubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kubeVenona.context,
@@ -105,6 +113,8 @@ func init() {
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
+
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.runtimeEnvironmentName, "runtimeName", viper.GetString("runtimeName"), "Name of the runtime as in codefresh")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.serviceAccount, "serviceAccount", viper.GetString("serviceAccount"), "Name of the service account in the runtime cluster, defaut is default \"default\"")

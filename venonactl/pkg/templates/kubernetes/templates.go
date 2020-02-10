@@ -355,12 +355,10 @@ templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: {{ .RuntimeEnvironment }}
+  name: {{ .AppName }}runtimes
   namespace: {{ .Namespace }}
 data:
-  kube.crt: {{ .RuntimeEnvironmentConfigCrt }}
-  kube.token: {{ .RuntimeEnvironmentConfigToken }}
-  kube.host: {{ .RuntimeEnvrionmentConfigHost }}` 
+  venonaconf: {{ .venonaConf}}` 
 
 templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret

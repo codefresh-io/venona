@@ -62,6 +62,8 @@ type (
 		BuildNodeSelector    map[string]string
 		Annotations          map[string]string
 		RuntimeEnvironment   string
+		RuntimeClusterName   string
+		RuntimeServiceAccount string
 	}
 
 	DeleteOptions struct {
