@@ -16,20 +16,6 @@ const ERROR_MESSAGES = {
 };
 
 class Agent {
-	constructor(config = {}) {
-		this.logger = Logger.create(config.metadata, config.logger);
-		this.logger.info('Starting agent');
-		this.server = new Server(config.metadata, config.server, this.logger.child({
-			namespace: LOGGER_NAMESPACES.SERVER,
-		}));
-		this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
-		this.kubernetesAPI = config.metadata.mode === AGENT_MODES.IN_CLUSTER
-			? Kubernetes.buildFromInCluster(config.metadata)
-			: Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
-		this.jobs = config.jobs;
-		this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
-		this.queue.drain = this._onEmptyQueue.bind(this);
-	}
 
 	_onEmptyQueue() {
 		this.logger.info('Queue is empty');
@@ -55,9 +41,21 @@ class Agent {
 
 
 
-	async init() {
+	async init(config = {}) {
 		try {
-			this.logger.info('Initializing agent');
+			// this.logger.info('Initializing agent');
+			this.logger = Logger.create(config.metadata, config.logger);
+			this.logger.info('Starting agent');
+			this.server = new Server(config.metadata, config.server, this.logger.child({
+				namespace: LOGGER_NAMESPACES.SERVER,
+			}));
+			this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
+			this.kubernetesAPI = config.metadata.mode === AGENT_MODES.IN_CLUSTER
+				? await Kubernetes.buildFromInCluster(config.metadata)
+				: Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
+			this.jobs = config.jobs;
+			this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
+			this.queue.drain = this._onEmptyQueue.bind(this);
 			await Promise.all([
 				this.server.init(),
 				this.codefreshAPI.init(),

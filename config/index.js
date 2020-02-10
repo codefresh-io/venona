@@ -30,7 +30,8 @@ function build() {
 			},
 			metadata: {
 				name: process.env.SELF_POD_NAME,
-				namepsace: process.env.SELF_POD_NAMESPACE,
+				namespace: process.env.SELF_POD_NAMESPACE,
+				venonaConf: process.env.VENONA_CONF
 			}
 		},
 		codefresh: {
