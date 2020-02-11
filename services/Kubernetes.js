@@ -2,6 +2,7 @@ const { Client, config } = require('kubernetes-client');
 const utils = require('./../utils');
 const fs = require('fs');
 const yaml = require('js-yaml');
+const _ = require('lodash');
 
 const ERROR_MESSAGES = {
 	MISSING_KUBERNETES_URL: 'Failed to construct Kubernetes API service, missing Kubernetes URL',
@@ -20,7 +21,7 @@ const ERROR_MESSAGES = {
 const RUNTIME_SECRET_LOCATION = '/etc/secrets/venonaconf';
 
 class Kubernetes {
-	constructor(metadata, agentClient, runtimes) {
+	constructor(metadata, agentClient, runtimes = {}) {
 		this.metadata = metadata;
 		this.agentClient = agentClient;
 		this.runtimes = runtimes;
@@ -28,20 +29,32 @@ class Kubernetes {
 
 	static parseRuntimesFromVenonaConf(venonaConf, encoding) {
 		let buff = new Buffer(venonaConf, encoding);
-		return yaml.safeLoad(buff.toString()).Runtimes;
+		return _.get(yaml.safeLoad(buff.toString()), 'Runtimes');
 	}
 	
 	static async buildFromInCluster(metadata) {
 		const client = new Client({ config: config.getInCluster() });
-		const venonaConf = await new Promise((resolve, reject) => {
-			fs.readFile(RUNTIME_SECRET_LOCATION, (err, data) => {
+		let venonaConf = '';
+		const isVenonaConfExist = await new Promise((resolve) => {
+			fs.access(RUNTIME_SECRET_LOCATION, (err) => {
 				if (err) {
-					reject(err);
-				}else {
-					resolve(data);
+					resolve(false);
+				} else {
+					resolve(true);
 				}
 			});
 		});
+		if (isVenonaConfExist) {
+			venonaConf = await new Promise((resolve, reject) => {
+				fs.readFile(RUNTIME_SECRET_LOCATION, (err, data) => {
+					if (err) {
+						reject(err);
+					}else {
+						resolve(data);
+					}
+				});
+			});
+		}
 		return new this(metadata, client,  Kubernetes.parseRuntimesFromVenonaConf(venonaConf));
 	}
 
