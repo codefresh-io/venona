@@ -31,18 +31,13 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	k8sApi "k8s.io/api/core/v1"
 )
 
 const (
 	clusterNameMaxLength = 20
 	namespaceMaxLength   = 20
 )
-
-type toleration struct {
-	Key      string `json:key`
-	Operator string `json:operator`
-	Effect   string `json:effect`
-}
 
 var installCmdOptions struct {
 	dryRun                 bool
@@ -251,7 +246,7 @@ func parseToleration(s string) (string, error) {
 	if s == "" {
 		return "", nil
 	}
-	data := []toleration{}
+	var data []k8sApi.Toleration
 	err := json.Unmarshal([]byte(s), &data)
 	if err != nil {
 		return "", errors.New("can not parse tolerations")
