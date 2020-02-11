@@ -17,12 +17,12 @@ limitations under the License.
 */
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
-	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"strings"
 
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -35,14 +35,14 @@ import (
 
 const (
 	clusterNameMaxLength = 20
-	namespaceMaxLength = 20
+	namespaceMaxLength   = 20
 )
 
 type toleration struct {
-	Key      string  `json:key`
-    Operator string  `json:operator`
-    Effect   string  `json:effect`
-} 
+	Key      string `json:key`
+	Operator string `json:operator`
+	Effect   string `json:effect`
+}
 
 var installCmdOptions struct {
 	dryRun                 bool
@@ -119,7 +119,7 @@ var installCmd = &cobra.Command{
 		s.KubernetesAPI.NodeSelector = kns.String()
 
 		if installCmdOptions.tolerationJsonString != "" {
-			
+
 			data, err := ioutil.ReadFile(installCmdOptions.tolerationJsonString)
 			if err != nil {
 				dieOnError(err)
@@ -130,7 +130,6 @@ var installCmd = &cobra.Command{
 			}
 			s.KubernetesAPI.Tolerations = tolerations
 		}
-		
 
 		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun
@@ -248,30 +247,30 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 	return nodeSelector{v[0]: v[1]}, nil
 }
 
-func parseToleration(s string) (string, error)  {
+func parseToleration(s string) (string, error) {
 	if s == "" {
 		return "", nil
 	}
 	data := []toleration{}
-	err := json.Unmarshal([]byte(s), &data);
-	if (err != nil) {
+	err := json.Unmarshal([]byte(s), &data)
+	if err != nil {
 		return "", errors.New("can not parse tolerations")
 	}
 	y, err := yaml.Marshal(&data)
-	if (err != nil) {
+	if err != nil {
 		return "", errors.New("can not marshel tolerations to yaml")
 	}
 	d := fmt.Sprintf("\n%s", string(y))
 	return d, nil
 }
 
-func validateInstallOptions(opts* plugins.InstallOptions) (error)  {
+func validateInstallOptions(opts *plugins.InstallOptions) error {
 	if len(opts.ClusterName) > clusterNameMaxLength {
 		return errors.New(fmt.Sprintf("cluster name length is limited to %d", clusterNameMaxLength))
 	}
 	if len(opts.ClusterNamespace) > namespaceMaxLength {
 		return errors.New(fmt.Sprintf("cluster namespace length is limited to %d", namespaceMaxLength))
-	} 	
+	}
 	return nil
 }
 
