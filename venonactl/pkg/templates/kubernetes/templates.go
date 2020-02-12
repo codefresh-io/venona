@@ -248,6 +248,10 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
+      volumes:
+        - name: venonaruntimes
+          secret:
+            secretName: venonaruntimes
       serviceAccountName: {{ .AppName }}
       {{ if ne .NodeSelector "" }}
       nodeSelector:
@@ -277,6 +281,10 @@ spec:
         - name: AGENT_ID
           value: {{ .AgentId }}
         image: {{ .Image.Name }}:{{ .Image.Tag }}
+        volumeMounts:
+        - name: venonaruntimes
+          mountPath: "/etc/secrets"
+          readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
       restartPolicy: Always
@@ -402,6 +410,15 @@ provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }
 parameters:
   volumeBackend: local
 ` 
+
+templatesMap["venonaruntimes.secret.venona.yaml"] = `apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ .AppName }}runtimes
+  namespace: {{ .Namespace }}
+data:
+  venonaconf: {{ .venonaConf}}` 
 
     return  templatesMap
 }

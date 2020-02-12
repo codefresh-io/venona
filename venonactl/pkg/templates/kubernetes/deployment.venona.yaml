@@ -24,6 +24,10 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
+      volumes:
+        - name: venonaruntimes
+          secret:
+            secretName: venonaruntimes
       serviceAccountName: {{ .AppName }}
       {{ if ne .NodeSelector "" }}
       nodeSelector:
@@ -53,6 +57,10 @@ spec:
         - name: AGENT_ID
           value: {{ .AgentId }}
         image: {{ .Image.Name }}:{{ .Image.Tag }}
+        volumeMounts:
+        - name: venonaruntimes
+          mountPath: "/etc/secrets"
+          readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
       restartPolicy: Always

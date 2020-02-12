@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DefaultVersion = "latest"
+	DefaultVersion = "fa7740a"
 )
 
 type (
