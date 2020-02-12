@@ -6,3 +6,6 @@ build-local:
 
 build-linux:
 	@sh ./hack/build-linux.sh
+
+fmt:
+	go fmt ./...
