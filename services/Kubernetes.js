@@ -76,23 +76,43 @@ class Kubernetes {
 	}
 
 	async getClient(runtimeName) {
+		const client = await this._getClient(runtimeName);
+		return client;
+		
+	}
+	_getClient(runtimeName) {
 		if (!this.runtimes[runtimeName]) {
 			throw new Error(`runtime ${runtimeName} is not found`);
 		}
 		const runtimeConfig = this.runtimes[runtimeName];
-		if (!runtimeConfig.client) {
-			runtimeConfig.client = new Client({
-				config: {
-					url: runtimeConfig.Host,
-					auth: {
-						bearer: runtimeConfig.Token,
+		if (!runtimeConfig.client) 
+		{
+			if (runtimeConfig.worker) {
+				return runtimeConfig.worker;
+			}
+			const worker = new Promise(async (resolve, reject) => {
+				const client = new Client({
+					config: {
+						url: runtimeConfig.Host,
+						auth: {
+							bearer: runtimeConfig.Token,
+						},
+						ca: runtimeConfig.Crt,
 					},
-					ca: runtimeConfig.Crt,
-				},
+				});
+				client.loadSpec().then(() => {
+					delete runtimeConfig.worker;
+					runtimeConfig.client = client;
+					resolve(runtimeConfig.client);
+				}).catch(reject);
+				
+
 			});
-			await runtimeConfig.client.loadSpec();
+			runtimeConfig.worker = worker;
+			return worker;
+			
 		}
-		return runtimeConfig.client;
+		return Promise.resolve(runtimeConfig.client);
 	}
 
 	async init() {
