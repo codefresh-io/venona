@@ -205,7 +205,7 @@ spec:
         key: node-role.kubernetes.io/master
         operator: "Exists"
       {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 8 }}
+        {{ .Tolerations | indent 6 }}
       {{ end }}
       containers:
       - name: dind-volume-provisioner
@@ -261,7 +261,7 @@ spec:
       {{ if ne .Tolerations "" }}
       tolerations:
         {{ .Tolerations | indent 8 }}
-      {{ end }}
+      {{ end }} 
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME
