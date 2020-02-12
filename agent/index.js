@@ -27,16 +27,22 @@ class Agent {
 			? Kubernetes.buildFromInCluster(config.metadata)
 			: Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
 		this.jobs = config.jobs;
+		this.cronJobs = {};
 		this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
 		this.queue.drain = this._onEmptyQueue.bind(this);
 	}
 
 	_onEmptyQueue() {
-		this.logger.info('Queue is empty');
+		this.logger.infoVerbose('Queue is empty');
 	}
 
 	_queueRunner(job = { run: Promise }, cb) {
-		this.logger.info(`Running job: ${job.constructor.name}`);
+		const logMsg = `Running job: ${job.constructor.name}`;
+		if (this._isCronJob(job)) {
+			this.logger.infoVerbose(logMsg);
+		} else {
+			this.logger.info(logMsg);
+		}
 		Promise.resolve()
 			.then(() => job.exec())
 			.then(() => cb(), cb);
@@ -44,7 +50,6 @@ class Agent {
 
 	async _loadJobs() {
 		const ignorePaths = [(file, stats) => {
-
 			return !(new RegExp(/.*job.js/g).test(file)) && !stats.isDirectory();
 		}];
 		return Promise
@@ -53,7 +58,9 @@ class Agent {
 			.map(Job => this._startJob(Job));
 	}
 
-
+	_isCronJob(job) {
+		return !!this.cronJobs[job.constructor.name];
+	}
 
 	async init() {
 		try {
@@ -75,6 +82,7 @@ class Agent {
 	_startJob(Job) {
 		const cron = _.get(this, `jobs.${Job.name}.cronExpression`, this.jobs.DEFAULT_CRON);
 		this.logger.info(`Preparing job: ${Job.name} with cron: ${cron}`);
+		this.cronJobs[Job.name] = Job;
 		scheduler.scheduleJob(cron, () => {
 			const taskLogger = this.logger.child({
 				namespace: LOGGER_NAMESPACES.TASK,
@@ -82,7 +90,7 @@ class Agent {
 				uid: new Chance().guid(),
 			});
 			const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
-			this.logger.info(`Pushing job: ${Job.name} to queue`);
+			this.logger.infoVerbose(`Pushing job: ${Job.name} to queue`);
 			this.queue.push(job, 1, this._handleJobError(job));
 		});
 	}
@@ -93,7 +101,12 @@ class Agent {
 				this.logger.error(`Failed to execute job ${job.constructor.name} with error message: ${err.message}`);
 				this.logger.error(err.stack);
 			} else {
-				this.logger.info(`Job: ${job.constructor.name} finished`);
+				const logMsg = `Job: ${job.constructor.name} finished`;
+				if (this._isCronJob(job)) {
+					this.logger.infoVerbose(logMsg);
+				} else {
+					this.logger.info(logMsg);
+				}
 			}
 		};
 	}

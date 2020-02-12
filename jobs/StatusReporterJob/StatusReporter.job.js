@@ -10,7 +10,7 @@ class StatusReporterJob extends Base {
 	async run() {
 		const status = await this._getStatus();
 		const res = await this.codefreshAPI.reportStatus(this.logger, status);
-		this.logger.info(res);
+		this.logger.infoVerbose(res);
 	}
 
 	async validate() {

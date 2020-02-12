@@ -32,7 +32,7 @@ class Codefresh {
 	}
 
 	pullTasks(logger) {
-		logger.info('Calling Codefresh API to fetch jobs');
+		logger.infoVerbose('Calling Codefresh API to fetch jobs');
 		const url = '/api/agent/tasks';
 		return this._call({
 			url,
@@ -41,7 +41,7 @@ class Codefresh {
 	}
 
 	reportStatus(logger, status) {
-		logger.info({ status }, 'Calling Codefresh API to report status');
+		logger.infoVerbose({ status }, 'Calling Codefresh API to report status');
 		const url = '/api/agent/status';
 		return this._call({
 			url,

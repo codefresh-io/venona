@@ -20,7 +20,11 @@ class TaskPullerJob extends Base {
 				throw new Error(message);
 			})
 			.then((res = []) => {
-				this.logger.info(`Got ${res.length} tasks`);
+				if (_.isEmpty(res)) {
+					this.logger.infoVerbose('Got 0 tasks');
+				} else {
+					this.logger.info(`Got ${res.length} new tasks`);
+				}
 				const promises = _.chain(res)
 					.map((task) => {
 						// TODO auto load all tasks
