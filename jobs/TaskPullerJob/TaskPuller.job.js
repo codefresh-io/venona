@@ -67,5 +67,6 @@ class TaskPullerJob extends Base {
 		return;
 	}
 }
+
 TaskPullerJob.Errors = ERROR_MESSAGES;
 module.exports = TaskPullerJob;
