@@ -47,8 +47,7 @@ class TaskPullerJob extends Base {
 					.value();
 
 				// resolves each promise sequentially, in sorted order
-				const resolves = await Promise.mapSeries(tasks, ({ task, executor }) => executor(task));
-				return resolves;
+				return await Promise.mapSeries(tasks, ({ task, executor }) => executor(task)); 
 			});
 	}
 
