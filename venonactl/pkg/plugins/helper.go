@@ -19,20 +19,18 @@ package plugins
 import (
 	"bytes"
 	"fmt"
-	"regexp"
 	"html/template"
+	"regexp"
 
 	// import all cloud providers auth clients
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"github.com/Masterminds/sprig"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
-	"github.com/Masterminds/sprig"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
-
-	
 )
 
 // ExecuteTemplate - executes templates in tpl str with config as values
