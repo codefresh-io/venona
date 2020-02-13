@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Joi = require('joi');
 const Base = require('../../BaseJob');
+const { TASK_PRIORITY } = require('../../../constants');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task DeletePod',
@@ -28,6 +29,7 @@ class DeletePodTask extends Base {
 	}
 }
 
+DeletePodTask.priority = TASK_PRIORITY.LOW;
 DeletePodTask.Errors = ERROR_MESSAGES;
 DeletePodTask.validationSchema = Joi.object().keys({
 	spec: Joi.object().keys({
@@ -35,4 +37,5 @@ DeletePodTask.validationSchema = Joi.object().keys({
 		name: Joi.string().required()
 	}).required(),
 }).options({ stripUnknown: true });
+
 module.exports       = DeletePodTask;

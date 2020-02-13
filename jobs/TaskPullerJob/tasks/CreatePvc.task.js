@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const Base = require('../../BaseJob');
+const { TASK_PRIORITY } = require('../../../constants');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task CreatePvc',
@@ -22,8 +23,11 @@ class CreatePvcTask extends Base {
 		return Joi.validate(task, CreatePvcTask.validationSchema);
 	}
 }
+
+CreatePvcTask.priority = TASK_PRIORITY.HIGH;
 CreatePvcTask.Errors = ERROR_MESSAGES;
 CreatePvcTask.validationSchema = Joi.object().keys({
 	spec: Joi.object().required(),
 }).options({ stripUnknown: true });
+
 module.exports       = CreatePvcTask;

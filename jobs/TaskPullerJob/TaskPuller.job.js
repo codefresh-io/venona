@@ -2,6 +2,7 @@ const Promise = require('bluebird');
 const Chance = require('chance');
 const _ = require('lodash');
 const Base = require('../BaseJob');
+const { TASK_PRIORITY } = require('../../constants');
 const CreatePod = require('./tasks/CreatePod.task');
 const DeletePod = require('./tasks/DeletePod.task');
 const CreatePvc = require('./tasks/CreatePvc.task');
@@ -12,6 +13,18 @@ const ERROR_MESSAGES = {
 };
 
 class TaskPullerJob extends Base {
+	constructor(...args) {
+		super(...args);
+		
+		this.typeToTaskMap = {
+			'CreatePod': { executor: this._executeTask(CreatePod), priority: CreatePod.priority },
+			'DeletePod': { executor: this._executeTask(DeletePod), priority: DeletePod.priority },
+			'CreatePvc': { executor: this._executeTask(CreatePvc), priority: CreatePvc.priority },
+			'DeletePvc': { executor: this._executeTask(DeletePvc), priority: DeletePvc.priority },
+			'NOOP': { executor: _.noop, priority: TASK_PRIORITY.LOW },
+		};
+	}
+
 	run() {
 		return this.codefreshAPI.pullTasks(this.logger)
 			.catch((err) => {
@@ -21,24 +34,18 @@ class TaskPullerJob extends Base {
 			})
 			.then((res = []) => {
 				this.logger.info(`Got ${res.length} tasks`);
-				const promises = _.chain(res)
-					.map((task) => {
-						// TODO auto load all tasks
-						const typeToTaskMap = {
-							'CreatePod': this._executeTask(CreatePod),
-							'DeletePod': this._executeTask(DeletePod),
-							'CreatePvc': this._executeTask(CreatePvc),
-							'DeletePvc': this._executeTask(DeletePvc),
-						};
+
+				const tasks = _.chain(res)
+					.map((task) => {						
 						const type = _.get(task, 'type');
 						this.logger.info(`Got request to run task with type: ${type}`);
-						const fn = typeToTaskMap[type] || _.noop;
-						return fn(task);
+						const { executor, priority } = _.get(this.typeToTaskMap, type, this.typeToTaskMap.NOOP);
+						return { task, priority, executor };
 					})
-					.compact()
-					.flattenDeep()
+					.sortBy(({ priority }) => priority)
 					.value();
-				return Promise.all(promises);
+
+				return Promise.each(tasks, ({ task, executor }) => executor(task)); // resolves each promise sequentially, in sorted order
 			});
 	}
 
