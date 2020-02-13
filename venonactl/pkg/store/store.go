@@ -100,7 +100,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
-		"Tolerations": s.KubernetesAPI.Tolerations,
+		"Tolerations":  s.KubernetesAPI.Tolerations,
 		"AgentToken":   "",
 		"ServerCert": map[string]string{
 			"Cert": "",

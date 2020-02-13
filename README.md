@@ -1,5 +1,5 @@
 # VENONA
-[![Go Report Card](https://goreportcard.com/badge/github.com/codefresh-io/venona)](https://goreportcard.com/report/github.com/codefresh-io/venona) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/codefresh-io/venona)](https://goreportcard.com/report/github.com/codefresh-io/venona)
 [![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/codefresh-inc/codefresh-io%2Fvenona%2Fvenona?type=cf-1)]( https://g.codefresh.io/public/accounts/codefresh-inc/pipelines/codefresh-io/venona/venona)
 
 ## Installation
@@ -16,7 +16,7 @@
 ### Install venona
 
 * Download [venona's](https://github.com/codefresh-io/venona/releases) binary
-  * With homebrew: 
+  * With homebrew:
     * `brew tap codefresh-io/venona`
     * `brew install venona`
 * Create namespace where venona should run<br />
@@ -24,25 +24,29 @@
 * Create *new* runtime-environment with Venona's agents installed <br />
   > `venona install --kube-namespace codefresh-runtime`
 * Get the status <br />
-  > `venona status`  
+  > `venona status`
   > `kubectl get pods -n codefresh-runtime`
 
 #### Install Options
 
 | Option Argument | Type | Description |
 | -------------------- | -------- | --------------------------------------------------- |
+| --build-annotations | stringArray | The kubernetes metadata.annotations as "key=value" to be used by venona build resources (default is no node selector) |
+| --build-node-selector | string | The kubernetes node selector "key=value" to be used by venona build resources (default is no node selector) |
 | --cluster-name | string | cluster name (if not passed runtime-environment will be created cluster-less); this is a friendly name used for metadata does not need to match the literal cluster name.  Limited to 20 Characters. |
 | --dry-run | boolean | Set to true to simulate installation |
-| -h, --help | | help for install |
+| -h, --help | boolean | help for install |
 | --in-cluster | boolean | Set flag if venona is been installed from inside a cluster |
 | --kube-context-name | string | Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT] |
-| --kube-namespace | string | Name of the namespace on which venona should be installed [$KUBE_NAMESPACE] |
-| --kubernetes-runner-type | string | Set the runner type to kubernetes (alpha feature) |
-| --only-runtime-environment | boolean | Set to true to only configure namespace as runtime-environment for Codefresh |
+| --kube-namespace | string |Name of the namespace on which venona should be installed [$KUBE_NAMESPACE] |
+| --kube-node-selector | string | The kubernetes node selector "key=value" to be used by venona resources (default is no node selector) |
+| --kubernetes-runner-type | boolean | Set the runner type to kubernetes (alpha feature) |
+| --only-runtime-environment | boolean | Set to true to onlky configure namespace as runtime-environment for Codefresh |
 | --runtime-environment | string | if --skip-runtime-installation set, will try to configure venona on current runtime-environment |
 | --set-default | boolean | Mark the install runtime-environment as default one after installation |
 | --skip-runtime-installation | boolean | Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name |
 | --storage-class | string | Set a name of your custom storage class, note: this will not install volume provisioning components |
+| --tolerations | string | The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations). If prefixed with "@", loads from a file: @/tmp/tolerations.json |
 | --venona-version | string | Version of venona to install (default is the latest) |
 
 #### Install on cluster version < 1.10
@@ -84,8 +88,8 @@ List of the resources that will be created
   * `cluster-role-binding.dind-volume-provisioner.yaml` - Binds the ClusterRole to `service-account.dind-volume-provisioner.re.yaml`
 
 ### Access the cluster from executed pipeline
-After a successfull installation of Venona, you'll be able to run a Codefresh pipeline on the configured cluster.  
-However, the pipeline itself dosent have any permission to connect to the hosted cluster.  
+After a successfull installation of Venona, you'll be able to run a Codefresh pipeline on the configured cluster.
+However, the pipeline itself dosent have any permission to connect to the hosted cluster.
 To make it work you need to add the cluster to Codefresh (make sure the service acount has all the permissions you need)
 > codefresh create cluster --kube-context CONTEXT_NAME --namespace NAMESPACE --serviceaccount SERVICE_ACCOUNT --behind-firewall
 
@@ -96,5 +100,5 @@ Example: `codefresh get cluster`
 * Install <br />
 Example: `venona install --cluster-name CLUSTER`
 * Get the status <br />
-Example: `venona status RUNTIME-ENVIRONMENT`  
+Example: `venona status RUNTIME-ENVIRONMENT`
 Example: `kubectl get pods -n NAMESPACE`
