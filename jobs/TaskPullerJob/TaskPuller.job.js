@@ -32,7 +32,7 @@ class TaskPullerJob extends Base {
 				this.logger.error(message);
 				throw new Error(message);
 			})
-			.then((res = []) => {
+			.then(async (res = []) => {
 				this.logger.info(`Got ${res.length} tasks`);
 
 				const tasks = _.chain(res)
@@ -42,10 +42,13 @@ class TaskPullerJob extends Base {
 						const { executor, priority } = _.get(this.typeToTaskMap, type, this.typeToTaskMap.NOOP);
 						return { task, priority, executor };
 					})
+					.filter(({ executor }) => executor !== _.noop)
 					.sortBy(({ priority }) => priority)
 					.value();
 
-				return Promise.each(tasks, ({ task, executor }) => executor(task)); // resolves each promise sequentially, in sorted order
+				// resolves each promise sequentially, in sorted order
+				const resolves = await Promise.mapSeries(tasks, ({ task, executor }) => executor(task));
+				return resolves;
 			});
 	}
 
