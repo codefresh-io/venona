@@ -3,6 +3,12 @@ const AGENT_MODES = {
 	IN_CLUSTER: 'InCluster',
 };
 
+const TASK_PRIORITY = {
+	HIGH: 1,
+	MEDIUM: 2,
+	LOW: 3	
+};
+      
 const LOGGER_MODES = {
 	// print logs more pretty
 	PRETTY: 'pretty',
@@ -23,4 +29,5 @@ module.exports = {
 	LOGGER_NAMESPACES,
 	LOGGER_MODES,
 	CRON,
+	TASK_PRIORITY,
 };

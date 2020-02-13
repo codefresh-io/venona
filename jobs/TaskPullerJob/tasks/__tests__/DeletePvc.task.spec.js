@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../../services/Logger');
 const DeletePvcTask = require('../DeletePvc.task');
+const { TASK_PRIORITY } = require('../../../../constants');
 
 jest.mock('./../../../../services/Logger');
 
@@ -113,6 +114,10 @@ describe('DeletePvc task unit tests', () => {
 			const taskDef = getValidTaskDef();
 			const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 			return expect(task.exec(taskDef)).resolves.toEqual('OK');
+		});
+
+		it('Should have a LOW priority', () => {
+			expect(DeletePvcTask.priority).toBe(TASK_PRIORITY.LOW);
 		});
 	});
 });
