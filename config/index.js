@@ -8,6 +8,7 @@ function build() {
 			version,
 			mode: process.env.AGENT_MODE,
 			id: process.env.AGENT_ID,
+			venonaConfPath: process.env.VENONA_CONFIG_PATH,
 		},
 		logger: {
 			...(!process.env.LOGGER_MODE && {
@@ -30,8 +31,7 @@ function build() {
 			},
 			metadata: {
 				name: process.env.SELF_POD_NAME,
-				namespace: process.env.SELF_POD_NAMESPACE,
-				venonaConf: process.env.VENONA_CONF
+				namespace: process.env.SELF_POD_NAMESPACE
 			}
 		},
 		codefresh: {

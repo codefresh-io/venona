@@ -52,7 +52,7 @@ class Agent {
 			this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
 			this.kubernetesAPI = config.metadata.mode === AGENT_MODES.IN_CLUSTER
 				? await Kubernetes.buildFromInCluster(config.metadata)
-				: Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
+				: await Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
 			this.jobs = config.jobs;
 			this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
 			this.queue.drain = this._onEmptyQueue.bind(this);
