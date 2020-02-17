@@ -13,8 +13,16 @@ describe('CreatePod task unit tests', () => {
 			const kubernetesAPIMock = {
 				createPod: jest.fn().mockRejectedValue(new Error('Error!!!')),
 			};
-			const taskDef = {};
-			const task = new CreatePodTask(_.noop(), kubernetesAPIMock, logger);
+			const taskDef = {
+				metadata: {
+					reName: 'runtime'
+				}
+			};
+			const task = new CreatePodTask(_.noop(), {
+				'runtime': {
+					kubernetesAPI: kubernetesAPIMock,
+				},
+			}, logger);
 			return expect(task.run(taskDef)).rejects.toThrowError('Failed to run task CreatePod: Error!!!');
 		});
 	});
@@ -28,9 +36,16 @@ describe('CreatePod task unit tests', () => {
 				createPod: spy,
 			};
 			const taskDef = {
+				metadata: {
+					reName: 'runtime'
+				},
 				spec: {}
 			};
-			const task = new CreatePodTask(_.noop(), kubernetesAPIMock, logger);
+			const task = new CreatePodTask(_.noop(), {
+				'runtime': {
+					kubernetesAPI: kubernetesAPIMock,
+				},
+			}, logger);
 			return task.run(taskDef)
 				.then(() => {
 					const loggerMacher = expect.objectContaining({
@@ -55,10 +70,15 @@ describe('CreatePod task unit tests', () => {
 				createPod: spy,
 			};
 			const taskDef = {
-				runtime: {},
-				dockerDaemon: {},
+				metadata: {
+					reName: 'runtime'
+				},
 			};
-			const task = new CreatePodTask(_.noop(), kubernetesAPIMock, logger);
+			const task = new CreatePodTask(_.noop(), {
+				'runtime': {
+					kubernetesAPI: kubernetesAPIMock,
+				},
+			}, logger);
 			return expect(task.run(taskDef)).resolves.toEqual(spyResult);
 		});
 	});

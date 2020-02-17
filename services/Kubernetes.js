@@ -1,6 +1,5 @@
-const { Client, config } = require('kubernetes-client');
+const { Client } = require('kubernetes-client');
 const utils = require('./../utils');
-const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('lodash');
 
@@ -19,105 +18,37 @@ const ERROR_MESSAGES = {
 };
 
 class Kubernetes {
-	constructor(metadata, agentClient, runtimes = {}) {
+	constructor(metadata, client) {
 		this.metadata = metadata;
-		this.agentClient = agentClient;
-		this.runtimes = runtimes;
+		this.client = client;
 	}
 
 	static parseRuntimesFromVenonaConf(venonaConf, encoding) {
 		let buff = new Buffer(venonaConf, encoding);
 		return _.get(yaml.safeLoad(buff.toString()), 'Runtimes');
 	}
-	
-	static async buildFromInCluster(metadata) {
-		const client = new Client({ config: config.getInCluster() });
-		let venonaConf = await Kubernetes.readFromVenonaConfPath(metadata.venonaConfPath);
-		
-		return new this(metadata, client,  Kubernetes.parseRuntimesFromVenonaConf(venonaConf));
-	}
 
 	static async buildFromConfig(metadata, options) {
 		const url = utils.getPropertyOrError(options, 'config.url', ERROR_MESSAGES.MISSING_KUBERNETES_URL);
 		const bearer = utils.getPropertyOrError(options, 'config.auth.bearer', ERROR_MESSAGES.MISSING_KUBERNETES_BEARER_TOKEN);
 		const ca = utils.getPropertyOrError(options, 'config.ca', ERROR_MESSAGES.MISSING_KUBERNETES_CA_CERTIFICATE);
-		const venonaConfPath = utils.getPropertyOrError(options, 'metadata.venonaConfPath', ERROR_MESSAGES.MISSING_VENONA_CONF);
 		const client = new Client({
 			config: {
 				url,
 				auth: {
-					bearer: Buffer.from(bearer, 'base64'),
+					bearer
 				},
-				ca: Buffer.from(ca, 'base64'),
+				ca
 			},
 		});
-		let venonaConf = await Kubernetes.readFromVenonaConfPath(venonaConfPath);
-		return new this(metadata, client, Kubernetes.parseRuntimesFromVenonaConf(venonaConf, 'base64') );
+		return new this(metadata, client);
 	}
 
-	static async readFromVenonaConfPath(venonaConfPath) {
-		let venonaConf = '';
-		const isVenonaConfExist = await new Promise((resolve) => {
-			fs.access(venonaConfPath, (err) => {
-				if (err) {
-					resolve(false);
-				} else {
-					resolve(true);
-				}
-			});
-		});
-		if (isVenonaConfExist) {
-			venonaConf = await new Promise((resolve, reject) => {
-				fs.readFile(venonaConfPath, (err, data) => {
-					if (err) {
-						reject(err);
-					}else {
-						resolve(data);
-					}
-				});
-			});
-		}
-		return venonaConf;
-	}
 
 	async getClient(runtimeName) {
 		const client = await this._getClient(runtimeName);
 		return client;
 		
-	}
-	_getClient(runtimeName) {
-		if (!this.runtimes[runtimeName]) {
-			throw new Error(`runtime ${runtimeName} is not found`);
-		}
-		const runtimeConfig = this.runtimes[runtimeName];
-		if (!runtimeConfig.client) 
-		{
-			if (runtimeConfig.worker) {
-				return runtimeConfig.worker;
-			}
-			const worker = new Promise(async (resolve, reject) => {
-				const client = new Client({
-					config: {
-						url: runtimeConfig.Host,
-						auth: {
-							bearer: runtimeConfig.Token,
-						},
-						ca: runtimeConfig.Crt,
-					},
-				});
-				client.loadSpec().then(() => {
-					delete runtimeConfig.worker;
-					runtimeConfig.client = client;
-					resolve(runtimeConfig.client);
-				}).catch(reject);
-				
-
-			});
-			runtimeConfig.worker = worker;
-			return worker;
-			
-		}
-		return Promise.resolve(runtimeConfig.client);
 	}
 
 	async init() {
@@ -129,10 +60,9 @@ class Kubernetes {
 		}
 	}
 
-	async createPod(logger, spec, runtime) {
+	async createPod(logger, spec) {
 		try {
-			const client = await this.getClient(runtime);
-			await client.api.v1.namespaces(spec.metadata.namespace).pod.post({ body: spec });
+			await this.client.api.v1.namespaces(spec.metadata.namespace).pod.post({ body: spec });
 			logger.info('Pod created');
 			return Promise.resolve();
 		} catch (err) {
@@ -140,10 +70,9 @@ class Kubernetes {
 		}
 	}
 
-	async deletePod(logger, namespace, name, runtime) {
+	async deletePod(logger, namespace, name) {
 		try {
-			const client = await this.getClient(runtime);
-			await client.api.v1.namespaces(namespace).pod(name).delete();
+			await this.client.api.v1.namespaces(namespace).pod(name).delete();
 			logger.info('Pod deleted');
 			return Promise.resolve();
 		} catch (err) {
@@ -151,10 +80,9 @@ class Kubernetes {
 		}
 	}
 
-	async createPvc(logger, spec, runtime) {
+	async createPvc(logger, spec) {
 		try {
-			const client = await this.getClient(runtime);
-			await client.api.v1.namespaces(spec.metadata.namespace).persistentvolumeclaim.post({ body: spec });
+			await this.client.api.v1.namespaces(spec.metadata.namespace).persistentvolumeclaim.post({ body: spec });
 			logger.info('Pvc created');
 			return Promise.resolve();
 		} catch (err) {
@@ -162,10 +90,9 @@ class Kubernetes {
 		}
 	}
 
-	async deletePvc(logger, namespace, name, runtime) {
+	async deletePvc(logger, namespace, name) {
 		try {
-			const client = await this.getClient(runtime);
-			await client.api.v1.namespaces(namespace).persistentvolumeclaim(name).delete();
+			await this.client.api.v1.namespaces(namespace).persistentvolumeclaim(name).delete();
 			logger.info('Pvc deleted');
 			return Promise.resolve();
 		} catch (err) {
