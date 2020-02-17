@@ -26,7 +26,7 @@ type venonaConf struct {
 
 const (
 	runtimeAttachFilesPattern = ".*.runtime-attach.yaml"
-	runtimeSecretName = "venonaruntimes"
+	runtimeSecretName = "venonaconf"
 )
 
 func buildRuntimeConfig(opt *InstallOptions, v Values) (runtimeConfiguration, error) {

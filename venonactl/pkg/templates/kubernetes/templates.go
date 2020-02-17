@@ -227,7 +227,7 @@ kind: Deployment
 metadata:
   labels:
     app: {{ .AppName }}
-    version: {{ .Version }}
+    version: {{ .Version }} 
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 spec:
@@ -249,9 +249,9 @@ spec:
         version: {{ .Version }}
     spec:
       volumes:
-        - name: venonaruntimes
+        - name: venonaconf
           secret:
-            secretName: venonaruntimes
+            secretName: venonaconf
       serviceAccountName: {{ .AppName }}
       {{ if ne .NodeSelector "" }}
       nodeSelector:
@@ -280,9 +280,11 @@ spec:
           value: {{ .AppName }}
         - name: AGENT_ID
           value: {{ .AgentId }}
+        - name: VENONA_CONFIG_PATH
+          value: "/etc/secrets/venonaconf"
         image: {{ .Image.Name }}:{{ .Image.Tag }}
         volumeMounts:
-        - name: venonaruntimes
+        - name: venonaconf
           mountPath: "/etc/secrets"
           readOnly: true
         imagePullPolicy: Always
@@ -363,7 +365,7 @@ templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: {{ .AppName }}runtimes
+  name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
 data:
   venonaconf: {{ .venonaConf}}` 
@@ -411,11 +413,11 @@ parameters:
   volumeBackend: local
 ` 
 
-templatesMap["venonaruntimes.secret.venona.yaml"] = `apiVersion: v1
+templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: {{ .AppName }}runtimes
+  name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
 data:
   venonaconf: {{ .venonaConf}}` 
