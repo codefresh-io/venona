@@ -19,6 +19,7 @@ const buildTestConfig = () => ({
 		name: 'agent',
 		version: '1.0',
 		mode: 'mode',
+		venonaConfPath: '/path/to/venona/config'
 	},
 	server: {
 		port: '9000',
@@ -68,7 +69,7 @@ beforeEach(() => {
 });
 
 describe('Agent unit test', () => {
-	describe.skip('Constructing new Agent', () => {
+	describe('Constructing new Agent', () => {
 
 		describe('positive', () => {
 			it('Should construct successfully', () => {
@@ -226,6 +227,12 @@ describe('Agent unit test', () => {
 				}));
 				return expect(new Agent(buildTestConfig()).init()).rejects.toThrow('Failed to initialize agent with error message');
 			});
+
+			it.skip('Should fail to init in case there is no access to given metadata.venonaConfPath', () => {});
+			it.skip('Should fail to init in case failed to read metadata.venonaConfPath file', () => {});
+			it.skip('Should fail to init in case metadata.venonaConfPath data is not matched to schema', () => {});
+			
+			it.skip('Should fail to init in case failed to init one of the Kubernetes services for one of the given runtimes', () => {});
 		});
 
 	});

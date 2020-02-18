@@ -18,17 +18,14 @@ const ERROR_MESSAGES = {
 };
 
 class Kubernetes {
+	// Do not use this constructor, use Kubernetes.buildFromConfig
+	// to create new instance
 	constructor(metadata, client) {
 		this.metadata = metadata;
 		this.client = client;
 	}
 
-	static parseRuntimesFromVenonaConf(venonaConf, encoding) {
-		let buff = new Buffer(venonaConf, encoding);
-		return _.get(yaml.safeLoad(buff.toString()), 'Runtimes');
-	}
-
-	static async buildFromConfig(metadata, options) {
+	static buildFromConfig(metadata, options) {
 		const url = utils.getPropertyOrError(options, 'config.url', ERROR_MESSAGES.MISSING_KUBERNETES_URL);
 		const bearer = utils.getPropertyOrError(options, 'config.auth.bearer', ERROR_MESSAGES.MISSING_KUBERNETES_BEARER_TOKEN);
 		const ca = utils.getPropertyOrError(options, 'config.ca', ERROR_MESSAGES.MISSING_KUBERNETES_CA_CERTIFICATE);
@@ -53,7 +50,7 @@ class Kubernetes {
 
 	async init() {
 		try {
-			await this.agentClient.loadSpec();
+			await this.client.loadSpec();
 			return Promise.resolve();
 		} catch (err) {
 			throw new Error(`${ERROR_MESSAGES.FAILED_TO_INIT} with error: ${err.message}`);

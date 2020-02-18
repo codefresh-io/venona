@@ -19,30 +19,6 @@ const ERROR_MESSAGES = {
 
 class Agent {
 
-	_onEmptyQueue() {
-		this.logger.info('Queue is empty');
-	}
-
-	_queueRunner(job = { run: Promise }, cb) {
-		this.logger.info(`Running job: ${job.constructor.name}`);
-		Promise.resolve()
-			.then(() => job.exec())
-			.then(() => cb(), cb);
-	}
-
-	async _loadJobs() {
-		const ignorePaths = [(file, stats) => {
-
-			return !(new RegExp(/.*job.js/g).test(file)) && !stats.isDirectory();
-		}];
-		return Promise
-			.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
-			.map(require)
-			.map(Job => this._startJob(Job));
-	}
-
-
-
 	async init(config = {}) {
 		try {
 			this.logger = Logger.create(config.metadata, config.logger);
@@ -53,8 +29,8 @@ class Agent {
 			this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
 
 			this.logger.info(`Reading Venona config file from: ${config.metadata.venonaConfPath}`);
-			const cnf = await Agent.readFromVenonaConfPath(config.metadata.venonaConfPath);
-			this.runtimes = Agent.parseRuntimesFromVenonaConf(cnf);
+			const cnf = await this._readFromVenonaConfPath(config.metadata.venonaConfPath);
+			this.runtimes = this._parseRuntimesFromVenonaConf(cnf);
 
 			await Promise.all(_.map(this.runtimes, async (runtimecnf, name) => {
 				this.logger.info(`Initializing Kubernetes client for runtime: ${name}`);
@@ -87,11 +63,34 @@ class Agent {
 		}
 	}
 
-	static async readFromVenonaConfPath(venonaConfPath) {
+	_onEmptyQueue() {
+		this.logger.info('Queue is empty');
+	}
+
+	_queueRunner(job = { run: Promise }, cb) {
+		this.logger.info(`Running job: ${job.constructor.name}`);
+		Promise.resolve()
+			.then(() => job.exec())
+			.then(() => cb(), cb);
+	}
+
+	async _loadJobs() {
+		const ignorePaths = [(file, stats) => {
+
+			return !(new RegExp(/.*job.js/g).test(file)) && !stats.isDirectory();
+		}];
+		return Promise
+			.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
+			.map(require)
+			.map(Job => this._startJob(Job));
+	}
+
+	async _readFromVenonaConfPath(path) {
 		let venonaConf = '';
 		const isVenonaConfExist = await new Promise((resolve) => {
-			fs.access(venonaConfPath, (err) => {
+			fs.access(path, (err) => {
 				if (err) {
+					// TODO:  print the error
 					resolve(false);
 				} else {
 					resolve(true);
@@ -100,7 +99,7 @@ class Agent {
 		});
 		if (isVenonaConfExist) {
 			venonaConf = await new Promise((resolve, reject) => {
-				fs.readFile(venonaConfPath, (err, data) => {
+				fs.readFile(path, (err, data) => {
 					if (err) {
 						reject(err);
 					}else {
@@ -113,7 +112,7 @@ class Agent {
 	}
 	
 
-	static parseRuntimesFromVenonaConf(venonaConf, encoding) {
+	_parseRuntimesFromVenonaConf(venonaConf, encoding) {
 		let buff = new Buffer(venonaConf, encoding);
 		return _.get(yaml.safeLoad(buff.toString()), 'Runtimes');
 	}
