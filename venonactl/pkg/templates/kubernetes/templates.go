@@ -280,7 +280,7 @@ spec:
         - name: AGENT_ID
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
-          value: "/etc/secrets/venonaconf"
+          value: "/etc/secrets"
         image: {{ .Image.Name }}:{{ .Image.Tag }}
         volumeMounts:
         - name: venonaconf
