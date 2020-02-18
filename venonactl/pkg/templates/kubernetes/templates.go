@@ -264,7 +264,7 @@ spec:
       {{ if ne .Tolerations "" }}
       tolerations:
         {{ .Tolerations | indent 8 }}
-      {{ end }} 
+      {{ end }}
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME
@@ -341,7 +341,7 @@ spec:
 
 `
 
-templatesMap["role-binding.re.yaml"] = `kind: RoleBinding
+	templatesMap["role-binding.re.yaml"] = `kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -355,7 +355,7 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
-templatesMap["role.re.yaml"] = `kind: Role
+	templatesMap["role.re.yaml"] = `kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -366,7 +366,7 @@ rules:
   verbs: ["get", "create", "delete"]
 `
 
-templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
+	templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -375,9 +375,9 @@ metadata:
 data:
 {{ range $key, $value := .venonaConf }}
   {{ $key }}: {{ $value }}
-{{ end }}` 
+{{ end }}`
 
-templatesMap["secret.venona.yaml"] = `apiVersion: v1
+	templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -402,7 +402,7 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
-templatesMap["service-account.re.yaml"] = `apiVersion: v1
+	templatesMap["service-account.re.yaml"] = `apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
@@ -420,7 +420,7 @@ parameters:
   volumeBackend: local
 `
 
-templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
+	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -429,7 +429,7 @@ metadata:
 data:
 {{ range $key, $value := .venonaConf }}
   {{ $key }}: {{ $value }}
-{{ end }}` 
+{{ end }}`
 
-    return  templatesMap
+	return templatesMap
 }
