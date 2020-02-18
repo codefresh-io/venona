@@ -5,65 +5,63 @@ import (
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
-	"sigs.k8s.io/yaml"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 type runtimeAttachPlugin struct {
 	logger logger.Logger
 }
 
-type runtimeConfiguration struct {
-	Crt string `yaml:"crt"`
+type RuntimeConfiguration struct {
+	Crt   string `yaml:"crt"`
 	Token string `yaml:"token"`
-	Host string `yaml:"host"`
+	Host  string `yaml:"host"`
 }
 
 type venonaConf struct {
-	Runtimes map[string] runtimeConfiguration `yaml:"runtimes,omitempty"`
+	Runtimes map[string]RuntimeConfiguration `yaml:"runtimes,omitempty"`
 }
 
 const (
 	runtimeAttachFilesPattern = ".*.runtime-attach.yaml"
-	runtimeSecretName = "venonaconf"
+	runtimeSecretName         = "venonaconf"
 )
 
-func buildRuntimeConfig(opt *InstallOptions, v Values) (runtimeConfiguration, error) {
-	
+func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
+
 	config, err := opt.KubeBuilder.BuildConfig().ClientConfig()
 	if err != nil {
-		return runtimeConfiguration{}, fmt.Errorf("Failed to get client config on runtime cluster: %v", err)
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to get client config on runtime cluster: %v", err)
 	}
-	
+
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
-		return runtimeConfiguration{}, fmt.Errorf("Failed to create client on runtime cluster: %v", err)
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to create client on runtime cluster: %v", err)
 	}
 
 	// get default service account for the namespace
 	var getOpt metav1.GetOptions
 	sa, err := cs.CoreV1().ServiceAccounts(opt.RuntimeClusterName).Get(opt.RuntimeServiceAccount, getOpt)
 	if err != nil {
-		return runtimeConfiguration{}, fmt.Errorf("Failed to read service account runtime cluster: %v", err)
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to read service account runtime cluster: %v", err)
 	}
 
 	secretRef := sa.Secrets[0]
 	secret, err := cs.CoreV1().Secrets(opt.RuntimeClusterName).Get(secretRef.Name, getOpt)
 	if err != nil {
-		return runtimeConfiguration{}, fmt.Errorf("Failed to get secret from service account on runtime cluster: %v", err)
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret from service account on runtime cluster: %v", err)
 	}
 
 	crt := secret.Data["ca.crt"]
 	token := secret.Data["token"]
 
-	rc := runtimeConfiguration{
-		Crt: string(crt),
+	rc := RuntimeConfiguration{
+		Crt:   string(crt),
 		Token: string(token),
-		Host: config.Host,
-
+		Host:  config.Host,
 	}
-
 
 	return rc, nil
 }
@@ -75,7 +73,7 @@ func readCurrentVenonaConf(opt *InstallOptions) (venonaConf, error) {
 		return venonaConf{}, fmt.Errorf("Failed to create client on venona cluster: %v", err)
 	}
 	secret, err := cs.CoreV1().Secrets(opt.ClusterNamespace).Get(runtimeSecretName, metav1.GetOptions{})
-	
+
 	conf := &venonaConf{}
 	err = yaml.Unmarshal(secret.Data["venonaconf"], &conf)
 	if err != nil {
@@ -85,8 +83,6 @@ func readCurrentVenonaConf(opt *InstallOptions) (venonaConf, error) {
 		return venonaConf{}, nil
 	}
 	return *conf, nil
-	
-	
 
 }
 
@@ -110,7 +106,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		return nil, err
 	}
 	if currentVenonaConf.Runtimes == nil {
-		currentVenonaConf.Runtimes = make(map[string]runtimeConfiguration)
+		currentVenonaConf.Runtimes = make(map[string]RuntimeConfiguration)
 	}
 	currentVenonaConf.Runtimes[opt.RuntimeEnvironment] = rc
 
@@ -120,7 +116,6 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
 		return nil, err
 	}
-
 
 	v["venonaConf"] = base64.StdEncoding.EncodeToString([]byte(d))
 

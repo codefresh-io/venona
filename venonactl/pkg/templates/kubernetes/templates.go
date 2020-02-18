@@ -337,7 +337,7 @@ spec:
 
 ` 
 
-templatesMap["role-binding.venona.yaml"] = `kind: RoleBinding
+templatesMap["role-binding.re.yaml"] = `kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -350,7 +350,7 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io` 
 
-templatesMap["role.venona.yaml"] = `kind: Role
+templatesMap["role.re.yaml"] = `kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -395,7 +395,7 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}` 
 
-templatesMap["service-account.venona.yaml"] = `apiVersion: v1
+templatesMap["service-account.re.yaml"] = `apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}

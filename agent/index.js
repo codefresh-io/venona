@@ -28,24 +28,38 @@ class Agent {
 			}));
 			this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
 
-			this.logger.info(`Reading Venona config file from: ${config.metadata.venonaConfPath}`);
-			const cnf = await this._readFromVenonaConfPath(config.metadata.venonaConfPath);
-			this.runtimes = this._parseRuntimesFromVenonaConf(cnf);
+			this.logger.info(`Reading Venona config file directory: ${config.metadata.venonaConfDir}`);
+			const cnf = await this._readFromVenonaConfDir(config.metadata.venonaConfDir);
+			this.runtimes = {};
+			_.map(cnf, (runtimecnf) => {
+				if (this.runtimes[runtimecnf.name]) {
+					this.logger.error(`Duplication error, runtime name: ${runtimecnf.name} already been configured`);
+				}
+				this.runtimes[runtimecnf.name] = {
+					spec: _.omit(runtimecnf, 'name'),
+				};
+			});
 
-			await Promise.all(_.map(this.runtimes, async (runtimecnf, name) => {
+			await Promise.all(_.map(this.runtimes, async (runtime, name) => {
 				this.logger.info(`Initializing Kubernetes client for runtime: ${name}`);
 				const opt = {
 					config: {
-						url: runtimecnf.Host,
+						url: runtime.spec.host,
 						auth: {
-							bearer: runtimecnf.Token
+							bearer: runtime.spec.token
 						},
-						ca: runtimecnf.Crt
+						ca: runtime.spec.crt
 					},
 				};
 				const client = Kubernetes.buildFromConfig(config.metadata, opt);
-				await client.init();
-				this.runtimes[name].kubernetesAPI = client;
+				try {
+					await client.init();
+					runtime.kubernetesAPI = client;
+					this.logger.info(`Runtime ${name} was loaded successfuly`);
+				} catch(err) {
+					this.logger.error(`Failed to initiate runtime: ${name}, error: ${err.message}`);
+					runtime.metadata.error = err.message;
+				}
 			}));
 			this.jobs = config.jobs;
 			this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
@@ -76,7 +90,6 @@ class Agent {
 
 	async _loadJobs() {
 		const ignorePaths = [(file, stats) => {
-
 			return !(new RegExp(/.*job.js/g).test(file)) && !stats.isDirectory();
 		}];
 		return Promise
@@ -85,17 +98,28 @@ class Agent {
 			.map(Job => this._startJob(Job));
 	}
 
-	async _readFromVenonaConfPath(path) {
-		await Promise.fromCallback(cb => fs.access(path, cb));
-		const venonaConf = await Promise.fromCallback(cb => fs.readFile(path, cb));
-		return venonaConf;
+	async _readFromVenonaConfDir(dir) {
+		const runtimeRegexp = /.*\.runtime\.yaml/;
+		const data = await Promise.fromCallback(cb => fs.readdir(dir, cb));
+		const runtimes = await Promise.all(_.map(data, async(f) => {
+			const fullPath = path.join(dir, f);
+			const stat = await Promise.fromCallback(cb => fs.stat(fullPath, cb));
+			if (stat.isDirectory()) {
+				this.logger.warn(`Directory ${f} ignored, Venona loading only files that are mached to regexp ${runtimeRegexp.toString()}`);
+				return Promise.resolve();
+			}
+			if (runtimeRegexp.test(f)) {
+				await Promise.fromCallback(cb => fs.access(fullPath, cb));
+				const venonaConf = await Promise.fromCallback(cb => fs.readFile(fullPath, cb));
+				return yaml.safeLoad(venonaConf.toString());
+			} else {
+				this.logger.warn(`File ${f} ignored, Venona loading only files that are mached to regexp ${runtimeRegexp.toString()}`);
+				return Promise.resolve();
+			}
+		}));
+		return _.compact(runtimes);
 	}
-	
 
-	_parseRuntimesFromVenonaConf(venonaConf, encoding) {
-		let buff = new Buffer(venonaConf, encoding);
-		return _.get(yaml.safeLoad(buff.toString()), 'Runtimes');
-	}
 
 	_startJob(Job) {
 		const cron = _.get(this, `jobs.${Job.name}.cronExpression`, this.jobs.DEFAULT_CRON);

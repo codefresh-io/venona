@@ -6,9 +6,8 @@ function build() {
 	return {
 		metadata: {
 			version,
-			mode: process.env.AGENT_MODE,
 			id: process.env.AGENT_ID,
-			venonaConfPath: process.env.VENONA_CONFIG_PATH,
+			venonaConfDir: process.env.VENONA_CONFIG_DIR,
 		},
 		logger: {
 			...(!process.env.LOGGER_MODE && {
