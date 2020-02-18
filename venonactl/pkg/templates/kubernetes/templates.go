@@ -345,6 +345,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .AppName }}
+  namespace: {{ .Namespace }}
 roleRef:
   kind: Role
   name: {{ .AppName }}
@@ -368,7 +369,9 @@ metadata:
   name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
 data:
-  venonaconf: {{ .venonaConf}}` 
+{{ range $key, $value := .venonaConf }}
+  {{ $key }}: {{ $value }}
+{{ end }}` 
 
 templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret

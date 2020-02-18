@@ -74,13 +74,15 @@ func readCurrentVenonaConf(opt *InstallOptions) (venonaConf, error) {
 	}
 	secret, err := cs.CoreV1().Secrets(opt.ClusterNamespace).Get(runtimeSecretName, metav1.GetOptions{})
 
-	conf := &venonaConf{}
-	err = yaml.Unmarshal(secret.Data["venonaconf"], &conf)
-	if err != nil {
-		return venonaConf{}, fmt.Errorf("Failed to unmarshal secret  cluster: %v", err)
+	conf := &venonaConf{
+		Runtimes: make(map[string]RuntimeConfiguration),
 	}
-	if conf == nil {
-		return venonaConf{}, nil
+	for k, v := range secret.Data {
+		cnf := RuntimeConfiguration{}
+		if err := yaml.Unmarshal(v, &cnf); err != nil {
+			return venonaConf{}, fmt.Errorf("Failed to unmarshal yaml with error: %s", err.Error())
+		}
+		conf.Runtimes[k] = cnf
 	}
 	return *conf, nil
 
