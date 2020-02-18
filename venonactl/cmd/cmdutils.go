@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"k8s.io/client-go/tools/clientcmd"
+	k8sApi "k8s.io/api/core/v1"
 )
 
 var (
@@ -198,29 +199,28 @@ func parseNodeSelector(s string) (nodeSelector, error) {
 	}
 	return nodeSelector{v[0]: v[1]}, nil
 }
-type toleration struct {
-	Key      string  `json:key`
-    Operator string  `json:operator`
-    Effect   string  `json:effect`
-} 
 
-func getTolerationFromPath(s string) (string, error)  {
+func loadTolerationsFromFile(filename string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		dieOnError(err)
+	}
+
+	return string(data)
+}
+
+func parseTolerations(s string) (string, error) {
 	if s == "" {
 		return "", nil
 	}
-	rawData, err := ioutil.ReadFile(s)
+	var data []k8sApi.Toleration
+	err := json.Unmarshal([]byte(s), &data)
 	if err != nil {
-		return "", err
-	}
-
-	data := []toleration{}
-	err = json.Unmarshal([]byte(rawData), &data);
-	if (err != nil) {
-		return "", errors.New("can not parse tolerations")
+		return "", fmt.Errorf("can not parse tolerations: %s", err)
 	}
 	y, err := yaml.Marshal(&data)
-	if (err != nil) {
-		return "", errors.New("can not marshel tolerations to yaml")
+	if err != nil {
+		return "", fmt.Errorf("can not marshel tolerations to yaml: %s", err)
 	}
 	d := fmt.Sprintf("\n%s", string(y))
 	return d, nil

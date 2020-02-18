@@ -36,6 +36,7 @@ var installRuntimeCmdOptions struct {
 	storageClass           string
 	runtimeEnvironmentName string
 	kubernetesRunnerType   bool
+	tolerations            string
 	
 }
 
@@ -59,6 +60,23 @@ var installRuntimeCmd = &cobra.Command{
 		// This is temporarily and used for signing
 		s.CodefreshAPI = &store.CodefreshAPI{
 			Host: cfAPIHost,
+		}
+
+		if installRuntimeCmdOptions.tolerations != "" {
+			var tolerationsString string
+
+			if installRuntimeCmdOptions.tolerations[0] == '@' {
+				tolerationsString = loadTolerationsFromFile(installRuntimeCmdOptions.tolerations[1:])
+			} else {
+				tolerationsString = installRuntimeCmdOptions.tolerations
+			}
+
+			tolerations, err := parseTolerations(tolerationsString)
+			if err != nil {
+				dieOnError(err)
+			}
+
+			s.KubernetesAPI.Tolerations = tolerations
 		}
 
 		builder := plugins.NewBuilder(lgr)
@@ -129,5 +147,7 @@ func init() {
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
+
 
 }

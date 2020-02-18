@@ -27,6 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DeletionError is..
 type DeletionError struct {
 	err       error
 	operation string

@@ -98,13 +98,10 @@ var installVenonaCmd = &cobra.Command{
 		}
 		s.KubernetesAPI.NodeSelector = kns.String()
 
-		tolerations, err := getTolerationFromPath(installCmdOptions.tolerationJSONString)
 		if err != nil {
 			dieOnError(err)
 		}
-		if tolerations != "" {
-			s.KubernetesAPI.Tolerations = tolerations
-		}
+
 
 		if installCmdOptions.dryRun {
 			s.DryRun = installCmdOptions.dryRun

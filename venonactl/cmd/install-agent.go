@@ -40,7 +40,7 @@ var installAgentCmdOptions struct {
 	agentToken                    string
 	agentID                       string
 	kubernetesRunnerType          bool
-	tolerationJSONString          string
+	tolerations                   string
 }
 
 var installAgentCmd = &cobra.Command{
@@ -72,11 +72,20 @@ var installAgentCmd = &cobra.Command{
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
 
-		tolerations, err := getTolerationFromPath(installAgentCmdOptions.tolerationJSONString)
-		if err != nil {
-			dieOnError(err)
-		}
-		if tolerations != "" {
+		if installAgentCmdOptions.tolerations != "" {
+			var tolerationsString string
+
+			if installAgentCmdOptions.tolerations[0] == '@' {
+				tolerationsString = loadTolerationsFromFile(installAgentCmdOptions.tolerations[1:])
+			} else {
+				tolerationsString = installAgentCmdOptions.tolerations
+			}
+
+			tolerations, err := parseTolerations(tolerationsString)
+			if err != nil {
+				dieOnError(err)
+			}
+
 			s.KubernetesAPI.Tolerations = tolerations
 		}
 
@@ -125,7 +134,7 @@ func init()  {
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
-	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.tolerationJSONString, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
+	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
