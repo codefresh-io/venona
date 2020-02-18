@@ -57,7 +57,7 @@ class Agent {
 			this.logger.info('All services has been initialized');
 			await this._loadJobs();
 		} catch(err) {
-			const message = `Failed to initialize agent with error message: ${err.message}`;
+			const message = `Failed to initialize agent with error, message: ${err.message}`;
 			this.logger.error(message);
 			throw new Error(message);
 		}
@@ -86,28 +86,8 @@ class Agent {
 	}
 
 	async _readFromVenonaConfPath(path) {
-		let venonaConf = '';
-		const isVenonaConfExist = await new Promise((resolve) => {
-			fs.access(path, (err) => {
-				if (err) {
-					// TODO:  print the error
-					resolve(false);
-				} else {
-					resolve(true);
-				}
-			});
-		});
-		if (isVenonaConfExist) {
-			venonaConf = await new Promise((resolve, reject) => {
-				fs.readFile(path, (err, data) => {
-					if (err) {
-						reject(err);
-					}else {
-						resolve(data);
-					}
-				});
-			});
-		}
+		await Promise.fromCallback(cb => fs.access(path, cb));
+		const venonaConf = await Promise.fromCallback(cb => fs.readFile(path, cb));
 		return venonaConf;
 	}
 	

@@ -1,7 +1,5 @@
 const { Client } = require('kubernetes-client');
 const utils = require('./../utils');
-const yaml = require('js-yaml');
-const _ = require('lodash');
 
 const ERROR_MESSAGES = {
 	MISSING_KUBERNETES_URL: 'Failed to construct Kubernetes API service, missing Kubernetes URL',

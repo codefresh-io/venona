@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Promise = require('bluebird');
 const scheduler = require('node-schedule');
+const fs = require('fs');
 const Agent = require('./../');
 const Codefresh = require('./../../services/Codefresh');
 const Kubernetes = require('./../../services/Kubernetes');
@@ -13,6 +14,7 @@ jest.mock('./../../services/Codefresh');
 jest.mock('./../../services/Kubernetes');
 jest.mock('./../../services/Logger');
 jest.mock('./../../server');
+jest.mock('fs');
 
 const buildTestConfig = () => ({
 	metadata: {
@@ -154,7 +156,7 @@ describe('Agent unit test', () => {
 	describe('Initializing agent', () => {
 
 		describe('positive', () => {
-			it.only('Should report all services been initialized', () => {
+			it('Should report all services been initialized', () => {
 				return new Agent()
 					.init(buildTestConfig())
 					.then(() => {
@@ -225,11 +227,23 @@ describe('Agent unit test', () => {
 				Server.mockImplementationOnce(() => ({
 					init: jest.fn().mockRejectedValue(new Error('Error!')),
 				}));
-				return expect(new Agent(buildTestConfig()).init()).rejects.toThrow('Failed to initialize agent with error message');
+				return expect(new Agent().init(buildTestConfig())).rejects.toThrow('Failed to initialize agent with error message');
 			});
 
-			it.skip('Should fail to init in case there is no access to given metadata.venonaConfPath', () => {});
-			it.skip('Should fail to init in case failed to read metadata.venonaConfPath file', () => {});
+			it.only('Should fail to init in case there is no access to given metadata.venonaConfPath', async () => {
+				fs.access.mockImplementationOnce((path, cb) => cb());
+				fs.readFile.mockImplementationOnce((path, cb) => cb(new Error('Failed to read file')));
+				
+				const agent = new Agent();
+				return expect(agent.init(buildTestConfig())).rejects.toThrow('Failed to initialize agent with error, message: Failed to load file: /path/to/venona/config, access denied');
+			});
+			it('Should fail to init in case failed to read metadata.venonaConfPath file', () => {
+				fs.access.mockImplementationOnce((path, cb) => {
+					cb(new Error(`Failed to load file: ${path}, access denied`));
+				});
+				const agent = new Agent();
+				return expect(agent.init(buildTestConfig())).rejects.toThrow('Failed to initialize agent with error, message: Failed to read file');
+			});
 			it.skip('Should fail to init in case metadata.venonaConfPath data is not matched to schema', () => {});
 			
 			it.skip('Should fail to init in case failed to init one of the Kubernetes services for one of the given runtimes', () => {});
