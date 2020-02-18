@@ -3,11 +3,12 @@ package plugins
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
+	"gopkg.in/yaml.v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/yaml"
 )
 
 type runtimeAttachPlugin struct {
@@ -18,6 +19,8 @@ type RuntimeConfiguration struct {
 	Crt   string `yaml:"crt"`
 	Token string `yaml:"token"`
 	Host  string `yaml:"host"`
+	Name  string `yaml:"name"`
+	Type  string `yaml:"type"`
 }
 
 type venonaConf struct {
@@ -61,6 +64,8 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 		Crt:   string(crt),
 		Token: string(token),
 		Host:  config.Host,
+		Name:  opt.RuntimeEnvironment,
+		Type:  "runtime",
 	}
 
 	return rc, nil
@@ -111,15 +116,20 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		currentVenonaConf.Runtimes = make(map[string]RuntimeConfiguration)
 	}
 	currentVenonaConf.Runtimes[opt.RuntimeEnvironment] = rc
+	runtimes := map[string]string{}
+	for name, runtime := range currentVenonaConf.Runtimes {
+		// marshel prior persist
+		d, err := yaml.Marshal(runtime)
+		if err != nil {
+			u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
+			return nil, err
+		}
 
-	// marshel prior persist
-	d, err := yaml.Marshal(&currentVenonaConf)
-	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
-		return nil, err
+		// normalize the key in the secret to make sure we are not violating kube naming conventions
+		name := strings.ReplaceAll(name, "/", ".")
+		runtimes[fmt.Sprintf("%s.runtime.yaml", name)] = base64.StdEncoding.EncodeToString([]byte(d))
 	}
-
-	v["venonaConf"] = base64.StdEncoding.EncodeToString([]byte(d))
+	v["venonaConf"] = runtimes
 
 	// TODO: High - make the secret deletation as a transaction (rename)
 

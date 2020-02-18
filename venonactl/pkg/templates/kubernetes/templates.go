@@ -252,7 +252,6 @@ spec:
         - name: venonaconf
           secret:
             secretName: venonaconf
-      serviceAccountName: {{ .AppName }}
       {{ if ne .NodeSelector "" }}
       nodeSelector:
         {{ .NodeSelector }}
@@ -280,7 +279,7 @@ spec:
           value: {{ .AppName }}
         - name: AGENT_ID
           value: {{ .AgentId }}
-        - name: VENONA_CONFIG_PATH
+        - name: VENONA_CONFIG_DIR
           value: "/etc/secrets/venonaconf"
         image: {{ .Image.Name }}:{{ .Image.Tag }}
         volumeMounts:
@@ -423,7 +422,9 @@ metadata:
   name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
 data:
-  venonaconf: {{ .venonaConf}}` 
+{{ range $key, $value := .venonaConf }}
+  {{ $key }}: {{ $value }}
+{{ end }}` 
 
     return  templatesMap
 }
