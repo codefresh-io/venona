@@ -13,8 +13,16 @@ describe('CreatePvc task unit tests', () => {
 			const kubernetesAPIMock = {
 				createPvc: jest.fn().mockRejectedValue(new Error('Error!!!')),
 			};
-			const taskDef = {};
-			const task = new CreatePvcTask(_.noop(), kubernetesAPIMock, logger);
+			const taskDef = {
+				metadata: {
+					reName: 'runtime'
+				}
+			};
+			const task = new CreatePvcTask(_.noop(), {
+				'runtime': {
+					kubernetesAPI: kubernetesAPIMock,
+				},
+			}, logger);
 			return expect(task.run(taskDef)).rejects.toThrowError('Failed to run task CreatePvc: Error!!!');
 		});
 
@@ -22,8 +30,16 @@ describe('CreatePvc task unit tests', () => {
 			it('should throw error in case the task in not valid', () => {
 				const logger = createLogger();
 				const kubernetesAPIMock = {};
-				const taskDef = {};
-				const task = new CreatePvcTask(_.noop(), kubernetesAPIMock, logger);
+				const taskDef = {
+					metadata: {
+						reName: 'runtime'
+					}
+				};
+				const task = new CreatePvcTask(_.noop(), {
+					'runtime': {
+						kubernetesAPI: kubernetesAPIMock,
+					},
+				}, logger);
 				return expect(task.validate(taskDef)).rejects.toThrowError('child "spec" fails because ["spec" is required]');
 			});
 		});
@@ -38,9 +54,16 @@ describe('CreatePvc task unit tests', () => {
 				createPvc: spy,
 			};
 			const taskDef = {
+				metadata: {
+					reName: 'runtime'
+				},
 				spec: {}
 			};
-			const task = new CreatePvcTask(_.noop(), kubernetesAPIMock, logger);
+			const task = new CreatePvcTask(_.noop(), {
+				'runtime': {
+					kubernetesAPI: kubernetesAPIMock,
+				},
+			}, logger);
 			return task.run(taskDef)
 				.then(() => {
 					const loggerMacher = expect.objectContaining({
@@ -65,10 +88,15 @@ describe('CreatePvc task unit tests', () => {
 				createPvc: spy,
 			};
 			const taskDef = {
-				runtime: {},
-				dockerDaemon: {},
+				metadata: {
+					reName: 'runtime'
+				}
 			};
-			const task = new CreatePvcTask(_.noop(), kubernetesAPIMock, logger);
+			const task = new CreatePvcTask(_.noop(), {
+				'runtime': {
+					kubernetesAPI: kubernetesAPIMock,
+				},
+			}, logger);
 			return expect(task.run(taskDef)).resolves.toEqual(spyResult);
 		});
 	});

@@ -10,7 +10,8 @@ class CreatePodTask extends Base {
 	async run(task) {
 		this.logger.info('Running CreatePod task');
 		try {
-			const pod = await this.kubernetesAPI.createPod(this.logger, task.spec, _.get(task, 'metadata.reName'));
+			const service = await this.getKubernetesService(_.get(task, 'metadata.reName'));
+			const pod = await service.createPod(this.logger, task.spec);
 			return pod;
 		} catch (err) {
 			const message = `${ERROR_MESSAGES.FAILED_TO_EXECUTE_TASK}: ${err.message}`;

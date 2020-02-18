@@ -10,7 +10,8 @@ class DeletePodTask extends Base {
 	async run(task) {
 		this.logger.info('Running DeletePod task');
 		try {
-			await this.kubernetesAPI.deletePod(this.logger, task.spec.namespace, task.spec.name, _.get(task, 'metadata.reName'));
+			const service = await this.getKubernetesService(_.get(task, 'metadata.reName'));
+			await service.deletePod(this.logger, task.spec.namespace, task.spec.name);
 		} catch (err) {
 			// we treat 404 as if the operation succeeded
 			if (_.get(err, 'code') !== 404) {

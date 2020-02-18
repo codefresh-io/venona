@@ -3,19 +3,65 @@ const Chance = require('chance');
 const scheduler = require('node-schedule');
 const path = require('path');
 const _ = require('lodash');
+const fs = require('fs');
+const yaml = require('js-yaml');
 const Queue = require('async/priorityQueue');
 const recursive = require('recursive-readdir');
 const Codefresh = require('./../services/Codefresh');
 const Kubernetes = require('./../services/Kubernetes');
 const Logger = require('./../services/Logger');
 const { Server } = require('./../server');
-const { LOGGER_NAMESPACES, AGENT_MODES } = require('./../constants');
+const { LOGGER_NAMESPACES } = require('./../constants');
 
 
 const ERROR_MESSAGES = {
 };
 
 class Agent {
+
+	async init(config = {}) {
+		try {
+			this.logger = Logger.create(config.metadata, config.logger);
+			this.logger.info('Initializing agent');
+			this.server = new Server(config.metadata, config.server, this.logger.child({
+				namespace: LOGGER_NAMESPACES.SERVER,
+			}));
+			this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
+
+			this.logger.info(`Reading Venona config file from: ${config.metadata.venonaConfPath}`);
+			const cnf = await this._readFromVenonaConfPath(config.metadata.venonaConfPath);
+			this.runtimes = this._parseRuntimesFromVenonaConf(cnf);
+
+			await Promise.all(_.map(this.runtimes, async (runtimecnf, name) => {
+				this.logger.info(`Initializing Kubernetes client for runtime: ${name}`);
+				const opt = {
+					config: {
+						url: runtimecnf.Host,
+						auth: {
+							bearer: runtimecnf.Token
+						},
+						ca: runtimecnf.Crt
+					},
+				};
+				const client = Kubernetes.buildFromConfig(config.metadata, opt);
+				await client.init();
+				this.runtimes[name].kubernetesAPI = client;
+			}));
+			this.jobs = config.jobs;
+			this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
+			this.queue.drain = this._onEmptyQueue.bind(this);
+			await Promise.all([
+				this.server.init(),
+				this.codefreshAPI.init(),
+			]);
+			this.logger.info('All services has been initialized');
+			await this._loadJobs();
+		} catch(err) {
+			const message = `Failed to initialize agent with error, message: ${err.message}`;
+			this.logger.error(message);
+			throw new Error(message);
+		}
+	}
 
 	_onEmptyQueue() {
 		this.logger.info('Queue is empty');
@@ -39,35 +85,16 @@ class Agent {
 			.map(Job => this._startJob(Job));
 	}
 
+	async _readFromVenonaConfPath(path) {
+		await Promise.fromCallback(cb => fs.access(path, cb));
+		const venonaConf = await Promise.fromCallback(cb => fs.readFile(path, cb));
+		return venonaConf;
+	}
+	
 
-
-	async init(config = {}) {
-		try {
-			// this.logger.info('Initializing agent');
-			this.logger = Logger.create(config.metadata, config.logger);
-			this.logger.info('Starting agent');
-			this.server = new Server(config.metadata, config.server, this.logger.child({
-				namespace: LOGGER_NAMESPACES.SERVER,
-			}));
-			this.codefreshAPI = new Codefresh(config.metadata, config.codefresh);
-			this.kubernetesAPI = config.metadata.mode === AGENT_MODES.IN_CLUSTER
-				? await Kubernetes.buildFromInCluster(config.metadata)
-				: await Kubernetes.buildFromConfig(config.metadata, config.kubernetes);
-			this.jobs = config.jobs;
-			this.queue = Queue(this._queueRunner.bind(this), config.jobs.queue.concurrency);
-			this.queue.drain = this._onEmptyQueue.bind(this);
-			await Promise.all([
-				this.server.init(),
-				this.codefreshAPI.init(),
-				this.kubernetesAPI.init(),
-			]);
-			this.logger.info('All services has been initialized');
-			await this._loadJobs();
-		} catch(err) {
-			const message = `Failed to initialize agent with error message: ${err.message}`;
-			this.logger.error(message);
-			throw new Error(message);
-		}
+	_parseRuntimesFromVenonaConf(venonaConf, encoding) {
+		let buff = new Buffer(venonaConf, encoding);
+		return _.get(yaml.safeLoad(buff.toString()), 'Runtimes');
 	}
 
 	_startJob(Job) {
@@ -79,7 +106,7 @@ class Agent {
 				job: Job.name,
 				uid: new Chance().guid(),
 			});
-			const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
+			const job = new Job(this.codefreshAPI, this.runtimes, taskLogger);
 			this.logger.info(`Pushing job: ${Job.name} to queue`);
 			this.queue.push(job, 1, this._handleJobError(job));
 		});

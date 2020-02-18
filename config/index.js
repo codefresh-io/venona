@@ -22,13 +22,6 @@ function build() {
 			port: process.env.PORT || '9000',
 		},
 		kubernetes: {
-			config: {
-				url: process.env.KUBERNETES_HOST,
-				auth: {
-					bearer: process.env.KUBERNETES_AUTH_BEARER_TOKEN,
-				},
-				ca: process.env.KUBERNETES_CA_CERT,
-			},
 			metadata: {
 				name: process.env.SELF_POD_NAME,
 				namespace: process.env.SELF_POD_NAMESPACE

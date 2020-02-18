@@ -9,12 +9,10 @@ describe('BaseJob unit tests', () => {
 	describe('positive', () => {
 		it('Should construct', () => {
 			const task = new BaseJob(_.noop(), _.noop(), createLogger());
-			expect(Object.keys(task).sort()).toEqual(['codefreshAPI', 'kubernetesAPI', 'logger'].sort());
+			expect(Object.keys(task).sort()).toEqual(['codefreshAPI', 'runtimes', 'logger'].sort());
 		});
-	});
 
-	describe('negative', () => {
-
+		it.skip('Should throw an error in case the requested runtime is not set on this.runtimes', () => {});
 	});
 
 });

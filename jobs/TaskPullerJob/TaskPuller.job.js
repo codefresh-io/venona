@@ -48,7 +48,7 @@ class TaskPullerJob extends Base {
 				task: Task.name,
 				taskUid: new Chance().guid()
 			});
-			const task = new Task(this.codefreshAPI, this.kubernetesAPI, logger);
+			const task = new Task(this.codefreshAPI, this.runtimes, logger);
 			return task.exec(taskSpec);
 		};
 	}
