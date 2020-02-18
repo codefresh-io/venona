@@ -26,8 +26,7 @@ import (
 )
 
 var installRuntimeCmdOptions struct {
-	agentID string
-	agentToken string
+	codefreshToken string
 	dryRun bool
 	kube   struct {
 		namespace string
@@ -48,7 +47,7 @@ var installRuntimeCmd = &cobra.Command{
 		s := store.GetStore()
 		lgr := createLogger("Install-runtime", verbose)
 		buildBasicStore(lgr)
-		extendStoreWithAgentAPI(lgr, installRuntimeCmdOptions.agentToken, installRuntimeCmdOptions.agentID)
+		extendStoreWithAgentAPI(lgr, installRuntimeCmdOptions.codefreshToken, "")
 		extendStoreWithKubeClient(lgr)
 
 		if installRuntimeCmdOptions.runtimeEnvironmentName == "" {
@@ -71,7 +70,7 @@ var installRuntimeCmd = &cobra.Command{
 			DryRun:                installRuntimeCmdOptions.dryRun,
 			KubernetesRunnerType:  installRuntimeCmdOptions.kubernetesRunnerType,
 			CodefreshHost:         cfAPIHost,
-			CodefreshToken:        installRuntimeCmdOptions.agentToken,
+			CodefreshToken:        installRuntimeCmdOptions.codefreshToken,
 			RuntimeEnvironment:    installRuntimeCmdOptions.runtimeEnvironmentName,
 			ClusterNamespace:      installRuntimeCmdOptions.kube.namespace,
 		}
@@ -121,8 +120,7 @@ func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 
-	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.agentToken, "agentToken", "", "Agent token created by codefresh")
-	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.agentID, "agentId", "", "Agent id created by codefresh")
+	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.codefreshToken, "codefreshToken", "", "Codefresh token")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.runtimeEnvironmentName, "runtimeName", viper.GetString("runtimeName"), "Name of the runtime as in codefresh")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
