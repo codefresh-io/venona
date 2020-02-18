@@ -30,6 +30,9 @@ spec:
         - key: 'codefresh/dind'
           operator: 'Exists'
           effect: 'NoSchedule'
+      {{ if ne .Tolerations "" }}
+        {{ .Tolerations | indent 8 }}
+      {{ end }}
       containers:
         - image: codefresh/dind-volume-utils:v5
           name: lv-cleaner

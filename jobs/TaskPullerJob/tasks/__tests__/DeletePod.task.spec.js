@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../../services/Logger');
 const DeletePodTask = require('../DeletePod.task');
+const { TASK_PRIORITY } = require('../../../../constants');
 
 jest.mock('./../../../../services/Logger');
 
@@ -144,6 +145,10 @@ describe('DeletePod task unit tests', () => {
 				},
 			}, logger);
 			return expect(task.exec(taskDef)).resolves.toEqual('OK');
+		});
+
+		it('Should have a LOW priority', () => {
+			expect(DeletePodTask.priority).toBe(TASK_PRIORITY.LOW);
 		});
 	});
 });

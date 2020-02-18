@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const Base = require('../../BaseJob');
 const _ = require('lodash');
+const { TASK_PRIORITY } = require('../../../constants');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task CreatePod',
@@ -24,6 +25,8 @@ class CreatePodTask extends Base {
 		return Joi.validate(task, CreatePodTask.validationSchema);
 	}
 }
+
+CreatePodTask.priority = TASK_PRIORITY.HIGH;
 CreatePodTask.Errors = ERROR_MESSAGES;
 CreatePodTask.validationSchema = Joi.object().keys({
 	spec: Joi.object().required(),

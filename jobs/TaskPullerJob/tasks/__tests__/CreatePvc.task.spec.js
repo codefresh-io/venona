@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const { create: createLogger } = require('../../../../services/Logger');
 const CreatePvcTask = require('../CreatePvc.task');
+const { TASK_PRIORITY } = require('../../../../constants');
 
 jest.mock('./../../../../services/Logger');
 
@@ -98,6 +99,10 @@ describe('CreatePvc task unit tests', () => {
 				},
 			}, logger);
 			return expect(task.run(taskDef)).resolves.toEqual(spyResult);
+		});
+
+		it('Should have a HIGH priority', () => {
+			expect(CreatePvcTask.priority).toBe(TASK_PRIORITY.HIGH);
 		});
 	});
 

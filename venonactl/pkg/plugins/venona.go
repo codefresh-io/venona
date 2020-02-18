@@ -122,7 +122,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	// avoid it till patch fully implemented
 	var skipUpgradeFor = map[string]interface{}{
 		"service-account.venona.yaml": nil,
-		"deployment.venona.yaml": nil,
+		"deployment.venona.yaml":      nil,
 	}
 
 	var deletePriorUpgrade = map[string]interface{}{
@@ -184,7 +184,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 				return nil, err
 			}
 		}
-		
+
 		if _, ok := skipUpgradeFor[fileName]; ok {
 			u.logger.Debug(fmt.Sprintf("Skipping upgrade of %s: should be ignored", fileName))
 			continue

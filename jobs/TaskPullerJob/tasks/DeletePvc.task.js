@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Joi = require('joi');
 const Base = require('../../BaseJob');
+const { TASK_PRIORITY } = require('../../../constants');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task DeletePvc',
@@ -29,6 +30,7 @@ class DeletePvcTask extends Base {
 	}
 }
 
+DeletePvcTask.priority = TASK_PRIORITY.LOW;
 DeletePvcTask.Errors = ERROR_MESSAGES;
 DeletePvcTask.validationSchema = Joi.object().keys({
 	spec: Joi.object().keys({

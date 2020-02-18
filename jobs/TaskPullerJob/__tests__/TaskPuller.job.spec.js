@@ -1,10 +1,17 @@
 const _ = require('lodash');
+const Promise = require('bluebird');
 const { create: createLogger } = require('../../../services/Logger');
 const TaskPullerJob = require('../TaskPuller.job');
 const CreatePodTask = require('../tasks/CreatePod.task');
+const DeletePodTask = require('../tasks/DeletePod.task');
+const CreatePvcTask = require('../tasks/CreatePvc.task');
+const DeletePvcTask = require('../tasks/DeletePvc.task');
 
 jest.mock('./../../../services/Logger');
 jest.mock('./../tasks/CreatePod.task');
+jest.mock('./../tasks/DeletePod.task');
+jest.mock('./../tasks/CreatePvc.task');
+jest.mock('./../tasks/DeletePvc.task');
 
 describe('TaskPullerJob unit tests', () => {
 	it('Should throw an error when codefresh service call failed', () => {
@@ -77,5 +84,43 @@ describe('TaskPullerJob unit tests', () => {
 			pullTasks: jest.fn().mockResolvedValue(tasks),
 		}, _.noop(), logger);
 		return expect(task.exec()).resolves.toEqual([]);
+	});
+
+	it('Should always execute and resolve the HIGH priority task first', async () => {
+		const tasks = [
+			{
+				type: 'DeletePod'
+			},
+			{
+				type: 'DeletePvc'
+			},
+			{
+				type: 'CreatePod'				
+			},
+			{
+				type: 'CreatePvc'
+			},
+		];
+
+		DeletePodTask.mockImplementationOnce(() => ({
+			exec: jest.fn(async () => Promise.delay(10,'DeletePod'))	
+		}));
+		DeletePvcTask.mockImplementationOnce(() => ({
+			exec: jest.fn(async () => Promise.delay(10,'DeletePvc'))	
+		}));
+		CreatePodTask.mockImplementationOnce(() => ({
+			exec: jest.fn(async () => Promise.delay(400, 'CreatePod'))	
+		}));
+		CreatePvcTask.mockImplementationOnce(() => ({
+			exec: jest.fn(async () => Promise.delay(400, 'CreatePvc'))	
+		}));
+
+		const logger = createLogger();
+		const job = new TaskPullerJob({ 
+			pullTasks: jest.fn().mockResolvedValueOnce(tasks) 
+		}, _.noop, logger);
+		
+		const results = await job.exec();
+		expect(results).toEqual(['CreatePod', 'CreatePvc', 'DeletePod', 'DeletePvc']);
 	});
 });
