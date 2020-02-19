@@ -3,6 +3,7 @@ const Promise = require('bluebird');
 const scheduler = require('node-schedule');
 const fs = require('fs');
 const path = require('path');
+const _ = require('lodash');
 const recursive = require('recursive-readdir');
 const Agent = require('./../');
 const Codefresh = require('./../../services/Codefresh');
@@ -10,9 +11,11 @@ const Logger = require('./../../services/Logger');
 const { Server } = require('./../../server');
 const TaskPullerJob = require('./../../jobs/TaskPullerJob/TaskPuller.job');
 const StatusReporterJob = require('./../../jobs/StatusReporterJob/StatusReporter.job');
+const Kubernetes = require('./../../services/Kubernetes');
 
 jest.mock('./../../services/Codefresh');
 jest.mock('./../../services/Logger');
+jest.mock('./../../services/Kubernetes');
 jest.mock('./../../server');
 jest.mock('fs');
 jest.mock('recursive-readdir');
@@ -168,7 +171,6 @@ describe('Agent unit test', () => {
 				expect(agent.logger.warn).toHaveBeenCalledTimes(1);
 				expect(agent.logger.warn).toHaveBeenCalledWith('Directory "sub-dir" ignored, Venona loading only files that are mached to regexp /.*\\.runtime\\.yaml/');
 			});
-
 			it('Should log warning that file that is not matched to the regexp is ignored from being loaded', async () => {
 				fs.readdir.mockReset();
 				fs.readdir.mockImplementationOnce((path, cb) => cb(null, [
@@ -184,6 +186,35 @@ describe('Agent unit test', () => {
 				await agent.init(buildTestConfig());
 				expect(agent.logger.warn).toHaveBeenCalledTimes(1);
 				expect(agent.logger.warn).toHaveBeenCalledWith('File "file" ignored, Venona loading only files that are mached to regexp /.*\\.runtime\\.yaml/');
+			});
+			it('Should log warning in case found duplication of runtimes', async () => {
+				const db = {
+					'a.runtime.yaml': 'name: runtime',
+					'b.runtime.yaml': 'name: runtime',
+				};
+				fs.readdir.mockReset();
+				fs.readdir.mockImplementationOnce((path, cb) => {
+					cb(null, _.keys(db));
+				});
+				fs.stat.mockImplementation((path, cb) => {
+					cb(null, {
+						isDirectory: () => false,
+					});
+				});
+				fs.readFile.mockImplementation((location, cb) => {
+					cb(null, db[path.basename(location)]);
+				});
+				fs.access.mockImplementation((path, cb) => {
+					cb(null);
+				});
+				Kubernetes.mockImplementation(() => ({
+					init: Promise.resolve,
+				}));
+				Kubernetes.buildFromConfig = jest.fn(Kubernetes);
+
+				const agent = new Agent();
+				await expect(agent.init(buildTestConfig())).resolves.toEqual();
+				expect(agent.logger.warn).toHaveBeenCalledWith('Ignoring runtime "runtime", already been configured, conflict with file: "/path/to/venona/config/dir/b.runtime.yaml"');
 			});
 		});
 	});

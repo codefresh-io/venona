@@ -49,7 +49,8 @@ class Agent {
 		this.runtimes = {};
 		_.map(cnf, (runtimecnf) => {
 			if (this.runtimes[runtimecnf.name]) {
-				this.logger.error(`Duplication error, runtime name: ${runtimecnf.name} already been configured`);
+				this.logger.warn(`Ignoring runtime "${runtimecnf.name}", already been configured, conflict with file: "${runtimecnf.file}"`);
+				return;
 			}
 			this.runtimes[runtimecnf.name] = {
 				spec: _.omit(runtimecnf, 'name'),
@@ -112,7 +113,10 @@ class Agent {
 			if (runtimeRegexp.test(f)) {
 				await Promise.fromCallback(cb => fs.access(fullPath, cb));
 				const venonaConf = await Promise.fromCallback(cb => fs.readFile(fullPath, cb));
-				return yaml.safeLoad(venonaConf.toString());
+				return {
+					...yaml.safeLoad(venonaConf.toString()),
+					file: fullPath,
+				}
 			} else {
 				this.logger.warn(`File "${f}" ignored, Venona loading only files that are mached to regexp ${runtimeRegexp.toString()}`);
 				return Promise.resolve();
