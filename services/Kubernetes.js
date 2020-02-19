@@ -39,13 +39,6 @@ class Kubernetes {
 		return new this(metadata, client);
 	}
 
-
-	async getClient(runtimeName) {
-		const client = await this._getClient(runtimeName);
-		return client;
-		
-	}
-
 	async init() {
 		try {
 			await this.client.loadSpec();
