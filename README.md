@@ -2,6 +2,39 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/codefresh-io/venona)](https://goreportcard.com/report/github.com/codefresh-io/venona)
 [![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/codefresh-inc/codefresh-io%2Fvenona%2Fvenona?type=cf-1)]( https://g.codefresh.io/public/accounts/codefresh-inc/pipelines/codefresh-io/venona/venona)
 
+## Version 1.x.x
+Version 1.0.0 is released now, read more about migration from older version [here](#Migration)
+We highly suggest to use Codefresh official CLI to install the agent:
+1. `kubectl create namespace codefreh`
+2. `codefresh install agent --kube-namespace codefresh --install-runtime`
+The last command will:
+1. Install the agent on the namespace `codefresh`
+2. Install the runtime on the same namespace
+3. Attach the runtime to the agent
+
+It is still possible, for advanced users to install all manually, for example:
+One process of Venona can manage multiple runtime environments
+NOTE: Please make sure that the process where Venona is installed there is a network connection to the clusters where the runtimes will be installed
+1. Create namespace for the agent: `kubectl create namespace codefresh-agent`
+2. Install the agent on the namespace ( give your agent a unique):
+  a. `codefresh create agent $NAME` - this command will print a token that the Venona process will be using.
+  b. `codefresh install agent --token $TOKEN --kube-namespace codefresh-agent`
+3. Create namespace for the first runtime: `kubectl create namespace codefresh-runtime-1`
+4. Install the first runtime on the namespace: `codefresh install runtime --kube-namespace codefresh-runtime-1` - the runtime name is printted
+5. Attach the first runtime to agent:
+  a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --kube-namespace codefresh-runtime-1`
+  b. restart the venona pod in namespace `codefresh-agent`
+5. Create namespace for the second runtime: `kubectl create namespace codefresh-runtime-2`
+6. Install the second runtime on the namespace: `codefresh install runtime --kube-namespace codefresh-runtime-2`
+7. Attach the second runtime to agent:
+  a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --kube-namespace codefresh-runtime-1`
+  b. restart the venona pod in namespace `codefresh-agent`
+
+
+
+  
+
+
 ## Installation
 
 ### Prerequisite:
@@ -12,6 +45,10 @@
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
   * Authenticated context exist under `$HOME/.cfconfig` or authenticate with [Codefesh CLI](https://codefresh-io.github.io/cli/getting-started/#authenticate)
 
+### Migration
+Moving from Venona < 1.0.0 to > 1.0.0 is not done automatically atm, the fastest way to delete may cause "downtime", means that the pipeline that was configured to run on that runtime will not be able to execute.
+1. Detele Venona `venona delete $NAME`
+2. Install version 1.0.0 as described [here](#Version 1.x.x)
 
 ### Install venona
 
