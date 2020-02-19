@@ -22,11 +22,11 @@ class Job {
 
 	async getKubernetesService(runtime) {
 		if (!_.has(this, `runtimes[${runtime}]`)) {
-			throw new Error(`Kubernetes client for runtime ${runtime} was not found`);
+			throw new Error(`Kubernetes client for runtime "${runtime}" was not found`);
 		}
 		if (!_.has(this, `runtimes[${runtime}].kubernetesAPI`)) {
 			const err = _.get(this, `runtimes[${runtime}].metadata.error`, '');
-			throw new Error(`Kubernetes client for runtime ${runtime} was not created due to error: ${err}`);
+			throw new Error(`Kubernetes client for runtime "${runtime}" was not created due to error: ${err}`);
 		}
 		return this.runtimes[runtime].kubernetesAPI;
 	}
