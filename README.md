@@ -27,7 +27,7 @@ NOTE: Please make sure that the process where Venona is installed there is a net
 5. Create namespace for the second runtime: `kubectl create namespace codefresh-runtime-2`
 6. Install the second runtime on the namespace: `codefresh install runtime --kube-namespace codefresh-runtime-2`
 7. Attach the second runtime to agent:
-  a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --kube-namespace codefresh-runtime-1`
+  a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --runtime-kube-namespace codefresh-runtime-1`
   b. restart the venona pod in namespace `codefresh-agent`
 
 
@@ -64,27 +64,6 @@ Moving from Venona < 1.0.0 to > 1.0.0 is not done automatically atm, the fastest
   > `venona status`
   > `kubectl get pods -n codefresh-runtime`
 
-#### Install Options
-
-| Option Argument | Type | Description |
-| -------------------- | -------- | --------------------------------------------------- |
-| --build-annotations | stringArray | The kubernetes metadata.annotations as "key=value" to be used by venona build resources (default is no node selector) |
-| --build-node-selector | string | The kubernetes node selector "key=value" to be used by venona build resources (default is no node selector) |
-| --cluster-name | string | cluster name (if not passed runtime-environment will be created cluster-less); this is a friendly name used for metadata does not need to match the literal cluster name.  Limited to 20 Characters. |
-| --dry-run | boolean | Set to true to simulate installation |
-| -h, --help | boolean | help for install |
-| --in-cluster | boolean | Set flag if venona is been installed from inside a cluster |
-| --kube-context-name | string | Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT] |
-| --kube-namespace | string |Name of the namespace on which venona should be installed [$KUBE_NAMESPACE] |
-| --kube-node-selector | string | The kubernetes node selector "key=value" to be used by venona resources (default is no node selector) |
-| --kubernetes-runner-type | boolean | Set the runner type to kubernetes (alpha feature) |
-| --only-runtime-environment | boolean | Set to true to onlky configure namespace as runtime-environment for Codefresh |
-| --runtime-environment | string | if --skip-runtime-installation set, will try to configure venona on current runtime-environment |
-| --set-default | boolean | Mark the install runtime-environment as default one after installation |
-| --skip-runtime-installation | boolean | Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name |
-| --storage-class | string | Set a name of your custom storage class, note: this will not install volume provisioning components |
-| --tolerations | string | The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations). If prefixed with "@", loads from a file: @/tmp/tolerations.json |
-| --venona-version | string | Version of venona to install (default is the latest) |
 
 #### Install on cluster version < 1.10
 * Make sure the `PersistentLocalVolumes` [feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/) is turned on
