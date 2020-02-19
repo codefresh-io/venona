@@ -37,6 +37,7 @@ var attachRuntimeCmdOptions struct {
 		kubePath  string
 		context   string
 	}
+	restartAgent  bool
 }
 
 var attachRuntimeCmd = &cobra.Command{
@@ -52,18 +53,14 @@ var attachRuntimeCmd = &cobra.Command{
 		s.CodefreshAPI = &store.CodefreshAPI{}
 		s.AgentAPI = &store.AgentAPI{}
 
-		fillKubernetesAPI(lgr, attachRuntimeCmdOptions.kubeVenona.context, attachRuntimeCmdOptions.kubeVenona.namespace, false)
-
-		builder := plugins.NewBuilder(lgr)
-
 		if attachRuntimeCmdOptions.kubeVenona.kubePath == "" {
 			attachRuntimeCmdOptions.kubeVenona.kubePath = kubeConfigPath
 		}
 		if attachRuntimeCmdOptions.kubeVenona.namespace == "" {
-			attachRuntimeCmdOptions.kubeVenona.namespace = installRuntimeCmdOptions.kube.namespace
+			attachRuntimeCmdOptions.kubeVenona.namespace = attachRuntimeCmdOptions.kube.namespace
 		}
 		if attachRuntimeCmdOptions.kubeVenona.context == "" {
-			attachRuntimeCmdOptions.kubeVenona.context = installRuntimeCmdOptions.kube.context
+			attachRuntimeCmdOptions.kubeVenona.context = attachRuntimeCmdOptions.kube.context
 		}
 
 		if attachRuntimeCmdOptions.kube.serviceAccount == "" {
@@ -74,11 +71,16 @@ var attachRuntimeCmd = &cobra.Command{
 			attachRuntimeCmdOptions.kube.kubePath = kubeConfigPath
 		}
 
+		fillKubernetesAPI(lgr, attachRuntimeCmdOptions.kubeVenona.context, attachRuntimeCmdOptions.kubeVenona.namespace, false)
+
+		builder := plugins.NewBuilder(lgr)
+
 		builderInstallOpt := &plugins.InstallOptions{
 			ClusterNamespace:      attachRuntimeCmdOptions.kubeVenona.namespace,
 			RuntimeEnvironment:    attachRuntimeCmdOptions.runtimeEnvironmentName,
 			RuntimeClusterName:    attachRuntimeCmdOptions.kube.namespace,
 			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
+			RestartEngine:         attachRuntimeCmdOptions.restartAgent,
 		}
 
 		// runtime
@@ -114,11 +116,13 @@ func init() {
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 
-	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.runtimeEnvironmentName, "runtimeName", viper.GetString("runtimeName"), "Name of the runtime as in codefresh")
-	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.serviceAccount, "serviceAccount", viper.GetString("serviceAccount"), "Name of the service account in the runtime cluster, defaut is default \"default\"")
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.runtimeEnvironmentName, "runtime-name", viper.GetString("runtime-name"), "Name of the runtime as in codefresh")
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.serviceAccount, "service-account", viper.GetString("service-account"), "Name of the service account in the runtime cluster, defaut is default \"default\"")
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.namespace, "kube-namespace-agent", viper.GetString("kube-namespace-agent"), "Name of the namespace where venona is installed [$KUBE_NAMESPACE]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.context, "kube-context-name-agent", viper.GetString("kube-context-agent"), "Name of the kubernetes context on which venona is installed (default is current-context) [$KUBE_CONTEXT]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.kubePath, "kube-config-path-agent", viper.GetString("kubeconfig-agent"), "Path to kubeconfig file (default is $HOME/.kube/config) for agent [$KUBECONFIG]")
+	attachRuntimeCmd.Flags().BoolVar(&attachRuntimeCmdOptions.restartAgent, "restart-agent", viper.GetBool("restart-agent"), "Restart agent after attach operation")
+
 
 }

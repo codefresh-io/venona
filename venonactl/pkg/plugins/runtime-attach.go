@@ -131,8 +131,6 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	}
 	v["venonaConf"] = runtimes
 
-	// TODO: High - make the secret deletation as a transaction (rename)
-
 	cs.CoreV1().Secrets(opt.ClusterNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
 	err = install(&installOptions{
@@ -148,6 +146,21 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 
 	if err != nil {
 		return nil, err
+	}
+
+	if opt.RestartEngine {
+		list, err := cs.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
+		if err != nil {
+			u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
+			return nil, err
+		}
+		podName := list.Items[0].ObjectMeta.Name
+		err = cs.CoreV1().Pods(opt.ClusterNamespace).Delete(podName, &metav1.DeleteOptions{})
+		if err != nil {
+			u.logger.Error(fmt.Sprintf("Cannot delete agent pod: %v ", err))
+			return nil, err
+		}
+
 	}
 
 	return v, nil

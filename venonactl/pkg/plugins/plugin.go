@@ -64,6 +64,7 @@ type (
 		RuntimeEnvironment   string
 		RuntimeClusterName   string
 		RuntimeServiceAccount string
+		RestartEngine        bool
 	}
 
 	DeleteOptions struct {
