@@ -11,8 +11,6 @@ describe('BaseJob unit tests', () => {
 			const task = new BaseJob(_.noop(), _.noop(), createLogger());
 			expect(Object.keys(task).sort()).toEqual(['codefreshAPI', 'runtimes', 'logger'].sort());
 		});
-
-		it.skip('Should throw an error in case the requested runtime is not set on this.runtimes', () => {});
 	});
 
 });
