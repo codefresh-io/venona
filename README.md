@@ -3,11 +3,12 @@
 [![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/codefresh-inc/codefresh-io%2Fvenona%2Fvenona?type=cf-1)]( https://g.codefresh.io/public/accounts/codefresh-inc/pipelines/codefresh-io/venona/venona)
 
 ## Version 1.x.x
-Version 1.0.0 is released now, read more about migration from older version [here](#Migration)
+Version 1.0.0 is released now, read more about migration from older version [here](#Migration)  
 We highly suggest to use Codefresh official CLI to install the agent:
 1. `kubectl create namespace codefreh`
 2. `codefresh install agent --kube-namespace codefresh --install-runtime`
-The last command will:
+
+The last command will:  
 1. Install the agent on the namespace `codefresh`
 2. Install the runtime on the same namespace
 3. Attach the runtime to the agent
@@ -56,13 +57,6 @@ Moving from Venona < 1.0.0 to > 1.0.0 is not done automatically atm, the fastest
   * With homebrew:
     * `brew tap codefresh-io/venona`
     * `brew install venona`
-* Create namespace where venona should run<br />
-  > `kubectl create namespace codefresh-runtime`
-* Create *new* runtime-environment with Venona's agents installed <br />
-  > `venona install --kube-namespace codefresh-runtime`
-* Get the status <br />
-  > `venona status`
-  > `kubectl get pods -n codefresh-runtime`
 
 
 #### Install on cluster version < 1.10
@@ -94,27 +88,11 @@ Each one has own RBAC needs and therefore, created roles(and cluster-roles)
 The resource descriptors are avaliable [here](https://github.com/codefresh-io/venona/tree/master/venonactl/templates/kubernetes)
 List of the resources that will be created
 * Agent (grouped by `/.*.venona.yaml/`)
-  * `service-account.venona.yaml` - The service account that the agent's pod will use at the end
+  * `service-account.re.yaml` - The service account that the Venona pod will use to create the resource on the runtime namespace(the resoucre installed on the runtime namespace)
+  * `role.re.yaml` - Allow to GET, CREATE and DELETE pods and persistentvolumeclaims
+  * `role-binding.re.yaml` - The agent is spinning up pods and pvc, this biniding binds `role.venona.yaml` to `service-account.venona.yaml`
   * `cluster-role-binding.venona.yaml` - The agent discovering K8S apis by calling to `openapi/v2`, this ClusterRoleBinding binds  bootstraped ClusterRole by Kubernetes `system:discovery` to `service-account.venona.yaml`. This role has only permissions to make a GET calls to non resources urls
-  * `role.venona.yaml` - Allow to GET, CREATE and DELETE pods and persistentvolumeclaims
-  * `role-binding.venona.yaml` - The agent is spinning up pods and pvc, this biniding binds `role.venona.yaml` to `service-account.venona.yaml`
 * Runtime-environment (grouped by `/.*.re.yaml/`) Kubernetes controller that spins up all required resources to provide a good caching expirience during pipeline execution
   * `service-account.dind-volume-provisioner.re.yaml` - The service account that the controller will use
   * `cluster-role.dind-volume-provisioner.re.yaml` Defines all the permission needed for the controller to operate correctly
   * `cluster-role-binding.dind-volume-provisioner.yaml` - Binds the ClusterRole to `service-account.dind-volume-provisioner.re.yaml`
-
-### Access the cluster from executed pipeline
-After a successfull installation of Venona, you'll be able to run a Codefresh pipeline on the configured cluster.
-However, the pipeline itself dosent have any permission to connect to the hosted cluster.
-To make it work you need to add the cluster to Codefresh (make sure the service acount has all the permissions you need)
-> codefresh create cluster --kube-context CONTEXT_NAME --namespace NAMESPACE --serviceaccount SERVICE_ACCOUNT --behind-firewall
-
-#### Upgrade
-To upgrade existing runtime-environment, a one that was created without Venona's agent, run:
-* Find the name of the cluster was linked to that runtime environment <br />
-Example: `codefresh get cluster`
-* Install <br />
-Example: `venona install --cluster-name CLUSTER`
-* Get the status <br />
-Example: `venona status RUNTIME-ENVIRONMENT`
-Example: `kubectl get pods -n NAMESPACE`
