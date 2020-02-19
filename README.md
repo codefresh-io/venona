@@ -4,7 +4,7 @@
 
 ## Version 1.x.x
 Version 1.0.0 is released now, read more about migration from older version [here](#Migration)  
-We highly suggest to use Codefresh official CLI to install the agent:
+We highly suggest to use [Codefresh official CLI](https://codefresh-io.github.io/cli/) to install the agent:
 1. `kubectl create namespace codefreh`
 2. `codefresh install agent --kube-namespace codefresh --install-runtime`
 
@@ -31,10 +31,10 @@ NOTE: Please make sure that the process where Venona is installed there is a net
   a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --runtime-kube-namespace codefresh-runtime-1`
   b. restart the venona pod in namespace `codefresh-agent`
 
-
-
-  
-
+## Migration
+Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, the fastest way to delete may cause "downtime", means that the pipeline that was configured to run on that runtime will not be able to execute.
+1. Detele Venona `venona delete $NAME`
+2. Install version 1.0.0 as described [here](#Version-1xx)
 
 ## Installation
 
@@ -45,11 +45,6 @@ NOTE: Please make sure that the process where Venona is installed there is a net
   * Disk size 50GB per node
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
   * Authenticated context exist under `$HOME/.cfconfig` or authenticate with [Codefesh CLI](https://codefresh-io.github.io/cli/getting-started/#authenticate)
-
-### Migration
-Moving from Venona < 1.0.0 to > 1.0.0 is not done automatically atm, the fastest way to delete may cause "downtime", means that the pipeline that was configured to run on that runtime will not be able to execute.
-1. Detele Venona `venona delete $NAME`
-2. Install version 1.0.0 as described [here](#Version 1.x.x)
 
 ### Install venona
 
