@@ -8,11 +8,7 @@
 #   a. $VENONA_KUBE_NAMESPACE - required 
 #   b. $VENONA_KUBE_CONTEXT - default is current-context
 #   c. $VENONA_KUBECONFIG_PATH - default is $HOME/.kube/config
-# 3. Delete the old Venona pod - pass variables: (downtime starting here)
-#   a. $RUNTIME_KUBE_NAMESPACE - required 
-#   b. $RUNTIME_KUBE_CONTEXT - default is current-context
-#   c. $RUNTIME_KUBECONFIG_PATH - default is $HOME/.kube/config
-# 4. Attach runtime to the new agent (downtime ends) - pass $CODEFRESH_RUNTIME_NAME - required
+# 3. Attach runtime to the new agent (downtime ends) - pass $CODEFRESH_RUNTIME_NAME - required
 
 set -e
 
@@ -64,55 +60,33 @@ else
 fi
 
 
-if [ -z "$RUNTIME_KUBE_NAMESPACE" ]
-then
-    fatal "RUNTIME_KUBE_NAMESPACE is not set, exiting"
-    exit 1
-fi
 
-if [ -z "$RUNTIME_KUBECONFIG_PATH" ]
-then
-    info "RUNTIME_KUBECONFIG_PATH is not set, using \$KUBECONFIG if exist or $DEFAULT_KUBECONFIG"
-    RUNTIME_KUBECONFIG_PATH=${KUBECONFIG:=$DEFAULT_KUBECONFIG}
-    info "RUNTIME_KUBECONFIG_PATH=$RUNTIME_KUBECONFIG_PATH"
-else
-    info "RUNTIME_KUBECONFIG_PATH is set to $RUNTIME_KUBECONFIG_PATH"
-fi
-
-if [ -z "$RUNTIME_KUBE_CONTEXT" ]
-then
-    info "RUNTIME_KUBE_CONTEXT is not set, using current-context"
-    RUNTIME_KUBE_CONTEXT=$(kubectl --kubeconfig $RUNTIME_KUBECONFIG_PATH config current-context)
-    info "RUNTIME_KUBE_CONTEXT=$RUNTIME_KUBE_CONTEXT"
-else
-    info "RUNTIME_KUBE_CONTEXT is set to $RUNTIME_KUBE_CONTEXT"
-fi
-
-runtimekube="kubectl --kubeconfig $RUNTIME_KUBECONFIG_PATH --cluster $RUNTIME_KUBE_CONTEXT -n $RUNTIME_KUBE_NAMESPACE"
-agentkube="kubectl --kubeconfig $RUNTIME_KUBECONFIG_PATH --cluster $RUNTIME_KUBE_CONTEXT -n $RUNTIME_KUBE_NAMESPACE"
+kube="kubectl --kubeconfig $VENONA_KUBECONFIG_PATH --cluster $VENONA_KUBE_CONTEXT -n $VENONA_KUBE_NAMESPACE"
 
 info "Testing connection to runtime cluster"
-runtimeTestCmd="$runtimekube get deploy venona"
+runtimeTestCmd="$kube get deploy venona"
 echoAndRun "$runtimeTestCmd"
 
 info "Crating new agent in Codefresh"
 token=$(echoAndRun "codefresh create agent $CODEFRESH_AGENT_NAME" | awk 'FNR==3')
 
-info "Creating new namespace $VENONA_KUBE_NAMESPACE"
-createNsCmd="$agentkube create namespace $VENONA_KUBE_NAMESPACE"
-echoAndRun "$createNsCmd" || true
+info "Deleting current Venona process"
+pod=$(eval "$kube get pods -l app=venona -o go-template='{{range .items }}{{ .metadata.name }}{{end}}'")
+echoAndRun "$kube delete deploy --wait=true venona"
+echoAndRun "$kube wait --for=delete pod/$pod --timeout 60s"
+echoAndRun "$kube delete secret venona"
+echoAndRun "$kube delete role venona"
+echoAndRun "$kube delete rolebinding venona"
 
 info "Installing agent on namespace using token $token"
 echoAndRun "codefresh install agent --token $token --kube-namespace $VENONA_KUBE_NAMESPACE --kube-context-name $VENONA_KUBE_CONTEXT --kube-config-path $VENONA_KUBECONFIG_PATH --verbose"
 
-info "Deleting current Venona process"
-echoAndRun "$runtimekube delete deploy venona"
-
-
 info "Attaching old runtime to new agent"
-echoAndRun "codefresh attach runtime --runtime-name $CODEFRESH_RUNTIME_NAME --agent-name $CODEFRESH_AGENT_NAME --runtime-kube-context-name $RUNTIME_KUBE_CONTEXT --agent-kube-context-name $VENONA_KUBE_CONTEXT --runtime-kube-namespace $RUNTIME_KUBE_NAMESPACE --agent-kube-namespace $VENONA_KUBE_NAMESPACE --agent-kube-config-path $VENONA_KUBECONFIG_PATH --runtime-kube-config-path $RUNTIME_KUBECONFIG_PATH --restart-agent --verbose"
+pod=$(eval "$kube get pods -l app=venona -o go-template='{{range .items }}{{ .metadata.name }}{{end}}'")
+echoAndRun "codefresh attach runtime --runtime-name $CODEFRESH_RUNTIME_NAME --agent-name $CODEFRESH_AGENT_NAME --runtime-kube-context-name $VENONA_KUBE_CONTEXT --agent-kube-context-name $VENONA_KUBE_CONTEXT --runtime-kube-namespace $VENONA_KUBE_NAMESPACE --agent-kube-namespace $VENONA_KUBE_NAMESPACE --agent-kube-config-path $VENONA_KUBECONFIG_PATH --runtime-kube-config-path $VENONA_KUBECONFIG_PATH --restart-agent --verbose"
+echoAndRun "$kube wait --for=delete pod/$pod --timeout 60s"
 
-pod=$(eval "$agentkube get pods -l app=venona -o go-template='{{range .items }}{{ .metadata.name}}{{end}}'")
-echoAndRun "$agentkube wait --for=condition=Ready pod/$pod --timeout 60s"
+pod=$(eval "$kube get pods -l app=venona -o go-template='{{range .items }}{{ .metadata.name }}{{end}}'")
+echoAndRun "$kube wait --for=condition=Ready pod/$pod --timeout 60s"
 
 info "Migration finished"
