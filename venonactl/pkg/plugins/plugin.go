@@ -64,7 +64,7 @@ type (
 		RuntimeEnvironment   string
 		RuntimeClusterName   string
 		RuntimeServiceAccount string
-		RestartEngine        bool
+		RestartAgent        bool
 	}
 
 	DeleteOptions struct {

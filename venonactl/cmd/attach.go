@@ -78,7 +78,7 @@ var attachRuntimeCmd = &cobra.Command{
 			RuntimeEnvironment:    attachRuntimeCmdOptions.runtimeEnvironmentName,
 			RuntimeClusterName:    attachRuntimeCmdOptions.kube.namespace,
 			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
-			RestartEngine:         attachRuntimeCmdOptions.restartAgent,
+			RestartAgent:         attachRuntimeCmdOptions.restartAgent,
 		}
 
 		// runtime

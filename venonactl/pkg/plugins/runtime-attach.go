@@ -148,7 +148,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		return nil, err
 	}
 
-	if opt.RestartEngine {
+	if opt.RestartAgent {
 		list, err := cs.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
 		if err != nil {
 			u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
