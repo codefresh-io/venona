@@ -46,6 +46,7 @@ var deleteCmdOptions struct {
 var deleteCmd = &cobra.Command{
 	Use:   "delete [names]",
 	Short: "Delete a Codefresh's runtime-environment",
+	Deprecated: "This command is deprecated, use delete-agent and delete-runtime",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires name of the runtime-environment")

@@ -111,7 +111,7 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
-		return nil
+		return err
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
@@ -122,7 +122,7 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 		operatorType:   RuntimeEnvironmentPluginType,
 		logger:         u.logger,
 	}
-	return delete(opt)
+	return uninstall(opt)
 }
 
 func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {

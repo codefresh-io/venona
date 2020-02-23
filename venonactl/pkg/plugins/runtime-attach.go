@@ -71,13 +71,13 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 	return rc, nil
 }
 
-func readCurrentVenonaConf(opt *InstallOptions) (venonaConf, error) {
+func readCurrentVenonaConf(agentKubeBuilder KubeClientBuilder, clusterNamespace string) (venonaConf, error) {
 
-	cs, err := opt.AgentKubeBuilder.BuildClient()
+	cs, err := agentKubeBuilder.BuildClient()
 	if err != nil {
 		return venonaConf{}, fmt.Errorf("Failed to create client on venona cluster: %v", err)
 	}
-	secret, err := cs.CoreV1().Secrets(opt.ClusterNamespace).Get(runtimeSecretName, metav1.GetOptions{})
+	secret, err := cs.CoreV1().Secrets(clusterNamespace).Get(runtimeSecretName, metav1.GetOptions{})
 
 	conf := &venonaConf{
 		Runtimes: make(map[string]RuntimeConfiguration),
@@ -101,7 +101,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	}
 
 	// read current venona conf
-	currentVenonaConf, err := readCurrentVenonaConf(opt)
+	currentVenonaConf, err := readCurrentVenonaConf(opt.AgentKubeBuilder, opt.ClusterNamespace)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
 		return nil, err
@@ -115,7 +115,9 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	if currentVenonaConf.Runtimes == nil {
 		currentVenonaConf.Runtimes = make(map[string]RuntimeConfiguration)
 	}
-	currentVenonaConf.Runtimes[opt.RuntimeEnvironment] = rc
+	// normalize the key in the secret to make sure we are not violating kube naming conventions
+	name := strings.ReplaceAll(opt.RuntimeEnvironment, "/", ".")
+	currentVenonaConf.Runtimes[fmt.Sprintf("%s.runtime.yaml", name)] = rc
 	runtimes := map[string]string{}
 	for name, runtime := range currentVenonaConf.Runtimes {
 		// marshel prior persist
@@ -125,9 +127,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 			return nil, err
 		}
 
-		// normalize the key in the secret to make sure we are not violating kube naming conventions
-		name := strings.ReplaceAll(name, "/", ".")
-		runtimes[fmt.Sprintf("%s.runtime.yaml", name)] = base64.StdEncoding.EncodeToString([]byte(d))
+		runtimes[name] = base64.StdEncoding.EncodeToString([]byte(d))
 	}
 	v["venonaConf"] = runtimes
 
@@ -188,21 +188,77 @@ func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]st
 }
 
 func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
-	cs, err := deleteOpt.KubeBuilder.BuildClient()
+	cs, err := deleteOpt.AgentKubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
-		return nil
+		return err
 	}
-	opt := &deleteOptions{
-		templates:      templates.TemplatesMap(),
-		templateValues: v,
-		kubeClientSet:  cs,
-		namespace:      deleteOpt.ClusterNamespace,
-		matchPattern:   runtimeAttachFilesPattern,
-		operatorType:   RuntimeAttachType,
-		logger:         u.logger,
+	// Delete the entry from venonaconf - if this is the only , delete the secret
+
+	// read current venona conf
+	currentVenonaConf, err := readCurrentVenonaConf(deleteOpt.AgentKubeBuilder, deleteOpt.AgentNamespace)
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
+		return err
 	}
-	return delete(opt)
+	name := strings.ReplaceAll(deleteOpt.RuntimeEnvironment , "/", ".")
+	name = fmt.Sprintf("%s.runtime.yaml", name)
+	if _, ok := currentVenonaConf.Runtimes[name]; ok {
+		 delete(currentVenonaConf.Runtimes, name)
+	}
+
+
+	// If only one runtime is defined, remove the secret , otherwise remove the entry and persist 
+	shouldDelete := true
+	if len(currentVenonaConf.Runtimes) > 0 {
+	
+		runtimes := map[string]string{}
+		for name, runtime := range currentVenonaConf.Runtimes {
+			// marshel prior persist
+			d, err := yaml.Marshal(runtime)
+			if err != nil {
+				u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
+				return err
+			}
+	
+			runtimes[name] = base64.StdEncoding.EncodeToString([]byte(d))
+		}
+		
+
+		shouldDelete = false
+		v["venonaConf"] = runtimes
+
+	    cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
+
+		err = install(&installOptions{
+			logger:         u.logger,
+			templates:      templates.TemplatesMap(),
+			templateValues: v,
+			kubeClientSet:  cs,
+			namespace:      deleteOpt.AgentNamespace,
+			matchPattern:   runtimeAttachFilesPattern,
+			operatorType:   RuntimeAttachType,
+		})
+		return err
+
+	}
+
+
+
+    if shouldDelete {
+		opt := &deleteOptions{
+			templates:      templates.TemplatesMap(),
+			templateValues: v,
+			kubeClientSet:  cs,
+			namespace:      deleteOpt.AgentNamespace,
+			matchPattern:   runtimeAttachFilesPattern,
+			operatorType:   RuntimeAttachType,
+			logger:         u.logger,
+		}
+		return uninstall(opt)
+	}
+	return nil
+	
 }
 
 func (u *runtimeAttachPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {

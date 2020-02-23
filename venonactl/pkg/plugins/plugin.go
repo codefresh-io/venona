@@ -33,6 +33,10 @@ type (
 		Get() []Plugin
 	}
 
+	KubeClientBuilder interface {
+		BuildClient() (*kubernetes.Clientset, error)
+	}
+
 	pb struct {
 		logger  logger.Logger
 		plugins []Plugin
@@ -71,7 +75,14 @@ type (
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
-		ClusterNamespace string
+		AgentKubeBuilder	  interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		ClusterNamespace string // runtime
+		AgentNamespace   string // agent
+		RuntimeEnvironment   string
+		RestartAgent        bool
+
 	}
 
 	UpgradeOptions struct {
@@ -233,7 +244,7 @@ func status(opt *statusOptions) ([][]string, error) {
 	return rows, nil
 }
 
-func delete(opt *deleteOptions) error {
+func uninstall(opt *deleteOptions) error {
 
 	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {

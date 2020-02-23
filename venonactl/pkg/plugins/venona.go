@@ -113,7 +113,7 @@ func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
-	return delete(opt)
+	return uninstall(opt)
 }
 
 func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
@@ -165,7 +165,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 				matchPattern:   fileName,
 				operatorType:   VenonaPluginType,
 			}
-			err := delete(delOpt)
+			err := uninstall(delOpt)
 			if err != nil {
 				return nil, err
 			}
