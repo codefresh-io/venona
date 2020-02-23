@@ -52,7 +52,7 @@ codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefre
 ```
 
 ## Migration
-Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, please use the migration script to do that, check out which environment variables are required to run it.
+Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, please use the [migration script](https://github.com/codefresh-io/venona/blob/SAAS-5009/scripts/migration.sh) to do that, check out which environment variables are required to run it.
 ```bash
 # This script comes to migrate old versions of Venona installation ( version < 1.x.x ) to new version (version >= 1.0.0 )
 # Please read carefully what the script does.
