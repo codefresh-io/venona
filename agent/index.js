@@ -116,7 +116,7 @@ class Agent {
 				return {
 					...yaml.safeLoad(venonaConf.toString()),
 					file: fullPath,
-				}
+				};
 			} else {
 				this.logger.warn(`File "${f}" ignored, Venona loading only files that are mached to regexp ${runtimeRegexp.toString()}`);
 				return Promise.resolve();
