@@ -5,7 +5,7 @@
 ## Version 1.x.x
 Version 1.0.0 is released now, read more about migration from older version [here](#Migration)  
 We highly suggest to use [Codefresh official CLI](https://codefresh-io.github.io/cli/) to install the agent:
-1. `kubectl create namespace codefreh`
+1. `kubectl create namespace codefresh`
 2. `codefresh install agent --kube-namespace codefresh --install-runtime`
 
 The last command will:  
