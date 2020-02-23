@@ -5,8 +5,10 @@
 ## Version 1.x.x
 Version 1.0.0 is released now, read more about migration from older version [here](#Migration)  
 We highly suggest to use [Codefresh official CLI](https://codefresh-io.github.io/cli/) to install the agent:
-1. `kubectl create namespace codefresh`
-2. `codefresh install agent --kube-namespace codefresh --install-runtime`
+```bash
+kubectl create namespace codefresh
+codefresh install agent --kube-namespace codefresh --install-runtime
+```
 
 The last command will:  
 1. Install the agent on the namespace `codefresh`
@@ -16,20 +18,31 @@ The last command will:
 It is still possible, for advanced users to install all manually, for example:
 One process of Venona can manage multiple runtime environments
 NOTE: Please make sure that the process where Venona is installed there is a network connection to the clusters where the runtimes will be installed
-1. Create namespace for the agent: `kubectl create namespace codefresh-agent`
-2. Install the agent on the namespace ( give your agent a unique):
-  a. `codefresh create agent $NAME` - this command will print a token that the Venona process will be using.
-  b. `codefresh install agent --token $TOKEN --kube-namespace codefresh-agent`
-3. Create namespace for the first runtime: `kubectl create namespace codefresh-runtime-1`
-4. Install the first runtime on the namespace: `codefresh install runtime --kube-namespace codefresh-runtime-1` - the runtime name is printted
-5. Attach the first runtime to agent:
-  a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --kube-namespace codefresh-runtime-1`
-  b. restart the venona pod in namespace `codefresh-agent`
-5. Create namespace for the second runtime: `kubectl create namespace codefresh-runtime-2`
-6. Install the second runtime on the namespace: `codefresh install runtime --kube-namespace codefresh-runtime-2`
-7. Attach the second runtime to agent:
-  a. `codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --runtime-kube-namespace codefresh-runtime-1`
-  b. restart the venona pod in namespace `codefresh-agent`
+```bash
+# Create namespace for the agent: 
+kubectl create namespace codefresh-agent
+# Install the agent on the namespace ( give your agent a unique):
+# Print a token that the Venona process will be using.
+codefresh create agent $NAME
+codefresh install agent --token $TOKEN --kube-namespace codefresh-agent
+# Create namespace for the first runtime:
+kubectl create namespace codefresh-runtime-1
+# Install the first runtime on the namespace
+# the runtime name is printed
+codefresh install runtime --kube-namespace codefresh-runtime-1
+# Attach the first runtime to agent:
+codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --kube-namespace codefresh-runtime-1
+# restart the venona pod in namespace `codefresh-agent`
+kubectl delete pods $VENONA_POD
+
+# Create namespace for the second runtime
+kubectl create namespace codefresh-runtime-2
+# Install the second runtime on the namespace
+codefresh install runtime --kube-namespace codefresh-runtime-2
+# Attach the second runtime to agent and restart the Venoa pod automatically
+codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --runtime-kube-namespace codefresh-runtime-1 --restart-agent
+
+```
 
 ## Migration
 Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, please use the migration script to do that, check out which environment variables are required to run it.
