@@ -32,9 +32,21 @@ NOTE: Please make sure that the process where Venona is installed there is a net
   b. restart the venona pod in namespace `codefresh-agent`
 
 ## Migration
-Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, the fastest way to delete may cause "downtime", means that the pipeline that was configured to run on that runtime will not be able to execute.
-1. Detele Venona `venona delete $NAME`
-2. Install version 1.0.0 as described [here](#Version-1xx)
+Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, please use the migration script to do that, check out which environment variables are required to run it.
+```bash
+# This script comes to migrate old versions of Venona installation ( version < 1.x.x ) to new version (version >= 1.0.0 )
+# Please read carefully what the script does.
+# There will be a "downtime" in terms of your builds targeted to this runtime environment
+# Once the script is finished, all the builds during the downtime will start
+# The script will:
+# 1. Create new agent entity in Codefresh using Codefresh CLI - give it a name $CODEFRESH_AGENT_NAME, default is "codefresh"
+# 2. Install the agent on you cluster pass variables:
+#   a. $VENONA_KUBE_NAMESPACE - required 
+#   b. $VENONA_KUBE_CONTEXT - default is current-context
+#   c. $VENONA_KUBECONFIG_PATH - default is $HOME/.kube/config
+# 3. Attach runtime to the new agent (downtime ends) - pass $CODEFRESH_RUNTIME_NAME - required
+```
+
 
 ## Installation
 
