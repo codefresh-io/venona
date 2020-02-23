@@ -27,8 +27,8 @@ import (
 
 var installRuntimeCmdOptions struct {
 	codefreshToken string
-	dryRun bool
-	kube   struct {
+	dryRun         bool
+	kube           struct {
 		namespace string
 		inCluster bool
 		context   string
@@ -37,7 +37,6 @@ var installRuntimeCmdOptions struct {
 	runtimeEnvironmentName string
 	kubernetesRunnerType   bool
 	tolerations            string
-	
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -148,6 +147,5 @@ func init() {
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
-
 
 }
