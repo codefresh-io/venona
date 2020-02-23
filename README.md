@@ -19,27 +19,34 @@ It is still possible, for advanced users to install all manually, for example:
 One process of Venona can manage multiple runtime environments
 NOTE: Please make sure that the process where Venona is installed there is a network connection to the clusters where the runtimes will be installed
 ```bash
-# Create namespace for the agent: 
+# 1. Create namespace for the agent: 
 kubectl create namespace codefresh-agent
-# Install the agent on the namespace ( give your agent a unique):
+
+# 2. Install the agent on the namespace ( give your agent a unique):
 # Print a token that the Venona process will be using.
 codefresh create agent $NAME
 codefresh install agent --token $TOKEN --kube-namespace codefresh-agent
-# Create namespace for the first runtime:
+
+# 3. Create namespace for the first runtime:
 kubectl create namespace codefresh-runtime-1
-# Install the first runtime on the namespace
-# the runtime name is printed
+
+# 4. Install the first runtime on the namespace
+# 5. the runtime name is printed
 codefresh install runtime --kube-namespace codefresh-runtime-1
-# Attach the first runtime to agent:
+
+# 6. Attach the first runtime to agent:
 codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --kube-namespace codefresh-runtime-1
-# restart the venona pod in namespace `codefresh-agent`
+
+# 7. Restart the venona pod in namespace `codefresh-agent`
 kubectl delete pods $VENONA_POD
 
-# Create namespace for the second runtime
+# 8. Create namespace for the second runtime
 kubectl create namespace codefresh-runtime-2
-# Install the second runtime on the namespace
+
+# 9. Install the second runtime on the namespace
 codefresh install runtime --kube-namespace codefresh-runtime-2
-# Attach the second runtime to agent and restart the Venoa pod automatically
+
+# 10. Attach the second runtime to agent and restart the Venoa pod automatically
 codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefresh-agent --runtime-name $RUNTIME_NAME --runtime-kube-namespace codefresh-runtime-1 --restart-agent
 
 ```
