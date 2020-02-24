@@ -39,25 +39,27 @@ const (
 
 // Install venona agent
 func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
-	u.logger.Debug("Generating token for agent")
-	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
-	u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
+	if  v["AgentToken"] == "" {
+		u.logger.Debug("Generating token for agent")
+		tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
+		u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
 
-	client := codefresh.New(&codefresh.ClientOptions{
-		Auth: codefresh.AuthOptions{
-			Token: opt.CodefreshToken,
-		},
-		Host: opt.CodefreshHost,
-	})
+		client := codefresh.New(&codefresh.ClientOptions{
+			Auth: codefresh.AuthOptions{
+				Token: opt.CodefreshToken,
+			},
+			Host: opt.CodefreshHost,
+		})
 
-	token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
-	if err != nil {
-		return nil, err
-	}
-	u.logger.Debug("Token created")
-	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
-	if err != nil {
-		return nil, err
+		token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
+		if err != nil {
+			return nil, err
+		}
+		u.logger.Debug("Token created")
+		v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	cs, err := opt.KubeBuilder.BuildClient()
@@ -111,7 +113,7 @@ func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
-	return delete(opt)
+	return uninstall(opt)
 }
 
 func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
@@ -163,7 +165,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 				matchPattern:   fileName,
 				operatorType:   VenonaPluginType,
 			}
-			err := delete(delOpt)
+			err := uninstall(delOpt)
 			if err != nil {
 				return nil, err
 			}

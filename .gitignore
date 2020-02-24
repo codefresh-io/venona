@@ -16,3 +16,4 @@ telepresence.log
 venonactl/dist/*
 venonactl-linux
 venonalog.json
+.venonaconf

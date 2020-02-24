@@ -1,10 +1,13 @@
-const { Client, config } = require('kubernetes-client');
+const { Client } = require('kubernetes-client');
 const utils = require('./../utils');
 
 const ERROR_MESSAGES = {
 	MISSING_KUBERNETES_URL: 'Failed to construct Kubernetes API service, missing Kubernetes URL',
 	MISSING_KUBERNETES_BEARER_TOKEN: 'Failed to construct Kubernetes API service, missing Kubernetes bearer token',
 	MISSING_KUBERNETES_CA_CERTIFICATE: 'Failed to construct Kubernetes API service, missing Kubernetes ca certificate',
+	MISSING_NAMESPACE: 'Failed to get Kubernetes namespace',
+	MISSING_VENONA_CONF: 'Failed to read venona configuration',
+
 	FAILED_TO_INIT: 'Failed to complete Kubernetes service initialization',
 	FAILED_TO_CREATE_POD: 'Failed to create Kubernetes pod',
 	FAILED_TO_DELETE_POD: 'Failed to delete Kubernetes pod',
@@ -12,16 +15,12 @@ const ERROR_MESSAGES = {
 	FAILED_TO_DELETE_PVC: 'Failed to delete Kubernetes pvc',
 };
 
-
 class Kubernetes {
+	// Do not use this constructor, use Kubernetes.buildFromConfig
+	// to create new instance
 	constructor(metadata, client) {
 		this.metadata = metadata;
 		this.client = client;
-	}
-
-	static buildFromInCluster(metadata) {
-		const client = new Client({ config: config.getInCluster() });
-		return new this(metadata, client);
 	}
 
 	static buildFromConfig(metadata, options) {
@@ -32,9 +31,9 @@ class Kubernetes {
 			config: {
 				url,
 				auth: {
-					bearer: Buffer.from(bearer, 'base64'),
+					bearer
 				},
-				ca: Buffer.from(ca, 'base64'),
+				ca
 			},
 		});
 		return new this(metadata, client);

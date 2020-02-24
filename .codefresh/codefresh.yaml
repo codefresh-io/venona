@@ -22,7 +22,6 @@ steps:
     commands:
         - export VERSION=$(jq -r ".version" package.json)
         - cf_export VERSION
-        # - export FILE_VERSION= $(cat ./venonactl/VERSION)
         - cf_export FILE_VERSION=$(cat ./venonactl/VERSION)
     when:
       steps:

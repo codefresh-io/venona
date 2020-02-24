@@ -1,11 +1,16 @@
 package cmd
 
 import (
+	"encoding/base64"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"strings"
+
+	"encoding/json"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
@@ -15,6 +20,9 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
+	"gopkg.in/yaml.v2"
+	k8sApi "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -178,4 +186,79 @@ func createLogger(command string, verbose bool) logger.Logger {
 		Verbose:   verbose,
 		LogToFile: logFile,
 	})
+}
+
+type nodeSelector map[string]string
+
+func parseNodeSelector(s string) (nodeSelector, error) {
+	if s == "" {
+		return nodeSelector{}, nil
+	}
+	v := strings.Split(s, "=")
+	if len(v) != 2 {
+		return nil, errors.New("node selector must be in form \"key=value\"")
+	}
+	return nodeSelector{v[0]: v[1]}, nil
+}
+
+func loadTolerationsFromFile(filename string) string {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		dieOnError(err)
+	}
+
+	return string(data)
+}
+
+func parseTolerations(s string) (string, error) {
+	if s == "" {
+		return "", nil
+	}
+	var data []k8sApi.Toleration
+	err := json.Unmarshal([]byte(s), &data)
+	if err != nil {
+		return "", fmt.Errorf("can not parse tolerations: %s", err)
+	}
+	y, err := yaml.Marshal(&data)
+	if err != nil {
+		return "", fmt.Errorf("can not marshel tolerations to yaml: %s", err)
+	}
+	d := fmt.Sprintf("\n%s", string(y))
+	return d, nil
+}
+
+func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCluster bool) {
+
+	s := store.GetStore()
+	if context == "" {
+		config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
+		context = config.CurrentContext
+		lgr.Debug("Kube Context is not set, using current context", "Kube-Context-Name", context)
+	}
+	if namespace == "" {
+		namespace = "default"
+	}
+
+	s.KubernetesAPI.InCluster = inCluster
+	s.KubernetesAPI.ContextName = context
+	s.KubernetesAPI.Namespace = namespace
+
+}
+
+func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string) {
+	s := store.GetStore()
+	logger.Debug("Using agent's token", "Token", token)
+	s.AgentAPI = &store.AgentAPI{
+		Token: base64.StdEncoding.EncodeToString([]byte(token)),
+		Id:    agentID,
+	}
+}
+
+// String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
+func (ns nodeSelector) String() string {
+	var s string
+	for k, v := range ns {
+		s = fmt.Sprintf("%s: %s", k, v)
+	}
+	return s
 }

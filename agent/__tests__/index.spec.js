@@ -1,24 +1,31 @@
-const _ = require('lodash');
+
 const Promise = require('bluebird');
 const scheduler = require('node-schedule');
+const fs = require('fs');
+const path = require('path');
+const _ = require('lodash');
+const recursive = require('recursive-readdir');
 const Agent = require('./../');
 const Codefresh = require('./../../services/Codefresh');
-const Kubernetes = require('./../../services/Kubernetes');
 const Logger = require('./../../services/Logger');
 const { Server } = require('./../../server');
 const TaskPullerJob = require('./../../jobs/TaskPullerJob/TaskPuller.job');
 const StatusReporterJob = require('./../../jobs/StatusReporterJob/StatusReporter.job');
+const Kubernetes = require('./../../services/Kubernetes');
 
 jest.mock('./../../services/Codefresh');
-jest.mock('./../../services/Kubernetes');
 jest.mock('./../../services/Logger');
+jest.mock('./../../services/Kubernetes');
 jest.mock('./../../server');
+jest.mock('fs');
+jest.mock('recursive-readdir');
 
 const buildTestConfig = () => ({
 	metadata: {
 		name: 'agent',
 		version: '1.0',
 		mode: 'mode',
+		venonaConfDir: '/path/to/venona/config/dir'
 	},
 	server: {
 		port: '9000',
@@ -53,6 +60,13 @@ const buildTestConfig = () => ({
 	}
 });
 
+const loadActualJobs = () => {
+	recursive.__setFiles([
+		path.join(__dirname, '../../', 'jobs/StatusReporterJob/StatusReporter.job.js'),
+		path.join(__dirname, '../../', 'jobs/TaskPullerJob/TaskPuller.job.js'),
+	]);
+};
+
 beforeEach(() => {
 	Server.mockImplementationOnce(() => ({
 		init: jest.fn(),
@@ -60,181 +74,149 @@ beforeEach(() => {
 	Codefresh.mockImplementationOnce(() => ({
 		init: jest.fn(),
 	}));
-	Kubernetes.mockImplementationOnce(() => ({
-		init: jest.fn(),
-	}));
-	Kubernetes.buildFromConfig = jest.fn(Kubernetes);
-	Kubernetes.buildFromInCluster = jest.fn(Kubernetes);
+	recursive.__setFiles([]);
+	fs.readdir.mockImplementationOnce((path, cb) => {
+		cb(null, []);
+	});
+});
+
+afterEach(() => {
+	recursive.__clear();
 });
 
 describe('Agent unit test', () => {
-	describe('Constructing new Agent', () => {
-
-		describe('positive', () => {
-			it('Should construct successfully', () => {
-				const agent = new Agent(buildTestConfig());
-				expect(Object.keys(agent).sort()).toEqual([
-					'kubernetesAPI',
-					'codefreshAPI',
-					'logger',
-					'jobs',
-					'queue',
-					'server',
-				].sort());
-			});
-
-			it('Should create logger during construction', () => {
-				new Agent(buildTestConfig());
-				expect(Logger.create).toHaveBeenCalled();
-			});
-
-			it('Should create logger during construction with specific keys', () => {
-				new Agent(buildTestConfig());
-				const callsArguments = Logger.create.mock.calls[0];
-				expect(Object.keys(callsArguments[0])).toEqual(['name', 'version', 'mode']);
-				expect(Object.keys(callsArguments[1])).toEqual(['prettyPrint', 'level']);
-			});
-
-			it('Should call logger with message during construction', () => {
-				new Agent(buildTestConfig());
-				const callsArguments = Logger.create.mock.instances[1].info.mock.calls[0][0];
-				expect(callsArguments).toEqual('Starting agent');
-			});
-
-			it('Should Codefresh API service during construction just once', () => {
-				new Agent(buildTestConfig());
-				const totalCallsToCodefreshConstructor = Codefresh.mock.calls;
-				expect(totalCallsToCodefreshConstructor).toHaveLength(1);
-			});
-
-			it('Should construct CodefreshAPI service with specific keys', () => {
-				new Agent(buildTestConfig());
-				const callsArguments = Codefresh.mock.calls[0];
-				expect(callsArguments).toHaveLength(2);
-				expect(Object.keys(callsArguments[0])).toEqual(['name', 'version', 'mode']);
-				expect(Object.keys(callsArguments[1])).toEqual(['baseURL', 'token']);
-			});
-
-			it('Should construct KubernetesAPI service with specific keys', () => {
-				new Agent(buildTestConfig());
-				const callsArguments = Kubernetes.buildFromConfig.mock.calls[0];
-				expect(callsArguments).toHaveLength(2);
-				expect(Object.keys(callsArguments[0])).toEqual(['name', 'version', 'mode']);
-				expect(Object.keys(callsArguments[1])).toEqual(['config']);
-			});
-
-			it('Should construct KubernetesAPI service when agent running from inside a cluster', () => {
-				Kubernetes.buildFromInCluster = jest.fn();
-				new Agent(_.merge(buildTestConfig(), { metadata: { name: 'fake-name', mode: 'InCluster' } }));
-				const callsArguments = Kubernetes.buildFromInCluster.mock.calls[0];
-				expect(Kubernetes.buildFromInCluster).toHaveBeenCalled();
-				expect(Object.keys(callsArguments[0])).toEqual(['name', 'version', 'mode']);
-			});
-
-			it('Should construct Server with specific keys', () => {
-				new Agent(buildTestConfig());
-				const callsArguments = Server.mock.calls[0];
-				expect(callsArguments).toHaveLength(3);
-				expect(Object.keys(callsArguments[0])).toEqual(['name', 'version', 'mode']);
-				expect(Object.keys(callsArguments[1])).toEqual(['port']);
-				expect(Object.keys(callsArguments[2])).toEqual(['info', 'child', 'error']);
-			});
-
-		});
-
-		describe('negative', () => {
-			it('Should throw an error in case the agent was not constructed correctly', () => {
-				try {
-					Logger.create.mockImplementationOnce(() => {
-						throw new Error('error');
-					});
-					new Agent(buildTestConfig());
-				} catch (err) {
-					expect(err.toString()).toEqual('Error: error');
-				}
-			});
-		});
-
-	});
 
 	describe('Initializing agent', () => {
 
 		describe('positive', () => {
-			it('Should report all services been initialized', () => {
-				return new Agent(buildTestConfig())
-					.init()
-					.then(() => {
-						const loggerSuccessMessage = Logger.create.mock.instances[1].info.mock.calls[2][0];
-						expect(loggerSuccessMessage).toEqual('All services has been initialized');
-					});
+			it('Should report all services been initialized', async () => {
+				const agent = new Agent();
+				await agent.init(buildTestConfig());
+				const loggerSuccessMessage = Logger.create.mock.instances[1].info.mock.calls[2][0];
+				expect(loggerSuccessMessage).toEqual('All services has been initialized');
+
 			});
 
-			it('Should call to Server initialization process during agent initialization', () => {
+			it('Should call to Server initialization process during agent initialization', async () => {
 				const serverInitSpy = jest.fn();
 				Server.mockReset();
 				Server.mockImplementationOnce(() => ({
 					init: serverInitSpy,
 				}));
-				return new Agent(buildTestConfig())
-					.init()
-					.then(() => {
-						expect(serverInitSpy).toHaveBeenCalledTimes(1);
-						expect(serverInitSpy).toHaveBeenCalledWith();
-					});
+				const agent = new Agent();
+				await agent.init(buildTestConfig());
+				expect(serverInitSpy).toHaveBeenCalledTimes(1);
+				expect(serverInitSpy).toHaveBeenCalledWith();
+
 			});
 
-			it('Should call to CodefreshAPI initialization process during agent initialization', () => {
+			it('Should call to CodefreshAPI initialization process during agent initialization', async () => {
 				const codefreshInitSpy = jest.fn();
 				Codefresh.mockReset();
 				Codefresh.mockImplementation(() => ({
 					init: codefreshInitSpy,
 				}));
-				return new Agent(buildTestConfig())
-					.init()
-					.then(() => {
-						expect(codefreshInitSpy).toHaveBeenCalledTimes(1);
-						expect(codefreshInitSpy).toHaveBeenCalledWith();
-					});
+				jest.unmock('recursive-readdir');
+				const agent = new Agent();
+				await agent.init(buildTestConfig());
+				expect(codefreshInitSpy).toHaveBeenCalledTimes(1);
+				expect(codefreshInitSpy).toHaveBeenCalledWith();
+
 			});
 
-			it('Should call to KubernetesAPI initialization process during agent initialization', () => {
-				const kubernetesInitSpy = jest.fn();
-				Kubernetes.mockReset();
-				Kubernetes.mockImplementation(() => ({
-					init: kubernetesInitSpy,
-				}));
-				return new Agent(buildTestConfig())
-					.init()
-					.then(() => {
-						expect(kubernetesInitSpy).toHaveBeenCalledTimes(1);
-						expect(kubernetesInitSpy).toHaveBeenCalledWith();
-					});
-			});
-
-			it('Should call to _startJob for both supported tasks', () => {
-				const agent = new Agent(buildTestConfig());
+			it('Should call to _startJob for both supported tasks', async () => {
+				loadActualJobs();
+				const agent = new Agent();
 				agent._startJob = jest.fn();
-				return agent
-					.init()
-					.then(() => {
-						expect(agent._startJob).toHaveBeenCalledTimes(2);
-						expect(agent._startJob).toHaveBeenNthCalledWith(1, StatusReporterJob);
-						expect(agent._startJob).toHaveBeenNthCalledWith(2, TaskPullerJob);
-					});
+				await agent.init(buildTestConfig());
+				expect(agent._startJob).toHaveBeenCalledTimes(2);
+				expect(agent._startJob).toHaveBeenNthCalledWith(1, StatusReporterJob);
+				expect(agent._startJob).toHaveBeenNthCalledWith(2, TaskPullerJob);
+
 			});
 		});
-
-		describe('negative', () => {
-
+		
+		describe('Prepare server', () => {
 			it('Should throw an error when initialization crashed', () => {
 				Server.mockReset();
 				Server.mockImplementationOnce(() => ({
 					init: jest.fn().mockRejectedValue(new Error('Error!')),
 				}));
-				return expect(new Agent(buildTestConfig()).init()).rejects.toThrow('Failed to initialize agent with error message');
+				return expect(new Agent().init(buildTestConfig())).rejects.toThrow('Failed to initialize agent with error, message: Error!');
 			});
 		});
 
+		describe('Prepare runtimes', () => {
+			it('Should fail to init in case failed to read metadata.venonaConfDir directory', async () => {
+				fs.readdir.mockReset();
+				fs.readdir.mockImplementationOnce((path, cb) => cb(new Error('Failed to read directory')));
+				const agent = new Agent();
+				return expect(agent.init(buildTestConfig())).rejects.toThrow('Failed to initialize agent with error, message: Failed to read directory');
+			});
+			it('Should log warning that nasted directory under metadata.venonaConfDir is not going to be read', async () => {
+				fs.readdir.mockReset();
+				fs.readdir.mockImplementationOnce((path, cb) => cb(null, [
+					'sub-dir',
+				]));
+				fs.stat.mockImplementation((path, cb) => {
+					if (path.includes('sub-di')) {
+						cb(null, {
+							isDirectory: () => true,
+						});
+					}
+				});
+
+				const agent = new Agent();
+				await agent.init(buildTestConfig());
+				expect(agent.logger.warn).toHaveBeenCalledTimes(1);
+				expect(agent.logger.warn).toHaveBeenCalledWith('Directory "sub-dir" ignored, Venona loading only files that are mached to regexp /.*\\.runtime\\.yaml/');
+			});
+			it('Should log warning that file that is not matched to the regexp is ignored from being loaded', async () => {
+				fs.readdir.mockReset();
+				fs.readdir.mockImplementationOnce((path, cb) => cb(null, [
+					'file',
+				]));
+				fs.stat.mockImplementation((path, cb) => {
+					cb(null, {
+						isDirectory: () => false,
+					});
+				});
+
+				const agent = new Agent();
+				await agent.init(buildTestConfig());
+				expect(agent.logger.warn).toHaveBeenCalledTimes(1);
+				expect(agent.logger.warn).toHaveBeenCalledWith('File "file" ignored, Venona loading only files that are mached to regexp /.*\\.runtime\\.yaml/');
+			});
+			it('Should log warning in case found duplication of runtimes', async () => {
+				const db = {
+					'a.runtime.yaml': 'name: runtime',
+					'b.runtime.yaml': 'name: runtime',
+				};
+				fs.readdir.mockReset();
+				fs.readdir.mockImplementationOnce((path, cb) => {
+					cb(null, _.keys(db));
+				});
+				fs.stat.mockImplementation((path, cb) => {
+					cb(null, {
+						isDirectory: () => false,
+					});
+				});
+				fs.readFile.mockImplementation((location, cb) => {
+					cb(null, db[path.basename(location)]);
+				});
+				fs.access.mockImplementation((path, cb) => {
+					cb(null);
+				});
+				Kubernetes.mockImplementation(() => ({
+					init: Promise.resolve,
+				}));
+				Kubernetes.buildFromConfig = jest.fn(Kubernetes);
+
+				const agent = new Agent();
+				await expect(agent.init(buildTestConfig())).resolves.toEqual();
+				expect(agent.logger.warn).toHaveBeenCalledWith('Ignoring runtime "runtime", already been configured, conflict with file: "/path/to/venona/config/dir/b.runtime.yaml"');
+			});
+		});
 	});
 
 	describe('Queue', () => {
@@ -244,7 +226,8 @@ describe('Agent unit test', () => {
 				cb();
 			});
 			const spy = jest.fn();
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = spy;
 				return this;
@@ -260,7 +243,8 @@ describe('Agent unit test', () => {
 				cb();
 			});
 			const error = new Error('my error');
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = jest.fn().mockRejectedValue(error);
 				return this;
@@ -280,7 +264,8 @@ describe('Agent unit test', () => {
 				cb();
 			});
 			const error = new Error('my error');
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = jest.fn(() => {
 					throw (error);
@@ -297,13 +282,12 @@ describe('Agent unit test', () => {
 			expect(handleErrorSpy).toHaveBeenCalledWith(error);
 		});
 
-		it.skip('Should call cb with an error in case a job timedout', () => {});
-
 		it('Should call cb in case the job was resolved', async () => {
 			scheduler.scheduleJob = jest.fn((_ex, cb) => {
 				cb();
 			});
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = jest.fn();
 				return this;
@@ -322,7 +306,8 @@ describe('Agent unit test', () => {
 			scheduler.scheduleJob = jest.fn((_ex, cb) => {
 				cb();
 			});
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = jest.fn();
 				return this;
@@ -339,9 +324,10 @@ describe('Agent unit test', () => {
 
 	describe('Auto jobs load', () => {
 		it('Should load only jobs that related to agent', async () => {
-			const agent = new Agent(buildTestConfig());
+			loadActualJobs();
+			const agent = new Agent();
 			agent._startJob = jest.fn();
-			await agent._loadJobs();
+			await agent.init(buildTestConfig());
 			expect(agent._startJob).toHaveBeenCalledTimes(2);
 		});
 	});
@@ -352,7 +338,8 @@ describe('Agent unit test', () => {
 			scheduler.scheduleJob = jest.fn((_ex, cb) => {
 				cb();
 			});
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = jest.fn();
 				return this;
@@ -363,11 +350,12 @@ describe('Agent unit test', () => {
 			expect(agent.logger.child).toHaveBeenCalledTimes(1);
 		});
 
-		it('Should pass all services to the Job constructor', async () => {
+		it('Should pass all services and runtimes the Job constructor', async () => {
 			scheduler.scheduleJob = jest.fn((_ex, cb) => {
 				cb();
 			});
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = jest.fn().mockImplementation(() => {
 				this.exec = jest.fn();
 				return this;
@@ -378,14 +366,15 @@ describe('Agent unit test', () => {
 			});
 			agent._startJob(FakeJob);
 			await Promise.delay(100);
-			expect(FakeJob).toHaveBeenCalledWith(agent.codefreshAPI, agent.kubernetesAPI, newTaskLogger);
+			expect(FakeJob).toHaveBeenCalledWith(agent.codefreshAPI, {}, newTaskLogger);
 		});
 
 		it('Should push the job to the queue', async () => {
 			scheduler.scheduleJob = jest.fn((_ex, cb) => {
 				cb();
 			});
-			const agent = new Agent(buildTestConfig());
+			const agent = new Agent();
+			await agent.init(buildTestConfig());
 			const FakeJob = function() {
 				this.exec = jest.fn();
 				return this;

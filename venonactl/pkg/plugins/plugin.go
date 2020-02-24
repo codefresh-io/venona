@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
+	RuntimeAttachType			  = "runtime-attach"
 )
 
 type (
@@ -29,6 +31,10 @@ type (
 	PluginBuilder interface {
 		Add(string) PluginBuilder
 		Get() []Plugin
+	}
+
+	KubeClientBuilder interface {
+		BuildClient() (*kubernetes.Clientset, error)
 	}
 
 	pb struct {
@@ -49,18 +55,34 @@ type (
 		IsDefaultStorageClass bool
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)
+			BuildConfig() clientcmd.ClientConfig
+			
+		}
+		AgentKubeBuilder	  interface {
+			BuildClient() (*kubernetes.Clientset, error)
 		}
 		DryRun               bool
 		KubernetesRunnerType bool
 		BuildNodeSelector    map[string]string
 		Annotations          map[string]string
+		RuntimeEnvironment   string
+		RuntimeClusterName   string
+		RuntimeServiceAccount string
+		RestartAgent        bool
 	}
 
 	DeleteOptions struct {
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
-		ClusterNamespace string
+		AgentKubeBuilder	  interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		ClusterNamespace string // runtime
+		AgentNamespace   string // agent
+		RuntimeEnvironment   string
+		RestartAgent        bool
+
 	}
 
 	UpgradeOptions struct {
@@ -158,6 +180,11 @@ func build(t string, logger logger.Logger) Plugin {
 		}
 	}
 
+	if t == RuntimeAttachType {
+		return &runtimeAttachPlugin{
+			logger: logger.New("Plugin", RuntimeAttachType),
+		}
+	}
 	return nil
 }
 
@@ -217,7 +244,7 @@ func status(opt *statusOptions) ([][]string, error) {
 	return rows, nil
 }
 
-func delete(opt *deleteOptions) error {
+func uninstall(opt *deleteOptions) error {
 
 	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {

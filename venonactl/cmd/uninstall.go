@@ -20,11 +20,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var installCommand = &cobra.Command{
-	Use:   "install",
-	Short: "Install agent and runtime components",
+var uninstallCommand = &cobra.Command{
+	Use:   "uninstall",
+	Short: "Uninstall agent and runtime components",
 }
 
 func init() {
-	rootCmd.AddCommand(installCommand)
+	rootCmd.AddCommand(uninstallCommand)
 }

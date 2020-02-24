@@ -10,6 +10,7 @@ import (
 type (
 	Kube interface {
 		BuildClient() (*kubernetes.Clientset, error)
+		BuildConfig() (clientcmd.ClientConfig)
 	}
 
 	kube struct {
@@ -42,17 +43,23 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 	if k.inCluster {
 		config, err = rest.InClusterConfig()
 	} else {
-		config, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: k.pathToKubeConfig},
-			&clientcmd.ConfigOverrides{
-				CurrentContext: k.contextName,
-				Context: clientcmdapi.Context{
-					Namespace: k.namespace,
-				},
-			}).ClientConfig()
+		config, err = k.BuildConfig().ClientConfig()
 	}
 	if err != nil {
 		return nil, err
 	}
 	return kubernetes.NewForConfig(config)
+}
+
+func (k *kube) BuildConfig() (clientcmd.ClientConfig) {
+	config := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: k.pathToKubeConfig},
+		&clientcmd.ConfigOverrides{
+			CurrentContext: k.contextName,
+			Context: clientcmdapi.Context{
+				Namespace: k.namespace,
+			},
+		})
+		return config
+
 }
