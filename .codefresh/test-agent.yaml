@@ -7,6 +7,7 @@ stages:
 steps:
 
   create_namespace:
+    stage: Notification
     title: 'Create namespace in Kuberentes'
     image: codefresh/kube-helm
     commands:
@@ -14,6 +15,7 @@ steps:
     - kubectl create namespace $KUBE_NAMESPACE
 
   install_agent:
+    stage: Notification
     title: 'Install agent'
     image: codefresh/cli
     commands:
@@ -22,6 +24,7 @@ steps:
     - codefresh run $TEST_PIPELINE_ID
 
   uninstall_agent:
+    stage: Notification
     title: 'Uninstall agent'
     image: codefresh/cli
     commands:
@@ -29,6 +32,7 @@ steps:
     - echo "removed"
 
   delete_namespace:
+    stage: Notification
     title: 'Create namespace in Kuberentes'
     image: codefresh/kube-helm
     commands:
@@ -41,6 +45,7 @@ steps:
         - success
 
   reported_failure:
+    stage: Notification
     title: Report failure to Slack
     type: slack-message-sender
     arguments:
