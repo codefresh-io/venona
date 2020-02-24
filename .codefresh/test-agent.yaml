@@ -46,7 +46,7 @@ steps:
 
   delete_namespace:
     stage: Test
-    title: 'Create namespace in Kuberentes'
+    title: 'Delete namespace in Kuberentes'
     image: codefresh/kube-helm
     commands:
     - kubectl delete namespace $KUBE_NAMESPACE
