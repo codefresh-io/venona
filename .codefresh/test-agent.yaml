@@ -13,7 +13,7 @@ steps:
     title: 'Create namespace in Kuberentes'
     image: codefresh/kube-helm
     commands:
-    - kubectl config set-context $KUBE_CONTEXT
+    - kubectl config use-context $KUBE_CONTEXT
     - kubectl create namespace $KUBE_NAMESPACE
 
   install_agent:
@@ -62,7 +62,7 @@ steps:
     title: Report failure to Slack
     type: slack-message-sender
     arguments:
-      WEBHOOK_URL: $SLACK_WEBHOOK_URL
+      WEBHOOK_URL: ${{SLACK_WEBHOOK_URL}}
       MESSAGE: "Venona installation failed, link: $CF_BUILD_URL"
     when:
       steps:
