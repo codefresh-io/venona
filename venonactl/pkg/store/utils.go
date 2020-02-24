@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DefaultVersion = "saas-5009-64ab4d6"
+	DefaultVersion = "latest"
 )
 
 type (
