@@ -29,6 +29,8 @@ steps:
     image: codefresh/cli
     commands:
     # Uninstall agent, runtime
+    - codefresh uninstall agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE
+    - codefresh uninstall runtime --runtime-name $KUEB_CONTEXT/$KUBE_NAMESPACE --kube-namespace $KUBE_NAMESPACE --kube-context-name $KUEB_CONTEXT --kube-config-path $KUBECONFIG
     - echo "removed"
 
   delete_namespace:
