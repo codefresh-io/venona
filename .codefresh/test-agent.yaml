@@ -4,47 +4,58 @@ stages:
 - Test
 - Notification
 
+mode: parallel
+
 steps:
 
   create_namespace:
-    stage: Notification
+    stage: Test
     title: 'Create namespace in Kuberentes'
     image: codefresh/kube-helm
     commands:
-    - kubectl config set-context $KUEB_CONTEXT
+    - kubectl config set-context $KUBE_CONTEXT
     - kubectl create namespace $KUBE_NAMESPACE
 
   install_agent:
-    stage: Notification
+    stage: Test
     title: 'Install agent'
     image: codefresh/cli
     commands:
     # Install agent, runtime and attach it
-    - codefresh install agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE --install-runtime --kube-context-name $KUEB_CONTEXT --kube-config-path $KUBECONFIG
+    - codefresh install agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE --install-runtime --kube-context-name $KUBE_CONTEXT --kube-config-path $KUBECONFIG
     - codefresh run $TEST_PIPELINE_ID
-
-  uninstall_agent:
-    stage: Notification
-    title: 'Uninstall agent'
-    image: codefresh/cli
-    commands:
-    # Uninstall agent, runtime
-    - codefresh uninstall agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE
-    - codefresh uninstall runtime --runtime-name $KUEB_CONTEXT/$KUBE_NAMESPACE --kube-namespace $KUBE_NAMESPACE --kube-context-name $KUEB_CONTEXT --kube-config-path $KUBECONFIG
-    - echo "removed"
-
-  delete_namespace:
-    stage: Notification
-    title: 'Create namespace in Kuberentes'
-    image: codefresh/kube-helm
-    commands:
-    - kubectl delete namespace $KUBE_NAMESPACE
-
     when:
       steps:
       - name: create_namespace
         on:
         - success
+
+  uninstall_agent:
+    stage: Test
+    title: 'Uninstall agent'
+    image: codefresh/cli
+    commands:
+    # Uninstall agent, runtime
+    - codefresh uninstall agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE
+    - codefresh uninstall runtime --runtime-name $KUBE_CONTEXT/$KUBE_NAMESPACE --kube-namespace $KUBE_NAMESPACE --kube-context-name $KUBE_CONTEXT --kube-config-path $KUBECONFIG
+    when:
+      steps:
+      - name: install_agent
+        on:
+        - success
+
+  delete_namespace:
+    stage: Test
+    title: 'Create namespace in Kuberentes'
+    image: codefresh/kube-helm
+    commands:
+    - kubectl delete namespace $KUBE_NAMESPACE
+    when:
+      steps:
+      - name: uninstall_agent
+        on:
+        - success
+
 
   reported_failure:
     stage: Notification
