@@ -23,7 +23,7 @@ steps:
     commands:
     # Install agent, runtime and attach it
     - codefresh install agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE --install-runtime --kube-context-name $KUBE_CONTEXT --kube-config-path $KUBECONFIG
-    - codefresh run $TEST_PIPELINE_ID
+    - codefresh run -b master $TEST_PIPELINE_ID
     when:
       steps:
       - name: create_namespace
