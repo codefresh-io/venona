@@ -75,8 +75,6 @@ pod=$(eval "$kube get pods -l app=venona -o go-template='{{range .items }}{{ .me
 echoAndRun "$kube delete deploy --wait=true venona"
 echoAndRun "$kube wait --for=delete pod/$pod --timeout 60s"
 echoAndRun "$kube delete secret venona"
-echoAndRun "$kube delete role venona"
-echoAndRun "$kube delete rolebinding venona"
 
 info "Installing agent on namespace using token $token"
 echoAndRun "codefresh install agent --token $token --kube-namespace $VENONA_KUBE_NAMESPACE --kube-context-name $VENONA_KUBE_CONTEXT --kube-config-path $VENONA_KUBECONFIG_PATH --verbose"
