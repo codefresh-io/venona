@@ -1,14 +1,16 @@
 package cmd
 
 import (
+	"encoding/base64"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"strings"
-	"errors"
-	"io/ioutil"
-	"encoding/base64"
+
+	"encoding/json"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
@@ -18,10 +20,9 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
-	"encoding/json"
 	"gopkg.in/yaml.v2"
-	"k8s.io/client-go/tools/clientcmd"
 	k8sApi "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -226,7 +227,7 @@ func parseTolerations(s string) (string, error) {
 	return d, nil
 }
 
-func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCluster bool)  {
+func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCluster bool) {
 
 	s := store.GetStore()
 	if context == "" {
@@ -241,14 +242,23 @@ func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCl
 	s.KubernetesAPI.InCluster = inCluster
 	s.KubernetesAPI.ContextName = context
 	s.KubernetesAPI.Namespace = namespace
-	
+
 }
 
-func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)  {
+func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string) {
 	s := store.GetStore()
 	logger.Debug("Using agent's token", "Token", token)
 	s.AgentAPI = &store.AgentAPI{
-		Token:  base64.StdEncoding.EncodeToString([]byte(token)),
-		Id: agentID,
+		Token: base64.StdEncoding.EncodeToString([]byte(token)),
+		Id:    agentID,
 	}
+}
+
+// String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
+func (ns nodeSelector) String() string {
+	var s string
+	for k, v := range ns {
+		s = fmt.Sprintf("%s: %s", k, v)
+	}
+	return s
 }
