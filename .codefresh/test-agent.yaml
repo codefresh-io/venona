@@ -8,7 +8,7 @@ steps:
 
   create_namespace:
     title: 'Create namespace in Kuberentes'
-    image: codefresh/cli
+    image: codefresh/kube-helm
     commands:
     - kubectl config set-context $KUEB_CONTEXT
     - kubectl create namespace $KUBE_NAMESPACE
@@ -20,7 +20,20 @@ steps:
     # Install agent, runtime and attach it
     - codefresh install agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE --install-runtime --kube-context-name $KUEB_CONTEXT --kube-config-path $KUBECONFIG
     - codefresh run $TEST_PIPELINE_ID
-    
+
+  uninstall_agent:
+    title: 'Uninstall agent'
+    image: codefresh/cli
+    commands:
+    # Uninstall agent, runtime
+    - echo "removed"
+
+  delete_namespace:
+    title: 'Create namespace in Kuberentes'
+    image: codefresh/kube-helm
+    commands:
+    - kubectl delete namespace $KUBE_NAMESPACE
+
     when:
       steps:
       - name: create_namespace
@@ -40,6 +53,12 @@ steps:
           on:
           - failure
         - name: create_namespace
+          on:
+          - failure
+        - name: delete_namespace
+          on:
+          - failure
+        - name: uninstall_agent
           on:
           - failure
 
