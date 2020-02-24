@@ -117,6 +117,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	}
 	// normalize the key in the secret to make sure we are not violating kube naming conventions
 	name := strings.ReplaceAll(opt.RuntimeEnvironment, "/", ".")
+	name = strings.ReplaceAll(name, "@", ".")
 	currentVenonaConf.Runtimes[fmt.Sprintf("%s.runtime.yaml", name)] = rc
 	runtimes := map[string]string{}
 	for name, runtime := range currentVenonaConf.Runtimes {
@@ -201,17 +202,16 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
 		return err
 	}
-	name := strings.ReplaceAll(deleteOpt.RuntimeEnvironment , "/", ".")
+	name := strings.ReplaceAll(deleteOpt.RuntimeEnvironment, "/", ".")
 	name = fmt.Sprintf("%s.runtime.yaml", name)
 	if _, ok := currentVenonaConf.Runtimes[name]; ok {
-		 delete(currentVenonaConf.Runtimes, name)
+		delete(currentVenonaConf.Runtimes, name)
 	}
 
-
-	// If only one runtime is defined, remove the secret , otherwise remove the entry and persist 
+	// If only one runtime is defined, remove the secret , otherwise remove the entry and persist
 	shouldDelete := true
 	if len(currentVenonaConf.Runtimes) > 0 {
-	
+
 		runtimes := map[string]string{}
 		for name, runtime := range currentVenonaConf.Runtimes {
 			// marshel prior persist
@@ -220,15 +220,14 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 				u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
 				return err
 			}
-	
+
 			runtimes[name] = base64.StdEncoding.EncodeToString([]byte(d))
 		}
-		
 
 		shouldDelete = false
 		v["venonaConf"] = runtimes
 
-	    cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
+		cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
 		err = install(&installOptions{
 			logger:         u.logger,
@@ -243,9 +242,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 
 	}
 
-
-
-    if shouldDelete {
+	if shouldDelete {
 		opt := &deleteOptions{
 			templates:      templates.TemplatesMap(),
 			templateValues: v,
@@ -258,7 +255,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		return uninstall(opt)
 	}
 	return nil
-	
+
 }
 
 func (u *runtimeAttachPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
