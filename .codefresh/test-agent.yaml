@@ -1,0 +1,45 @@
+version: '1.0'
+
+stages:
+- Test
+- Notification
+
+steps:
+
+  create_namespace:
+    title: 'Create namespace in Kuberentes'
+    image: codefresh/cli
+    commands:
+    - kubectl config set-context $KUEB_CONTEXT
+    - kubectl create namespace $KUBE_NAMESPACE
+
+  install_agent:
+    title: 'Install agent'
+    image: codefresh/cli
+    commands:
+    # Install agent, runtime and attach it
+    - codefresh install agent --name $AGENT_NAME --kube-namespace $KUBE_NAMESPACE --install-runtime --kube-context-name $KUEB_CONTEXT --kube-config-path $KUBECONFIG
+    - codefresh run $TEST_PIPELINE_ID
+    
+    when:
+      steps:
+      - name: create_namespace
+        on:
+        - success
+
+  reported_failure:
+    title: Report failure to Slack
+    type: slack-message-sender
+    arguments:
+      WEBHOOK_URL: $SLACK_WEBHOOK_URL
+      MESSAGE: "Venona installation failed, link: $CF_BUILD_URL"
+    when:
+      steps:
+        any:
+        - name: create_namespace
+          on:
+          - failure
+        - name: create_namespace
+          on:
+          - failure
+
