@@ -120,6 +120,27 @@ steps:
           on:
           - finished
           
+  create_git_tag:
+    title: Push tag to git
+    image: codefresh/cli
+    stage: Release
+    commands:
+    - export OLD_ORIGIN=$(git remote get-url origin)
+    - git remote rm origin
+    - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/venona.git
+    - git tag v${{VERSION}}
+    - git push --tags
+    - git remote rm origin
+    - git remote add origin $OLD_ORIGIN
+    
+    fail_fast: false
+    when:
+      steps:
+      - name: calculate_version
+      - name: main_clone
+      branch:
+        only:
+        - release-1.0
   
   release_binaries:
     title: Create release in Github with venona CLI
@@ -131,8 +152,9 @@ steps:
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate # pre-release
     when:
       steps:
-      - name: calculate_version
-      - name: main_clone
+      - name: create_git_tag
+        on:
+        - finished
       branch:
         only:
         - release-1.0
