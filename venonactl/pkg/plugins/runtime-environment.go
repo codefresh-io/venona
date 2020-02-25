@@ -71,7 +71,6 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		return nil, err
 	}
 
-	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
 	err = install(&installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
@@ -85,6 +84,12 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	if err != nil {
 		return nil, err
 	}
+
+	re, err := cf.Register()
+	if err != nil {
+		return nil, err
+	}
+	v["RuntimeEnvironment"] = re.Metadata.Name
 
 	return v, nil
 }
@@ -111,7 +116,7 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
-		return err
+		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
@@ -122,7 +127,7 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 		operatorType:   RuntimeEnvironmentPluginType,
 		logger:         u.logger,
 	}
-	return uninstall(opt)
+	return delete(opt)
 }
 
 func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {

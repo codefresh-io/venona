@@ -33,7 +33,14 @@ describe('Kubernetes API unit tests', () => {
 			expect(paramsToConstructor).toHaveProperty('config.url');
 		});
 
-		it('Should throw error when url is not given', () => expect(() => Kubernetes.buildFromConfig(getFakeMetadata(), { config: {} })).toThrow('Failed to construct Kubernetes API service, missing Kubernetes URL'));
+		it('Should construct form in-cluster', () => {
+			Kubernetes.buildFromInCluster();
+			const callToClientConstructor = kube.Client.prototype.constructor.mock.calls;
+			expect(callToClientConstructor).toHaveLength(1);
+			expect(callToClientConstructor[0][0]).toHaveProperty('config');
+		});
+
+		it('Should throw error when url is not given', () => expect(() => Kubernetes.buildFromConfig(getFakeMetadata(), { config: {} })).toThrow('Failed to construct Kubernetes API service, '));
 
 		it('Should throw error when bearer token is not given', () => expect(() => Kubernetes.buildFromConfig(getFakeMetadata(), { config: { url: 'ok' } })).toThrow('Failed to construct Kubernetes API service, missing Kubernetes bearer token'));
 

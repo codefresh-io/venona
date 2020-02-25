@@ -87,7 +87,7 @@ func (u *enginePlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		matchPattern:   engineFilesPattern,
 		operatorType:   EnginePluginType,
 	}
-	return uninstall(opt)
+	return delete(opt)
 }
 
 func (u *enginePlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {

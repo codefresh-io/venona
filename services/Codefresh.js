@@ -11,7 +11,6 @@ class Codefresh {
 	constructor(metadata, options) {
 		this.options = options;
 		this.metadata = metadata;
-		this.agentId = this.metadata.id;
 		this.defaults = {
 			baseUrl: utils.getPropertyOrError(options, 'baseURL', ERROR_MESSAGES.MISSING_BASE_URL),
 			headers: {
@@ -34,7 +33,7 @@ class Codefresh {
 
 	pullTasks(logger) {
 		logger.info('Calling Codefresh API to fetch jobs');
-		const url = `/api/agent/${this.agentId}/tasks`;
+		const url = '/api/agent/tasks';
 		return this._call({
 			url,
 			method: 'GET',
@@ -43,7 +42,7 @@ class Codefresh {
 
 	reportStatus(logger, status) {
 		logger.info({ status }, 'Calling Codefresh API to report status');
-		const url = `/api/agent/${this.agentId}/status`;
+		const url = '/api/agent/status';
 		return this._call({
 			url,
 			method: 'PUT',
