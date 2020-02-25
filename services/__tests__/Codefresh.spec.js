@@ -5,7 +5,7 @@ const { create: createLogger } = require('./../../services/Logger');
 jest.mock('request-promise');
 jest.mock('./../../services/Logger');
 
-const getFakeMetadata = () => ({ name: 'unit-test', id: 'fake-agent-id' });
+const getFakeMetadata = () => ({ name: 'unit-test' });
 
 const getFakeConfig = () => ({ baseURL: 'fake-url', token: 'fake-token' });
 
@@ -19,7 +19,7 @@ describe('Codefresh API unit tests', () => {
 
 		it('Should set values on this', () => {
 			const api = createCodefreshAPI();
-			expect(Object.keys(api)).toStrictEqual(['options', 'metadata', 'agentId', 'defaults']);
+			expect(Object.keys(api)).toStrictEqual(['options', 'metadata', 'defaults']);
 		});
 	});
 
@@ -94,7 +94,7 @@ describe('Codefresh API unit tests', () => {
 				return createCodefreshAPI()
 					.pullTasks(createLogger(getFakeMetadata()))
 					.then(() => {
-						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/fake-agent-id/tasks');
+						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/tasks');
 					});
 			});
 		});
@@ -110,7 +110,7 @@ describe('Codefresh API unit tests', () => {
 						},
 					})
 					.then(() => {
-						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/fake-agent-id/status');
+						expect(spy.mock.calls[0][0]).toHaveProperty('url', '/api/agent/status');
 						expect(spy.mock.calls[0][0]).toHaveProperty('method', 'PUT');
 						expect(spy.mock.calls[0][0]).toHaveProperty('body');
 					});

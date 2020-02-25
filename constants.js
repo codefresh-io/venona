@@ -1,4 +1,7 @@
-
+const AGENT_MODES = {
+	// The agent will run inside a cluster as a pod
+	IN_CLUSTER: 'InCluster',
+};
 
 const TASK_PRIORITY = {
 	HIGH: 1,
@@ -22,6 +25,7 @@ const CRON = {
 };
 
 module.exports = {
+	AGENT_MODES,
 	LOGGER_NAMESPACES,
 	LOGGER_MODES,
 	CRON,

@@ -232,7 +232,7 @@ kind: Deployment
 metadata:
   labels:
     app: {{ .AppName }}
-    version: {{ .Version }} 
+    version: {{ .Version }}
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 spec:
@@ -253,10 +253,7 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
-      volumes:
-        - name: venonaconf
-          secret:
-            secretName: venonaconf
+      serviceAccountName: {{ .AppName }}
       {{ if ne .NodeSelector "" }}
       nodeSelector:
         {{ .NodeSelector }}
@@ -264,7 +261,7 @@ spec:
       {{ if ne .Tolerations "" }}
       tolerations:
         {{ .Tolerations | indent 8 }}
-      {{ end }}
+      {{ end }} 
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME
@@ -282,15 +279,7 @@ spec:
           value: {{ .Mode }}
         - name: AGENT_NAME
           value: {{ .AppName }}
-        - name: AGENT_ID
-          value: {{ .AgentId }}
-        - name: VENONA_CONFIG_DIR
-          value: "/etc/secrets"
         image: {{ .Image.Name }}:{{ .Image.Tag }}
-        volumeMounts:
-        - name: venonaconf
-          mountPath: "/etc/secrets"
-          readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
       restartPolicy: Always
@@ -341,7 +330,7 @@ spec:
 
 `
 
-	templatesMap["role-binding.re.yaml"] = `kind: RoleBinding
+	templatesMap["role-binding.venona.yaml"] = `kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -349,13 +338,12 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .AppName }}
-  namespace: {{ .Namespace }}
 roleRef:
   kind: Role
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
-	templatesMap["role.re.yaml"] = `kind: Role
+	templatesMap["role.venona.yaml"] = `kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -365,17 +353,6 @@ rules:
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "create", "delete"]
 `
-
-	templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
-kind: Secret
-type: Opaque
-metadata:
-  name: {{ .AppName }}conf
-  namespace: {{ .Namespace }}
-data:
-{{ range $key, $value := .venonaConf }}
-  {{ $key }}: {{ $value }}
-{{ end }}`
 
 	templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
@@ -402,7 +379,7 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
-	templatesMap["service-account.re.yaml"] = `apiVersion: v1
+	templatesMap["service-account.venona.yaml"] = `apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
@@ -419,17 +396,6 @@ provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }
 parameters:
   volumeBackend: local
 `
-
-	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
-kind: Secret
-type: Opaque
-metadata:
-  name: {{ .AppName }}conf
-  namespace: {{ .Namespace }}
-data:
-{{ range $key, $value := .venonaConf }}
-  {{ $key }}: {{ $value }}
-{{ end }}`
 
 	return templatesMap
 }

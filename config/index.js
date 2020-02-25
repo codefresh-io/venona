@@ -6,8 +6,7 @@ function build() {
 	return {
 		metadata: {
 			version,
-			id: process.env.AGENT_ID,
-			venonaConfDir: process.env.VENONA_CONFIG_DIR,
+			mode: process.env.AGENT_MODE,
 		},
 		logger: {
 			...(!process.env.LOGGER_MODE && {
@@ -21,9 +20,16 @@ function build() {
 			port: process.env.PORT || '9000',
 		},
 		kubernetes: {
+			config: {
+				url: process.env.KUBERNETES_HOST,
+				auth: {
+					bearer: process.env.KUBERNETES_AUTH_BEARER_TOKEN,
+				},
+				ca: process.env.KUBERNETES_CA_CERT,
+			},
 			metadata: {
 				name: process.env.SELF_POD_NAME,
-				namespace: process.env.SELF_POD_NAMESPACE
+				namepsace: process.env.SELF_POD_NAMESPACE,
 			}
 		},
 		codefresh: {

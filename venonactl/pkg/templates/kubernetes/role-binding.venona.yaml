@@ -6,7 +6,6 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .AppName }}
-  namespace: {{ .Namespace }}
 roleRef:
   kind: Role
   name: {{ .AppName }}

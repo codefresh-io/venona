@@ -7,9 +7,6 @@ jest.mock('./../../../../services/Logger');
 
 const getValidTaskDef = () => {
 	return {
-		metadata: {
-			reName: 'runtime'
-		},
 		spec: {
 			namespace: 'namespace',
 			name: 'docker-daemon-name'
@@ -27,11 +24,7 @@ describe('DeletePvc task unit tests', () => {
 				deletePvc: jest.fn().mockRejectedValue(new Error('Error!!!')),
 			};
 
-			const task = new DeletePvcTask(_.noop(), {
-				'runtime': {
-					kubernetesAPI: kubernetesAPIMock,
-				},
-			}, logger);
+			const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 			return expect(task.exec(getValidTaskDef())).rejects.toThrowError('Failed to run task DeletePvc: Error!!!');
 		});
 
@@ -45,11 +38,7 @@ describe('DeletePvc task unit tests', () => {
 
 				const taskDef = getValidTaskDef();
 				delete taskDef.spec;
-				const task = new DeletePvcTask(_.noop(), {
-					'runtime': {
-						kubernetesAPI: kubernetesAPIMock,
-					},
-				}, logger);
+				const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 				return expect(task.exec(taskDef)).rejects.toThrowError('child "spec" fails because ["spec" is required]');
 			});
 
@@ -62,11 +51,7 @@ describe('DeletePvc task unit tests', () => {
 
 				const taskDef = getValidTaskDef();
 				delete taskDef.spec.namespace;
-				const task = new DeletePvcTask(_.noop(), {
-					'runtime': {
-						kubernetesAPI: kubernetesAPIMock,
-					},
-				}, logger);
+				const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 				return expect(task.exec(taskDef)).rejects.toThrowError('child "spec" fails because [child "namespace" fails because ["namespace" is required]]');
 			});
 
@@ -79,11 +64,7 @@ describe('DeletePvc task unit tests', () => {
 
 				const taskDef = getValidTaskDef();
 				delete taskDef.spec.name;
-				const task = new DeletePvcTask(_.noop(), {
-					'runtime': {
-						kubernetesAPI: kubernetesAPIMock,
-					},
-				}, logger);
+				const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 				return expect(task.exec(taskDef)).rejects.toThrowError('child "spec" fails because [child "name" fails because ["name" is required]]');
 			});
 		});
@@ -98,11 +79,7 @@ describe('DeletePvc task unit tests', () => {
 			};
 
 			const taskDef = getValidTaskDef();
-			const task = new DeletePvcTask(_.noop(), {
-				'runtime': {
-					kubernetesAPI: kubernetesAPIMock,
-				},
-			}, logger);
+			const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 			return task.exec(taskDef)
 				.then(() => {
 					const loggerMacher = expect.objectContaining({
@@ -122,11 +99,7 @@ describe('DeletePvc task unit tests', () => {
 				deletePvc: spy,
 			};
 			const taskDef = getValidTaskDef();
-			const task = new DeletePvcTask(_.noop(), {
-				'runtime': {
-					kubernetesAPI: kubernetesAPIMock,
-				},
-			}, logger);
+			const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 			return expect(task.exec(taskDef)).resolves.toEqual('OK');
 		});
 
@@ -139,11 +112,7 @@ describe('DeletePvc task unit tests', () => {
 			};
 
 			const taskDef = getValidTaskDef();
-			const task = new DeletePvcTask(_.noop(), {
-				'runtime': {
-					kubernetesAPI: kubernetesAPIMock,
-				},
-			}, logger);
+			const task = new DeletePvcTask(_.noop(), kubernetesAPIMock, logger);
 			return expect(task.exec(taskDef)).resolves.toEqual('OK');
 		});
 

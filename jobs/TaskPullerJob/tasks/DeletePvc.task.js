@@ -11,8 +11,7 @@ class DeletePvcTask extends Base {
 	async run(task) {
 		this.logger.info('Running DeletePvc task');
 		try {
-			const service = await this.getKubernetesService(_.get(task, 'metadata.reName'));
-			await service.deletePvc(this.logger, task.spec.namespace, task.spec.name);
+			await this.kubernetesAPI.deletePvc(this.logger, task.spec.namespace, task.spec.name);
 		} catch (err) {
 			// we treat 404 as if the operation succeeded
 			if (_.get(err, 'code') !== 404) {
