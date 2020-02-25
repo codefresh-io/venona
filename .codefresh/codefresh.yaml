@@ -87,19 +87,18 @@ steps:
       steps:
         - name: build
 
-  push_latest:
+  push_tag:
     title: "Pushing image to registry with latest tag"
     stage: Release
     type: push
     candidate: ${{build}}
     tags:
-    - latest
     - ${{VERSION}}
     registry: "dockerhub"
     when:
       branch:
         only:
-        - master
+        - release-v1.0
       steps:
         - name: build
           on:
@@ -121,27 +120,6 @@ steps:
           on:
           - finished
           
-  create_git_tag:
-    title: Push tag to git
-    image: codefresh/cli
-    stage: Release
-    commands:
-    - export OLD_ORIGIN=$(git remote get-url origin)
-    - git remote rm origin
-    - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/venona.git
-    - git tag v${{VERSION}}
-    - git push --tags
-    - git remote rm origin
-    - git remote add origin $OLD_ORIGIN
-    
-    fail_fast: false
-    when:
-      steps:
-      - name: calculate_version
-      - name: main_clone
-      branch:
-        only:
-        - master
   
   release_binaries:
     title: Create release in Github with venona CLI
@@ -153,30 +131,26 @@ steps:
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate # pre-release
     when:
       steps:
-      - name: create_git_tag
-        on:
-        - finished
+      - name: calculate_version
+      - name: main_clone
       branch:
         only:
-        - master
+        - release-v1.0
 
   build_binaries:
     title: Build binaries for all platforms - skip publish
-    image: golang:1.12-alpine
+    image: goreleaser/goreleaser:v0.124.1
     stage: Build & Test
     fail_fast: false
     commands:
     - cd venonactl
-    - apk add git curl
-    - curl -L https://github.com/goreleaser/goreleaser/releases/download/v0.118.1/goreleaser_Linux_x86_64.tar.gz | tar xz
-    - mv goreleaser /bin/goreleaser
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
     when:
       steps:
       - name: main_clone
       branch:
         ignore:
-        - master
+        - release-v1.0
 
   build_cli_image:
     title: "Building venona cli image"
