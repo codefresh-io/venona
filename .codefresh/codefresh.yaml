@@ -98,7 +98,7 @@ steps:
     when:
       branch:
         only:
-        - release-v1.0
+        - release-1.0
       steps:
         - name: build
           on:
@@ -135,7 +135,7 @@ steps:
       - name: main_clone
       branch:
         only:
-        - release-v1.0
+        - release-1.0
 
   build_binaries:
     title: Build binaries for all platforms - skip publish
@@ -150,7 +150,7 @@ steps:
       - name: main_clone
       branch:
         ignore:
-        - release-v1.0
+        - release-1.0
 
   build_cli_image:
     title: "Building venona cli image"
