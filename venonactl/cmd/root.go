@@ -49,6 +49,5 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&kubeConfigPath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
-	rootCmd.PersistentFlags().BoolVar(&skipVerionCheck, "skip-version-check", false, "Do not compare current Venona's version with latest")
 
 }
