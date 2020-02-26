@@ -3,7 +3,12 @@
 [![Codefresh build status]( https://g.codefresh.io/api/badges/pipeline/codefresh-inc/codefresh-io%2Fvenona%2Fvenona?type=cf-1)]( https://g.codefresh.io/public/accounts/codefresh-inc/pipelines/codefresh-io/venona/venona)
 
 ## Version 1.x.x
-Version 1.0.0 is released now, read more about migration from older version [here](#Migration)  
+Version 1.x.x is is about to be released soon, read more about migration from older version [here](#Migration)  
+Meanwhile 1.x.x is to release and makred as pre-release we will maintain 2 branches:
+* `master` - the previous version ( `version < 1.0.0` )
+  * we will keep maintaing if (bugs, security issues) - this version will be intalled when installing `venona` on MacOS using brew
+  * `codefresh/venona:latest` will refer to this branch
+* `release-1.0` it the new release, which will be used when running Codefresh CLI to install the agent
 We highly suggest to use [Codefresh official CLI](https://codefresh-io.github.io/cli/) to install the agent:
 ```bash
 kubectl create namespace codefresh
