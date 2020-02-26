@@ -29,9 +29,6 @@ var (
 	version = "dev"
 	commit  = "none"
 	date    = "unknown"
-	// set to false by default, when running hack/build.sh will change to true
-	// to prevent version checking during development
-	localDevFlow = "false"
 
 	verbose bool
 
@@ -41,8 +38,6 @@ var (
 	cfContext  string
 
 	kubeConfigPath string
-
-	skipVerionCheck bool
 )
 
 func buildBasicStore(logger logger.Logger) {
@@ -64,30 +59,7 @@ func buildBasicStore(logger logger.Logger) {
 	s.ServerCert = &certs.ServerCert{}
 
 	s.AppName = store.ApplicationName
-
-	if skipVerionCheck || localDevFlow == "true" {
-		latestVersion := &store.LatestVersion{
-			Version:   store.DefaultVersion,
-			IsDefault: true,
-		}
-		s.Version.Latest = latestVersion
-		logger.Debug("Skipping version check")
-	} else {
-		latestVersion := &store.LatestVersion{
-			Version:   store.GetLatestVersion(logger),
-			IsDefault: false,
-		}
-		s.Image.Tag = latestVersion.Version
-		s.Version.Latest = latestVersion
-		res, _ := store.IsRunningLatestVersion()
-		// the local version and the latest version not match
-		// make sure the command is no venonactl version
-		if !res {
-			logger.Info("New version is avaliable, please update",
-				"Local-Version", s.Version.Current.Version,
-				"Latest-Version", s.Version.Latest.Version)
-		}
-	}
+	s.Image.Tag = s.Version.Current.Version
 }
 
 func extendStoreWithCodefershClient(logger logger.Logger) error {

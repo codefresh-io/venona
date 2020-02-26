@@ -44,7 +44,6 @@ var uninstallAgentCmd = &cobra.Command{
 			deleteOptions := &plugins.DeleteOptions{}
 			s.KubernetesAPI.ContextName = uninstallAgentCmdOptions.kube.context
 			s.KubernetesAPI.Namespace = uninstallAgentCmdOptions.kube.namespace
-			s.KubernetesAPI.ConfigPath = uninstallAgentCmdOptions.kube.kubePath
 
 			builder.Add(plugins.VenonaPluginType)
 			deleteOptions.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, false)
@@ -66,6 +65,5 @@ func init() {
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 	uninstallAgentCmd.Flags().StringVar(&uninstallAgentCmdOptions.kube.context, "kube-context-name", "", "Name of the kubernetes context on which venona should be uninstalled (default is current-context) [$KUBE_CONTEXT]")
 	uninstallAgentCmd.Flags().StringVar(&uninstallAgentCmdOptions.kube.namespace, "kube-namespace", "", "Name of the namespace on which venona should be uninstalled [$KUBE_NAMESPACE]")
-	uninstallAgentCmd.Flags().StringVar(&uninstallAgentCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 
 }

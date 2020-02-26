@@ -19,32 +19,32 @@ limitations under the License.
 import (
 	"fmt"
 
-	"github.com/codefresh-io/venona/venonactl/pkg/store"
-	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
+	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var installAgentCmdOptions struct {
-	dryRun                 bool
-	kube                   struct {
+	dryRun bool
+	kube   struct {
 		namespace    string
 		inCluster    bool
 		context      string
 		nodeSelector string
 	}
-	venona       struct {
+	venona struct {
 		version string
 	}
-	agentToken                    string
-	agentID                       string
-	kubernetesRunnerType          bool
-	tolerations                   string
+	agentToken           string
+	agentID              string
+	kubernetesRunnerType bool
+	tolerations          string
 }
 
 var installAgentCmd = &cobra.Command{
-	Use: "agent",
+	Use:   "agent",
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
@@ -59,7 +59,7 @@ var installAgentCmd = &cobra.Command{
 			cfAPIHost = "https://g.codefresh.io"
 		}
 		builderInstallOpt := &plugins.InstallOptions{
-			CodefreshHost:         cfAPIHost,
+			CodefreshHost: cfAPIHost,
 		}
 
 		if installAgentCmdOptions.agentToken == "" {
@@ -93,9 +93,7 @@ var installAgentCmd = &cobra.Command{
 			version := installAgentCmdOptions.venona.version
 			lgr.Info("Version set manually", "version", version)
 			s.Image.Tag = version
-			s.Version.Latest.Version = version
 		}
-
 
 		kns, err := parseNodeSelector(installAgentCmdOptions.kube.nodeSelector)
 		if err != nil {
@@ -106,7 +104,6 @@ var installAgentCmd = &cobra.Command{
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
-
 
 		builder.Add(plugins.VenonaPluginType)
 
@@ -120,10 +117,9 @@ var installAgentCmd = &cobra.Command{
 		lgr.Info("Agent installation completed Successfully")
 
 	},
-
 }
 
-func init()  {
+func init() {
 	installCommand.AddCommand(installAgentCmd)
 
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
@@ -141,12 +137,10 @@ func init()  {
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 }
 
-
-
-func fillCodefreshAPI(logger logger.Logger)  {
+func fillCodefreshAPI(logger logger.Logger) {
 	s := store.GetStore()
 	s.CodefreshAPI = &store.CodefreshAPI{
-		Host:   cfAPIHost,
+		Host: cfAPIHost,
 	}
-	
+
 }

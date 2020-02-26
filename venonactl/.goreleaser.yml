@@ -1,42 +1,45 @@
+before:
+  hooks:
+    - go mod tidy
+
 builds:
-- env:
-  - CGO_ENABLED=0
+- 
   goos:
-    - darwin
-    - linux
-    - windows
+  - linux
+  - windows
+  - darwin
+  goarch:
+  - amd64
+  - 386
+  env:
+  - CGO_ENABLED=0
   ldflags:
   - -X github.com/codefresh-io/venona/venonactl/cmd.version={{.Version}} -X github.com/codefresh-io/venona/venonactl/cmd.commit={{.Commit}} -X github.com/codefresh-io/venona/venonactl/cmd.date={{.Date}}
-archive:
+
+archives:
+- 
   replacements:
     darwin: Darwin
     linux: Linux
     windows: Windows
     386: i386
     amd64: x86_64
-  format_overrides:
-  - goos: windows
-    format: zip
-checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 changelog:
   sort: asc
   filters:
     exclude:
     - '^docs:'
     - '^test:'
-brew:
+
+
+release:
   github:
     owner: codefresh-io
-    name: homebrew-venona
-  folder: Formula
-  description: "venona --help"
-  homepage: "http://docs.codefresh.io"
-  commit_author:
-    name: Oleg Sucharevich
-    email: olegs@codefresh.io
+    name: venona
 
-  install: |
-      bin.install "venona"
+  # If set to auto, will mark the release as not ready for production
+  # in case there is an indicator for this in the tag e.g. v1.0.0-rc1
+  # If set to true, will mark the release as not ready for production.
+  # Default is false.
+  prerelease: true

@@ -28,7 +28,7 @@ type (
 
 		KubernetesAPI *KubernetesAPI
 
-		AgentAPI      *AgentAPI
+		AgentAPI *AgentAPI
 
 		ClusterInCodefresh string
 
@@ -56,8 +56,8 @@ type (
 	}
 
 	AgentAPI struct {
-		Token            string
-		Id               string
+		Token string
+		Id    string
 	}
 
 	Image struct {
@@ -67,19 +67,12 @@ type (
 
 	Version struct {
 		Current *CurrentVersion
-		Latest  *LatestVersion
 	}
 
 	CurrentVersion struct {
 		Version string
 		Commit  string
 		Date    string
-	}
-	LatestVersion struct {
-		Version   string
-		Commit    string
-		Date      string
-		IsDefault bool
 	}
 )
 
@@ -94,12 +87,12 @@ func GetStore() *Values {
 func (s *Values) BuildValues() map[string]interface{} {
 	return map[string]interface{}{
 		"AppName":       ApplicationName,
-		"Version":       s.Version.Latest.Version,
+		"Version":       s.Version.Current.Version,
 		"CodefreshHost": s.CodefreshAPI.Host,
 		"Mode":          ModeInCluster,
 		"Image": map[string]string{
 			"Name": "codefresh/venona",
-			"Tag":  s.Version.Latest.Version,
+			"Tag":  s.Version.Current.Version,
 		},
 		"VolumeProvisionerImage": map[string]string{
 			"Name": "codefresh/dind-volume-provisioner",
@@ -107,9 +100,9 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"ConfigPath":   s.KubernetesAPI.ConfigPath,
-		"Context":		s.KubernetesAPI.ContextName,
+		"Context":      s.KubernetesAPI.ContextName,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
-		"Tolerations": s.KubernetesAPI.Tolerations,
+		"Tolerations":  s.KubernetesAPI.Tolerations,
 		"AgentToken":   s.AgentAPI.Token,
 		"AgentId":      s.AgentAPI.Id,
 		"ServerCert": map[string]string{

@@ -34,7 +34,6 @@ var versionCmd = &cobra.Command{
 		fmt.Printf("Date: %s\n", s.Version.Current.Date)
 		fmt.Printf("Commit: %s\n", s.Version.Current.Commit)
 		fmt.Printf("Local Version: %s\n", s.Version.Current.Version)
-		fmt.Printf("Latest version: %s\n", s.Version.Latest.Version)
 	},
 }
 
