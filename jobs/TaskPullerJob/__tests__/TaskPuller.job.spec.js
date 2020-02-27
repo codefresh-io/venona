@@ -41,7 +41,7 @@ describe('TaskPullerJob unit tests', () => {
 	it('Should map all results to tasks by types and execute them', () => {
 		CreatePodTask.mockImplementationOnce(() => {
 			return {
-				exec: jest.fn(() => {
+				exec: jest.fn(async () => {
 					return {
 						status: 'ok'
 					};
@@ -74,6 +74,41 @@ describe('TaskPullerJob unit tests', () => {
 	});
 
 	it('Should not fail when non-typed task arrives', () => {
+		const tasks = [
+			{
+				prop: 'a'
+			},
+		];
+		const logger = createLogger();
+		const task = new TaskPullerJob({
+			pullTasks: jest.fn().mockResolvedValue(tasks),
+		}, _.noop(), logger);
+		return expect(task.exec()).resolves.toEqual([]);
+	});
+
+	it('Should not fail when a task failed', () => {
+		const tasks = [
+			{
+				type: 'DeletePod',
+			},
+			{
+				type: 'CreatePod',
+			}
+		];
+		DeletePodTask.mockImplementationOnce(() => ({
+			exec: jest.fn(async () => Promise.reject('error'))	
+		}));
+		CreatePodTask.mockImplementationOnce(() => ({
+			exec: jest.fn(async () => Promise.resolve('value'))	
+		}));
+		const logger = createLogger();
+		const task = new TaskPullerJob({
+			pullTasks: jest.fn().mockResolvedValue(tasks),
+		}, _.noop(), logger);
+		return expect(task.exec()).resolves.toEqual(['value', undefined]);
+	});
+
+	it('Should not fail when task failed', () => {
 		const tasks = [
 			{
 				prop: 'a'
