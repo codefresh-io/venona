@@ -202,9 +202,9 @@ var installCmd = &cobra.Command{
 
 		// from https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 		base := map[string]interface{}{}
-		for _, value := range opts.Values {
+		for _, value := range installCmdOptions.templateValues {
 			if err := strvals.ParseInto(value, base); err != nil {
-				return nil, errors.Wrap(err, "failed parsing --set data")
+				dieOnError(fmt.Errorf("Cannot parse option --set-value %s", value))
 			}
 		}
 		for k, v := range base {
@@ -245,7 +245,7 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 
-	installCmd.Flags().StringArrayVar(&installCmdOptions.templateValues, "set", []string{}, "Set values for templates, example: --set LocalVolumesDir=/mnt/disk/ssd0/codefresh-volumes")
+	installCmd.Flags().StringArrayVar(&installCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disk/ssd0/codefresh-volumes")
 
 }
 
