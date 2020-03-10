@@ -35,6 +35,7 @@ type (
 		RuntimeEnvironment string
 
 		Version *Version
+
 	}
 
 	KubernetesAPI struct {
@@ -96,7 +97,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"VolumeProvisionerImage": map[string]string{
 			"Name": "codefresh/dind-volume-provisioner",
-			"Tag":  "v18",
+			"Tag":  "v20",
 		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,

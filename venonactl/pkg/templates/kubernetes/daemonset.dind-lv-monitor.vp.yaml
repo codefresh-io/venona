@@ -45,7 +45,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
-              value: /var/lib/codefresh/dind-volumes
+              value: {{ .LocalVolumeDir | default "/var/lib/codefresh/dind-volumes" }}
 #              Debug:
 #            - name: DRY_RUN
 #              value: "1"

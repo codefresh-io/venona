@@ -47,6 +47,7 @@
 | --skip-runtime-installation | boolean | Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name |
 | --storage-class | string | Set a name of your custom storage class, note: this will not install volume provisioning components |
 | --tolerations | string | The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations). If prefixed with "@", loads from a file: @/tmp/tolerations.json |
+| --set | stringArray | Set values for templates, example: --set LocalVolumesDir=/mnt/disk/ssd0/codefresh-volumes |
 | --venona-version | string | Version of venona to install (default is the latest) |
 
 #### Install on cluster version < 1.10

@@ -153,7 +153,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
-              value: /var/lib/codefresh/dind-volumes
+              value: {{ .LocalVolumeDir | default "/var/lib/codefresh/dind-volumes" }}
 #              Debug:
 #            - name: DRY_RUN
 #              value: "1"
@@ -261,7 +261,7 @@ spec:
       {{ if ne .Tolerations "" }}
       tolerations:
         {{ .Tolerations | indent 8 }}
-      {{ end }} 
+      {{ end }}
       containers:
       - env:
         - name: SELF_DEPLOYMENT_NAME
@@ -395,6 +395,7 @@ metadata:
 provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
   volumeBackend: local
+  volumeParentDir: {{ .LocalVolumeDir | default "/var/lib/codefresh/dind-volumes" }}
 `
 
 	return templatesMap

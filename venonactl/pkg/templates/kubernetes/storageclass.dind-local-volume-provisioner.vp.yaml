@@ -8,3 +8,4 @@ metadata:
 provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
   volumeBackend: local
+  volumeParentDir: {{ .LocalVolumeDir | default "/var/lib/codefresh/dind-volumes" }}

@@ -31,6 +31,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/strvals"
 	k8sApi "k8s.io/api/core/v1"
 )
 
@@ -60,6 +61,7 @@ var installCmdOptions struct {
 	buildNodeSelector             string
 	buildAnnotations              []string
 	tolerations                   string
+	templateValues                []string
 }
 
 // installCmd represents the install command
@@ -197,6 +199,18 @@ var installCmd = &cobra.Command{
 		}
 
 		values := s.BuildValues()
+
+		// from https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
+		base := map[string]interface{}{}
+		for _, value := range opts.Values {
+			if err := strvals.ParseInto(value, base); err != nil {
+				return nil, errors.Wrap(err, "failed parsing --set data")
+			}
+		}
+		for k, v := range base {
+			values[k] = v
+		}
+
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -230,6 +244,8 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+
+	installCmd.Flags().StringArrayVar(&installCmdOptions.templateValues, "set", []string{}, "Set values for templates, example: --set LocalVolumesDir=/mnt/disk/ssd0/codefresh-volumes")
 
 }
 
