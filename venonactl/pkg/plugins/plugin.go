@@ -56,10 +56,12 @@ type (
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)
 			BuildConfig() clientcmd.ClientConfig
+			EnsureNamespaceExists(cs *kubernetes.Clientset) (error)
 			
 		}
 		AgentKubeBuilder	  interface {
 			BuildClient() (*kubernetes.Clientset, error)
+			EnsureNamespaceExists(cs *kubernetes.Clientset) (error)
 		}
 		DryRun               bool
 		KubernetesRunnerType bool
