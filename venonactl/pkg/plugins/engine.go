@@ -41,6 +41,11 @@ func (u *enginePlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
+	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
+		return nil, err
+	}
 	return v, install(&installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),

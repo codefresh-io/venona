@@ -40,6 +40,12 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	if err != nil {
 		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v ", err)
 	}
+	
+	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
+		return nil, err
+	}
 
 	cfOpt := &codefresh.APIOptions{
 		Logger:                u.logger,

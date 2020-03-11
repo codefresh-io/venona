@@ -14,6 +14,7 @@ type (
 	Kube interface {
 		BuildClient() (*kubernetes.Clientset, error)
 		BuildConfig() (clientcmd.ClientConfig)
+		EnsureNamespaceExists(cs *kubernetes.Clientset) (error)
 	}
 
 	kube struct {
@@ -52,15 +53,19 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 		return nil, err
 	}
 	cs, err := kubernetes.NewForConfig(config)
-	_, err = cs.CoreV1().Namespaces().Get(k.namespace, v1.GetOptions{})
+	return cs, nil
+}
+
+func (k *kube) EnsureNamespaceExists(cs *kubernetes.Clientset) (error) {
+	_, err := cs.CoreV1().Namespaces().Get(k.namespace, v1.GetOptions{})
 	if err != nil  {
 		nsSpec := &v1Core.Namespace{ObjectMeta: metav1.ObjectMeta {Name: k.namespace}};
 		_, err := cs.CoreV1().Namespaces().Create(nsSpec)
 		if err != nil {
-			return nil, err
+			return  err
 		} 
 	}
-	return cs, nil
+	return nil
 }
 
 func (k *kube) BuildConfig() (clientcmd.ClientConfig) {

@@ -43,6 +43,10 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to create client on runtime cluster: %v", err)
 	}
+	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	if err != nil {
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to ensure namespace on runtime cluster: %v", err)
+	}
 
 	// get default service account for the namespace
 	var getOpt metav1.GetOptions
@@ -97,6 +101,11 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	cs, err := opt.AgentKubeBuilder.BuildClient() // on the agent cluster
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return nil, err
+	}
+	err = opt.AgentKubeBuilder.EnsureNamespaceExists(cs)
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
 
