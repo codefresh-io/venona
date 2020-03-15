@@ -45,7 +45,7 @@ const buildTestConfig = () => ({
 			cronExpression: 'cron'
 		},
 		StatusReporterJob: {
-			cronExpression: 'cron'
+			cronExpression: 'cron',
 		},
 		queue: {
 
@@ -171,6 +171,7 @@ describe('Agent unit test', () => {
 
 			it('Should call to Server initialization process during agent initialization', () => {
 				const serverInitSpy = jest.fn();
+				scheduler.scheduleJob = jest.fn();
 				Server.mockReset();
 				Server.mockImplementationOnce(() => ({
 					init: serverInitSpy,
@@ -185,9 +186,11 @@ describe('Agent unit test', () => {
 
 			it('Should call to CodefreshAPI initialization process during agent initialization', () => {
 				const codefreshInitSpy = jest.fn();
+				scheduler.scheduleJob = jest.fn();
 				Codefresh.mockReset();
 				Codefresh.mockImplementation(() => ({
 					init: codefreshInitSpy,
+					reportStatus: jest.fn(),
 				}));
 				return new Agent(buildTestConfig())
 					.init()
@@ -199,6 +202,7 @@ describe('Agent unit test', () => {
 
 			it('Should call to KubernetesAPI initialization process during agent initialization', () => {
 				const kubernetesInitSpy = jest.fn();
+			//	scheduler.scheduleJob = jest.fn();
 				Kubernetes.mockReset();
 				Kubernetes.mockImplementation(() => ({
 					init: kubernetesInitSpy,
@@ -221,6 +225,20 @@ describe('Agent unit test', () => {
 						expect(agent._startJob).toHaveBeenNthCalledWith(1, StatusReporterJob);
 						expect(agent._startJob).toHaveBeenNthCalledWith(2, TaskPullerJob);
 					});
+			});
+			it('Should call task that run once when agent starts ', () => {
+				const config = buildTestConfig();
+				config.jobs.StatusReporterJob.runOnce = true;
+				const agent = new Agent(buildTestConfig());
+				agent._runOnce = jest.fn();
+				return agent
+					.init()
+					.then(() => {
+						expect(agent._runOnce).toHaveBeenCalledTimes(2);
+						expect(agent._runOnce).toHaveBeenNthCalledWith(1, StatusReporterJob);
+					});
+
+
 			});
 		});
 

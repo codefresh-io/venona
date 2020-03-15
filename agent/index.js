@@ -50,7 +50,10 @@ class Agent {
 		return Promise
 			.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
 			.map(require)
-			.map(Job => this._startJob(Job));
+			.map(Job => {
+				this._runOnce(Job);
+				this._startJob(Job);
+			});
 	}
 
 
@@ -85,6 +88,20 @@ class Agent {
 			this.logger.info(`Pushing job: ${Job.name} to queue`);
 			this.queue.push(job, 1, this._handleJobError(job));
 		});
+	}
+
+	_runOnce(Job) {
+		const runOnce = _.get(this, `jobs.${Job.name}.runOnce`, false);
+		if (!runOnce) {
+			return;
+		}
+		const taskLogger = this.logger.child({
+			namespace: LOGGER_NAMESPACES.TASK,
+			job: Job.name,
+			uid: new Chance().guid(),
+		});
+		const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
+		job.exec();
 	}
 
 	_handleJobError(job) {
