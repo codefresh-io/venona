@@ -106,7 +106,31 @@ data:
 
 `
 
-	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `apiVersion: apps/v1
+	templatesMap["cron-job.dind-volume-cleanup.vp.yaml"] = `{{- if not (eq .Storage.Backend "local") }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dind-volume-cleanup-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-volume-cleanup
+spec:
+  schedule: "0,10,20,30,40,50 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: volume-provisioner-{{ .AppName }}
+          restartPolicy: Never
+          containers:
+            - name: dind-volume-cleanup
+              image: codefresh/dind-volume-cleanup
+{{- end }}`
+
+	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `{{- if eq .Storage.Backend "local" -}}
+{{- $localVolumeParentDir := ( .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" ) }}
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: dind-lv-monitor-{{ .AppName }}
@@ -153,7 +177,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
-              value: {{ .LocalVolumeDir | default "/var/lib/codefresh/dind-volumes" }}
+              value: {{ $localVolumeParentDir }}
 #              Debug:
 #            - name: DRY_RUN
 #              value: "1"
@@ -167,14 +191,14 @@ spec:
 #              value: "20"
 
           volumeMounts:
-          - mountPath: /var/lib/codefresh/dind-volumes
+          - mountPath: {{ $localVolumeParentDir }}
             readOnly: false
             name: dind-volume-dir
       volumes:
       - name: dind-volume-dir
         hostPath:
-          path: /var/lib/codefresh/dind-volumes
-`
+          path: {{ $localVolumeParentDir }}
+{{- end -}}`
 
 	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
 kind: Deployment
@@ -385,7 +409,27 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
 
-	templatesMap["storageclass.dind-local-volume-provisioner.vp.yaml"] = `---
+	templatesMap["storageclass.dind-gce.vp.yaml"] = `{{- if eq .Storage.Backend "gcedisk" }}
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: dind-gce-{{ .AppName }}-{{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+provisioner: codefresh.io/dind-gce-{{ .AppName }}-{{ .Namespace }}
+parameters:
+  volumeBackend: {{ .Storage.Backend }}
+  #  pd-ssd or pd-standard
+  type: {{ .Storage.VolumeType | default "pd-ssd" }}
+  # Valid zone in GCP
+  zone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- end }}`
+
+	templatesMap["storageclass.dind-local-volume-provisioner.vp.yaml"] = `{{- if eq .Storage.Backend "local" }}
+---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -395,8 +439,8 @@ metadata:
 provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
   volumeBackend: local
-  volumeParentDir: {{ .LocalVolumeDir | default "/var/lib/codefresh/dind-volumes" }}
-`
+  volumeParentDir: {{ .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" }}
+{{- end }}`
 
 	return templatesMap
 }

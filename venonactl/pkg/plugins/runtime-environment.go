@@ -56,6 +56,21 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		Annotations:           opt.Annotations,
 	}
 
+	// Set storage Class by backend
+	if cfOpt.IsDefaultStorageClass {
+		if storageBackend, storageBackendParamsSet := v["Storage"].(map[string]interface{})["Backend"]; storageBackendParamsSet {
+
+			switch storageBackend {
+			case "local":
+				cfOpt.StorageClass = fmt.Sprintf("dind-local-volumes-%s-%s", v["AppName"], v["Namespace"])
+			case "gcedisk":
+				cfOpt.StorageClass = fmt.Sprintf("dind-gcedisk-%s-%s-%s", v["AvailabilityZone"], v["AppName"], v["Namespace"])
+			case "ebs":
+				cfOpt.StorageClass = fmt.Sprintf("dind-ebs-%s-%s-%s", v["AvailabilityZone"], v["AppName"], v["Namespace"])
+			}
+		}
+	}
+
 	cf := codefresh.NewCodefreshAPI(cfOpt)
 	cert, err := cf.Sign()
 	if err != nil {

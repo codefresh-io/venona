@@ -1,0 +1,18 @@
+{{- if eq .Storage.Backend "gcedisk" }}
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: dind-gcedisk-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+provisioner: codefresh.io/dind-gce-{{ .AppName }}-{{ .Namespace }}
+parameters:
+  volumeBackend: {{ .Storage.Backend }}
+  #  pd-ssd or pd-standard
+  type: {{ .Storage.VolumeType | default "pd-ssd" }}
+  # Valid zone in GCP
+  zone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- end }}

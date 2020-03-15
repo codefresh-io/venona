@@ -108,5 +108,16 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Key":  "",
 			"Ca":   "",
 		},
+		"Storage": map[string]interface{}{
+			"Backend": "local",
+			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
+			"AvailabilityZone": "",
+			"GoogleServiceAccount": "",
+			"VolumeProvisioner": map[string]interface{}{
+				"Image": "codefresh/dind-volume-provisioner:v20",
+				"NodeSelector": s.KubernetesAPI.NodeSelector,
+				"Tolerations":  s.KubernetesAPI.Tolerations,
+			},
+		},
 	}
 }
