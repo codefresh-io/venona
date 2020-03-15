@@ -36,6 +36,7 @@ function build() {
 			},
 			StatusReporterJob: {
 				cronExpression: process.env.JOB_REPORT_STATUS_CRON_EXPRESSION || CRON.EVERY_MINUTE,
+				runOnce: true,
 			},
 			DEFAULT_CRON: CRON.EVERY_MINUTE,
 			queue: {

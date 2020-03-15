@@ -97,7 +97,14 @@ class Agent {
 		return Promise
 			.fromCallback(cb => recursive(path.join(__dirname, './../jobs'), ignorePaths, cb))
 			.map(require)
-			.map(Job => this._startJob(Job));
+			.map(Job => {
+				const runOnce = _.get(this, `jobs.${Job.name}.runOnce`, false);
+				if (runOnce) {
+					this._runOnce(Job);
+				}
+				return Job;
+			}).map(Job => this._startJob(Job));
+			
 	}
 
 	async _readFromVenonaConfDir(dir) {
@@ -139,6 +146,19 @@ class Agent {
 			this.logger.info(`Pushing job: ${Job.name} to queue`);
 			this.queue.push(job, 1, this._handleJobError(job));
 		});
+	}
+
+	_runOnce(Job) {
+		if (!runOnce) {
+			return;
+		}
+		const taskLogger = this.logger.child({
+			namespace: LOGGER_NAMESPACES.TASK,
+			job: Job.name,
+			uid: new Chance().guid(),
+		});
+		const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
+		job.exec();
 	}
 
 	_handleJobError(job) {
