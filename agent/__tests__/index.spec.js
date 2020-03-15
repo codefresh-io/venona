@@ -99,7 +99,6 @@ describe('Agent unit test', () => {
 
 			it('Should call to Server initialization process during agent initialization', async () => {
 				const serverInitSpy = jest.fn();
-				scheduler.scheduleJob = jest.fn();
 				Server.mockReset();
 				Server.mockImplementationOnce(() => ({
 					init: serverInitSpy,
@@ -113,7 +112,6 @@ describe('Agent unit test', () => {
 
 			it('Should call to CodefreshAPI initialization process during agent initialization', async () => {
 				const codefreshInitSpy = jest.fn();
-				scheduler.scheduleJob = jest.fn();
 				Codefresh.mockReset();
 				Codefresh.mockImplementation(() => ({
 					init: codefreshInitSpy,
