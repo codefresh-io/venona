@@ -249,6 +249,20 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if .Storage.AwsAccessKeyId }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: dind-volume-provisioner-{{ .AppName }}
+              key: aws_access_key_id
+        {{- end }}
+        {{- if .Storage.AwsSecretAccessKey }}
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dind-volume-provisioner-{{ .AppName }}
+              key: aws_secret_access_key
+        {{- end }}
       {{- if .Storage.GoogleServiceAccount }}
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /etc/dind-volume-provisioner/credentials/google-service-account.json
@@ -403,6 +417,12 @@ data:
 {{- if .Storage.GoogleServiceAccount }}
   google-service-account.json: {{ .Storage.GoogleServiceAccount | b64enc }}
 {{- end }}
+{{- if .Storage.AwsAccessKeyId }}
+  aws_access_key_id: {{ .Storage.AwsAccessKeyId | b64enc }}
+{{- end }}
+{{- if .Storage.AwsSecretAccessKey }}
+  aws_secret_access_key: {{ .Storage.AwsSecretAccessKey | b64enc }}
+{{- end }}
 {{- end }}`
 
 	templatesMap["secret.venona.yaml"] = `apiVersion: v1
@@ -435,6 +455,26 @@ kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
+
+	templatesMap["storageclass.dind-aws-ebs.vp.yaml"] = `{{- if or (eq .Storage.Backend "ebs") (eq .Storage.Backend "ebs-csi") }}
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: dind-{{ .Storage.Backend }}-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+parameters:
+  # ebs or ebs-csi
+  volumeBackend: {{ .Storage.Backend }}
+  #  gp2 or io1
+  VolumeType: {{ .Storage.VolumeType | default "gp2" }}
+  # Valid zone in aws (us-east-1c, ...)
+  AvailabilityZone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- end }}`
 
 	templatesMap["storageclass.dind-gcedisk.vp.yaml"] = `{{- if eq .Storage.Backend "gcedisk" }}
 ---

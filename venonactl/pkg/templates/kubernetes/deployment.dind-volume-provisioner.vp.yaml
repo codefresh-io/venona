@@ -47,6 +47,20 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if .Storage.AwsAccessKeyId }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: dind-volume-provisioner-{{ .AppName }}
+              key: aws_access_key_id
+        {{- end }}
+        {{- if .Storage.AwsSecretAccessKey }}
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dind-volume-provisioner-{{ .AppName }}
+              key: aws_secret_access_key
+        {{- end }}
       {{- if .Storage.GoogleServiceAccount }}
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /etc/dind-volume-provisioner/credentials/google-service-account.json

@@ -68,6 +68,8 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 				cfOpt.StorageClass = fmt.Sprintf("dind-gcedisk-%s-%s-%s", storageParams["AvailabilityZone"], v["AppName"], v["Namespace"])
 			case "ebs":
 				cfOpt.StorageClass = fmt.Sprintf("dind-ebs-%s-%s-%s", storageParams["AvailabilityZone"], v["AppName"], v["Namespace"])
+			case "ebs-csi":
+				cfOpt.StorageClass = fmt.Sprintf("dind-ebs-csi-%s-%s-%s", storageParams["AvailabilityZone"], v["AppName"], v["Namespace"])
 			}
 		}
 	}

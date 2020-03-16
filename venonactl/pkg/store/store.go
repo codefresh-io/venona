@@ -109,6 +109,8 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
 			"AvailabilityZone": "",
 			"GoogleServiceAccount": "",
+			"AwsAccessKeyId": "",
+			"AwsSecretAccessKey": "",
 			"VolumeProvisioner": map[string]interface{}{
 				"Image": "codefresh/dind-volume-provisioner:v20",
 				"NodeSelector": s.KubernetesAPI.NodeSelector,
