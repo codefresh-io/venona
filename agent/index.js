@@ -149,15 +149,12 @@ class Agent {
 	}
 
 	_runOnce(Job) {
-		if (!runOnce) {
-			return;
-		}
 		const taskLogger = this.logger.child({
 			namespace: LOGGER_NAMESPACES.TASK,
 			job: Job.name,
 			uid: new Chance().guid(),
 		});
-		const job = new Job(this.codefreshAPI, this.kubernetesAPI, taskLogger);
+		const job = new Job(this.codefreshAPI, this.runtimes, taskLogger);
 		job.exec();
 	}
 
