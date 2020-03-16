@@ -31,12 +31,12 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-        image: {{ .VolumeProvisionerImage.Name }}:{{ .VolumeProvisionerImage.Tag }}
+        image: {{ .Storage.VolumeProvisioner.Image }}
         imagePullPolicy: Always
         resources:
           requests:
-            cpu: "300m"
-            memory: "400Mi"
+            cpu: "200m"
+            memory: "200Mi"
           limits:
             cpu: "1000m"
             memory: "6000Mi"

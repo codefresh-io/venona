@@ -233,7 +233,7 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-        image: {{ .VolumeProvisionerImage.Name }}:{{ .VolumeProvisionerImage.Tag }}
+        image: {{ .Storage.VolumeProvisioner.Image }}
         imagePullPolicy: Always
         resources:
           requests:
@@ -409,15 +409,15 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
 
-	templatesMap["storageclass.dind-gce.vp.yaml"] = `{{- if eq .Storage.Backend "gcedisk" }}
+	templatesMap["storageclass.dind-gcedisk.vp.yaml"] = `{{- if eq .Storage.Backend "gcedisk" }}
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: dind-gce-{{ .AppName }}-{{ .Namespace }}
+  name: dind-gcedisk-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
   labels:
     app: dind-volume-provisioner
-provisioner: codefresh.io/dind-gce-{{ .AppName }}-{{ .Namespace }}
+provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
   volumeBackend: {{ .Storage.Backend }}
   #  pd-ssd or pd-standard

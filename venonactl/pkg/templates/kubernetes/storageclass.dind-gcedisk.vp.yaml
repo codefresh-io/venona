@@ -6,7 +6,7 @@ metadata:
   name: dind-gcedisk-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
   labels:
     app: dind-volume-provisioner
-provisioner: codefresh.io/dind-gce-{{ .AppName }}-{{ .Namespace }}
+provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
   volumeBackend: {{ .Storage.Backend }}
   #  pd-ssd or pd-standard
