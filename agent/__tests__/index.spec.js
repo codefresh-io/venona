@@ -52,7 +52,7 @@ const buildTestConfig = () => ({
 			cronExpression: 'cron'
 		},
 		StatusReporterJob: {
-			cronExpression: 'cron'
+			cronExpression: 'cron',
 		},
 		queue: {
 
@@ -115,6 +115,7 @@ describe('Agent unit test', () => {
 				Codefresh.mockReset();
 				Codefresh.mockImplementation(() => ({
 					init: codefreshInitSpy,
+					reportStatus: jest.fn(),
 				}));
 				jest.unmock('recursive-readdir');
 				const agent = new Agent();
@@ -132,6 +133,18 @@ describe('Agent unit test', () => {
 				expect(agent._startJob).toHaveBeenCalledTimes(2);
 				expect(agent._startJob).toHaveBeenNthCalledWith(1, StatusReporterJob);
 				expect(agent._startJob).toHaveBeenNthCalledWith(2, TaskPullerJob);
+
+			});
+			it('Should call task that has runOnce when agent starts ', async () => {
+				loadActualJobs();
+				const config = buildTestConfig();
+				config.jobs.StatusReporterJob.runOnce = true;
+				const agent = new Agent();
+				agent._runOnce = jest.fn();
+				agent._startJob = jest.fn();
+				await agent.init(config);
+				expect(agent._runOnce).toHaveBeenCalledTimes(1);
+				expect(agent._runOnce).toHaveBeenNthCalledWith(1, StatusReporterJob);
 
 			});
 		});
