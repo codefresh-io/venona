@@ -146,7 +146,6 @@ describe('Agent unit test', () => {
 				expect(agent._runOnce).toHaveBeenCalledTimes(1);
 				expect(agent._runOnce).toHaveBeenNthCalledWith(1, StatusReporterJob);
 
-
 			});
 		});
 		
