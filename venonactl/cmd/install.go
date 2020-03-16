@@ -31,6 +31,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/strvals"
 	k8sApi "k8s.io/api/core/v1"
 )
 
@@ -60,6 +61,8 @@ var installCmdOptions struct {
 	buildNodeSelector             string
 	buildAnnotations              []string
 	tolerations                   string
+	templateValues                []string
+	templateFileValues            []string
 }
 
 // installCmd represents the install command
@@ -197,6 +200,27 @@ var installCmd = &cobra.Command{
 		}
 
 		values := s.BuildValues()
+
+		// from https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
+		base := map[string]interface{}{}
+		for _, value := range installCmdOptions.templateValues {
+			if err := strvals.ParseInto(value, base); err != nil {
+				dieOnError(fmt.Errorf("Cannot parse option --set-value %s", value))
+			}
+		}
+
+		for _, value := range installCmdOptions.templateFileValues {
+			reader := func(rs []rune) (interface{}, error) {
+				bytes, err := ioutil.ReadFile(string(rs))
+				return string(bytes), err
+			}
+			if err := strvals.ParseIntoFile(value, base, reader); err != nil {
+				dieOnError(fmt.Errorf("Cannot parse option --set-file %s", value))
+			}
+		}
+
+		values = mergeMaps(values, base)
+
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -205,6 +229,25 @@ var installCmd = &cobra.Command{
 		}
 		lgr.Info("Installation completed Successfully")
 	},
+}
+
+func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(a))
+	for k, v := range a {
+		out[k] = v
+	}
+	for k, v := range b {
+		if v, ok := v.(map[string]interface{}); ok {
+			if bv, ok := out[k]; ok {
+				if bv, ok := bv.(map[string]interface{}); ok {
+					out[k] = mergeMaps(bv, v)
+					continue
+				}
+			}
+		}
+		out[k] = v
+	}
+	return out
 }
 
 func init() {
@@ -230,6 +273,9 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+
+	installCmd.Flags().StringArrayVar(&installCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	installCmd.Flags().StringArrayVar(&installCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-value Storage.GoogleServiceAccount=/path/to/service-account.json")
 
 }
 
