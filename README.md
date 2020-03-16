@@ -73,6 +73,31 @@ rules:
   * Bind your user with cluster-admin kubernetes clusterrole
     > `kubectl create clusterrolebinding NAME --clusterrole cluster-admin --user YOUR_USER`
 
+#### Pipeline Storage with docker cache support
+
+###### GKE LocalSSD
+**Prerequisite:** [GKE custer with local SSD](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/local-ssd)
+```
+venonactl install [options] --set-value=Storage.LocalVolumeParentDir=/mnt/disks/ssd0/codefresh-volumes \
+                            --build-node-selector=cloud.google.com/gke-local-ssd=true
+```
+
+###### Using GKE Disks 
+**Prerequisite:** dind-volume-provisioner should have permissions to create/delete/get of google disks
+There are 3 options:
+* run venona dind-volume-provisioniner on node with iam role which is allowed to create/delete/get of google disks
+* create Google Service Account with ComputeEngine.StorageAdmin, download its key and pass it to venona installed with `--set-file=Storage.GooogleServiceAccount=/path/to/google-service-account.json`
+* use [Google Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) to assign iam role to `volume-provisioner-venona` service account 
+
+**Note**: Builds will be running in single availability zone, so you must to specify AvailabilityZone params
+
+```
+venonactl install [options] --set-value=Storage.Backend=gcedisk \
+                            --set-value=Storage.AvailabilityZone=us-central1-a \
+                            --build-node-selector=failure-domain.beta.kubernetes.io/zone=us-central1-a \
+                            [--set-file=Storage.GoogleServiceAccount=/path/to/google-service-account.json"]
+```
+
 #### Kubernetes RBAC
 Installation of Venona on Kubernetes cluster installing 2 groups of objects,
 Each one has own RBAC needs and therefore, created roles(and cluster-roles)

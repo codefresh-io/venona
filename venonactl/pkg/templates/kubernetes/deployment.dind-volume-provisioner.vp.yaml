@@ -47,3 +47,15 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+      {{- if .Storage.GoogleServiceAccount }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/dind-volume-provisioner/credentials/google-service-account.json
+        volumeMounts:
+        - name: credentials
+          readOnly: true
+          mountPath: "/etc/dind-volume-provisioner/credentials"
+      volumes:
+      - name: credentials
+        secret:
+          secretName: dind-volume-provisioner-{{ .AppName }}
+      {{- end }}

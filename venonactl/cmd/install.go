@@ -62,6 +62,7 @@ var installCmdOptions struct {
 	buildAnnotations              []string
 	tolerations                   string
 	templateValues                []string
+	templateFileValues            []string
 }
 
 // installCmd represents the install command
@@ -208,6 +209,16 @@ var installCmd = &cobra.Command{
 			}
 		}
 
+		for _, value := range installCmdOptions.templateFileValues {
+			reader := func(rs []rune) (interface{}, error) {
+				bytes, err := ioutil.ReadFile(string(rs))
+				return string(bytes), err
+			}
+			if err := strvals.ParseIntoFile(value, base, reader); err != nil {
+				dieOnError(fmt.Errorf("Cannot parse option --set-file %s", value))
+			}
+		}
+
 		values = mergeMaps(values, base)
 
 		for _, p := range builder.Get() {
@@ -264,6 +275,7 @@ func init() {
 	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 
 	installCmd.Flags().StringArrayVar(&installCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	installCmd.Flags().StringArrayVar(&installCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-value Storage.GoogleServiceAccount=/path/to/service-account.json")
 
 }
 

@@ -95,10 +95,6 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Latest.Version,
 		},
-		"VolumeProvisionerImage": map[string]string{
-			"Name": "codefresh/dind-volume-provisioner",
-			"Tag":  "v20",
-		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"NodeSelector": s.KubernetesAPI.NodeSelector,
 		"Tolerations":  s.KubernetesAPI.Tolerations,

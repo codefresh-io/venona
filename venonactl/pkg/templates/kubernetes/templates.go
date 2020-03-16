@@ -237,8 +237,8 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            cpu: "300m"
-            memory: "400Mi"
+            cpu: "200m"
+            memory: "200Mi"
           limits:
             cpu: "1000m"
             memory: "6000Mi"
@@ -249,6 +249,18 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+      {{- if .Storage.GoogleServiceAccount }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/dind-volume-provisioner/credentials/google-service-account.json
+        volumeMounts:
+        - name: credentials
+          readOnly: true
+          mountPath: "/etc/dind-volume-provisioner/credentials"
+      volumes:
+      - name: credentials
+        secret:
+          secretName: dind-volume-provisioner-{{ .AppName }}
+      {{- end }}
 `
 
 	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
@@ -377,6 +389,21 @@ rules:
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "create", "delete"]
 `
+
+	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `{{- if not (eq .Storage.Backend "local") }}
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: dind-volume-provisioner-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+data:
+{{- if .Storage.GoogleServiceAccount }}
+  google-service-account.json: {{ .Storage.GoogleServiceAccount | b64enc }}
+{{- end }}
+{{- end }}`
 
 	templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
