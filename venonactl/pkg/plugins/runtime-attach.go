@@ -200,6 +200,10 @@ func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]st
 func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.AgentKubeBuilder.BuildClient()
 	if err != nil {
+		if (deleteOpt.DetachCanFail) {
+			u.logger.Info(fmt.Sprintf("Cannot create kubernetes clientset: %v , skipping detach", err))
+			return nil
+		}
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return err
 	}

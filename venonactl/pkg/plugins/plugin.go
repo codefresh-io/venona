@@ -84,6 +84,7 @@ type (
 		AgentNamespace   string // agent
 		RuntimeEnvironment   string
 		RestartAgent        bool
+		DetachCanFail     bool
 
 	}
 

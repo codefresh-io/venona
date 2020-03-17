@@ -48,12 +48,14 @@ var uninstallRuntimeCmd = &cobra.Command{
 			dieOnError(fmt.Errorf("Namespace name is required to in order to uninstall agent"))
 		}
 
+		deleteOptions := &plugins.DeleteOptions{}
 
 		if uninstallRunimeCmdOptions.kubeVenona.kubePath == "" {
 			uninstallRunimeCmdOptions.kubeVenona.kubePath = kubeConfigPath
 		}
 		if uninstallRunimeCmdOptions.kubeVenona.namespace == "" {
 			uninstallRunimeCmdOptions.kubeVenona.namespace = uninstallRunimeCmdOptions.kube.namespace
+			deleteOptions.DetachCanFail = true
 		}
 		if uninstallRunimeCmdOptions.kubeVenona.context == "" {
 			uninstallRunimeCmdOptions.kubeVenona.context = uninstallRunimeCmdOptions.kube.context
@@ -63,7 +65,6 @@ var uninstallRuntimeCmd = &cobra.Command{
 			uninstallRunimeCmdOptions.kube.kubePath = kubeConfigPath
 		}
 
-		deleteOptions := &plugins.DeleteOptions{}
 		// runtime
 		deleteOptions.KubeBuilder = getKubeClientBuilder(uninstallRunimeCmdOptions.kube.context,
 			 uninstallRunimeCmdOptions.kube.namespace,
