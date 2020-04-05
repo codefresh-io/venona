@@ -178,10 +178,7 @@ func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 		options.NodeSelector = a.buildNodeSelector
 	}
 
-	options.StorageClass = fmt.Sprintf("%s-%s", a.storageClass, a.clusternamespace)
-	if !a.isDefaultStorageClass {
-		options.StorageClass = a.storageClass
-	}
+	options.StorageClass = a.storageClass
 
 	if len(a.annotations) != 0 {
 		options.Annotations = a.annotations

@@ -37,6 +37,8 @@ var installRuntimeCmdOptions struct {
 	runtimeEnvironmentName string
 	kubernetesRunnerType   bool
 	tolerations            string
+	templateValues         []string
+	templateFileValues     []string
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -120,6 +122,23 @@ var installRuntimeCmd = &cobra.Command{
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		var err error
 		values := s.BuildValues()
+
+		if len(installRuntimeCmdOptions.templateValues) > 0 {
+			setValues, err := parseSetValue(installRuntimeCmdOptions.templateValues)
+			if err != nil {
+				dieOnError(err)
+			}
+			values = mergerMaps(values, setValues)
+		}
+
+		if len(installRuntimeCmdOptions.templateFileValues) > 0 {
+			setFileValues, err := parseSetFiles(installRuntimeCmdOptions.templateFileValues)
+			if err != nil {
+				dieOnError(err)
+			}
+			values = mergerMaps(values, setFileValues)
+		}
+
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -147,5 +166,8 @@ func init() {
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
+
+	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-value Storage.GoogleServiceAccount=/path/to/service-account.json")
 
 }

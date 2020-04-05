@@ -94,10 +94,6 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Current.Version,
 		},
-		"VolumeProvisionerImage": map[string]string{
-			"Name": "codefresh/dind-volume-provisioner",
-			"Tag":  "v18",
-		},
 		"Namespace":    s.KubernetesAPI.Namespace,
 		"ConfigPath":   s.KubernetesAPI.ConfigPath,
 		"Context":      s.KubernetesAPI.ContextName,
@@ -109,6 +105,19 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Cert": "",
 			"Key":  "",
 			"Ca":   "",
+		},
+		"Storage": map[string]interface{}{
+			"Backend": "local",
+			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
+			"AvailabilityZone": "",
+			"GoogleServiceAccount": "",
+			"AwsAccessKeyId": "",
+			"AwsSecretAccessKey": "",
+			"VolumeProvisioner": map[string]interface{}{
+				"Image": "codefresh/dind-volume-provisioner:v20",
+				"NodeSelector": s.KubernetesAPI.NodeSelector,
+				"Tolerations":  s.KubernetesAPI.Tolerations,
+			},
 		},
 	}
 }

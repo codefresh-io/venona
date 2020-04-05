@@ -16,6 +16,9 @@ import (
 	rbacv1beta1 "k8s.io/api/rbac/v1beta1"
 
 	storagev1 "k8s.io/api/storage/v1"
+
+	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 )
 
 // CreateObject - creates kubernetes object from *runtime.Object. Returns object name, kind and creation error
@@ -34,6 +37,16 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.AppsV1().Deployments(namespace).Create(objT)
+
+	case *batchv1.Job:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.BatchV1().Jobs(namespace).Create(objT)
+
+	case *batchv1beta1.CronJob:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.BatchV1beta1().CronJobs(namespace).Create(objT)
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
@@ -147,6 +160,16 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+
+	case *batchv1.Job:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.BatchV1().Jobs(namespace).Get(name, metav1.GetOptions{})
+
+	case *batchv1beta1.CronJob:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.BatchV1beta1().CronJobs(namespace).Get(name, metav1.GetOptions{})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
@@ -262,6 +285,20 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		err = clientset.AppsV1().Deployments(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+
+	case *batchv1.Job:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		err = clientset.BatchV1().Jobs(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+
+	case *batchv1beta1.CronJob:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		err = clientset.BatchV1beta1().CronJobs(namespace).Delete(name, &metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
@@ -412,6 +449,16 @@ func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespac
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.AppsV1().Deployments(namespace).Update(objT)
+
+	case *batchv1.Job:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.BatchV1().Jobs(namespace).Update(objT)
+
+	case *batchv1beta1.CronJob:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.BatchV1beta1().CronJobs(namespace).Update(objT)
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name

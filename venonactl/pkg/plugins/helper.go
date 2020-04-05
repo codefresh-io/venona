@@ -53,6 +53,7 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 // ParseTemplates - parses and exexute templates and return map of strings with obj data
 func ParseTemplates(templatesMap map[string]string, data interface{}, pattern string, logger logger.Logger) (map[string]string, error) {
 	parsedTemplates := make(map[string]string)
+	nonEmptyParsedTemplateFunc := regexp.MustCompile(`[a-zA-Z0-9]`).MatchString
 	for n, tpl := range templatesMap {
 		match, _ := regexp.MatchString(pattern, n)
 		if match != true {
@@ -65,7 +66,11 @@ func ParseTemplates(templatesMap map[string]string, data interface{}, pattern st
 			logger.Error("Failed to parse and execute template", "Name", n)
 			return nil, err
 		}
-		parsedTemplates[n] = tplEx
+
+		// we add only non-empty parsedTemplates
+		if nonEmptyParsedTemplateFunc(tplEx) {
+			parsedTemplates[n] = tplEx
+		}
 	}
 	return parsedTemplates, nil
 }
