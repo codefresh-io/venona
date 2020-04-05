@@ -124,11 +124,11 @@ var installRuntimeCmd = &cobra.Command{
 		values := s.BuildValues()
 
 		if len(installRuntimeCmdOptions.templateValues) > 0 {
-			setValues, err := parseSetValue(installRuntimeCmdOptions.templateValues)
+			setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
 			if err != nil {
 				dieOnError(err)
 			}
-			values = mergerMaps(values, setValues)
+			values = mergeMaps(values, setValues)
 		}
 
 		if len(installRuntimeCmdOptions.templateFileValues) > 0 {
@@ -136,7 +136,7 @@ var installRuntimeCmd = &cobra.Command{
 			if err != nil {
 				dieOnError(err)
 			}
-			values = mergerMaps(values, setFileValues)
+			values = mergeMaps(values, setFileValues)
 		}
 
 		for _, p := range builder.Get() {
