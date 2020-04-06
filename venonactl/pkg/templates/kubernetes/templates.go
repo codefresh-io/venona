@@ -157,10 +157,6 @@ spec:
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
-      {{ if ne .NodeSelector "" }}
-      nodeSelector:
-        {{ .NodeSelector | unescape }}
-      {{ end }}
       tolerations:
         - key: 'codefresh/dind'
           operator: 'Exists'
