@@ -32,6 +32,7 @@ var installRuntimeCmdOptions struct {
 		namespace string
 		inCluster bool
 		context   string
+		nodeSelector string
 	}
 	storageClass           string
 	runtimeEnvironmentName string
@@ -80,6 +81,12 @@ var installRuntimeCmd = &cobra.Command{
 			s.KubernetesAPI.Tolerations = tolerations
 		}
 
+		kns, err := parseNodeSelector(installRuntimeCmdOptions.kube.nodeSelector)
+		if err != nil {
+			dieOnError(err)
+		}
+		s.KubernetesAPI.NodeSelector = kns.String()
+
 		builder := plugins.NewBuilder(lgr)
 		isDefault := isUsingDefaultStorageClass(installRuntimeCmdOptions.storageClass)
 
@@ -120,7 +127,6 @@ var installRuntimeCmd = &cobra.Command{
 		}
 
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
-		var err error
 		values := s.BuildValues()
 
 		if len(installRuntimeCmdOptions.templateValues) > 0 {
@@ -165,6 +171,7 @@ func init() {
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")

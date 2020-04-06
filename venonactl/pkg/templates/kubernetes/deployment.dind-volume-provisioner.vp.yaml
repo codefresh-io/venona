@@ -19,7 +19,7 @@ spec:
     spec:
       {{ if ne .NodeSelector "" }}
       nodeSelector:
-        {{ .NodeSelector }}
+        {{ .NodeSelector | unescape }}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:

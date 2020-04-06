@@ -126,6 +126,9 @@ spec:
           containers:
             - name: dind-volume-cleanup
               image: codefresh/dind-volume-cleanup
+              env:
+              - name: PROVISIONED_BY
+                value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 {{- end }}`
 
 	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `{{- if eq .Storage.Backend "local" -}}
@@ -156,7 +159,7 @@ spec:
       #   kubernetes.io/role: "node"
       {{ if ne .NodeSelector "" }}
       nodeSelector:
-        {{ .NodeSelector }}
+        {{ .NodeSelector | unescape }}
       {{ end }}
       tolerations:
         - key: 'codefresh/dind'
@@ -221,7 +224,7 @@ spec:
     spec:
       {{ if ne .NodeSelector "" }}
       nodeSelector:
-        {{ .NodeSelector }}
+        {{ .NodeSelector | unescape }}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:

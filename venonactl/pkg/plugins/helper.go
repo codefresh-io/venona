@@ -33,10 +33,14 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
+func unescape(s string) template.HTML {
+	return template.HTML(s)
+}
+
 // ExecuteTemplate - executes templates in tpl str with config as values
 func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 
-	template, err := template.New("base").Funcs(sprig.FuncMap()).Parse(tplStr)
+	template, err := template.New("base").Funcs(sprig.FuncMap()).Funcs(template.FuncMap{"unescape": unescape}).Parse(tplStr)
 	if err != nil {
 		return "", err
 	}
