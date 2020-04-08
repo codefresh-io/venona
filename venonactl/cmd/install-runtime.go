@@ -175,6 +175,6 @@ func init() {
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
-	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-value Storage.GoogleServiceAccount=/path/to/service-account.json")
+	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
 
 }
