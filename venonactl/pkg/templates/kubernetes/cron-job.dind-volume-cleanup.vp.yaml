@@ -9,6 +9,9 @@ metadata:
 spec:
   schedule: "0,10,20,30,40,50 * * * *"
   concurrencyPolicy: Forbid
+  {{- if eq .Storage.Backend "local" }}
+  suspend: true
+  {{- end }}
   jobTemplate:
     spec:
       template:

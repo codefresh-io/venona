@@ -3,6 +3,7 @@ package store
 import (
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
+	"fmt"
 )
 
 const (
@@ -108,6 +109,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"Storage": map[string]interface{}{
 			"Backend": "local",
+			"StorageClassName": fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
 			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
 			"AvailabilityZone": "",
 			"GoogleServiceAccount": "",
@@ -115,7 +117,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AwsSecretAccessKey": "",
 			"VolumeProvisioner": map[string]interface{}{
 				"Image": "codefresh/dind-volume-provisioner:v20",
-				"NodeSelector": s.KubernetesAPI.NodeSelector,
+				"NodeSelector": "",
 				"Tolerations":  s.KubernetesAPI.Tolerations,
 			},
 		},

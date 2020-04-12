@@ -123,7 +123,7 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	if err != nil {
-		a.logger.Debug("Failed to create zip reader from given certificate")
+		a.logger.Debug("Failed to create zip reader from given certificate " + fmt.Sprintf("%s",byteArray))
 		return nil, err
 	}
 	for _, zf := range zipReader.File {

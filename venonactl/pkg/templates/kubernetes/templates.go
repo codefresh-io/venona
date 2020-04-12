@@ -117,6 +117,9 @@ metadata:
 spec:
   schedule: "0,10,20,30,40,50 * * * *"
   concurrencyPolicy: Forbid
+  {{- if eq .Storage.Backend "local" }}
+  suspend: true
+  {{- end }}
   jobTemplate:
     spec:
       template:
@@ -218,9 +221,9 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
-      {{ if ne .NodeSelector "" }}
-      nodeSelector:
-        {{ .NodeSelector | unescape }}
+      {{ if .Storage.VolumeProvisioner.NodeSelector }}
+      nodeSelector: 
+{{ .Storage.VolumeProvisioner.NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
@@ -415,8 +418,7 @@ rules:
   verbs: ["get", "create", "delete"]
 `
 
-	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `{{- if not (eq .Storage.Backend "local") }}
-apiVersion: v1
+	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -433,7 +435,6 @@ data:
 {{- end }}
 {{- if .Storage.AwsSecretAccessKey }}
   aws_secret_access_key: {{ .Storage.AwsSecretAccessKey | b64enc }}
-{{- end }}
 {{- end }}`
 
 	templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
@@ -478,16 +479,27 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
 
-	templatesMap["storageclass.dind-aws-ebs.vp.yaml"] = `{{- if or (eq .Storage.Backend "ebs") (eq .Storage.Backend "ebs-csi") }}
----
+	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: dind-{{ .Storage.Backend }}-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
+  name: {{ .Storage.StorageClassName }}
   labels:
     app: dind-volume-provisioner
 provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
+{{- if eq .Storage.Backend "local" }}
+  volumeBackend: local
+  volumeParentDir: {{ .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" }}
+{{- else if eq .Storage.Backend "gcedisk" }}
+  volumeBackend: {{ .Storage.Backend }}
+  #  pd-ssd or pd-standard
+  type: {{ .Storage.VolumeType | default "pd-ssd" }}
+  # Valid zone in GCP
+  zone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- else if or (eq .Storage.Backend "ebs") (eq .Storage.Backend "ebs-csi")}}
   # ebs or ebs-csi
   volumeBackend: {{ .Storage.Backend }}
   #  gp2 or io1
@@ -496,39 +508,6 @@ parameters:
   AvailabilityZone: {{ .Storage.AvailabilityZone }}
   # ext4 or xfs (default to ext4 )
   fsType: {{ .Storage.FsType | default "ext4" }}
-{{- end }}`
-
-	templatesMap["storageclass.dind-gcedisk.vp.yaml"] = `{{- if eq .Storage.Backend "gcedisk" }}
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: dind-gcedisk-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
-  labels:
-    app: dind-volume-provisioner
-provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-parameters:
-  volumeBackend: {{ .Storage.Backend }}
-  #  pd-ssd or pd-standard
-  type: {{ .Storage.VolumeType | default "pd-ssd" }}
-  # Valid zone in GCP
-  zone: {{ .Storage.AvailabilityZone }}
-  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
-  fsType: {{ .Storage.FsType | default "ext4" }}
-{{- end }}`
-
-	templatesMap["storageclass.dind-local-volume-provisioner.vp.yaml"] = `{{- if eq .Storage.Backend "local" }}
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: dind-local-volumes-{{ .AppName }}-{{ .Namespace }}
-  labels:
-    app: dind-volume-provisioner
-provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-parameters:
-  volumeBackend: local
-  volumeParentDir: {{ .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" }}
 {{- end }}`
 
 	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"html/template"
 	"regexp"
+	"strings"
 
 	// import all cloud providers auth clients
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -37,10 +38,31 @@ func unescape(s string) template.HTML {
 	return template.HTML(s)
 }
 
+// template function to parse values for nodeSelector in form "key1=value1,key2=value2"
+func nodeSelectorParamToYaml(ns string) string {
+	nodeSelectorParts := strings.Split(ns, ",")
+	var nodeSelectorYaml string
+	for _, p := range(nodeSelectorParts){
+		pSplit := strings.Split(p, "=")
+		if len(pSplit) != 2 {
+			continue
+		}
+
+		if len(nodeSelectorYaml) > 0 {
+			nodeSelectorYaml += "\n"
+		}
+		nodeSelectorYaml += fmt.Sprintf("%s: %q", pSplit[0], pSplit[1])
+	}
+	return nodeSelectorYaml
+}
+
 // ExecuteTemplate - executes templates in tpl str with config as values
 func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
-
-	template, err := template.New("base").Funcs(sprig.FuncMap()).Funcs(template.FuncMap{"unescape": unescape}).Parse(tplStr)
+	funcMap := template.FuncMap{
+		          "unescape": unescape,
+							"nodeSelectorParamToYaml": nodeSelectorParamToYaml,
+             }
+	template, err := template.New("base").Funcs(sprig.FuncMap()).Funcs(funcMap).Parse(tplStr)
 	if err != nil {
 		return "", err
 	}
