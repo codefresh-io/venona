@@ -176,7 +176,7 @@ Minimal iam policy for dind-volume-provisioner:
 ```
 
 There are 3 options to provide cloud credentials on AWS:
-* run venona dind-volume-provisioniner on node with the iam role - use `--kube-node-selector=` option
+* run venona dind-volume-provisioniner on node with the iam role - use `--set-value Storage.VolumeProvisioner.NodeSelector=node-label=value` option
 * create AWS IAM User, assign it the permissions above and suppy aws credentials to venona installer `--set-value=Storage.AwsAccessKeyId=ABCDF --set-value=Storage.AwsSecretAccessKey=ZYXWV`
 
 * use [Aws Identity for Service Account](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) to assign iam role to `volume-provisioner-venona` service account
