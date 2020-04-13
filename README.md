@@ -121,11 +121,9 @@ rules:
 
 *Install venona for using GKE Local SSD:*
 ```
-venonactl install runtime [options] \
-                      --set-value=Storage.LocalVolumeParentDir=/mnt/disks/ssd0/codefresh-volumes 
-```
-yoou will also need to specify nodeSelector 
-                      --build-node-selector=cloud.google.com/gke-local-ssd=true
+codefresh install runtime [options] \
+                    --set-value=Storage.LocalVolumeParentDir=/mnt/disks/ssd0/codefresh-volumes 
+                    --kube-selector=cloud.google.com/gke-local-ssd=true
 ```
 
 ##### **GCE Disks** 
@@ -140,10 +138,11 @@ There are 3 options to provide cloud credentials on GCE:
 
 *Install venona for using GKE Disks:*
 ```
-venonactl install [options] --set-value=Storage.Backend=gcedisk \
-                            --set-value=Storage.AvailabilityZone=us-central1-a \
-                            --build-node-selector=failure-domain.beta.kubernetes.io/zone=us-central1-a \
-                            [--set-file=Storage.GoogleServiceAccount=/path/to/google-service-account.json]
+codefresh install runtime [options] \
+                    --set-value=Storage.Backend=gcedisk \
+                    --set-value=Storage.AvailabilityZone=us-central1-a \
+                    --kube-node-selector=failure-domain.beta.kubernetes.io/zone=us-central1-a \
+                    [--set-file=Storage.GoogleServiceAccount=/path/to/google-service-account.json]
 ```
 
 ##### **Amazon EBS**
@@ -189,13 +188,13 @@ There are 3 options to provide cloud credentials on AWS:
 
 *Install Command to run pipelines on ebs volumes*
 ```
-venonactl install [options] --set-value=Storage.Backend=ebs \
-                            --set-value=Storage.AvailabilityZone=us-east-1d \
-                            --build-node-selector=failure-domain.beta.kubernetes.io/zone=us-east-1d \
-                            [--kube-node-selector=kubernetes.io/role=master] \
-                            [--set-value=Storage.AwsAccessKeyId=ABCDF --set-value=Storage.AwsSecretAccessKey=ZYXWV]
+codefresh install runtime [options] \
+                    --set-value=Storage.Backend=ebs \
+                    --set-value=Storage.AvailabilityZone=us-east-1d \
+                    --kube-node-selector=failure-domain.beta.kubernetes.io/zone=us-east-1d \
+                    [--set-value Storage.VolumeProvisioner.NodeSelector=kubernetes.io/role=master] \
+                    [--set-value Storage.AwsAccessKeyId=ABCDF --set-value Storage.AwsSecretAccessKey=ZYXWV]
 ```
-
 
 #### Kubernetes RBAC
 Installation of Venona on Kubernetes cluster installing 2 groups of objects,
