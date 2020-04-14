@@ -38,7 +38,6 @@ var uninstallRuntimeCmd = &cobra.Command{
 
 		s.CodefreshAPI = &store.CodefreshAPI{}
 		s.AgentAPI = &store.AgentAPI{}
-
 		
 		builder := plugins.NewBuilder(lgr)
 		if uninstallRunimeCmdOptions.kube.context == "" {
@@ -47,7 +46,8 @@ var uninstallRuntimeCmd = &cobra.Command{
 		if uninstallRunimeCmdOptions.kube.namespace == "" {
 			dieOnError(fmt.Errorf("Namespace name is required to in order to uninstall agent"))
 		}
-
+		s.KubernetesAPI.ContextName = uninstallRunimeCmdOptions.kube.context
+		s.KubernetesAPI.Namespace = uninstallRunimeCmdOptions.kube.namespace
 
 		if uninstallRunimeCmdOptions.kubeVenona.kubePath == "" {
 			uninstallRunimeCmdOptions.kubeVenona.kubePath = kubeConfigPath

@@ -59,6 +59,9 @@ var functionsMap map[string]string = map[string]string{
 	"rbacv1.RoleBinding":        "RbacV1().RoleBindings(namespace)",
 
 	"storagev1.StorageClass": "StorageV1().StorageClasses()",
+
+	"batchv1.Job":     "BatchV1().Jobs(namespace)",
+	"batchv1beta1.CronJob": "BatchV1beta1().CronJobs(namespace)",
 }
 
 var packageTemplate = template.Must(template.New("").Parse(
@@ -81,6 +84,9 @@ import (
     rbacv1 "k8s.io/api/rbac/v1"
 
 	storagev1 "k8s.io/api/storage/v1"
+
+	batchv1 "k8s.io/api/batch/v1"
+	batchv1beta1 "k8s.io/api/batch/v1beta1"
 )
 
 // CreateObject - creates kubernetes object from *runtime.Object. Returns object name, kind and creation error

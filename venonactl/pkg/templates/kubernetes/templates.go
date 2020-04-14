@@ -106,7 +106,37 @@ data:
 
 `
 
-	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `apiVersion: apps/v1
+	templatesMap["cron-job.dind-volume-cleanup.vp.yaml"] = `{{- if not (eq .Storage.Backend "local") }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dind-volume-cleanup-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-volume-cleanup
+spec:
+  schedule: "0,10,20,30,40,50 * * * *"
+  concurrencyPolicy: Forbid
+  {{- if eq .Storage.Backend "local" }}
+  suspend: true
+  {{- end }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: volume-provisioner-{{ .AppName }}
+          restartPolicy: Never
+          containers:
+            - name: dind-volume-cleanup
+              image: codefresh/dind-volume-cleanup
+              env:
+              - name: PROVISIONED_BY
+                value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+{{- end }}`
+
+	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `{{- if eq .Storage.Backend "local" -}}
+{{- $localVolumeParentDir := ( .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" ) }}
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: dind-lv-monitor-{{ .AppName }}
@@ -130,10 +160,6 @@ spec:
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
-      {{ if ne .NodeSelector "" }}
-      nodeSelector:
-        {{ .NodeSelector }}
-      {{ end }}
       tolerations:
         - key: 'codefresh/dind'
           operator: 'Exists'
@@ -153,7 +179,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
-              value: /var/lib/codefresh/dind-volumes
+              value: {{ $localVolumeParentDir }}
 #              Debug:
 #            - name: DRY_RUN
 #              value: "1"
@@ -167,14 +193,14 @@ spec:
 #              value: "20"
 
           volumeMounts:
-          - mountPath: /var/lib/codefresh/dind-volumes
+          - mountPath: {{ $localVolumeParentDir }}
             readOnly: false
             name: dind-volume-dir
       volumes:
       - name: dind-volume-dir
         hostPath:
-          path: /var/lib/codefresh/dind-volumes
-`
+          path: {{ $localVolumeParentDir }}
+{{- end -}}`
 
 	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
 kind: Deployment
@@ -195,9 +221,9 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
-      {{ if ne .NodeSelector "" }}
-      nodeSelector:
-        {{ .NodeSelector }}
+      {{ if .Storage.VolumeProvisioner.NodeSelector }}
+      nodeSelector: 
+{{ .Storage.VolumeProvisioner.NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
@@ -209,12 +235,12 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-        image: {{ .VolumeProvisionerImage.Name }}:{{ .VolumeProvisionerImage.Tag }}
+        image: {{ .Storage.VolumeProvisioner.Image }}
         imagePullPolicy: Always
         resources:
           requests:
-            cpu: "300m"
-            memory: "400Mi"
+            cpu: "200m"
+            memory: "200Mi"
           limits:
             cpu: "1000m"
             memory: "6000Mi"
@@ -225,6 +251,32 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if .Storage.AwsAccessKeyId }}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: dind-volume-provisioner-{{ .AppName }}
+              key: aws_access_key_id
+        {{- end }}
+        {{- if .Storage.AwsSecretAccessKey }}
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dind-volume-provisioner-{{ .AppName }}
+              key: aws_secret_access_key
+        {{- end }}
+      {{- if .Storage.GoogleServiceAccount }}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/dind-volume-provisioner/credentials/google-service-account.json
+        volumeMounts:
+        - name: credentials
+          readOnly: true
+          mountPath: "/etc/dind-volume-provisioner/credentials"
+      volumes:
+      - name: credentials
+        secret:
+          secretName: dind-volume-provisioner-{{ .AppName }}
+      {{- end }}
 `
 
 	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
@@ -366,6 +418,25 @@ rules:
   verbs: ["get", "create", "delete"]
 `
 
+	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: dind-volume-provisioner-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-volume-provisioner
+data:
+{{- if .Storage.GoogleServiceAccount }}
+  google-service-account.json: {{ .Storage.GoogleServiceAccount | b64enc }}
+{{- end }}
+{{- if .Storage.AwsAccessKeyId }}
+  aws_access_key_id: {{ .Storage.AwsAccessKeyId | b64enc }}
+{{- end }}
+{{- if .Storage.AwsSecretAccessKey }}
+  aws_secret_access_key: {{ .Storage.AwsSecretAccessKey | b64enc }}
+{{- end }}`
+
 	templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
@@ -408,17 +479,36 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
 
-	templatesMap["storageclass.dind-local-volume-provisioner.vp.yaml"] = `---
+	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: dind-local-volumes-{{ .AppName }}-{{ .Namespace }}
+  name: {{ .Storage.StorageClassName }}
   labels:
     app: dind-volume-provisioner
 provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
+{{- if eq .Storage.Backend "local" }}
   volumeBackend: local
-`
+  volumeParentDir: {{ .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" }}
+{{- else if eq .Storage.Backend "gcedisk" }}
+  volumeBackend: {{ .Storage.Backend }}
+  #  pd-ssd or pd-standard
+  type: {{ .Storage.VolumeType | default "pd-ssd" }}
+  # Valid zone in GCP
+  zone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- else if or (eq .Storage.Backend "ebs") (eq .Storage.Backend "ebs-csi")}}
+  # ebs or ebs-csi
+  volumeBackend: {{ .Storage.Backend }}
+  #  gp2 or io1
+  VolumeType: {{ .Storage.VolumeType | default "gp2" }}
+  # Valid zone in aws (us-east-1c, ...)
+  AvailabilityZone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- end }}`
 
 	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
 kind: Secret

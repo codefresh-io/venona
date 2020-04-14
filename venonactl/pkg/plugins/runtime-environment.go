@@ -62,6 +62,12 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		Annotations:           opt.Annotations,
 	}
 
+	// Set storage Class by backend
+	if cfOpt.IsDefaultStorageClass {
+		storageParams := v["Storage"].(map[string]interface{})
+		cfOpt.StorageClass = storageParams["StorageClassName"].(string)
+	}
+
 	cf := codefresh.NewCodefreshAPI(cfOpt)
 	cert, err := cf.Sign()
 	if err != nil {

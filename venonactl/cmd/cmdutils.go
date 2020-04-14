@@ -23,6 +23,8 @@ import (
 	"gopkg.in/yaml.v2"
 	k8sApi "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"helm.sh/helm/v3/pkg/strvals"
 )
 
 var (
@@ -230,7 +232,55 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 func (ns nodeSelector) String() string {
 	var s string
 	for k, v := range ns {
-		s = fmt.Sprintf("%s: %s", k, v)
+		s = fmt.Sprintf("%s: %q", k, v)
 	}
 	return s
+}
+
+// Parsing helpers --set-value , --set-file 
+// by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
+
+// parses --set-value options 
+func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
+	base := map[string]interface{}{}
+	for _, value := range setValuesOpts {
+		if err := strvals.ParseInto(value, base); err != nil {
+			return nil, fmt.Errorf("Cannot parse option --set-value %s", value)
+		}
+	}
+	return base, nil
+}
+
+// parses --set-file options 
+func parseSetFiles(setFilesOpts []string) (map[string]interface{}, error) {
+	base := map[string]interface{}{}
+	for _, value := range setFilesOpts {
+		reader := func(rs []rune) (interface{}, error) {
+			bytes, err := ioutil.ReadFile(string(rs))
+			return string(bytes), err
+		}
+		if err := strvals.ParseIntoFile(value, base, reader); err != nil {
+			return nil, fmt.Errorf("Cannot parse option --set-file %s", value)
+		}
+	}
+	return base, nil
+}
+
+func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(a))
+	for k, v := range a {
+		out[k] = v
+	}
+	for k, v := range b {
+		if v, ok := v.(map[string]interface{}); ok {
+			if bv, ok := out[k]; ok {
+				if bv, ok := bv.(map[string]interface{}); ok {
+					out[k] = mergeMaps(bv, v)
+					continue
+				}
+			}
+		}
+		out[k] = v
+	}
+	return out
 }

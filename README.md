@@ -114,6 +114,88 @@ rules:
   * Bind your user with cluster-admin kubernetes clusterrole
     > `kubectl create clusterrolebinding NAME --clusterrole cluster-admin --user YOUR_USER`
 
+#### Pipeline Storage with docker cache support
+
+##### **GKE LocalSSD**
+*Prerequisite:* [GKE custer with local SSD](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/local-ssd)
+
+*Install venona for using GKE Local SSD:*
+```
+codefresh install runtime [options] \
+                    --set-value=Storage.LocalVolumeParentDir=/mnt/disks/ssd0/codefresh-volumes 
+                    --kube-selector=cloud.google.com/gke-local-ssd=true
+```
+
+##### **GCE Disks** 
+*Prerequisite:* volume provisioner (dind-volume-provisioner) should have permissions to create/delete/get of google disks
+There are 3 options to provide cloud credentials on GCE:
+* run venona dind-volume-provisioniner on node with iam role which is allowed to create/delete/get of google disks
+* create Google Service Account with ComputeEngine.StorageAdmin, download its key and pass it to venona installed with `--set-file=Storage.GooogleServiceAccount=/path/to/google-service-account.json`
+* use [Google Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) to assign iam role to `volume-provisioner-venona` service account 
+
+*Note*: Builds will be running in single availability zone, so you must to specify AvailabilityZone params
+
+
+*Install venona for using GKE Disks:*
+```
+codefresh install runtime [options] \
+                    --set-value=Storage.Backend=gcedisk \
+                    --set-value=Storage.AvailabilityZone=us-central1-a \
+                    --kube-node-selector=failure-domain.beta.kubernetes.io/zone=us-central1-a \
+                    [--set-file=Storage.GoogleServiceAccount=/path/to/google-service-account.json]
+```
+
+##### **Amazon EBS**
+
+*Prerequisite:* volume provisioner (dind-volume-provisioner) should have permissions to create/delete/get of aws ebs
+Minimal iam policy for dind-volume-provisioner:
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AttachVolume",
+        "ec2:CreateSnapshot",
+        "ec2:CreateTags",
+        "ec2:CreateVolume",
+        "ec2:DeleteSnapshot",
+        "ec2:DeleteTags",
+        "ec2:DeleteVolume",
+        "ec2:DescribeInstances",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeTags",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+There are 3 options to provide cloud credentials on AWS:
+* run venona dind-volume-provisioniner on node with the iam role - use `--set-value Storage.VolumeProvisioner.NodeSelector=node-label=value` option
+* create AWS IAM User, assign it the permissions above and suppy aws credentials to venona installer `--set-value=Storage.AwsAccessKeyId=ABCDF --set-value=Storage.AwsSecretAccessKey=ZYXWV`
+
+* use [Aws Identity for Service Account](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) to assign iam role to `volume-provisioner-venona` service account
+
+*Notes*: 
+- Builds will be running in single availability zone, so you must specify AvailabilityZone parameter `--set-value=Storage.AvailabilityZone=<aws-az>` and build-node-selector `--build-node-selector=failure-domain.beta.kubernetes.io/zone=<aws-az>` in case of multizone cluster
+
+- We support both [in-tree ebs](https://kubernetes.io/docs/concepts/storage/volumes/#awselasticblockstore) (`--set-value=Storage.Backend=ebs`) volumes and ebs-csi(https://github.com/kubernetes-sigs/aws-ebs-csi-driver) (`--set-value=Storage.Backend=ebs-csi`)
+
+*Install Command to run pipelines on ebs volumes*
+```
+codefresh install runtime [options] \
+                    --set-value=Storage.Backend=ebs \
+                    --set-value=Storage.AvailabilityZone=us-east-1d \
+                    --kube-node-selector=failure-domain.beta.kubernetes.io/zone=us-east-1d \
+                    [--set-value Storage.VolumeProvisioner.NodeSelector=kubernetes.io/role=master] \
+                    [--set-value Storage.AwsAccessKeyId=ABCDF --set-value Storage.AwsSecretAccessKey=ZYXWV]
+```
+
 #### Kubernetes RBAC
 Installation of Venona on Kubernetes cluster installing 2 groups of objects,
 Each one has own RBAC needs and therefore, created roles(and cluster-roles)

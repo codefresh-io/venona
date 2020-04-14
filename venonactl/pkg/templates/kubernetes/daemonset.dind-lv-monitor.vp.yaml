@@ -1,3 +1,5 @@
+{{- if eq .Storage.Backend "local" -}}
+{{- $localVolumeParentDir := ( .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" ) }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -22,10 +24,6 @@ spec:
       # hostNetwork: true
       # nodeSelector:
       #   kubernetes.io/role: "node"
-      {{ if ne .NodeSelector "" }}
-      nodeSelector:
-        {{ .NodeSelector }}
-      {{ end }}
       tolerations:
         - key: 'codefresh/dind'
           operator: 'Exists'
@@ -45,7 +43,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: VOLUME_PARENT_DIR
-              value: /var/lib/codefresh/dind-volumes
+              value: {{ $localVolumeParentDir }}
 #              Debug:
 #            - name: DRY_RUN
 #              value: "1"
@@ -59,10 +57,11 @@ spec:
 #              value: "20"
 
           volumeMounts:
-          - mountPath: /var/lib/codefresh/dind-volumes
+          - mountPath: {{ $localVolumeParentDir }}
             readOnly: false
             name: dind-volume-dir
       volumes:
       - name: dind-volume-dir
         hostPath:
-          path: /var/lib/codefresh/dind-volumes
+          path: {{ $localVolumeParentDir }}
+{{- end -}}

@@ -123,7 +123,7 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	if err != nil {
-		a.logger.Debug("Failed to create zip reader from given certificate")
+		a.logger.Debug("Failed to create zip reader from given certificate " + fmt.Sprintf("%s",byteArray))
 		return nil, err
 	}
 	for _, zf := range zipReader.File {
@@ -178,10 +178,7 @@ func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 		options.NodeSelector = a.buildNodeSelector
 	}
 
-	options.StorageClass = fmt.Sprintf("%s-%s", a.storageClass, a.clusternamespace)
-	if !a.isDefaultStorageClass {
-		options.StorageClass = a.storageClass
-	}
+	options.StorageClass = a.storageClass
 
 	if len(a.annotations) != 0 {
 		options.Annotations = a.annotations

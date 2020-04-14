@@ -1,0 +1,27 @@
+{{- if not (eq .Storage.Backend "local") }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: dind-volume-cleanup-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-volume-cleanup
+spec:
+  schedule: "0,10,20,30,40,50 * * * *"
+  concurrencyPolicy: Forbid
+  {{- if eq .Storage.Backend "local" }}
+  suspend: true
+  {{- end }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: volume-provisioner-{{ .AppName }}
+          restartPolicy: Never
+          containers:
+            - name: dind-volume-cleanup
+              image: codefresh/dind-volume-cleanup
+              env:
+              - name: PROVISIONED_BY
+                value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+{{- end }}
