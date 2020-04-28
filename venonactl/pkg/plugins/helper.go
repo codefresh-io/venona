@@ -18,20 +18,39 @@ package plugins
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"regexp"
 	"strings"
 
 	// import all cloud providers auth clients
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"github.com/Masterminds/sprig"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/scheme"
+)
+
+type (
+	validationResult struct {
+		isValid bool
+		message []string
+	}
+
+	validationRequest struct {
+		cpu                  string
+		localDiskMinimumSize string
+		momorySize           string
+		strictMode           bool
+	}
 )
 
 func unescape(s string) template.HTML {
@@ -42,7 +61,7 @@ func unescape(s string) template.HTML {
 func nodeSelectorParamToYaml(ns string) string {
 	nodeSelectorParts := strings.Split(ns, ",")
 	var nodeSelectorYaml string
-	for _, p := range(nodeSelectorParts){
+	for _, p := range nodeSelectorParts {
 		pSplit := strings.Split(p, "=")
 		if len(pSplit) != 2 {
 			continue
@@ -59,9 +78,9 @@ func nodeSelectorParamToYaml(ns string) string {
 // ExecuteTemplate - executes templates in tpl str with config as values
 func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 	funcMap := template.FuncMap{
-		          "unescape": unescape,
-							"nodeSelectorParamToYaml": nodeSelectorParamToYaml,
-             }
+		"unescape":                unescape,
+		"nodeSelectorParamToYaml": nodeSelectorParamToYaml,
+	}
 	template, err := template.New("base").Funcs(sprig.FuncMap()).Funcs(funcMap).Parse(tplStr)
 	if err != nil {
 		return "", err
@@ -129,4 +148,65 @@ func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, 
 func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string, logger logger.Logger) (map[string]runtime.Object, error) {
 	templatesMap := templates.TemplatesMap()
 	return KubeObjectsFromTemplates(templatesMap, values, pattern, logger)
+}
+
+func ensureClusterRequirements(client *kubernetes.Clientset, req validationRequest) (validationResult, error) {
+	result := validationResult{}
+	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
+	if err != nil {
+		return result, err
+	}
+	if nodes == nil {
+		return result, errors.New("Nodes not found")
+	}
+
+	result.isValid = true
+	if len(nodes.Items) == 0 {
+		result.message = append(result.message, "No nodes in cluster")
+		result.isValid = false
+	}
+	for _, n := range nodes.Items {
+		res := testNode(n, req)
+		if len(res) > 0 {
+			result.message = append(result.message, res...)
+			result.isValid = false
+		}
+	}
+	if !req.strictMode {
+		result.isValid = true
+	}
+	return result, nil
+}
+
+func testNode(n v1.Node, req validationRequest) []string {
+	result := []string{}
+
+	if req.cpu != "" {
+		requiredCPU, err := resource.ParseQuantity(req.cpu)
+		if err != nil {
+			result = append(result, err.Error())
+			return result
+		}
+		cpu := n.Status.Capacity.Cpu()
+
+		if cpu != nil && cpu.Cmp(requiredCPU) == -1 {
+			msg := fmt.Sprintf("Insufficiant CPU on node %s, current: %s - required: %s", n.GetObjectMeta().GetName(), cpu.String(), requiredCPU.String())
+			result = append(result, msg)
+		}
+	}
+
+	if req.momorySize != "" {
+		requiredMemory, err := resource.ParseQuantity(req.momorySize)
+		if err != nil {
+			result = append(result, err.Error())
+			return result
+		}
+		memory := n.Status.Capacity.Memory()
+		if memory != nil && memory.Cmp(requiredMemory) == -1 {
+			msg := fmt.Sprintf("Insufficiant Memory on node %s, current: %s - required: %s", n.GetObjectMeta().GetName(), memory.String(), requiredMemory.String())
+			result = append(result, msg)
+		}
+	}
+
+	return result
 }

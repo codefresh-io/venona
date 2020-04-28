@@ -29,17 +29,18 @@ var installRuntimeCmdOptions struct {
 	codefreshToken string
 	dryRun         bool
 	kube           struct {
-		namespace string
-		inCluster bool
-		context   string
+		namespace    string
+		inCluster    bool
+		context      string
 		nodeSelector string
 	}
-	storageClass           string
-	runtimeEnvironmentName string
-	kubernetesRunnerType   bool
-	tolerations            string
-	templateValues         []string
-	templateFileValues     []string
+	storageClass              string
+	runtimeEnvironmentName    string
+	kubernetesRunnerType      bool
+	tolerations               string
+	templateValues            []string
+	templateFileValues        []string
+	skipClusterAcceptanceTest bool
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -99,6 +100,7 @@ var installRuntimeCmd = &cobra.Command{
 			CodefreshToken:        installRuntimeCmdOptions.codefreshToken,
 			RuntimeEnvironment:    installRuntimeCmdOptions.runtimeEnvironmentName,
 			ClusterNamespace:      installRuntimeCmdOptions.kube.namespace,
+			SkipAcceptanceTest:    installRuntimeCmdOptions.skipClusterAcceptanceTest,
 		}
 
 		if installRuntimeCmdOptions.kubernetesRunnerType {
@@ -176,5 +178,6 @@ func init() {
 
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
+	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.skipClusterAcceptanceTest, "skip-cluster-test", false, "Do not run cluster acceptance test")
 
 }
