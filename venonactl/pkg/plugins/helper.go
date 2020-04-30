@@ -49,7 +49,6 @@ type (
 		cpu                  string
 		localDiskMinimumSize string
 		momorySize           string
-		strictMode           bool
 	}
 )
 
@@ -165,15 +164,19 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 		result.message = append(result.message, "No nodes in cluster")
 		result.isValid = false
 	}
+
+	atLeastOneMet := false
 	for _, n := range nodes.Items {
 		res := testNode(n, req)
 		if len(res) > 0 {
 			result.message = append(result.message, res...)
-			result.isValid = false
+		} else {
+			atLeastOneMet = true
 		}
 	}
-	if !req.strictMode {
-		result.isValid = true
+	if !atLeastOneMet {
+		result.isValid = false
+		return result, nil
 	}
 	return result, nil
 }

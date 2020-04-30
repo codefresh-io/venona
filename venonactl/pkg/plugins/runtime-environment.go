@@ -87,7 +87,6 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	if !opt.SkipAcceptanceTest {
 		u.logger.Debug("Running acceptance tests")
 		res, err := ensureClusterRequirements(cs, validationRequest{
-			strictMode: true,
 			cpu:        "1",
 			momorySize: "1Gi",
 		})

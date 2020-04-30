@@ -76,7 +76,6 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	if !opt.SkipAcceptanceTest {
 		u.logger.Debug("Running acceptance tests")
 		res, err := ensureClusterRequirements(cs, validationRequest{
-			strictMode: true,
 			cpu:        "500m",
 			momorySize: "1Gi",
 		})
