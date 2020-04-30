@@ -17,7 +17,7 @@ const (
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
-	RuntimeAttachType			  = "runtime-attach"
+	RuntimeAttachType             = "runtime-attach"
 )
 
 type (
@@ -56,35 +56,34 @@ type (
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)
 			BuildConfig() clientcmd.ClientConfig
-			EnsureNamespaceExists(cs *kubernetes.Clientset) (error)
-			
+			EnsureNamespaceExists(cs *kubernetes.Clientset) error
 		}
-		AgentKubeBuilder	  interface {
+		AgentKubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
-			EnsureNamespaceExists(cs *kubernetes.Clientset) (error)
+			EnsureNamespaceExists(cs *kubernetes.Clientset) error
 		}
-		DryRun               bool
-		KubernetesRunnerType bool
-		BuildNodeSelector    map[string]string
-		Annotations          map[string]string
-		RuntimeEnvironment   string
-		RuntimeClusterName   string
+		DryRun                bool
+		KubernetesRunnerType  bool
+		BuildNodeSelector     map[string]string
+		Annotations           map[string]string
+		RuntimeEnvironment    string
+		RuntimeClusterName    string
 		RuntimeServiceAccount string
-		RestartAgent        bool
+		RestartAgent          bool
+		SkipAcceptanceTest    bool
 	}
 
 	DeleteOptions struct {
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
-		AgentKubeBuilder	  interface {
+		AgentKubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
-		ClusterNamespace string // runtime
-		AgentNamespace   string // agent
-		RuntimeEnvironment   string
-		RestartAgent        bool
-
+		ClusterNamespace   string // runtime
+		AgentNamespace     string // agent
+		RuntimeEnvironment string
+		RestartAgent       bool
 	}
 
 	UpgradeOptions struct {

@@ -18,6 +18,7 @@ package plugins
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
@@ -40,7 +41,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	if err != nil {
 		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v ", err)
 	}
-	
+
 	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
@@ -81,6 +82,27 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 
 	if err := cf.Validate(); err != nil {
 		return nil, err
+	}
+
+	if !opt.SkipAcceptanceTest {
+		u.logger.Debug("Running acceptance tests")
+		res, err := ensureClusterRequirements(cs, validationRequest{
+			cpu:        "1",
+			momorySize: "1Gi",
+		})
+		if err != nil {
+			return nil, err
+		}
+		if !res.isValid {
+			for _, m := range res.message {
+				u.logger.Error(m)
+			}
+			return nil, errors.New("Failed to run acceptance test on cluster")
+		}
+
+		for _, m := range res.message {
+			u.logger.Warn(m)
+		}
 	}
 
 	v["RuntimeEnvironment"] = opt.RuntimeEnvironment

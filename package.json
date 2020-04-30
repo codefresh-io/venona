@@ -1,6 +1,6 @@
 {
   "name": "venona",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Codefresh agent to run on Codefresh's runtime environment and execute pipeline",
   "main": "index.js",
   "scripts": {

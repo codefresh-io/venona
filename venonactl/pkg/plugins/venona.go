@@ -18,6 +18,7 @@ package plugins
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"time"
 
@@ -39,7 +40,7 @@ const (
 
 // Install venona agent
 func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
-	if  v["AgentToken"] == "" {
+	if v["AgentToken"] == "" {
 		u.logger.Debug("Generating token for agent")
 		tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
 		u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
@@ -72,6 +73,27 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
+	if !opt.SkipAcceptanceTest {
+		u.logger.Debug("Running acceptance tests")
+		res, err := ensureClusterRequirements(cs, validationRequest{
+			cpu:        "500m",
+			momorySize: "1Gi",
+		})
+		if err != nil {
+			return nil, err
+		}
+		if !res.isValid {
+			for _, m := range res.message {
+				u.logger.Error(m)
+			}
+			return nil, errors.New("Failed to run acceptance test on cluster")
+		}
+
+		for _, m := range res.message {
+			u.logger.Warn(m)
+		}
+	}
+
 	return v, install(&installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
