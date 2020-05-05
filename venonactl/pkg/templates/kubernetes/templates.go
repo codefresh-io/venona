@@ -279,6 +279,97 @@ spec:
       {{- end }}
 `
 
+	templatesMap["deployment.k8sagent.yaml"] = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }}
+spec:
+  replicas: {{ default 1 .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 50%
+  selector:
+    matchLabels:
+      app: {{ .AppName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .AppName }}
+        version: {{ .Version }}
+    spec:
+      {{- if .Values.rbacEnabled}}
+      serviceAccountName: {{ .Release.Name  | quote }}
+      {{- end }}
+      containers:
+      - name: {{ .AppName }}
+        image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+        imagePullPolicy: Always
+        env:
+          - name: SERVICE_NAME
+            value: {{ .AppName }}
+          - name: NAMESPACE_INTERVAL
+            value: {{ .Values.namespaceInterval | quote }}
+          - name: POD_INTERVAL
+            value: {{ .Values.podInterval | quote }}
+          - name: DEPLOYMENT_INTERVAL
+            value: {{ .Values.deploymentInterval | quote }}
+          - name: RELEASE_INTERVAL
+            value: {{ .Values.releaseInterval | quote }}
+          - name: SERVICE_INTERVAL
+            value: {{ .Values.serviceInterval | quote }}
+          - name: SECRET_INTERVAL
+            value: {{ .Values.secretInterval | quote }}
+          {{- if .Values.useNamespaceWideRole }}
+          - name: ROLE_BINDING
+            value: "true"
+          {{- end }}
+          - name: PORT
+            value: "9020"
+          - name: CLUSTER_URL
+            value: {{ .Values.clusterUrl | quote }}
+          - name: CLUSTER_TOKEN
+            value: {{ .Values.clusterToken | quote }}
+          - name: CLUSTER_CA
+            value: {{ .Values.clusterCA | quote }}
+          - name: API_TOKEN
+            value: {{ .Values.apiToken | quote }}
+          - name: CLUSTER_ID
+            value: {{ .Values.clusterId | quote }}
+          - name: API_URL
+            value: {{ .Values.apiUrl | quote }}
+          - name: ACCOUNT_ID
+            value: {{ .Values.accountId | quote }}
+          - name: DISABLE_HELM
+            value: {{ .Values.disableHelm | quote }}
+          - name: HELM3
+            value: {{ .Values.helm3 | quote }}
+          - name: CLEAN
+            value: "{{ .Values.clean }}"
+          - name: NAMESPACE
+            value: "{{ .Namespace }}"
+          - name: NODE_OPTIONS
+            value: "--max_old_space_size={{ .Values.heapSize }}"
+          - name: FORCE_DISABLE_HELM_RELEASES
+            value: "{{ .Values.forceDisableHelmReleases }}"
+        ports:
+        - containerPort: 9020
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /api/ping
+            port: 9020
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+`
+
 	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -407,6 +498,58 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
+	templatesMap["role.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+{{- if .Values.useNamespaceWideRole }}
+kind: Role
+{{- else }}
+kind: ClusterRole
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name  | quote }}-cluster-reader
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Release.Name  | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name  | quote }}
+    heritage: {{ .Release.Service  | quote }}
+    version: {{ .Values.imageTag | quote }}
+rules:
+- apiGroups:
+  - ""
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+    - ""
+  resources: ["pods"]
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - deletecollection
+- apiGroups:
+  - extensions
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
+`
+
 	templatesMap["role.re.yaml"] = `kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -416,6 +559,79 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "create", "delete"]
+`
+
+	templatesMap["rolebinding.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+{{- if .Values.useNamespaceWideRole }}
+kind: RoleBinding
+{{- else }}
+kind: ClusterRoleBinding
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-cluster-reader
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name  | quote }}
+    heritage: {{ .Release.Service  | quote }}
+    version: {{ .Values.imageTag | quote }}
+subjects:
+- kind: ServiceAccount
+  namespace: {{ .Release.Namespace }}
+  name: {{ .Chart.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  {{- if .Values.useNamespaceWideRole }}
+  kind: Role
+  {{- else }}
+  kind: ClusterRole
+  {{- end }}
+  name: {{ .Chart.Name }}-cluster-reader
+{{- end }}
+`
+
+	templatesMap["rollback-role-binding.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+{{- if .Values.useNamespaceWideRole }}
+kind: RoleBinding
+{{- else }}
+kind: ClusterRoleBinding
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Chart.Name }}-rollback
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name  | quote }}
+    heritage: {{ .Release.Service  | quote }}
+    version: {{ .Values.imageTag | quote }}
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ .Release.Namespace }}
+    name: {{ .Chart.Name }}-rollback
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+  {{- end }}
+`
+
+	templatesMap["rollback-serviceaccount.k8sagent.yaml"] = `{{- if and .Values.rbacEnabled (not .Values.useNamespaceWideRole) }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-rollback
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name  | quote }}
+    heritage: {{ .Release.Service  | quote }}
+    version: {{ .Values.imageTag | quote }}
+{{- end }}
 `
 
 	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `apiVersion: v1
@@ -473,11 +689,45 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
+	templatesMap["service-account.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name  | quote }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Release.Name  | quote }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    release: {{ .Release.Name  | quote }}
+    heritage: {{ .Release.Service  | quote }}
+    version: {{ .Values.imageTag | quote }}
+{{- end }}
+`
+
 	templatesMap["service-account.re.yaml"] = `apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
+
+	templatesMap["service.k8sagent.yaml"] = `apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: "http"
+    port: 80
+    protocol: TCP
+    targetPort: 9020
+  selector:
+    app: {{ .AppName }}
+`
 
 	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `---
 kind: StorageClass

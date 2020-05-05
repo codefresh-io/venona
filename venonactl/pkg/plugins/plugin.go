@@ -14,6 +14,7 @@ import (
 const (
 	RuntimeEnvironmentPluginType  = "runtime-environment"
 	VenonaPluginType              = "venona"
+	K8sAgentPluginType            = "k8s-agent"
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
@@ -186,6 +187,13 @@ func build(t string, logger logger.Logger) Plugin {
 			logger: logger.New("Plugin", RuntimeAttachType),
 		}
 	}
+
+	if t == K8sAgentPluginType {
+		return &k8sAgentPlugin{
+			logger: logger.New("Plugin", K8sAgentPluginType),
+		}
+	}
+
 	return nil
 }
 

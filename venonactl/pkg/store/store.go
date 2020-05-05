@@ -1,9 +1,9 @@
 package store
 
 import (
+	"fmt"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
-	"fmt"
 )
 
 const (
@@ -108,18 +108,35 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Ca":   "",
 		},
 		"Storage": map[string]interface{}{
-			"Backend": "local",
-			"StorageClassName": fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
+			"Backend":              "local",
+			"StorageClassName":     fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
 			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
-			"AvailabilityZone": "",
+			"AvailabilityZone":     "",
 			"GoogleServiceAccount": "",
-			"AwsAccessKeyId": "",
-			"AwsSecretAccessKey": "",
+			"AwsAccessKeyId":       "",
+			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image": "codefresh/dind-volume-provisioner:v20",
+				"Image":        "codefresh/dind-volume-provisioner:v20",
 				"NodeSelector": "",
 				"Tolerations":  s.KubernetesAPI.Tolerations,
 			},
 		},
+	}
+}
+
+func (s *Values) BuildMinimizedValues() map[string]interface{} {
+	return map[string]interface{}{
+		"AppName":       ApplicationName,
+		"Version":       s.Version.Current.Version,
+		"CodefreshHost": s.CodefreshAPI.Host,
+		"Mode":          ModeInCluster,
+		"fullname":      "codefresh/k8s-agent",
+		"Image": map[string]string{
+			"Name": "codefresh/venona",
+			"Tag":  s.Version.Current.Version,
+		},
+		"Namespace":  s.KubernetesAPI.Namespace,
+		"ConfigPath": s.KubernetesAPI.ConfigPath,
+		"Context":    s.KubernetesAPI.ContextName,
 	}
 }
