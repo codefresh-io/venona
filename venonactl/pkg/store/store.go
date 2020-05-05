@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	ModeInCluster   = "InCluster"
-	ApplicationName = "venona"
+	ModeInCluster          = "InCluster"
+	ApplicationName        = "venona"
+	MonitorApplicationName = "monitor"
 )
 
 var (
@@ -38,6 +39,10 @@ type (
 		RuntimeEnvironment string
 
 		Version *Version
+
+		ClusterId string
+
+		Helm3 bool
 	}
 
 	KubernetesAPI struct {
@@ -126,14 +131,14 @@ func (s *Values) BuildValues() map[string]interface{} {
 
 func (s *Values) BuildMinimizedValues() map[string]interface{} {
 	return map[string]interface{}{
-		"AppName":       ApplicationName,
+		"AppName":       MonitorApplicationName,
 		"Version":       s.Version.Current.Version,
 		"CodefreshHost": s.CodefreshAPI.Host,
 		"Mode":          ModeInCluster,
 		"fullname":      "codefresh/k8s-agent",
 		"Image": map[string]string{
-			"Name": "codefresh/venona",
-			"Tag":  s.Version.Current.Version,
+			"Name": "codefresh/agent",
+			"Tag":  "stable",
 		},
 		"Namespace":  s.KubernetesAPI.Namespace,
 		"ConfigPath": s.KubernetesAPI.ConfigPath,

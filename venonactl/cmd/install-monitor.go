@@ -23,19 +23,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-var installK8sAgentCmdOptions struct {
+var installMonitorAgentCmdOptions struct {
 	kube struct {
 		namespace    string
 		inCluster    bool
 		context      string
 		nodeSelector string
 	}
+	clusterId      string
+	helm3          bool
+	codefreshToken string
 }
 
 // installK8sAgentCmd represents the install command
-var installK8sAgentCmd = &cobra.Command{
-	Use:   "k8sagent",
-	Short: "Install Codefresh's k8s agent on cluster",
+var installMonitorAgentCmd = &cobra.Command{
+	Use:   "monitor",
+	Short: "Install Codefresh's monitor agent on cluster",
 	Run: func(cmd *cobra.Command, args []string) {
 
 		s := store.GetStore()
@@ -43,10 +46,10 @@ var installK8sAgentCmd = &cobra.Command{
 		lgr := createLogger("Install-k8s-agent", verbose)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
-		fillKubernetesAPI(lgr, installK8sAgentCmdOptions.kube.context, installK8sAgentCmdOptions.kube.namespace, installK8sAgentCmdOptions.kube.inCluster)
+		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, installMonitorAgentCmdOptions.kube.inCluster)
 
 		builder := plugins.NewBuilder(lgr)
-		builder.Add(plugins.K8sAgentPluginType)
+		builder.Add(plugins.MonitorAgentPluginType)
 
 		builderInstallOpt := &plugins.InstallOptions{
 			ClusterNamespace: s.KubernetesAPI.Namespace,
@@ -54,12 +57,16 @@ var installK8sAgentCmd = &cobra.Command{
 
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 
+		s.ClusterId = installMonitorAgentCmdOptions.clusterId
+		s.Helm3 = installMonitorAgentCmdOptions.helm3
+
 		if cfAPIHost == "" {
 			cfAPIHost = "https://g.codefresh.io"
 		}
 		// This is temporarily and used for signing
 		s.CodefreshAPI = &store.CodefreshAPI{
-			Host: cfAPIHost,
+			Host:  cfAPIHost,
+			Token: installMonitorAgentCmdOptions.codefreshToken,
 		}
 
 		values := s.BuildMinimizedValues()
@@ -70,18 +77,22 @@ var installK8sAgentCmd = &cobra.Command{
 				dieOnError(err)
 			}
 		}
-		lgr.Info("Agent installation completed Successfully")
+		lgr.Info("Monitor agent installation completed Successfully")
 	},
 }
 
 func init() {
-	installCommand.AddCommand(installK8sAgentCmd)
+	installCommand.AddCommand(installMonitorAgentCmd)
 
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
-	installK8sAgentCmd.Flags().StringVar(&installK8sAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
-	installK8sAgentCmd.Flags().StringVar(&installK8sAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
+	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
+	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
+	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.clusterId, "clusterId", "", "Cluster Id")
+	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshToken, "codefreshToken", "", "Codefresh token")
 
-	installK8sAgentCmd.Flags().BoolVar(&installK8sAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
+	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
+
+	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.helm3, "helm3", false, "Set flag if cluster use helm3")
 
 }

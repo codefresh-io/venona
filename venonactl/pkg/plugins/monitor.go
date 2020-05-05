@@ -23,16 +23,16 @@ import (
 )
 
 // k8sAgentPlugin installs assets on Kubernetes Dind runtimectl Env
-type k8sAgentPlugin struct {
+type monitorAgentPlugin struct {
 	logger logger.Logger
 }
 
 const (
-	k8sAgentFilesPattern = ".*.k8sagent.yaml"
+	monitorFilesPattern = ".*.monitor.yaml"
 )
 
 // Install k8sAgent agent
-func (u *k8sAgentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *monitorAgentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
@@ -50,20 +50,20 @@ func (u *k8sAgentPlugin) Install(opt *InstallOptions, v Values) (Values, error) 
 		templateValues: v,
 		kubeClientSet:  cs,
 		namespace:      opt.ClusterNamespace,
-		matchPattern:   k8sAgentFilesPattern,
+		matchPattern:   monitorFilesPattern,
 		dryRun:         opt.DryRun,
-		operatorType:   K8sAgentPluginType,
+		operatorType:   MonitorAgentPluginType,
 	})
 }
 
-func (u *k8sAgentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *monitorAgentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 	return nil, nil
 }
 
-func (u *k8sAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	return nil
 }
 
-func (u *k8sAgentPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *monitorAgentPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	return nil, nil
 }

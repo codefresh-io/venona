@@ -279,7 +279,7 @@ spec:
       {{- end }}
 `
 
-	templatesMap["deployment.k8sagent.yaml"] = `apiVersion: apps/v1
+	templatesMap["deployment.monitor.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .AppName }}
@@ -308,7 +308,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ .AppName }}
-        image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+        image: "{{ .Image.Name }}:{{ .Image.Tag }}"
         imagePullPolicy: Always
         env:
           - name: SERVICE_NAME
@@ -498,7 +498,7 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
-	templatesMap["role.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+	templatesMap["role.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
 {{- if .Values.useNamespaceWideRole }}
 kind: Role
 {{- else }}
@@ -561,7 +561,7 @@ rules:
   verbs: ["get", "create", "delete"]
 `
 
-	templatesMap["rolebinding.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+	templatesMap["rolebinding.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
 {{- if .Values.useNamespaceWideRole }}
 kind: RoleBinding
 {{- else }}
@@ -592,7 +592,7 @@ roleRef:
 {{- end }}
 `
 
-	templatesMap["rollback-role-binding.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
 {{- if .Values.useNamespaceWideRole }}
 kind: RoleBinding
 {{- else }}
@@ -619,7 +619,7 @@ roleRef:
   {{- end }}
 `
 
-	templatesMap["rollback-serviceaccount.k8sagent.yaml"] = `{{- if and .Values.rbacEnabled (not .Values.useNamespaceWideRole) }}
+	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .Values.rbacEnabled (not .Values.useNamespaceWideRole) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -689,7 +689,7 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
-	templatesMap["service-account.k8sagent.yaml"] = `{{- if .Values.rbacEnabled }}
+	templatesMap["service-account.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -710,7 +710,7 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
 
-	templatesMap["service.k8sagent.yaml"] = `apiVersion: v1
+	templatesMap["service.monitor.yaml"] = `apiVersion: v1
 kind: Service
 metadata:
   name: {{ .AppName }}

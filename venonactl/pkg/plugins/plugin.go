@@ -14,7 +14,7 @@ import (
 const (
 	RuntimeEnvironmentPluginType  = "runtime-environment"
 	VenonaPluginType              = "venona"
-	K8sAgentPluginType            = "k8s-agent"
+	MonitorAgentPluginType        = "monitor-agent"
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
