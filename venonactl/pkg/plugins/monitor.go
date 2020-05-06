@@ -57,7 +57,7 @@ func (u *monitorAgentPlugin) Install(opt *InstallOptions, v Values) (Values, err
 }
 
 func (u *monitorAgentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
-	return nil, nil
+	return [][]string{}, nil
 }
 
 func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
