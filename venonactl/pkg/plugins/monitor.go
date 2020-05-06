@@ -61,7 +61,21 @@ func (u *monitorAgentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]str
 }
 
 func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
-	return nil
+	cs, err := deleteOpt.KubeBuilder.BuildClient()
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return err
+	}
+	opt := &deleteOptions{
+		templates:      templates.TemplatesMap(),
+		templateValues: v,
+		kubeClientSet:  cs,
+		namespace:      deleteOpt.ClusterNamespace,
+		matchPattern:   monitorFilesPattern,
+		operatorType:   MonitorAgentPluginType,
+		logger:         u.logger,
+	}
+	return uninstall(opt)
 }
 
 func (u *monitorAgentPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
