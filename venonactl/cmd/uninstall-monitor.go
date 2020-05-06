@@ -64,8 +64,8 @@ func init() {
 	uninstallCommand.AddCommand(uninstallMonitorAgentCmd)
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
-	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
-	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
+	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which monitor should be uninstalled [$KUBE_NAMESPACE]")
+	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be uninstalled (default is current-context) [$KUBE_CONTEXT]")
 	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 
 }
