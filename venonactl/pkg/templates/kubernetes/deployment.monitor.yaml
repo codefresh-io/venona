@@ -39,15 +39,15 @@ spec:
           - name: PORT
             value: "9020"
           - name: API_TOKEN
-            value: {{ .Values.apiToken | quote }}
+            value: {{ .Token }}
           - name: CLUSTER_ID
-            value: {{ .Values.clusterId | quote }}
+            value: {{ .ClusterId }}
           - name: API_URL
             value: {{ .CodefreshHost }}/api/k8s-monitor/events
           - name: ACCOUNT_ID
             value: user
           - name: HELM3
-            value: {{ .Values.helm3 | quote }}
+            value: "{{ .Helm3 }}"
           - name: NAMESPACE
             value: "{{ .Namespace }}"
           - name: NODE_OPTIONS

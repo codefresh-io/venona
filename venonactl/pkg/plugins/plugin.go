@@ -188,9 +188,9 @@ func build(t string, logger logger.Logger) Plugin {
 		}
 	}
 
-	if t == K8sAgentPluginType {
-		return &k8sAgentPlugin{
-			logger: logger.New("Plugin", K8sAgentPluginType),
+	if t == MonitorAgentPluginType {
+		return &monitorAgentPlugin{
+			logger: logger.New("Plugin", MonitorAgentPluginType),
 		}
 	}
 

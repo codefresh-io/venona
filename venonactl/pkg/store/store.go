@@ -134,6 +134,9 @@ func (s *Values) BuildMinimizedValues() map[string]interface{} {
 		"AppName":       MonitorApplicationName,
 		"Version":       s.Version.Current.Version,
 		"CodefreshHost": s.CodefreshAPI.Host,
+		"ClusterId":     s.ClusterId,
+		"Token":         s.CodefreshAPI.Token,
+		"Helm3":         s.Helm3,
 		"Mode":          ModeInCluster,
 		"fullname":      "codefresh/k8s-agent",
 		"Image": map[string]string{

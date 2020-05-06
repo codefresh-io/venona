@@ -313,50 +313,26 @@ spec:
         env:
           - name: SERVICE_NAME
             value: {{ .AppName }}
-          - name: NAMESPACE_INTERVAL
-            value: {{ .Values.namespaceInterval | quote }}
-          - name: POD_INTERVAL
-            value: {{ .Values.podInterval | quote }}
-          - name: DEPLOYMENT_INTERVAL
-            value: {{ .Values.deploymentInterval | quote }}
-          - name: RELEASE_INTERVAL
-            value: {{ .Values.releaseInterval | quote }}
-          - name: SERVICE_INTERVAL
-            value: {{ .Values.serviceInterval | quote }}
-          - name: SECRET_INTERVAL
-            value: {{ .Values.secretInterval | quote }}
           {{- if .Values.useNamespaceWideRole }}
           - name: ROLE_BINDING
             value: "true"
           {{- end }}
           - name: PORT
             value: "9020"
-          - name: CLUSTER_URL
-            value: {{ .Values.clusterUrl | quote }}
-          - name: CLUSTER_TOKEN
-            value: {{ .Values.clusterToken | quote }}
-          - name: CLUSTER_CA
-            value: {{ .Values.clusterCA | quote }}
           - name: API_TOKEN
-            value: {{ .Values.apiToken | quote }}
+            value: {{ .Token }}
           - name: CLUSTER_ID
-            value: {{ .Values.clusterId | quote }}
+            value: {{ .ClusterId }}
           - name: API_URL
-            value: {{ .Values.apiUrl | quote }}
+            value: {{ .CodefreshHost }}/api/k8s-monitor/events
           - name: ACCOUNT_ID
-            value: {{ .Values.accountId | quote }}
-          - name: DISABLE_HELM
-            value: {{ .Values.disableHelm | quote }}
+            value: user
           - name: HELM3
-            value: {{ .Values.helm3 | quote }}
-          - name: CLEAN
-            value: "{{ .Values.clean }}"
+            value: "{{ .Helm3 }}"
           - name: NAMESPACE
             value: "{{ .Namespace }}"
           - name: NODE_OPTIONS
-            value: "--max_old_space_size={{ .Values.heapSize }}"
-          - name: FORCE_DISABLE_HELM_RELEASES
-            value: "{{ .Values.forceDisableHelmReleases }}"
+            value: "--max_old_space_size=4096"
         ports:
         - containerPort: 9020
           protocol: TCP
