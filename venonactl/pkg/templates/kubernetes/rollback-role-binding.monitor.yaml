@@ -1,23 +1,20 @@
-{{- if .Values.rbacEnabled }}
-{{- if .Values.useNamespaceWideRole }}
+{{- if .RbacEnabled }}
+{{- if .UseNamespaceWideRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Chart.Name }}-rollback
+  name: {{ .AppName }}-rollback
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 subjects:
   - kind: ServiceAccount
-    namespace: {{ .Release.Namespace }}
-    name: {{ .Chart.Name }}-rollback
+    namespace: {{ .Namespace }}
+    name: {{ .AppName }}-rollback
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

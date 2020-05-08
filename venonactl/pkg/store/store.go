@@ -43,6 +43,9 @@ type (
 		ClusterId string
 
 		Helm3 bool
+
+		// need for define if monitor use cluster role or just role
+		UseNamespaceWithRole bool
 	}
 
 	KubernetesAPI struct {
@@ -143,8 +146,11 @@ func (s *Values) BuildMinimizedValues() map[string]interface{} {
 			"Name": "codefresh/agent",
 			"Tag":  "stable",
 		},
-		"Namespace":  s.KubernetesAPI.Namespace,
-		"ConfigPath": s.KubernetesAPI.ConfigPath,
-		"Context":    s.KubernetesAPI.ContextName,
+		"Namespace":            s.KubernetesAPI.Namespace,
+		"ConfigPath":           s.KubernetesAPI.ConfigPath,
+		"Context":              s.KubernetesAPI.ContextName,
+		"UseNamespaceWithRole": s.UseNamespaceWithRole,
+		//TODO: need verify it on cluster level
+		"RbacEnabled": true,
 	}
 }

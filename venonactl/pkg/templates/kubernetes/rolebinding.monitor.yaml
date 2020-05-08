@@ -1,29 +1,26 @@
-{{- if .Values.rbacEnabled }}
-{{- if .Values.useNamespaceWideRole }}
+{{- if .RbacEnabled }}
+{{- if .UseNamespaceWideRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Chart.Name }}-cluster-reader
+  name: {{ .AppName }}-cluster-reader
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 subjects:
 - kind: ServiceAccount
-  namespace: {{ .Release.Namespace }}
-  name: {{ .Chart.Name }}
+  namespace: {{ .Namespace }}
+  name: {{ .AppName }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  {{- if .Values.useNamespaceWideRole }}
+  {{- if .UseNamespaceWideRole }}
   kind: Role
   {{- else }}
   kind: ClusterRole
   {{- end }}
-  name: {{ .Chart.Name }}-cluster-reader
+  name: {{ .AppName }}-cluster-reader
 {{- end }}

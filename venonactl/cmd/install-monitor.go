@@ -1,7 +1,7 @@
 package cmd
 
 /*
-Copyright 2019 The Codefresh Authors.
+Copyright 2020 The Codefresh Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,9 +73,7 @@ var installMonitorAgentCmd = &cobra.Command{
 
 		for _, p := range builder.Get() {
 			_, err := p.Install(builderInstallOpt, values)
-			if err != nil {
-				dieOnError(err)
-			}
+			dieOnError(err)
 		}
 		lgr.Info("Monitor agent installation completed Successfully")
 	},

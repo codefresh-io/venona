@@ -7,7 +7,7 @@ metadata:
     app: {{ .AppName }}
     version: {{ .Version }}
 spec:
-  replicas: {{ default 1 .Values.replicaCount }}
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -22,8 +22,8 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
-      {{- if .Values.rbacEnabled}}
-      serviceAccountName: {{ .Release.Name  | quote }}
+      {{- if .RbacEnabled}}
+      serviceAccountName: {{ .AppName }}
       {{- end }}
       containers:
       - name: {{ .AppName }}
@@ -32,7 +32,7 @@ spec:
         env:
           - name: SERVICE_NAME
             value: {{ .AppName }}
-          {{- if .Values.useNamespaceWideRole }}
+          {{- if .UseNamespaceWideRole }}
           - name: ROLE_BINDING
             value: "true"
           {{- end }}
