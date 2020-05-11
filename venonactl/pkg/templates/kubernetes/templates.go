@@ -288,7 +288,7 @@ metadata:
     app: {{ .AppName }}
     version: {{ .Version }}
 spec:
-  replicas: {{ default 1 .Values.replicaCount }}
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -303,8 +303,8 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
-      {{- if .Values.rbacEnabled}}
-      serviceAccountName: {{ .Release.Name  | quote }}
+      {{- if .RbacEnabled}}
+      serviceAccountName: {{ .AppName }}
       {{- end }}
       containers:
       - name: {{ .AppName }}
@@ -313,7 +313,7 @@ spec:
         env:
           - name: SERVICE_NAME
             value: {{ .AppName }}
-          {{- if .Values.useNamespaceWideRole }}
+          {{- if .UseNamespaceWideRole }}
           - name: ROLE_BINDING
             value: "true"
           {{- end }}
@@ -474,22 +474,19 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
-	templatesMap["role.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
-{{- if .Values.useNamespaceWideRole }}
+	templatesMap["role.monitor.yaml"] = `{{- if .RbacEnabled }}
+{{- if .UseNamespaceWideRole }}
 kind: Role
 {{- else }}
 kind: ClusterRole
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name  | quote }}-cluster-reader
+  name: {{ .AppName }}-cluster-reader
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Release.Name  | quote }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 rules:
 - apiGroups:
   - ""
@@ -537,57 +534,51 @@ rules:
   verbs: ["get", "create", "delete"]
 `
 
-	templatesMap["rolebinding.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
-{{- if .Values.useNamespaceWideRole }}
+	templatesMap["rolebinding.monitor.yaml"] = `{{- if .RbacEnabled }}
+{{- if .UseNamespaceWideRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Chart.Name }}-cluster-reader
+  name: {{ .AppName }}-cluster-reader
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 subjects:
 - kind: ServiceAccount
-  namespace: {{ .Release.Namespace }}
-  name: {{ .Chart.Name }}
+  namespace: {{ .Namespace }}
+  name: {{ .AppName }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  {{- if .Values.useNamespaceWideRole }}
+  {{- if .UseNamespaceWideRole }}
   kind: Role
   {{- else }}
   kind: ClusterRole
   {{- end }}
-  name: {{ .Chart.Name }}-cluster-reader
+  name: {{ .AppName }}-cluster-reader
 {{- end }}
 `
 
-	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
-{{- if .Values.useNamespaceWideRole }}
+	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .RbacEnabled }}
+{{- if .UseNamespaceWideRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Chart.Name }}-rollback
+  name: {{ .AppName }}-rollback
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 subjects:
   - kind: ServiceAccount
-    namespace: {{ .Release.Namespace }}
-    name: {{ .Chart.Name }}-rollback
+    namespace: {{ .Namespace }}
+    name: {{ .AppName }}-rollback
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -595,18 +586,15 @@ roleRef:
   {{- end }}
 `
 
-	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .Values.rbacEnabled (not .Values.useNamespaceWideRole) }}
+	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .RbacEnabled (not .UseNamespaceWideRole) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Chart.Name }}-rollback
+  name: {{ .AppName }}-rollback
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Chart.Name }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 {{- end }}
 `
 
@@ -665,18 +653,15 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
-	templatesMap["service-account.monitor.yaml"] = `{{- if .Values.rbacEnabled }}
+	templatesMap["service-account.monitor.yaml"] = `{{- if .RbacEnabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Release.Name  | quote }}
+  name: {{ .AppName }}
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .Release.Name  | quote }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    release: {{ .Release.Name  | quote }}
-    heritage: {{ .Release.Service  | quote }}
-    version: {{ .Values.imageTag | quote }}
+    app: {{ .AppName }}
+    version: {{ .Version }}
 {{- end }}
 `
 

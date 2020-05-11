@@ -129,28 +129,11 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Tolerations":  s.KubernetesAPI.Tolerations,
 			},
 		},
-	}
-}
-
-func (s *Values) BuildMinimizedValues() map[string]interface{} {
-	return map[string]interface{}{
-		"AppName":       MonitorApplicationName,
-		"Version":       s.Version.Current.Version,
-		"CodefreshHost": s.CodefreshAPI.Host,
-		"ClusterId":     s.ClusterId,
-		"Token":         s.CodefreshAPI.Token,
-		"Helm3":         s.Helm3,
-		"Mode":          ModeInCluster,
-		"fullname":      "codefresh/k8s-agent",
-		"Image": map[string]string{
-			"Name": "codefresh/agent",
-			"Tag":  "stable",
+		"Monitor": map[string]interface{}{
+			"UseNamespaceWithRole": s.UseNamespaceWithRole,
+			//TODO: need verify it on cluster level
+			"RbacEnabled": true,
+			"Helm3":       s.Helm3,
 		},
-		"Namespace":            s.KubernetesAPI.Namespace,
-		"ConfigPath":           s.KubernetesAPI.ConfigPath,
-		"Context":              s.KubernetesAPI.ContextName,
-		"UseNamespaceWithRole": s.UseNamespaceWithRole,
-		//TODO: need verify it on cluster level
-		"RbacEnabled": true,
 	}
 }

@@ -69,7 +69,13 @@ var installMonitorAgentCmd = &cobra.Command{
 			Token: installMonitorAgentCmdOptions.codefreshToken,
 		}
 
-		values := s.BuildMinimizedValues()
+		// stub  , not need actually for monitor
+		s.AgentAPI = &store.AgentAPI{
+			Token: "",
+			Id:    "",
+		}
+
+		values := s.BuildValues()
 
 		for _, p := range builder.Get() {
 			_, err := p.Install(builderInstallOpt, values)
