@@ -1,5 +1,5 @@
-{{- if .RbacEnabled }}
-{{- if .UseNamespaceWideRole }}
+{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
@@ -17,7 +17,7 @@ subjects:
   name: {{ .AppName }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  {{- if .UseNamespaceWideRole }}
+  {{- if .Monitor.UseNamespaceWithRole }}
   kind: Role
   {{- else }}
   kind: ClusterRole

@@ -303,7 +303,7 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
-      {{- if .RbacEnabled}}
+      {{- if .Monitor.RbacEnabled}}
       serviceAccountName: {{ .AppName }}
       {{- end }}
       containers:
@@ -313,7 +313,7 @@ spec:
         env:
           - name: SERVICE_NAME
             value: {{ .AppName }}
-          {{- if .UseNamespaceWideRole }}
+          {{- if .Monitor.UseNamespaceWithRole }}
           - name: ROLE_BINDING
             value: "true"
           {{- end }}
@@ -328,7 +328,7 @@ spec:
           - name: ACCOUNT_ID
             value: user
           - name: HELM3
-            value: "{{ .Helm3 }}"
+            value: "{{ .Monitor.Helm3 }}"
           - name: NAMESPACE
             value: "{{ .Namespace }}"
           - name: NODE_OPTIONS
@@ -474,8 +474,8 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
-	templatesMap["role.monitor.yaml"] = `{{- if .RbacEnabled }}
-{{- if .UseNamespaceWideRole }}
+	templatesMap["role.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
 kind: Role
 {{- else }}
 kind: ClusterRole
@@ -534,8 +534,8 @@ rules:
   verbs: ["get", "create", "delete"]
 `
 
-	templatesMap["rolebinding.monitor.yaml"] = `{{- if .RbacEnabled }}
-{{- if .UseNamespaceWideRole }}
+	templatesMap["rolebinding.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
@@ -553,7 +553,7 @@ subjects:
   name: {{ .AppName }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  {{- if .UseNamespaceWideRole }}
+  {{- if .Monitor.UseNamespaceWithRole }}
   kind: Role
   {{- else }}
   kind: ClusterRole
@@ -562,8 +562,8 @@ roleRef:
 {{- end }}
 `
 
-	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .RbacEnabled }}
-{{- if .UseNamespaceWideRole }}
+	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
 {{- else }}
 kind: ClusterRoleBinding
@@ -586,7 +586,7 @@ roleRef:
   {{- end }}
 `
 
-	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .RbacEnabled (not .UseNamespaceWideRole) }}
+	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .Monitor.RbacEnabled (not .Monitor.UseNamespaceWithRole) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -653,7 +653,7 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
-	templatesMap["service-account.monitor.yaml"] = `{{- if .RbacEnabled }}
+	templatesMap["service-account.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:

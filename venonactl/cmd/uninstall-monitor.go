@@ -40,6 +40,12 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 			Host: cfAPIHost,
 		}
 
+		// stub  , not need actually for monitor
+		s.AgentAPI = &store.AgentAPI{
+			Token: "",
+			Id:    "",
+		}
+
 		deleteOptions := &plugins.DeleteOptions{}
 		// runtime
 		deleteOptions.KubeBuilder = getKubeClientBuilder(uninstallMonitorAgentCmdOptions.kube.context,
@@ -50,7 +56,7 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 		builder.Add(plugins.MonitorAgentPluginType)
 		deleteOptions.ClusterNamespace = s.KubernetesAPI.Namespace
 		for _, p := range builder.Get() {
-			err := p.Delete(deleteOptions, s.BuildMinimizedValues())
+			err := p.Delete(deleteOptions, s.BuildValues())
 			if err != nil {
 				dieOnError(err)
 			}
