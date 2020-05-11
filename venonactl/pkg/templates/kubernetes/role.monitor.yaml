@@ -1,5 +1,5 @@
-{{- if .RbacEnabled }}
-{{- if .UseNamespaceWideRole }}
+{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
 kind: Role
 {{- else }}
 kind: ClusterRole
