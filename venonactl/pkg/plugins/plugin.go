@@ -14,6 +14,7 @@ import (
 const (
 	RuntimeEnvironmentPluginType  = "runtime-environment"
 	VenonaPluginType              = "venona"
+	MonitorAgentPluginType        = "monitor-agent"
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
@@ -186,6 +187,13 @@ func build(t string, logger logger.Logger) Plugin {
 			logger: logger.New("Plugin", RuntimeAttachType),
 		}
 	}
+
+	if t == MonitorAgentPluginType {
+		return &monitorAgentPlugin{
+			logger: logger.New("Plugin", MonitorAgentPluginType),
+		}
+	}
+
 	return nil
 }
 

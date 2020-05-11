@@ -279,6 +279,73 @@ spec:
       {{- end }}
 `
 
+	templatesMap["deployment.monitor.yaml"] = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Monitor.AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 50%
+  selector:
+    matchLabels:
+      app: {{ .Monitor.AppName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Monitor.AppName }}
+        version: {{ .Version }}
+    spec:
+      {{- if .Monitor.RbacEnabled}}
+      serviceAccountName: {{ .Monitor.AppName }}
+      {{- end }}
+      containers:
+      - name: {{ .Monitor.AppName }}
+        image: "{{ .Image.Name }}:{{ .Image.Tag }}"
+        imagePullPolicy: Always
+        env:
+          - name: SERVICE_NAME
+            value: {{ .Monitor.AppName }}
+          {{- if .Monitor.UseNamespaceWithRole }}
+          - name: ROLE_BINDING
+            value: "true"
+          {{- end }}
+          - name: PORT
+            value: "9020"
+          - name: API_TOKEN
+            value: {{ .Token }}
+          - name: CLUSTER_ID
+            value: {{ .ClusterId }}
+          - name: API_URL
+            value: {{ .CodefreshHost }}/api/k8s-monitor/events
+          - name: ACCOUNT_ID
+            value: user
+          - name: HELM3
+            value: "{{ .Monitor.Helm3 }}"
+          - name: NAMESPACE
+            value: "{{ .Namespace }}"
+          - name: NODE_OPTIONS
+            value: "--max_old_space_size=4096"
+        ports:
+        - containerPort: 9020
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /api/ping
+            port: 9020
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+`
+
 	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -407,6 +474,55 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io`
 
+	templatesMap["role.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
+kind: Role
+{{- else }}
+kind: ClusterRole
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Monitor.AppName }}-cluster-reader
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+rules:
+- apiGroups:
+  - ""
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+    - ""
+  resources: ["pods"]
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - deletecollection
+- apiGroups:
+  - extensions
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
+`
+
 	templatesMap["role.re.yaml"] = `kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -416,6 +532,70 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "create", "delete"]
+`
+
+	templatesMap["rolebinding.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
+kind: RoleBinding
+{{- else }}
+kind: ClusterRoleBinding
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Monitor.AppName }}-cluster-reader
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+subjects:
+- kind: ServiceAccount
+  namespace: {{ .Namespace }}
+  name: {{ .Monitor.AppName }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  {{- if .Monitor.UseNamespaceWithRole }}
+  kind: Role
+  {{- else }}
+  kind: ClusterRole
+  {{- end }}
+  name: {{ .Monitor.AppName }}-cluster-reader
+{{- end }}
+`
+
+	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
+kind: RoleBinding
+{{- else }}
+kind: ClusterRoleBinding
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Monitor.AppName }}-rollback
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ .Namespace }}
+    name: {{ .Monitor.AppName }}-rollback
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+  {{- end }}
+`
+
+	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .Monitor.RbacEnabled (not .Monitor.UseNamespaceWithRole) }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Monitor.AppName }}-rollback
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+{{- end }}
 `
 
 	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `apiVersion: v1
@@ -473,11 +653,42 @@ metadata:
   name: engine
   namespace: {{ .Namespace }}`
 
+	templatesMap["service-account.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Monitor.AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+{{- end }}
+`
+
 	templatesMap["service-account.re.yaml"] = `apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}`
+
+	templatesMap["service.monitor.yaml"] = `apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Monitor.AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: "http"
+    port: 80
+    protocol: TCP
+    targetPort: 9020
+  selector:
+    app: {{ .Monitor.AppName }}
+`
 
 	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `---
 kind: StorageClass

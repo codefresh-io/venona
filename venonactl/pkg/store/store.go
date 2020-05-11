@@ -1,14 +1,15 @@
 package store
 
 import (
+	"fmt"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
-	"fmt"
 )
 
 const (
-	ModeInCluster   = "InCluster"
-	ApplicationName = "venona"
+	ModeInCluster          = "InCluster"
+	ApplicationName        = "venona"
+	MonitorApplicationName = "monitor"
 )
 
 var (
@@ -38,6 +39,13 @@ type (
 		RuntimeEnvironment string
 
 		Version *Version
+
+		ClusterId string
+
+		Helm3 bool
+
+		// need for define if monitor use cluster role or just role
+		UseNamespaceWithRole bool
 	}
 
 	KubernetesAPI struct {
@@ -108,17 +116,28 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Ca":   "",
 		},
 		"Storage": map[string]interface{}{
-			"Backend": "local",
-			"StorageClassName": fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
+			"Backend":              "local",
+			"StorageClassName":     fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
 			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
-			"AvailabilityZone": "",
+			"AvailabilityZone":     "",
 			"GoogleServiceAccount": "",
-			"AwsAccessKeyId": "",
-			"AwsSecretAccessKey": "",
+			"AwsAccessKeyId":       "",
+			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image": "codefresh/dind-volume-provisioner:v20",
+				"Image":        "codefresh/dind-volume-provisioner:v20",
 				"NodeSelector": "",
 				"Tolerations":  s.KubernetesAPI.Tolerations,
+			},
+		},
+		"Monitor": map[string]interface{}{
+			"UseNamespaceWithRole": s.UseNamespaceWithRole,
+			//TODO: need verify it on cluster level
+			"RbacEnabled": true,
+			"Helm3":       s.Helm3,
+			"AppName":     MonitorApplicationName,
+			"Image": map[string]string{
+				"Name": "codefresh/agent",
+				"Tag":  "stable",
 			},
 		},
 	}
