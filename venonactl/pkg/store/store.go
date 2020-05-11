@@ -134,6 +134,11 @@ func (s *Values) BuildValues() map[string]interface{} {
 			//TODO: need verify it on cluster level
 			"RbacEnabled": true,
 			"Helm3":       s.Helm3,
+			"AppName":     MonitorApplicationName,
+			"Image": map[string]string{
+				"Name": "codefresh/agent",
+				"Tag":  "stable",
+			},
 		},
 	}
 }

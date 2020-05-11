@@ -282,7 +282,7 @@ spec:
 	templatesMap["deployment.monitor.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .AppName }}
+  name: {{ .Monitor.AppName }}
   namespace: {{ .Namespace }}
   labels:
     app: {{ .AppName }}
@@ -296,23 +296,23 @@ spec:
       maxSurge: 50%
   selector:
     matchLabels:
-      app: {{ .AppName }}
+      app: {{ .Monitor.AppName }}
   template:
     metadata:
       labels:
-        app: {{ .AppName }}
+        app: {{ .Monitor.AppName }}
         version: {{ .Version }}
     spec:
       {{- if .Monitor.RbacEnabled}}
-      serviceAccountName: {{ .AppName }}
+      serviceAccountName: {{ .Monitor.AppName }}
       {{- end }}
       containers:
-      - name: {{ .AppName }}
+      - name: {{ .Monitor.AppName }}
         image: "{{ .Image.Name }}:{{ .Image.Tag }}"
         imagePullPolicy: Always
         env:
           - name: SERVICE_NAME
-            value: {{ .AppName }}
+            value: {{ .Monitor.AppName }}
           {{- if .Monitor.UseNamespaceWithRole }}
           - name: ROLE_BINDING
             value: "true"
@@ -482,10 +482,10 @@ kind: ClusterRole
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .AppName }}-cluster-reader
+  name: {{ .Monitor.AppName }}-cluster-reader
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 rules:
 - apiGroups:
@@ -542,15 +542,15 @@ kind: ClusterRoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .AppName }}-cluster-reader
+  name: {{ .Monitor.AppName }}-cluster-reader
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 subjects:
 - kind: ServiceAccount
   namespace: {{ .Namespace }}
-  name: {{ .AppName }}
+  name: {{ .Monitor.AppName }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   {{- if .Monitor.UseNamespaceWithRole }}
@@ -558,7 +558,7 @@ roleRef:
   {{- else }}
   kind: ClusterRole
   {{- end }}
-  name: {{ .AppName }}-cluster-reader
+  name: {{ .Monitor.AppName }}-cluster-reader
 {{- end }}
 `
 
@@ -570,15 +570,15 @@ kind: ClusterRoleBinding
 {{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .AppName }}-rollback
+  name: {{ .Monitor.AppName }}-rollback
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ .Namespace }}
-    name: {{ .AppName }}-rollback
+    name: {{ .Monitor.AppName }}-rollback
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -590,10 +590,10 @@ roleRef:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .AppName }}-rollback
+  name: {{ .Monitor.AppName }}-rollback
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 {{- end }}
 `
@@ -657,10 +657,10 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .AppName }}
+  name: {{ .Monitor.AppName }}
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 {{- end }}
 `
@@ -674,10 +674,10 @@ metadata:
 	templatesMap["service.monitor.yaml"] = `apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .AppName }}
+  name: {{ .Monitor.AppName }}
   namespace: {{ .Namespace }}
   labels:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 spec:
   type: ClusterIP
@@ -687,7 +687,7 @@ spec:
     protocol: TCP
     targetPort: 9020
   selector:
-    app: {{ .AppName }}
+    app: {{ .Monitor.AppName }}
 `
 
 	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `---

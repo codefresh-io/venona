@@ -17,6 +17,7 @@ limitations under the License.
 */
 
 import (
+	"fmt"
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
@@ -57,13 +58,21 @@ var installMonitorAgentCmd = &cobra.Command{
 
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 
+		if installMonitorAgentCmdOptions.clusterId == "" {
+			dieOnError(fmt.Errorf("Cluster id is required in order to install monitor"))
+		}
+
 		s.ClusterId = installMonitorAgentCmdOptions.clusterId
 		s.Helm3 = installMonitorAgentCmdOptions.helm3
 
 		if cfAPIHost == "" {
 			cfAPIHost = "https://g.codefresh.io"
 		}
-		// This is temporarily and used for signing
+
+		if installMonitorAgentCmdOptions.codefreshToken == "" {
+			dieOnError(fmt.Errorf("Codefresh token is required in order to install monitor"))
+		}
+
 		s.CodefreshAPI = &store.CodefreshAPI{
 			Host:  cfAPIHost,
 			Token: installMonitorAgentCmdOptions.codefreshToken,
