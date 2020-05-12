@@ -62,7 +62,8 @@ func GetLatestVersion(logger logger) string {
 	return defaultversion
 }
 
-func IsRunningLatestVersion(s *Values) (bool, error) {
+func IsRunningLatestVersion() (bool, error) {
+	s := GetStore()
 	current, err := version.NewVersion(s.Version.Current.Version)
 	if err != nil {
 		return false, err
