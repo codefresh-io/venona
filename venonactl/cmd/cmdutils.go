@@ -71,7 +71,7 @@ func buildBasicStore(logger logger.Logger) {
 		}
 		s.Image.Tag = latestVersion.Version
 		s.Version.Latest = latestVersion
-		res, _ := store.IsRunningLatestVersion()
+		res, _ := store.IsRunningLatestVersion(s)
 		// the local version and the latest version not match
 		// make sure the command is no venonactl version
 		if !res {
