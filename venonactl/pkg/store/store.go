@@ -96,6 +96,7 @@ func GetStore() *Values {
 func (s *Values) BuildValues() map[string]interface{} {
 	return map[string]interface{}{
 		"AppName":       ApplicationName,
+		"ClusterId":     s.ClusterId,
 		"Version":       s.Version.Current.Version,
 		"CodefreshHost": s.CodefreshAPI.Host,
 		"Token":         s.CodefreshAPI.Token,

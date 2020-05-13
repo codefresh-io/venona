@@ -308,7 +308,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Monitor.AppName }}
-        image: "{{ .Image.Name }}:{{ .Image.Tag }}"
+        image: "{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }}"
         imagePullPolicy: Always
         env:
           - name: SERVICE_NAME
