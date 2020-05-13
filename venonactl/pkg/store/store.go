@@ -98,6 +98,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"AppName":       ApplicationName,
 		"Version":       s.Version.Current.Version,
 		"CodefreshHost": s.CodefreshAPI.Host,
+		"Token":         s.CodefreshAPI.Token,
 		"Mode":          ModeInCluster,
 		"Image": map[string]string{
 			"Name": "codefresh/venona",
