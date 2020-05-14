@@ -4,10 +4,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	"gopkg.in/yaml.v2"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -171,6 +173,24 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 			return nil, err
 		}
 
+		ticker := time.NewTicker(5 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				u.logger.Debug("Validating old runner pod termination")
+				_, err = cs.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+				if err != nil {
+					if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
+						if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
+							return v, nil
+						}
+					}
+				}
+			case <-time.After(45 * time.Second):
+				u.logger.Error("Failed to validate old venona pod termination")
+				return v, fmt.Errorf("Failed to validate old venona pod termination")
+			}
+		}
 	}
 
 	return v, nil
