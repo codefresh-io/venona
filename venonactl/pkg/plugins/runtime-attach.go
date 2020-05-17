@@ -186,7 +186,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 						}
 					}
 				}
-			case <-time.After(45 * time.Second):
+			case <-time.After(60 * time.Second):
 				u.logger.Error("Failed to validate old venona pod termination")
 				return v, fmt.Errorf("Failed to validate old venona pod termination")
 			}
