@@ -9,9 +9,11 @@ import (
 	"os/user"
 	"path"
 	"strings"
+	"time"
 
 	"encoding/json"
 
+	"github.com/briandowns/spinner"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
@@ -162,6 +164,13 @@ func createLogger(command string, verbose bool) logger.Logger {
 	})
 }
 
+func createSpinner(prefix, suffix string) *spinner.Spinner {
+	s := spinner.New([]string{"   ", ".  ", ".. ", "..."}, 520*time.Millisecond)
+	s.Suffix = suffix
+	s.Prefix = prefix
+	return s
+}
+
 type nodeSelector map[string]string
 
 func parseNodeSelector(s string) (nodeSelector, error) {
@@ -237,10 +246,10 @@ func (ns nodeSelector) String() string {
 	return s
 }
 
-// Parsing helpers --set-value , --set-file 
+// Parsing helpers --set-value , --set-file
 // by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 
-// parses --set-value options 
+// parses --set-value options
 func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
 	base := map[string]interface{}{}
 	for _, value := range setValuesOpts {
@@ -251,7 +260,7 @@ func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
 	return base, nil
 }
 
-// parses --set-file options 
+// parses --set-file options
 func parseSetFiles(setFilesOpts []string) (map[string]interface{}, error) {
 	base := map[string]interface{}{}
 	for _, value := range setFilesOpts {

@@ -37,7 +37,7 @@ var attachRuntimeCmdOptions struct {
 		kubePath  string
 		context   string
 	}
-	restartAgent  bool
+	restartAgent bool
 }
 
 var attachRuntimeCmd = &cobra.Command{
@@ -78,7 +78,7 @@ var attachRuntimeCmd = &cobra.Command{
 			RuntimeEnvironment:    attachRuntimeCmdOptions.runtimeEnvironmentName,
 			RuntimeClusterName:    attachRuntimeCmdOptions.kube.namespace,
 			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
-			RestartAgent:         attachRuntimeCmdOptions.restartAgent,
+			RestartAgent:          attachRuntimeCmdOptions.restartAgent,
 		}
 
 		// runtime
@@ -94,12 +94,15 @@ var attachRuntimeCmd = &cobra.Command{
 
 		var err error
 		values := s.BuildValues()
+		spn := createSpinner("Attaching runtime to agent (might take a few seconds)", "")
+		spn.Start()
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
 				dieOnError(err)
 			}
 		}
+		spn.Stop()
 		lgr.Info("Attach to runtime completed Successfully")
 
 	},
@@ -120,6 +123,5 @@ func init() {
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.context, "kube-context-name-agent", viper.GetString("kube-context-agent"), "Name of the kubernetes context on which venona is installed (default is current-context) [$KUBE_CONTEXT]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.kubePath, "kube-config-path-agent", viper.GetString("kubeconfig-agent"), "Path to kubeconfig file (default is $HOME/.kube/config) for agent [$KUBECONFIG]")
 	attachRuntimeCmd.Flags().BoolVar(&attachRuntimeCmdOptions.restartAgent, "restart-agent", viper.GetBool("restart-agent"), "Restart agent after attach operation")
-
 
 }
