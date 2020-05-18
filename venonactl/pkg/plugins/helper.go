@@ -161,9 +161,7 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 	if err != nil {
 		// should not fail if can't validate version
 		logger.Warn("Failed to validate kubernetes version", "cause", err)
-	}
-	res := testKubernetesVersion(v)
-	if !res {
+	} else if res := testKubernetesVersion(v); !res {
 		result.isValid = false
 		result.message = append(result.message, "Cluster does not meet the kubernetes version requirements")
 	}
