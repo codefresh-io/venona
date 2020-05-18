@@ -54,7 +54,7 @@ type (
 	}
 )
 
-var requiredK8sVersion, _ = ver.NewConstraint(">= 1.17")
+var requiredK8sVersion, _ = ver.NewConstraint(">= 1.10")
 
 func unescape(s string) template.HTML {
 	return template.HTML(s)
