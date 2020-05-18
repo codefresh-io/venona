@@ -78,7 +78,7 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 		res, err := ensureClusterRequirements(cs, validationRequest{
 			cpu:        "500m",
 			momorySize: "1Gi",
-		}, u.logger)
+		})
 		if err != nil {
 			return nil, err
 		}

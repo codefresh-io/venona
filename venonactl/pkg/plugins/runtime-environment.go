@@ -89,7 +89,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		res, err := ensureClusterRequirements(cs, validationRequest{
 			cpu:        "1",
 			momorySize: "1Gi",
-		}, u.logger)
+		})
 		if err != nil {
 			return nil, err
 		}
