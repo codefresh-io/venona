@@ -33,9 +33,11 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 
+	ver "github.com/hashicorp/go-version"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
@@ -51,6 +53,8 @@ type (
 		momorySize           string
 	}
 )
+
+var requiredK8sVersion, _ = ver.NewConstraint(">= 1.10")
 
 func unescape(s string) template.HTML {
 	return template.HTML(s)
@@ -149,8 +153,19 @@ func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string, l
 	return KubeObjectsFromTemplates(templatesMap, values, pattern, logger)
 }
 
-func ensureClusterRequirements(client *kubernetes.Clientset, req validationRequest) (validationResult, error) {
+func ensureClusterRequirements(client *kubernetes.Clientset, req validationRequest, logger logger.Logger) (validationResult, error) {
 	result := validationResult{}
+	result.isValid = true
+
+	v, err := client.ServerVersion()
+	if err != nil {
+		// should not fail if can't validate version
+		logger.Warn("Failed to validate kubernetes version", "cause", err)
+	} else if res := testKubernetesVersion(v); !res {
+		result.isValid = false
+		result.message = append(result.message, "Cluster does not meet the kubernetes version requirements")
+	}
+
 	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
 	if err != nil {
 		return result, err
@@ -159,7 +174,6 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 		return result, errors.New("Nodes not found")
 	}
 
-	result.isValid = true
 	if len(nodes.Items) == 0 {
 		result.message = append(result.message, "No nodes in cluster")
 		result.isValid = false
@@ -179,6 +193,11 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 		return result, nil
 	}
 	return result, nil
+}
+
+func testKubernetesVersion(version *version.Info) bool {
+	v, _ := ver.NewVersion(version.String())
+	return requiredK8sVersion.Check(v)
 }
 
 func testNode(n v1.Node, req validationRequest) []string {
