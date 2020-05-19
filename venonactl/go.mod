@@ -10,6 +10,7 @@ require (
 	github.com/codefresh-io/go-sdk v0.18.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gophercloud/gophercloud v0.8.0 // indirect
+	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/huandu/xstrings v1.3.0 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1
