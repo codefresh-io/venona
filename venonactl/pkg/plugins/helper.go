@@ -54,7 +54,7 @@ type (
 	}
 )
 
-var requiredK8sVersion, _ = semver.NewConstraint(">= 1.17")
+var requiredK8sVersion, _ = semver.NewConstraint(">= 1.10.0")
 
 func unescape(s string) template.HTML {
 	return template.HTML(s)
@@ -160,9 +160,13 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 	if err != nil {
 		// should not fail if can't get version
 		logger.Warn("Failed to validate kubernetes version", "cause", err)
-	} else if res := testKubernetesVersion(v); !res {
-		result.isValid = false
-		result.message = append(result.message, fmt.Sprintf("Cluster does not meet the version requirements, minimum supported version is: \"1.10.0\" found version: \"%v\"", v))
+	} else if res, err := testKubernetesVersion(v); !res {
+		if err != nil {
+			logger.Warn("Failed to validate kubernetes version", "cause", err)
+		} else {
+			result.isValid = false
+			result.message = append(result.message, fmt.Sprintf("Cluster does not meet the version requirements, minimum supported version is: '1.10.0' found version: '%v'", v))
+		}
 	}
 
 	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
@@ -194,9 +198,18 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 	return result, nil
 }
 
-func testKubernetesVersion(version *version.Info) bool {
-	v, _ := semver.NewVersion(version.String())
-	return requiredK8sVersion.Check(v)
+func testKubernetesVersion(version *version.Info) (bool, error) {
+	v, err := semver.NewVersion(version.String())
+	if err != nil {
+		return false, err
+	}
+	// extract only major, minor and patch
+	verStr := fmt.Sprintf("%v.%v.%v", v.Major(), v.Minor(), v.Patch())
+	v, err = semver.NewVersion(verStr)
+	if err != nil {
+		return false, err
+	}
+	return requiredK8sVersion.Check(v), nil
 }
 
 func testNode(n v1.Node, req validationRequest) []string {
