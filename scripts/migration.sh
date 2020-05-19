@@ -82,7 +82,6 @@ echoAndRun "codefresh install agent --token $token --kube-namespace $VENONA_KUBE
 info "Attaching old runtime to new agent"
 pod=$(eval "$kube get pods -l app=venona -o go-template='{{range .items }}{{ .metadata.name }}{{end}}'")
 echoAndRun "codefresh attach runtime --runtime-name $CODEFRESH_RUNTIME_NAME --agent-name $CODEFRESH_AGENT_NAME --runtime-kube-context-name $VENONA_KUBE_CONTEXT --agent-kube-context-name $VENONA_KUBE_CONTEXT --runtime-kube-namespace $VENONA_KUBE_NAMESPACE --agent-kube-namespace $VENONA_KUBE_NAMESPACE --agent-kube-config-path $VENONA_KUBECONFIG_PATH --runtime-kube-config-path $VENONA_KUBECONFIG_PATH --restart-agent --verbose"
-echoAndRun "$kube wait --for=delete pod/$pod --timeout 60s"
 
 pod=$(eval "$kube get pods -l app=venona -o go-template='{{range .items }}{{ .metadata.name }}{{end}}'")
 echoAndRun "$kube wait --for=condition=Ready pod/$pod --timeout 60s"
