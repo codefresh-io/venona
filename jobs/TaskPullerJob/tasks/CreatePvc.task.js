@@ -9,7 +9,7 @@ const ERROR_MESSAGES = {
 
 class CreatePvcTask extends Base {
 	async run(task) {
-		this.logger.info(`Running CreatePvc task - ${_.get(task, 'spec.metadata.name')}`);
+		this.logger.info(`Running CreatePvc task - creating pvc: ${_.get(task, 'spec.metadata.name')} in namespace: ${_.get(task, 'spec.metadata.namespace')}`);
 		try {
 			const pvc = await this.kubernetesAPI.createPvc(this.logger, task.spec);
 			return pvc;

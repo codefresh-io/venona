@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const Base = require('../../BaseJob');
 const { TASK_PRIORITY } = require('../../../constants');
-const _ = require('loadsh');
+const _ = require('lodash');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task CreatePod',
@@ -9,7 +9,7 @@ const ERROR_MESSAGES = {
 
 class CreatePodTask extends Base {
 	async run(task) {
-		this.logger.info(`Running CreatePod task - ${_.get(task, 'spec.metadata.name')}`);
+		this.logger.info(`Running CreatePod task - creating pod: ${_.get(task, 'spec.metadata.name')} in namespace: ${_.get(task, 'spec.metadata.namespace')}`);
 		try {
 			const pod = await this.kubernetesAPI.createPod(this.logger, task.spec);
 			return pod;
