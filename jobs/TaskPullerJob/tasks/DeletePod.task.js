@@ -9,7 +9,7 @@ const ERROR_MESSAGES = {
 
 class DeletePodTask extends Base {
 	async run(task) {
-		this.logger.info('Running DeletePod task');
+		this.logger.info(`Running DeletePod task - ${_.get(task, 'spec.metadata.name')}`);
 		try {
 			await this.kubernetesAPI.deletePod(this.logger, task.spec.namespace, task.spec.name);
 		} catch (err) {

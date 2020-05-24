@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const Base = require('../../BaseJob');
 const { TASK_PRIORITY } = require('../../../constants');
+const _ = require('lodash');
 
 const ERROR_MESSAGES = {
 	FAILED_TO_EXECUTE_TASK: 'Failed to run task CreatePvc',
@@ -8,7 +9,7 @@ const ERROR_MESSAGES = {
 
 class CreatePvcTask extends Base {
 	async run(task) {
-		this.logger.info('Running CreatePvc task');
+		this.logger.info(`Running CreatePvc task - ${_.get(task, 'spec.metadata.name')}`);
 		try {
 			const pvc = await this.kubernetesAPI.createPvc(this.logger, task.spec);
 			return pvc;
