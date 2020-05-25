@@ -9,7 +9,7 @@ const ERROR_MESSAGES = {
 
 class DeletePvcTask extends Base {
 	async run(task) {
-		this.logger.info('Running DeletePvc task');
+		this.logger.info(`Running DeletePvc task - deleting pvc: ${_.get(task, 'spec.name')} from namespace: ${_.get(task, 'spec.namespace')}`);
 		try {
 			await this.kubernetesAPI.deletePvc(this.logger, task.spec.namespace, task.spec.name);
 		} catch (err) {
