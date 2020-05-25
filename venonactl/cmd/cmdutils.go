@@ -241,7 +241,7 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 func (ns nodeSelector) String() string {
 	var s string
 	for k, v := range ns {
-		s = fmt.Sprintf("%s: %q", k, v)
+		s = fmt.Sprintf("%s: %s", k, v)
 	}
 	return s
 }
