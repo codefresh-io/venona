@@ -244,12 +244,12 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 		return err
 	}
 	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
-		if err != nil {
-			u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
-			return err
-		}
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
+		return err
+	}
 	podName := list.Items[0].ObjectMeta.Name
-	for fileName, _ := range kubeObjects {
+	for fileName := range kubeObjects {
 		if _, ok := deletePriorUpgrade[fileName]; ok {
 			u.logger.Debug(fmt.Sprintf("Deleting previous deplopyment of %s", fileName))
 			delOpt := &deleteOptions{
@@ -268,21 +268,21 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 		}
 	}
 	ticker := time.NewTicker(5 * time.Second)
-		for {
-			select {
-			case <-ticker.C:
-				u.logger.Debug("Validating old runner pod termination")
-				_, err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
-				if err != nil {
-					if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
-						if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
-							return nil
-						}
+	for {
+		select {
+		case <-ticker.C:
+			u.logger.Debug("Validating old runner pod termination")
+			_, err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+			if err != nil {
+				if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
+					if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
+						return nil
 					}
 				}
-			case <-time.After(60 * time.Second):
-				u.logger.Error("Failed to validate old venona pod termination")
-				return fmt.Errorf("Failed to validate old venona pod termination")
 			}
+		case <-time.After(60 * time.Second):
+			u.logger.Error("Failed to validate old venona pod termination")
+			return fmt.Errorf("Failed to validate old venona pod termination")
 		}
+	}
 }

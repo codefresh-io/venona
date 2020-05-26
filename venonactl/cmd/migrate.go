@@ -29,7 +29,6 @@ var migrateCmdOpt struct {
 		context string
 		namespace string
 	}
-	dryRun bool
 }
 
 var migrateCmd = &cobra.Command{
@@ -63,5 +62,4 @@ func init() {
 	rootCmd.AddCommand(migrateCmd)
 	migrateCmd.Flags().StringVar(&migrateCmdOpt.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
 	migrateCmd.Flags().StringVar(&migrateCmdOpt.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona is installed [$KUBE_NAMESPACE]")
-	migrateCmd.Flags().BoolVar(&migrateCmdOpt.dryRun, "dry-run", false, "Set to to actually upgrade the kubernetes components")
 }
