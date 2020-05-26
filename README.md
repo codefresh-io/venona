@@ -210,3 +210,6 @@ List of the resources that will be created
   * `service-account.dind-volume-provisioner.re.yaml` - The service account that the controller will use
   * `cluster-role.dind-volume-provisioner.re.yaml` Defines all the permission needed for the controller to operate correctly
   * `cluster-role-binding.dind-volume-provisioner.yaml` - Binds the ClusterRole to `service-account.dind-volume-provisioner.re.yaml`
+
+# Contribution
+* To generate mocks for interfaces use mockery: `mockery -dir=./pkg/logger -name=Logger -output=./pkg/mocks -case underscore`
