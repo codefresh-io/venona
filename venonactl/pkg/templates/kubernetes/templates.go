@@ -221,10 +221,9 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
-      {{- $nodeSelector := (.Storage.VolumeProvisioner.NodeSelector | default .NodeSelector )}}
-      {{ if ne $nodeSelector "" }}
+      {{ if .Storage.VolumeProvisioner.NodeSelector }}
       nodeSelector: 
-{{ $nodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
+{{ .Storage.VolumeProvisioner.NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
