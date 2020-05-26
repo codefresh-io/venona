@@ -30,7 +30,7 @@ spec:
             secretName: venonaconf
       {{ if ne .NodeSelector "" }}
       nodeSelector:
-        {{ .NodeSelector }}
+{{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
       {{ if ne .Tolerations "" }}
       tolerations:

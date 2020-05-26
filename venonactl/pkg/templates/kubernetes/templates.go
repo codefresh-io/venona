@@ -57,7 +57,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "create", "delete"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "update"]
@@ -221,9 +221,10 @@ spec:
       labels:
         app: dind-volume-provisioner
     spec:
-      {{ if .Storage.VolumeProvisioner.NodeSelector }}
+      {{- $nodeSelector := (.Storage.VolumeProvisioner.NodeSelector | default .NodeSelector )}}
+      {{ if ne $nodeSelector "" }}
       nodeSelector: 
-{{ .Storage.VolumeProvisioner.NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
+{{ $nodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
@@ -378,7 +379,7 @@ spec:
             secretName: venonaconf
       {{ if ne .NodeSelector "" }}
       nodeSelector:
-        {{ .NodeSelector }}
+{{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
       {{ if ne .Tolerations "" }}
       tolerations:

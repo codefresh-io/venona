@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"encoding/base64"
-	"errors"
+//	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -171,19 +171,6 @@ func createSpinner(prefix, suffix string) *spinner.Spinner {
 	return s
 }
 
-type nodeSelector map[string]string
-
-func parseNodeSelector(s string) (nodeSelector, error) {
-	if s == "" {
-		return nodeSelector{}, nil
-	}
-	v := strings.Split(s, "=")
-	if len(v) != 2 {
-		return nil, errors.New("node selector must be in form \"key=value\"")
-	}
-	return nodeSelector{v[0]: v[1]}, nil
-}
-
 func loadTolerationsFromFile(filename string) string {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -235,15 +222,6 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 		Token: base64.StdEncoding.EncodeToString([]byte(token)),
 		Id:    agentID,
 	}
-}
-
-// String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
-func (ns nodeSelector) String() string {
-	var s string
-	for k, v := range ns {
-		s = fmt.Sprintf("%s: %s", k, v)
-	}
-	return s
 }
 
 // Parsing helpers --set-value , --set-file

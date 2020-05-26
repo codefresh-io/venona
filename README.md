@@ -123,7 +123,7 @@ rules:
 ```
 codefresh install runtime [options] \
                     --set-value=Storage.LocalVolumeParentDir=/mnt/disks/ssd0/codefresh-volumes 
-                    --kube-selector=cloud.google.com/gke-local-ssd=true
+                    --kube-node-selector=cloud.google.com/gke-local-ssd=true
 ```
 
 ##### **GCE Disks** 
