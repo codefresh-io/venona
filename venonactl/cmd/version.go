@@ -21,6 +21,7 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // versionCmd represents the version command
@@ -39,4 +40,12 @@ var versionCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+
+	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
+	viper.BindEnv("kube-context", "KUBE_CONTEXT")
+	
+	versionCmd.Flags().StringVar(&installAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona is installed [$KUBE_NAMESPACE]")
+	versionCmd.Flags().StringVar(&installAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona is installed (default is current-context) [$KUBE_CONTEXT]")
+	versionCmd.Flags().StringVar(&installAgentCmdOptions.kube.context, "server-version-only", viper.GetString("kube-context"), "Name of the kubernetes context on which venona is installed (default is current-context) [$KUBE_CONTEXT]")
+
 }

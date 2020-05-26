@@ -26,6 +26,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -224,4 +225,64 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	}
 
 	return v, nil
+}
+
+func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
+	var deletePriorUpgrade = map[string]interface{}{
+		"deployment.venona.yaml": nil,
+		"secret.venona.yaml": nil,
+	}
+
+	kubeClientset, err := opt.KubeBuilder.BuildClient()
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return err
+	}
+
+	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
+	if err != nil {
+		return err
+	}
+	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
+		if err != nil {
+			u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
+			return err
+		}
+	podName := list.Items[0].ObjectMeta.Name
+	for fileName, _ := range kubeObjects {
+		if _, ok := deletePriorUpgrade[fileName]; ok {
+			u.logger.Debug(fmt.Sprintf("Deleting previous deplopyment of %s", fileName))
+			delOpt := &deleteOptions{
+				logger:         u.logger,
+				templates:      templates.TemplatesMap(),
+				templateValues: v,
+				kubeClientSet:  kubeClientset,
+				namespace:      opt.ClusterNamespace,
+				matchPattern:   fileName,
+				operatorType:   VenonaPluginType,
+			}
+			err := uninstall(delOpt)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	ticker := time.NewTicker(5 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				u.logger.Debug("Validating old runner pod termination")
+				_, err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+				if err != nil {
+					if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
+						if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
+							return nil
+						}
+					}
+				}
+			case <-time.After(60 * time.Second):
+				u.logger.Error("Failed to validate old venona pod termination")
+				return fmt.Errorf("Failed to validate old venona pod termination")
+			}
+		}
 }

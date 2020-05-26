@@ -108,3 +108,6 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 	return v, nil
 
 }
+func (u *volumeProvisionerPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}

@@ -290,3 +290,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 func (u *runtimeAttachPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
 }
+
+func (u *runtimeAttachPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}
