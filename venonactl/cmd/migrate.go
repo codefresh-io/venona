@@ -35,7 +35,7 @@ var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Migrate existing runtime-environment from 0.X to 1.X version",
 	Run: func(cmd *cobra.Command, args []string) {
-		lgr := createLogger("Migrate", true)
+		lgr := createLogger("Migrate", verbose)
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.VenonaPluginType)
 		s := store.GetStore()
@@ -45,6 +45,9 @@ var migrateCmd = &cobra.Command{
 		extendStoreWithAgentAPI(lgr, "", "")
 		fillKubernetesAPI(lgr, migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, false)
 		values := s.BuildValues()
+		spn := createSpinner("Migrating runtime (might take a few seconds)", "")
+		spn.Start()
+		defer spn.Stop()
 		for _, p := range builder.Get() {
 			err := p.Migrate( &plugins.MigrateOptions{
 				ClusterNamespace: migrateCmdOpt.kube.namespace,
