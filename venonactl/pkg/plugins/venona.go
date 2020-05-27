@@ -42,6 +42,7 @@ type venonaPlugin struct {
 type migrationData struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 	Tolerations [] v1.Toleration `json:"tolerations,omitempty"`
+	Env [] v1.EnvVar
 }
 
 const (
@@ -264,6 +265,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	migrationData := migrationData{
 		Tolerations: list.Items[0].Spec.Tolerations,
 		NodeSelector: list.Items[0].Spec.NodeSelector,
+		Env: list.Items[0].Spec.Containers[0].Env,
 	}
 	var jsonData []byte
 	jsonData, err = json.Marshal(migrationData)
