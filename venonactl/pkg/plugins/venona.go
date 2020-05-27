@@ -18,8 +18,10 @@ package plugins
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
@@ -28,11 +30,18 @@ import (
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/api/core/v1"
+	
 )
 
 // venonaPlugin installs assets on Kubernetes Dind runtimectl Env
 type venonaPlugin struct {
 	logger logger.Logger
+}
+
+type migrationData struct {
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Tolerations [] v1.Toleration `json:"tolerations,omitempty"`
 }
 
 const (
@@ -248,6 +257,21 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 		u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
 		return err
 	}
+	if (len(list.Items) == 0) {
+		u.logger.Debug("Runner pod not found , existing migration")
+		return nil
+	}
+	migrationData := migrationData{
+		Tolerations: list.Items[0].Spec.Tolerations,
+		NodeSelector: list.Items[0].Spec.NodeSelector,
+	}
+	var jsonData []byte
+	jsonData, err = json.Marshal(migrationData)
+	err = ioutil.WriteFile("migration.json", jsonData, 0644)
+	if (err != nil) {
+		u.logger.Error("Cannot write migration json")
+	}
+
 	podName := list.Items[0].ObjectMeta.Name
 	for fileName := range kubeObjects {
 		if _, ok := deletePriorUpgrade[fileName]; ok {
