@@ -81,3 +81,6 @@ func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 func (u *monitorAgentPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	return nil, nil
 }
+func (u *monitorAgentPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}

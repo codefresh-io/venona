@@ -162,3 +162,7 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
 }
+
+func (u *runtimeEnvironmentPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}

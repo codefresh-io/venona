@@ -27,6 +27,7 @@ type (
 		Status(*StatusOptions, Values) ([][]string, error)
 		Delete(*DeleteOptions, Values) error
 		Upgrade(*UpgradeOptions, Values) (Values, error)
+		Migrate(*MigrateOptions, Values) error
 	}
 
 	PluginBuilder interface {
@@ -97,6 +98,14 @@ type (
 			BuildClient() (*kubernetes.Clientset, error)
 		}
 		DryRun bool
+	}
+
+	MigrateOptions struct {
+		ClusterName      string
+		ClusterNamespace string
+		KubeBuilder      interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
 	}
 
 	StatusOptions struct {
