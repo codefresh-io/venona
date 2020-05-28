@@ -57,7 +57,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "create", "delete"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "update"]
@@ -378,7 +378,7 @@ spec:
             secretName: venonaconf
       {{ if ne .NodeSelector "" }}
       nodeSelector:
-        {{ .NodeSelector }}
+{{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
       {{ if ne .Tolerations "" }}
       tolerations:

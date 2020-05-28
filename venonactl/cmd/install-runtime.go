@@ -82,11 +82,7 @@ var installRuntimeCmd = &cobra.Command{
 			s.KubernetesAPI.Tolerations = tolerations
 		}
 
-		kns, err := parseNodeSelector(installRuntimeCmdOptions.kube.nodeSelector)
-		if err != nil {
-			dieOnError(err)
-		}
-		s.KubernetesAPI.NodeSelector = kns.String()
+		s.KubernetesAPI.NodeSelector = installRuntimeCmdOptions.kube.nodeSelector
 
 		builder := plugins.NewBuilder(lgr)
 		isDefault := isUsingDefaultStorageClass(installRuntimeCmdOptions.storageClass)
@@ -131,6 +127,7 @@ var installRuntimeCmd = &cobra.Command{
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		values := s.BuildValues()
 
+		var err error
 		if len(installRuntimeCmdOptions.templateValues) > 0 {
 			setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
 			if err != nil {

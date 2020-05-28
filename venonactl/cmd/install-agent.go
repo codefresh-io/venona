@@ -94,13 +94,10 @@ var installAgentCmd = &cobra.Command{
 			version := installAgentCmdOptions.venona.version
 			lgr.Info("Version set manually", "version", version)
 			s.Image.Tag = version
+			s.Version.Current.Version = version
 		}
 
-		kns, err := parseNodeSelector(installAgentCmdOptions.kube.nodeSelector)
-		if err != nil {
-			dieOnError(err)
-		}
-		s.KubernetesAPI.NodeSelector = kns.String()
+		s.KubernetesAPI.NodeSelector = installAgentCmdOptions.kube.nodeSelector
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
@@ -109,6 +106,7 @@ var installAgentCmd = &cobra.Command{
 		builder.Add(plugins.VenonaPluginType)
 
 		values := s.BuildValues()
+		var err error
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
