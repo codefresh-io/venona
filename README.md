@@ -211,5 +211,19 @@ List of the resources that will be created
   * `cluster-role.dind-volume-provisioner.re.yaml` Defines all the permission needed for the controller to operate correctly
   * `cluster-role-binding.dind-volume-provisioner.yaml` - Binds the ClusterRole to `service-account.dind-volume-provisioner.re.yaml`
 
+
+# Structure 
+* The repository contains two modules
+  * venonactl - the cli to install all the required assest on the remote cluster
+  * venona - all the files beseid `venonactl` dir
+    * cmd - entrypoints to the application
+    * pkg/agent - call Codefresh API every X ms to get new pipelines to run. Also, report status back to Codefresh
+    * pkg/codefresh - Codefresh API client
+    * pkg/config - Interface to load the attached runtimes from the filesystem
+    * pkg/kubernetes - Interface to Kubernetes
+    * pkg/logger - logger
+    * pkg/runtime - Interface that uses Kubernetes API to start the pipeline
+
+
 # Contribution
 * To generate mocks for interfaces use mockery: `mockery -dir=./pkg/logger -name=Logger -output=./pkg/mocks -case underscore`

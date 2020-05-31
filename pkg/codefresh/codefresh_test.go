@@ -113,13 +113,6 @@ func Test_cf_prepareURL(t *testing.T) {
 			if tt.wantErr {
 				assert.Error(t, err)
 			}
-			// if (err != nil) != tt.wantErr {
-			// 	t.Errorf("cf.prepareURL() error = %v, wantErr %v", err, tt.wantErr)
-			// 	return
-			// }
-			// if !reflect.DeepEqual(got, tt.want) {
-			// 	t.Errorf("cf.prepareURL() = %v, want %v", got, tt.want)
-			// }
 		})
 	}
 }

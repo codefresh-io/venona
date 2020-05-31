@@ -20,6 +20,11 @@ type (
 	Codefresh interface {
 		Tasks() ([]Task, error)
 		ReportStatus(status AgentStatus) error
+		Host() string
+	}
+
+	RequestDoer interface {
+		Do(*http.Request) (*http.Response, error)
 	}
 
 	Options struct {
@@ -27,9 +32,7 @@ type (
 		Token      string
 		AgentID    string
 		Logger     logger.Logger
-		HTTPClient interface {
-			Do(*http.Request) (*http.Response, error)
-		}
+		HTTPClient RequestDoer
 	}
 
 	cf struct {
@@ -75,6 +78,11 @@ func (c cf) Tasks() ([]Task, error) {
 		return nil, err
 	}
 	return tasks, nil
+}
+
+// Host returns the host
+func (c cf) Host() string {
+	return c.host
 }
 
 // ReportStatus updates the agent entity with given status
