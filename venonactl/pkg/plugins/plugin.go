@@ -28,6 +28,8 @@ type (
 		Delete(*DeleteOptions, Values) error
 		Upgrade(*UpgradeOptions, Values) (Values, error)
 		Migrate(*MigrateOptions, Values) error
+		Test(TestOptions) error
+		Name() string
 	}
 
 	PluginBuilder interface {
@@ -72,7 +74,6 @@ type (
 		RuntimeClusterName    string
 		RuntimeServiceAccount string
 		RestartAgent          bool
-		SkipAcceptanceTest    bool
 	}
 
 	DeleteOptions struct {
@@ -106,6 +107,13 @@ type (
 		KubeBuilder      interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
+	}
+
+	TestOptions struct {
+		KubeBuilder interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		ClusterNamespace string
 	}
 
 	StatusOptions struct {
@@ -148,6 +156,15 @@ type (
 		operatorType   string
 		logger         logger.Logger
 	}
+
+	testOptions struct {
+		logger      logger.Logger
+		kubeBuilder interface {
+			BuildClient() (*kubernetes.Clientset, error)
+		}
+		namespace         string
+		validationRequest validationRequest
+	}
 )
 
 func NewBuilder(logger logger.Logger) PluginBuilder {
@@ -169,37 +186,37 @@ func (p *pb) Get() []Plugin {
 func build(t string, logger logger.Logger) Plugin {
 	if t == VenonaPluginType {
 		return &venonaPlugin{
-			logger: logger.New("Plugin", VenonaPluginType),
+			logger: logger.New("installer", VenonaPluginType),
 		}
 	}
 
 	if t == RuntimeEnvironmentPluginType {
 		return &runtimeEnvironmentPlugin{
-			logger: logger.New("Plugin", RuntimeEnvironmentPluginType),
+			logger: logger.New("installer", RuntimeEnvironmentPluginType),
 		}
 	}
 
 	if t == VolumeProvisionerPluginType {
 		return &volumeProvisionerPlugin{
-			logger: logger.New("Plugin", VolumeProvisionerPluginType),
+			logger: logger.New("installer", VolumeProvisionerPluginType),
 		}
 	}
 
 	if t == EnginePluginType {
 		return &enginePlugin{
-			logger: logger.New("Plugin", EnginePluginType),
+			logger: logger.New("installer", EnginePluginType),
 		}
 	}
 
 	if t == RuntimeAttachType {
 		return &runtimeAttachPlugin{
-			logger: logger.New("Plugin", RuntimeAttachType),
+			logger: logger.New("installer", RuntimeAttachType),
 		}
 	}
 
 	if t == MonitorAgentPluginType {
 		return &monitorAgentPlugin{
-			logger: logger.New("Plugin", MonitorAgentPluginType),
+			logger: logger.New("installer", MonitorAgentPluginType),
 		}
 	}
 
@@ -289,4 +306,19 @@ func uninstall(opt *deleteOptions) error {
 		}
 	}
 	return nil
+}
+
+func test(opt testOptions) error {
+	lgr := opt.logger
+	cs, err := opt.kubeBuilder.BuildClient()
+	if err != nil {
+		lgr.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return err
+	}
+	lgr.Debug("Running acceptance tests")
+	res, err := ensureClusterRequirements(cs, opt.validationRequest, lgr)
+	if err != nil {
+		return err
+	}
+	return handleValidationResult(res, lgr)
 }

@@ -111,3 +111,73 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 func (u *volumeProvisionerPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
+
+func (u *volumeProvisionerPlugin) Test(opt TestOptions) error {
+	validationRequest := validationRequest{
+		rbac: []rbacValidation{
+			{
+				Resource: "persistentvolumes",
+				Verbs:    []string{"get", "list", "watch", "create", "delete", "patch"},
+			},
+			{
+				Resource: "persistentvolumeclaims",
+				Verbs:    []string{"get", "list", "watch", "update"},
+			},
+			{
+				Resource: "storageclasses",
+				Group:    "storage.k8s.io",
+				Verbs:    []string{"get", "list", "watch"},
+			},
+			{
+				Resource: "events",
+				Group:    "",
+				Verbs:    []string{"list", "watch", "create", "update", "patch"},
+			},
+			{
+				Resource: "secrets",
+				Group:    "",
+				Verbs:    []string{"get", "list"},
+			},
+			{
+				Resource: "nodes",
+				Group:    "",
+				Verbs:    []string{"get", "list", "watch"},
+			},
+			{
+				Resource: "pods",
+				Group:    "",
+				Verbs:    []string{"get", "list", "watch", "create", "delete", "patch"},
+			},
+			{
+				Resource: "endpoints",
+				Group:    "",
+				Verbs:    []string{"get", "list", "watch", "create", "update", "delete"},
+			},
+			{
+				Resource: "DaemonSet",
+				Group:    "",
+				Verbs:    []string{"get", "create", "update", "delete"},
+			},
+			{
+				Resource: "CronJob",
+				Group:    "batch",
+				Verbs:    []string{"get", "create", "update", "delete"},
+			},
+			{
+				Resource: "ServiceAccount",
+				Group:    "",
+				Verbs:    []string{"get", "create", "update", "delete"},
+			},
+		},
+	}
+	return test(testOptions{
+		logger:            u.logger,
+		kubeBuilder:       opt.KubeBuilder,
+		namespace:         opt.ClusterNamespace,
+		validationRequest: validationRequest,
+	})
+}
+
+func (u *volumeProvisionerPlugin) Name() string {
+	return VolumeProvisionerPluginType
+}

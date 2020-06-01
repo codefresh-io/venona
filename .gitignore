@@ -17,3 +17,5 @@ venonactl/dist/*
 venonactl-linux
 venonalog.json
 .venonaconf
+.cover
+configdir
