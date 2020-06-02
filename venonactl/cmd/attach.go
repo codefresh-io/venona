@@ -63,7 +63,7 @@ var attachRuntimeCmd = &cobra.Command{
 			attachRuntimeCmdOptions.kubeVenona.context = attachRuntimeCmdOptions.kube.context
 		}
 
-		attachRuntimeCmdOptions.kube.serviceAccount = "venona"
+		attachRuntimeCmdOptions.kube.serviceAccount = s.AppName
 
 		if attachRuntimeCmdOptions.kube.kubePath == "" {
 			attachRuntimeCmdOptions.kube.kubePath = kubeConfigPath

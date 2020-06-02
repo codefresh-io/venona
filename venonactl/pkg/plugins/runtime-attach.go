@@ -31,7 +31,7 @@ type venonaConf struct {
 
 const (
 	runtimeAttachFilesPattern = ".*.runtime-attach.yaml"
-	runtimeSecretName         = "venonaconf"
+	runtimeSecretName         = "runnerconf"
 )
 
 func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
@@ -114,7 +114,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	// read current venona conf
 	currentVenonaConf, err := readCurrentVenonaConf(opt.AgentKubeBuilder, opt.ClusterNamespace)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
+		u.logger.Error(fmt.Sprintf("Cannot read runnerconf: %v ", err))
 		return nil, err
 	}
 
@@ -135,13 +135,13 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		// marshel prior persist
 		d, err := yaml.Marshal(runtime)
 		if err != nil {
-			u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
+			u.logger.Error(fmt.Sprintf("Cannot marshal merged runnerconf: %v ", err))
 			return nil, err
 		}
 
 		runtimes[name] = base64.StdEncoding.EncodeToString([]byte(d))
 	}
-	v["venonaConf"] = runtimes
+	v["runnerConf"] = runtimes
 
 	cs.CoreV1().Secrets(opt.ClusterNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
@@ -223,12 +223,12 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return err
 	}
-	// Delete the entry from venonaconf - if this is the only , delete the secret
+	// Delete the entry from runnerconf - if this is the only , delete the secret
 
 	// read current venona conf
 	currentVenonaConf, err := readCurrentVenonaConf(deleteOpt.AgentKubeBuilder, deleteOpt.AgentNamespace)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
+		u.logger.Error(fmt.Sprintf("Cannot read runnerconf: %v ", err))
 		return err
 	}
 	name := strings.ReplaceAll(deleteOpt.RuntimeEnvironment, "/", ".")
@@ -246,7 +246,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 			// marshel prior persist
 			d, err := yaml.Marshal(runtime)
 			if err != nil {
-				u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
+				u.logger.Error(fmt.Sprintf("Cannot marshal merged runnerconf: %v ", err))
 				return err
 			}
 
@@ -254,7 +254,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		}
 
 		shouldDelete = false
-		v["venonaConf"] = runtimes
+		v["runnerConf"] = runtimes
 
 		cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
