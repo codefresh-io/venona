@@ -11,14 +11,15 @@ Meanwhile 1.x.x is to release and makred as pre-release we will maintain 2 branc
 * `release-1.0` it the new release, which will be used when running Codefresh CLI to install the agent
 We highly suggest to use [Codefresh official CLI](https://codefresh-io.github.io/cli/) to install the agent:
 ```bash
-kubectl create namespace codefresh
-codefresh install agent --kube-namespace codefresh --install-runtime
+codefresh runner init
 ```
 
 The last command will:  
-1. Install the agent on the namespace `codefresh`
+1. Install the agent on the namespace `codefresh` (as you choose)
 2. Install the runtime on the same namespace
 3. Attach the runtime to the agent
+4. Register cluster on codefresh platform
+5. Create and run demo pipeline
 
 It is still possible, for advanced users to install all manually, for example:
 One process of Venona can manage multiple runtime environments
@@ -57,19 +58,9 @@ codefresh attach runtime --agent-name $AGENT_NAME --agent-kube-namespace codefre
 ```
 
 ## Migration
-Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, please use the [migration script](https://github.com/codefresh-io/venona/blob/release-1.0/scripts/migration.sh) to do that, check out which environment variables are required to run it.
+Migrating from Venona `< 1.x.x` to `> 1.x.x` is not done automatically, please run the follwing
 ```bash
-# This script comes to migrate old versions of Venona installation ( version < 1.x.x ) to new version (version >= 1.0.0 )
-# Please read carefully what the script does.
-# There will be a "downtime" in terms of your builds targeted to this runtime environment
-# Once the script is finished, all the builds during the downtime will start
-# The script will:
-# 1. Create new agent entity in Codefresh using Codefresh CLI - give it a name $CODEFRESH_AGENT_NAME, default is "codefresh"
-# 2. Install the agent on you cluster pass variables:
-#   a. $VENONA_KUBE_NAMESPACE - required 
-#   b. $VENONA_KUBE_CONTEXT - default is current-context
-#   c. $VENONA_KUBECONFIG_PATH - default is $HOME/.kube/config
-# 3. Attach runtime to the new agent (downtime ends) - pass $CODEFRESH_RUNTIME_NAME - required
+codefresh runner upgrade
 ```
 
 

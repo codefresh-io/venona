@@ -44,7 +44,7 @@ var installMonitorAgentCmd = &cobra.Command{
 
 		s := store.GetStore()
 
-		lgr := createLogger("Install-monitor-agent", verbose)
+		lgr := createLogger("Install-monitor-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, false)

@@ -10,9 +10,10 @@ type (
 	}
 
 	Options struct {
-		Command   string
-		Verbose   bool
-		LogToFile string
+		Command      string
+		Verbose      bool
+		LogToFile    string
+		LogFormatter string
 	}
 )
 
@@ -25,7 +26,7 @@ func New(o *Options) Logger {
 	if o.Verbose {
 		lvl = log.LvlDebug
 	}
-	verboseHandler := log.LvlFilterHandler(lvl, log.StdoutHandler)
+	verboseHandler := log.LvlFilterHandler(lvl, getStdoutHanlder(o))
 	handlers = append(handlers, verboseHandler)
 	if o.LogToFile != "" {
 		fileHandler := log.LvlFilterHandler(log.LvlDebug, log.Must.FileHandler(o.LogToFile, log.JsonFormat()))

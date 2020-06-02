@@ -35,7 +35,7 @@ var migrateCmd = &cobra.Command{
 	Use:   "migrate",
 	Short: "Migrate existing runtime-environment from 0.X to 1.X version",
 	Run: func(cmd *cobra.Command, args []string) {
-		lgr := createLogger("Migrate", verbose)
+		lgr := createLogger("Migrate", verbose, logFormatter)
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.VenonaPluginType)
 		s := store.GetStore()

@@ -32,7 +32,7 @@ var uninstallRuntimeCmd = &cobra.Command{
 	Short: "Uninstall Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		lgr := createLogger("UninstallRuntime", verbose)
+		lgr := createLogger("UninstallRuntime", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 

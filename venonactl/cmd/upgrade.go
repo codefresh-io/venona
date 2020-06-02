@@ -34,7 +34,7 @@ var upgradeCmd = &cobra.Command{
 	Use:   "upgrade [name]",
 	Short: "Upgrade existing runtime-environment",
 	Run: func(cmd *cobra.Command, args []string) {
-		lgr := createLogger("Upgrade", true)
+		lgr := createLogger("Upgrade", true, logFormatter)
 		lgr.Warn("Upgrade is not supported from version < 1.0.0 to version >= 1.x.x, please run the migration script: https://github.com/codefresh-io/venona/blob/master/scripts/migration.sh to upgrade to the latest version")
 		os.Exit(0)
 	},
