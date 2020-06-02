@@ -49,7 +49,7 @@ var installRuntimeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		s := store.GetStore()
-		lgr := createLogger("Install-runtime", verbose)
+		lgr := createLogger("Install-runtime", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithAgentAPI(lgr, installRuntimeCmdOptions.codefreshToken, "")
 		extendStoreWithKubeClient(lgr)

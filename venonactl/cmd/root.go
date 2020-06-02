@@ -49,5 +49,6 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&kubeConfigPath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
 
 	rootCmd.PersistentFlags().BoolVar(&verbose, "verbose", false, "Print logs")
+	rootCmd.PersistentFlags().StringVar(&logFormatter, "log-formtter", "Plain", "Print logs in custom format")
 
 }

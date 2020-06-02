@@ -49,7 +49,7 @@ var installAgentCmd = &cobra.Command{
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		lgr := createLogger("Install-agent", verbose)
+		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithAgentAPI(lgr, installAgentCmdOptions.agentToken, installAgentCmdOptions.agentID)
 		extendStoreWithKubeClient(lgr)
