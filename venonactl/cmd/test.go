@@ -45,7 +45,7 @@ var testCommand = &cobra.Command{
 	Use:   "test",
 	Short: "Run test on the target cluster prior installation",
 	Run: func(cmd *cobra.Command, args []string) {
-		lgr := createLogger("test", verbose)
+		lgr := createLogger("test", verbose, logFormatter)
 		s := store.GetStore()
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, testCommandOptions.kube.context, testCommandOptions.kube.namespace, false)

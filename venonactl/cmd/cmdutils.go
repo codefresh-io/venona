@@ -33,7 +33,8 @@ var (
 	commit  = "none"
 	date    = "unknown"
 
-	verbose bool
+	verbose      bool
+	logFormatter string
 
 	configPath string
 	cfAPIHost  string
@@ -153,13 +154,14 @@ func getKubeClientBuilder(context string, namespace string, path string, inClust
 	})
 }
 
-func createLogger(command string, verbose bool) logger.Logger {
+func createLogger(command string, verbose bool, logFormatter string) logger.Logger {
 	logFile := "venonalog.json"
 	os.Remove(logFile)
 	return logger.New(&logger.Options{
-		Command:   command,
-		Verbose:   verbose,
-		LogToFile: logFile,
+		Command:      command,
+		Verbose:      verbose,
+		LogToFile:    logFile,
+		LogFormatter: logFormatter,
 	})
 }
 

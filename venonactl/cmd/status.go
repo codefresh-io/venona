@@ -41,7 +41,7 @@ var statusCmd = &cobra.Command{
 	Short: "Get status of Codefresh's runtime-environment",
 	Long:  "Pass the name of the runtime environment to see more details information about the underlying resources",
 	Run: func(cmd *cobra.Command, args []string) {
-		lgr := createLogger("Status", verbose)
+		lgr := createLogger("Status", verbose, logFormatter)
 
 		buildBasicStore(lgr)
 		extendStoreWithCodefershClient(lgr)

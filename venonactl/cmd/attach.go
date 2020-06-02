@@ -46,7 +46,7 @@ var attachRuntimeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		s := store.GetStore()
-		lgr := createLogger("Attach-runtime", verbose)
+		lgr := createLogger("Attach-runtime", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 
