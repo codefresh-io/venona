@@ -294,3 +294,11 @@ func (u *runtimeAttachPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, erro
 func (u *runtimeAttachPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
+
+func (u *runtimeAttachPlugin) Test(opt TestOptions) error {
+	return nil
+}
+
+func (u *runtimeAttachPlugin) Name() string {
+	return RuntimeAttachType
+}

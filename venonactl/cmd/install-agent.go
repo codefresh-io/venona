@@ -37,11 +37,10 @@ var installAgentCmdOptions struct {
 	venona struct {
 		version string
 	}
-	agentToken                string
-	agentID                   string
-	kubernetesRunnerType      bool
-	tolerations               string
-	skipClusterAcceptanceTest bool
+	agentToken           string
+	agentID              string
+	kubernetesRunnerType bool
+	tolerations          string
 }
 
 var installAgentCmd = &cobra.Command{
@@ -59,8 +58,7 @@ var installAgentCmd = &cobra.Command{
 			cfAPIHost = "https://g.codefresh.io"
 		}
 		builderInstallOpt := &plugins.InstallOptions{
-			CodefreshHost:      cfAPIHost,
-			SkipAcceptanceTest: installAgentCmdOptions.skipClusterAcceptanceTest,
+			CodefreshHost: cfAPIHost,
 		}
 
 		if installAgentCmdOptions.agentToken == "" {
@@ -133,7 +131,6 @@ func init() {
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
-	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.skipClusterAcceptanceTest, "skip-cluster-test", false, "Do not run cluster acceptance test")
 }
 
 func fillCodefreshAPI(logger logger.Logger) {
