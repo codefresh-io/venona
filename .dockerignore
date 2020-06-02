@@ -4,3 +4,4 @@ node_modules
 .envrc*
 .vscode
 .REST
+./.cover

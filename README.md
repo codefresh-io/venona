@@ -215,7 +215,7 @@ List of the resources that will be created
 # Structure 
 * The repository contains two modules
   * venonactl - the cli to install all the required assest on the remote cluster
-  * venona - all the files beseid `venonactl` dir
+  * venona - the agent process that is running on remote cluster
     * cmd - entrypoints to the application
     * pkg/agent - call Codefresh API every X ms to get new pipelines to run. Also, report status back to Codefresh
     * pkg/codefresh - Codefresh API client
