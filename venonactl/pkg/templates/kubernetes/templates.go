@@ -721,7 +721,7 @@ parameters:
   fsType: {{ .Storage.FsType | default "ext4" }}
 {{- end }}`
 
-	templatesMap["runnerconf.secret.venona.yaml"] = `apiVersion: v1
+	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
