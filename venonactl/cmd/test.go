@@ -48,6 +48,7 @@ var testCommand = &cobra.Command{
 		lgr := createLogger("test", verbose)
 		s := store.GetStore()
 		extendStoreWithKubeClient(lgr)
+		fillKubernetesAPI(lgr, testCommandOptions.kube.context, testCommandOptions.kube.namespace, false)
 
 		builder := plugins.NewBuilder(lgr)
 		for _, p := range testCommandOptions.plugin {
