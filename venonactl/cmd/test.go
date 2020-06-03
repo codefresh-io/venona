@@ -16,8 +16,6 @@ limitations under the License.
 */
 
 import (
-	"fmt"
-
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
@@ -72,19 +70,14 @@ var testCommand = &cobra.Command{
 			}
 		}
 		var finalerr error
+		lgr.Info("Testing requirements")
 		for _, p := range builder.Get() {
-			lgr.Info("Testing requirements", "installer", p.Name())
 			err := p.Test(plugins.TestOptions{
 				KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, false),
 				ClusterNamespace: s.KubernetesAPI.Namespace,
 			})
-			if err != nil {
-				if finalerr != nil {
-					finalerr = fmt.Errorf("%s - %s", finalerr.Error(), err.Error())
-				} else {
-					finalerr = fmt.Errorf("%s", err.Error())
-
-				}
+			if err != nil && finalerr == nil {
+				finalerr = err
 			}
 		}
 		dieOnError(finalerr)
