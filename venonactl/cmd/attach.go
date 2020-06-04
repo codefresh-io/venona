@@ -17,6 +17,8 @@ limitations under the License.
 */
 
 import (
+	"fmt"
+
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
@@ -63,7 +65,9 @@ var attachRuntimeCmd = &cobra.Command{
 			attachRuntimeCmdOptions.kubeVenona.context = attachRuntimeCmdOptions.kube.context
 		}
 
-		attachRuntimeCmdOptions.kube.serviceAccount = "venona"
+		if attachRuntimeCmdOptions.kube.serviceAccount == "" {
+			attachRuntimeCmdOptions.kube.serviceAccount = s.AppName
+		}
 
 		if attachRuntimeCmdOptions.kube.kubePath == "" {
 			attachRuntimeCmdOptions.kube.kubePath = kubeConfigPath
@@ -116,6 +120,7 @@ func init() {
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.serviceAccount, "kube-service-account", viper.GetString("kube-service-account"), fmt.Sprintf("Name of the kubernetes service account (default is %s)", plugins.AppName))
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.runtimeEnvironmentName, "runtime-name", viper.GetString("runtime-name"), "Name of the runtime as in codefresh")
 

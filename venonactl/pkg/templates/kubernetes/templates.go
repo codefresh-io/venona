@@ -373,9 +373,9 @@ spec:
         version: {{ .Version }}
     spec:
       volumes:
-        - name: venonaconf
+        - name: runnerconf
           secret:
-            secretName: venonaconf
+            secretName: runnerconf
       {{ if ne .NodeSelector "" }}
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
@@ -407,7 +407,7 @@ spec:
           value: "/etc/secrets"
         image: {{ .Image.Name }}:{{ .Image.Tag }}
         volumeMounts:
-        - name: venonaconf
+        - name: runnerconf
           mountPath: "/etc/secrets"
           readOnly: true
         imagePullPolicy: Always
@@ -624,7 +624,7 @@ metadata:
   name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
 data:
-{{ range $key, $value := .venonaConf }}
+{{ range $key, $value := .runnerConf }}
   {{ $key }}: {{ $value }}
 {{ end }}`
 
@@ -728,7 +728,7 @@ metadata:
   name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
 data:
-{{ range $key, $value := .venonaConf }}
+{{ range $key, $value := .runnerConf }}
   {{ $key }}: {{ $value }}
 {{ end }}`
 

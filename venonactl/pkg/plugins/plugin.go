@@ -17,7 +17,7 @@ const (
 	MonitorAgentPluginType        = "monitor-agent"
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
-	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
+	DefaultStorageClassNamePrefix = "dind-local-volumes-runner"
 	RuntimeAttachType             = "runtime-attach"
 )
 

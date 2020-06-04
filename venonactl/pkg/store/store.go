@@ -2,13 +2,14 @@ package store
 
 import (
 	"fmt"
+
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
 )
 
 const (
 	ModeInCluster          = "InCluster"
-	ApplicationName        = "venona"
+	ApplicationName        = "runner"
 	MonitorApplicationName = "monitor"
 )
 

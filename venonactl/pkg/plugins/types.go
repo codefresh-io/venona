@@ -17,7 +17,7 @@ package plugins
 
 const (
 	// AppName - app name for config
-	AppName = "venona"
+	AppName = "runner"
 
 	// TypeKubernetesDind - name for Kubernetes  Dind runtimectl
 	TypeKubernetesDind = "kubernetesDind"
