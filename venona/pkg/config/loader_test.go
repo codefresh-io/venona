@@ -10,6 +10,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type (
+	mockLoggerOpts struct {
+		method  string
+		args    []interface{}
+		returns []interface{}
+	}
+)
+
+func mockLogger(opt ...mockLoggerOpts) *mocks.Logger {
+	m := &mocks.Logger{}
+	for _, o := range opt {
+		m.On(o.method, o.args...).Return(o.returns...)
+	}
+	return m
+}
+
 func TestLoad(t *testing.T) {
 	type args struct {
 		dir     string
@@ -27,14 +43,25 @@ func TestLoad(t *testing.T) {
 		{
 			name: "Success and return empty list",
 			args: args{
-				dir:     "location",
-				logger:  &mocks.Logger{},
+				dir: "location",
+				logger: mockLogger(
+					mockLoggerOpts{
+						method: "Debug",
+						args: []interface{}{
+							"File ignored, regexp does not match",
+							"regexp",
+							"some-pattern",
+							"file",
+							"",
+						},
+					},
+				),
 				pattern: "some-pattern",
 			},
 			wantErr: false,
 			want:    map[string]Config{},
 			walkFileFunc: func(root string, fn filepath.WalkFunc) error {
-				return fn("some-path", nil, nil)
+				return fn("some-path", &info{}, nil)
 			},
 			fileReadFunc: func(string) ([]byte, error) {
 				return []byte{}, nil
