@@ -6,7 +6,9 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/agent"
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/config"
+	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,13 +30,32 @@ var startCmdOptions struct {
 var startCmd = &cobra.Command{
 	Use: "start",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		log := logger.New(logger.Options{
 			Verbose: startCmdOptions.verbose,
 		})
-
-		_, err := config.Load(startCmdOptions.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
+		configs, err := config.Load(startCmdOptions.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 		dieOnError(err)
+		runtimes := map[string]runtime.Runtime{}
+		for _, config := range configs {
+			
+			k, err := kubernetes.New(kubernetes.Options{
+				Token: config.Token,
+				Type: config.Type,
+				Host: config.Host,
+				Name: config.Name,
+				Cert: config.Cert,
+			})
+			if err != nil {
+				log.Error("Failed to load kubernetes with error", "error", err.Error())
+				continue
+			}
+			re := runtime.New(runtime.Options{
+				Kubernetes: k,
+			})
+			runtimes[config.Name] = re
+
+		}
 
 		cf := codefresh.New(codefresh.Options{
 			Host:    startCmdOptions.codefreshHost,
@@ -42,15 +63,17 @@ var startCmd = &cobra.Command{
 			AgentID: startCmdOptions.agentID,
 			Logger:  log.New("module", "service", "service", "codefresh"),
 		})
+		// load runtimes
+
 		agent := agent.Agent{
 			Codefresh:          cf,
 			Logger:             log.New("module", "agent"),
+			Runtimes: 			runtimes,
 			ID:                 startCmdOptions.agentID,
 			TaskPullerTicker:   time.NewTicker(time.Duration(startCmdOptions.taskPullingSecondsInterval) * time.Second),
 			ReportStatusTicker: time.NewTicker(time.Duration(startCmdOptions.statusReportingSecondsInterval) * time.Second),
 		}
 		dieOnError(agent.Start())
-		return nil
 
 	},
 	Long: "Start venona process",
@@ -65,6 +88,7 @@ func init() {
 
 	startCmd.PersistentFlags().BoolVar(&startCmdOptions.verbose, "verbose", true, "Show more logs")
 	startCmd.PersistentFlags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agentID"), "ID of the agent [$AGENT_ID]")
+	startCmd.PersistentFlags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("configDir"), "path to configuration folder")
 	startCmd.PersistentFlags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefreshToken"), "Codefresh API token [$CODEFRESH_TOKEN]")
 	startCmd.PersistentFlags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefreshHost"), "Codefresh API host default [$CODEFRESH_HOST]")
 	startCmd.PersistentFlags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval to pull new tasks from Codefresh")
