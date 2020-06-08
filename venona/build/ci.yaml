@@ -1,0 +1,55 @@
+version: '1.0'
+mode: parallel
+stages:
+- Prepare
+- Test
+- Build
+steps:
+
+  main_clone:
+    stage: Prepare
+    title: Clone repository
+    type: git-clone
+    repo: https://github.com/codefresh-io/venona
+    revision: ${{CF_BRANCH}}
+    credentials:
+      username: github
+      password: ${{secrets.hybrid.git}}
+
+  test:
+    title: Run Unit Tests
+    stage: Test
+    image: golang:1.14.4-alpine3.12
+    commands:
+      - cd venona && make test
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success     
+
+  gofmt:
+    title: Run GO-FMT
+    stage: Test
+    image: golang:1.14.4-alpine3.12
+    commands:
+      - cd venona && make test-fmt
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success     
+  
+  build:
+    type: build
+    title: Build Docker Image
+    stage: Build
+    tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+    dockerfile: venona/Dockerfile
+    image_name: codefresh/venona
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success     
+

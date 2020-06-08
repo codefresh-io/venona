@@ -1,6 +1,6 @@
 .PHONY: build	
 build:
-	go build -o venona *.go
+	@sh ./scripts/build.sh
 
 .PHONY: test
 test:
