@@ -9,6 +9,8 @@ require (
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.5.1
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/tools v0.0.0-20200606014950-c42cb6316fb6 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 	k8s.io/api v0.18.3 // indirect
 	k8s.io/client-go v0.17.3
