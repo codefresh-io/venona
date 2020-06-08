@@ -116,7 +116,7 @@ func (a Agent) reportStatus() {
 }
 
 func groupTasks(tasks []codefresh.Task) map[string][]codefresh.Task {
-	candidates := map[string][]codefresh.Task {}
+	candidates := map[string][]codefresh.Task{}
 	for _, task := range tasks {
 		name := task.Metadata.Workflow
 		if name == "" {
