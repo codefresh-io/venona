@@ -6,7 +6,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
+
 var errNotValidType = errors.New("not a valid type")
+
 type (
 	// Kubernetes API client
 	Kubernetes interface {
@@ -14,14 +16,14 @@ type (
 		DeleteResource() error
 	}
 	Options struct {
-		Type  string 
-		Cert  string 
-		Token string 
-		Host  string 
-		Name  string 
+		Type  string
+		Cert  string
+		Token string
+		Host  string
+		Name  string
 	}
 
-	kube struct{
+	kube struct {
 		client *kubernetes.Clientset
 	}
 )
@@ -34,7 +36,7 @@ func New(opt Options) (Kubernetes, error) {
 	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert)
 	return &kube{
 		client: client,
-	 }, err
+	}, err
 }
 
 func (k kube) CreateResource() error {

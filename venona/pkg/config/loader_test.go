@@ -8,6 +8,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type (
@@ -20,6 +21,15 @@ type (
 
 func mockLogger(opt ...mockLoggerOpts) *mocks.Logger {
 	m := &mocks.Logger{}
+	if len(opt) == 0 {
+		m.On(mock.Anything, mock.Anything).Return(nil)
+		m.On(mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+	}
 	for _, o := range opt {
 		m.On(o.method, o.args...).Return(o.returns...)
 	}
@@ -63,6 +73,27 @@ func TestLoad(t *testing.T) {
 			walkFileFunc: func(root string, fn filepath.WalkFunc) error {
 				return fn("some-path", &info{
 					name:  "file",
+					isDir: false,
+				}, nil)
+			},
+			fileReadFunc: func(string) ([]byte, error) {
+				return []byte{}, nil
+			},
+		},
+		{
+			name: "return config map from matching file",
+			args: args{
+				dir:     "location",
+				logger:  mockLogger(),
+				pattern: ".*",
+			},
+			wantErr: false,
+			want: map[string]Config{
+				"location/file.a.yaml": {},
+			},
+			walkFileFunc: func(root string, fn filepath.WalkFunc) error {
+				return fn("location/file.a.yaml", &info{
+					name:  "file.a.yaml",
 					isDir: false,
 				}, nil)
 			},
