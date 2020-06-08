@@ -27,6 +27,7 @@ gocyclo:
 
 .PHONY: lint
 lint:
+	@go get -u golang.org/x/lint/golint
 	@golint -set_exit_status ./...
 
 ## License check all the golang files to have the license
