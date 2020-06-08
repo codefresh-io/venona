@@ -13,7 +13,7 @@ test-fmt:
 # spellcheck Finds commonly misspelled English words
 .PHONY: spellcheck
 spellcheck:
-	@go get -u github.com/client9/misspell/cmd/misspell
+	@go get github.com/client9/misspell/cmd/misspell
 	@misspell -error .
 
 # Gocyclo calculates cyclomatic complexities of functions in Go source code.
@@ -27,7 +27,7 @@ gocyclo:
 
 .PHONY: lint
 lint:
-	@go get -u golang.org/x/lint/golint
+	@go get golang.org/x/lint/golint
 	@golint -set_exit_status ./...
 
 .PHONY: security-check
@@ -38,7 +38,7 @@ lint:
 ## License check all the golang files to have the license
 .PHONY: license
 license:
-	@go get -u github.com/google/addlicense
+	@go get github.com/google/addlicense
 	@addlicense -check -f License **/**/*.go
 
 # Fix fmt errors in file
