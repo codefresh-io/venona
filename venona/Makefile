@@ -20,4 +20,5 @@ mock:
 
 .PHONY: license
 license:
+	@go get -u github.com/google/addlicense
 	@addlicense -check -f License **/**/*.go
