@@ -46,3 +46,9 @@ fmt:
 .PHONY: mock
 mock:
 	@sh ./scripts/mock.sh $(PKG) $(NAME)
+
+# Generate mock struct from interface
+# example: make mock PKG=./pkg/runtime NAME=Runtime
+.PHONY: upload-coverage
+mock:
+	@sh ./scripts/codecov.sh -t $(CODECOV_TOKEN)

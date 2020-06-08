@@ -2,7 +2,7 @@ version: '1.0'
 mode: parallel
 stages:
 - Test
-- Build
+- Build Artifacts
 steps:
 
   main_clone:
@@ -63,10 +63,28 @@ steps:
     commands:
       - cd venona && make gocyclo
   
+  upload-codecov:
+    <<: *common
+    title: Upload Code Coverage
+    stage: Build Artifacts
+    commands:
+      - cd venona && make upload-coverage
+    environment:
+    - VCS_COMMIT_ID=${{CF_COMMIT}}
+    - VCS_BRANCH_NAME=${{CF_BRANCH}}
+    - VCS_SLUG=codefresh-io/venona
+    - CI_BUILD_URL=${{CF_BUILD_URL}}
+    - CI_BUILD_ID=${{CF_BUILD_ID}}
+    when:
+      steps:
+      - name: test
+        on:
+        - success 
+
   build:
     type: build
     title: Build Docker Image
-    stage: Build
+    stage: Build Artifacts
     tag: ${{CF_BRANCH_TAG_NORMALIZED}}
     dockerfile: Dockerfile
     working_directory: ${{main_clone}}/venona
