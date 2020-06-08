@@ -18,7 +18,7 @@ steps:
   test: &common
     title: Run Unit Tests
     stage: Test
-    image: golang:1.14.4
+    image: codefresh/venona-tester
     commands:
       - cd venona && make test
     when:

@@ -1,0 +1,9 @@
+FROM golang:1.14.4
+
+RUN go get github.com/client9/misspell/cmd/misspell && \
+    go get github.com/fzipp/gocyclo && \
+    go get golang.org/x/lint/golint && \
+    go get github.com/securego/gosec/cmd/gosec && \
+    go get github.com/google/addlicense
+
+# codefresh/venona-tester
