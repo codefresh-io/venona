@@ -29,6 +29,7 @@ type (
 		CreateResource() error
 		DeleteResource() error
 	}
+	// Options for Kubernetes
 	Options struct {
 		Type  string
 		Cert  string

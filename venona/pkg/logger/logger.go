@@ -19,10 +19,12 @@ import (
 )
 
 type (
+	// Logger interface
 	Logger interface {
 		log.Logger
 	}
 
+	// Options for logger 
 	Options struct {
 		Verbose bool
 	}
