@@ -19,7 +19,7 @@ steps:
   test:
     title: Run Unit Tests
     stage: Test
-    image: golang:1.14.4-alpine3.12
+    image: golang:1.14.4
     commands:
       - cd venona && make test
     when:
@@ -31,7 +31,7 @@ steps:
   gofmt:
     title: Run GO-FMT
     stage: Test
-    image: golang:1.14.4-alpine3.12
+    image: golang:1.14.4
     commands:
       - cd venona && make test-fmt
     when:
