@@ -31,7 +31,7 @@ lint:
 	@golint -set_exit_status ./...
 
 .PHONY: security-check
-lint:
+security-check:
 	@go get github.com/securego/gosec/cmd/gosec
 	@gosec ./...
 
