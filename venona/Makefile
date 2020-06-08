@@ -50,5 +50,5 @@ mock:
 # Generate mock struct from interface
 # example: make mock PKG=./pkg/runtime NAME=Runtime
 .PHONY: upload-coverage
-mock:
+upload-coverage:
 	@sh ./scripts/codecov.sh -t $(CODECOV_TOKEN)
