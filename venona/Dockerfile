@@ -1,5 +1,6 @@
 FROM golang:1.14.4-alpine3.12 AS godev
 
+
 RUN apk update && apk add --no-cache ca-certificates && apk upgrade && apk add git make
 
 WORKDIR /venona
