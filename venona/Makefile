@@ -51,4 +51,4 @@ mock:
 # example: make mock PKG=./pkg/runtime NAME=Runtime
 .PHONY: upload-coverage
 upload-coverage:
-	@sh ./scripts/codecov.sh -t $(CODECOV_TOKEN)
+	@./scripts/codecov.sh -t $(CODECOV_TOKEN)
