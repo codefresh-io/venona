@@ -50,6 +50,12 @@ steps:
     title: Run Go Lint
     commands:
       - cd venona && make lint
+  
+  security:
+    <<: *common
+    title: Run Security Check
+    commands:
+      - cd venona && make security-check
 
   gocyclo:
     <<: *common
