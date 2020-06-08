@@ -23,18 +23,20 @@ const (
 	TypeDeletePod = "DeletePod"
 	TypeDeletePVC = "DeletePvc"
 )
+
 // UnmarshalTasks with json
 func UnmarshalTasks(data []byte) ([]Task, error) {
 	var r []Task
 	err := json.Unmarshal(data, &r)
 	return r, err
 }
+
 // Marshal tasks
 func (r *Tasks) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
- // Tasks array
+// Tasks array
 type Tasks []Task
 
 // Task options
@@ -44,7 +46,7 @@ type Task struct {
 	Metadata Metadata    `json:"metadata"`
 }
 
-// Metadata options 
+// Metadata options
 type Metadata struct {
 	CreatedAt string `json:"createdAt"`
 	Account   string `json:"account"`

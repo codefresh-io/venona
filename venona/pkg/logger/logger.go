@@ -24,7 +24,7 @@ type (
 		log.Logger
 	}
 
-	// Options for logger 
+	// Options for logger
 	Options struct {
 		Verbose bool
 	}

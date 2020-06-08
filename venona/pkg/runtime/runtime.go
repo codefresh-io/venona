@@ -26,7 +26,7 @@ type (
 		TerminateWorkflow([]codefresh.Task) error
 	}
 
-	// Options for runtime 
+	// Options for runtime
 	Options struct {
 		Kubernetes kubernetes.Kubernetes
 	}

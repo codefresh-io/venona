@@ -22,6 +22,7 @@ type (
 		Message string `json:"message"`
 	}
 )
+
 // Marshal status
 func (r *AgentStatus) Marshal() ([]byte, error) {
 	return json.Marshal(r)
