@@ -38,13 +38,13 @@ var startCmd = &cobra.Command{
 		dieOnError(err)
 		runtimes := map[string]runtime.Runtime{}
 		for _, config := range configs {
-			
+
 			k, err := kubernetes.New(kubernetes.Options{
 				Token: config.Token,
-				Type: config.Type,
-				Host: config.Host,
-				Name: config.Name,
-				Cert: config.Cert,
+				Type:  config.Type,
+				Host:  config.Host,
+				Name:  config.Name,
+				Cert:  config.Cert,
 			})
 			if err != nil {
 				log.Error("Failed to load kubernetes with error", "error", err.Error())
@@ -68,7 +68,7 @@ var startCmd = &cobra.Command{
 		agent := agent.Agent{
 			Codefresh:          cf,
 			Logger:             log.New("module", "agent"),
-			Runtimes: 			runtimes,
+			Runtimes:           runtimes,
 			ID:                 startCmdOptions.agentID,
 			TaskPullerTicker:   time.NewTicker(time.Duration(startCmdOptions.taskPullingSecondsInterval) * time.Second),
 			ReportStatusTicker: time.NewTicker(time.Duration(startCmdOptions.statusReportingSecondsInterval) * time.Second),

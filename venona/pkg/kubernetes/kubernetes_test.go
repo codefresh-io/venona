@@ -11,10 +11,10 @@ func TestNew(t *testing.T) {
 		opt Options
 	}
 	tests := []struct {
-		name    string
-		args    args
-		want    kube
-		wantErr bool
+		name        string
+		args        args
+		want        kube
+		wantErr     bool
 		errorString string
 	}{
 		{
@@ -34,7 +34,7 @@ func TestNew(t *testing.T) {
 					Type: "secret",
 				},
 			},
-			wantErr: true,
+			wantErr:     true,
 			errorString: "not a valid type",
 		},
 	}

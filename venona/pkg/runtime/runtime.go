@@ -4,7 +4,6 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 )
- 
 
 type (
 	// Runtime API client
@@ -13,7 +12,7 @@ type (
 		TerminateWorkflow([]codefresh.Task) error
 	}
 
-	Options struct{
+	Options struct {
 		Kubernetes kubernetes.Kubernetes
 	}
 
@@ -21,7 +20,7 @@ type (
 )
 
 // New creates new Runtime client
-func New(opt Options) (Runtime) {
+func New(opt Options) Runtime {
 	return &runtime{}
 }
 
