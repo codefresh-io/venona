@@ -41,7 +41,7 @@ func TestLoad(t *testing.T) {
 		walkFileFunc func(string, filepath.WalkFunc) error
 	}{
 		{
-			name: "Success and return empty list",
+			name: "Success and return empty list when file name does not match",
 			args: args{
 				dir: "location",
 				logger: mockLogger(
@@ -52,7 +52,7 @@ func TestLoad(t *testing.T) {
 							"regexp",
 							"some-pattern",
 							"file",
-							"",
+							"file",
 						},
 					},
 				),
@@ -61,7 +61,10 @@ func TestLoad(t *testing.T) {
 			wantErr: false,
 			want:    map[string]Config{},
 			walkFileFunc: func(root string, fn filepath.WalkFunc) error {
-				return fn("some-path", &info{}, nil)
+				return fn("some-path", &info{
+					name:  "file",
+					isDir: false,
+				}, nil)
 			},
 			fileReadFunc: func(string) ([]byte, error) {
 				return []byte{}, nil
