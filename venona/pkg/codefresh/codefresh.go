@@ -37,10 +37,12 @@ type (
 		Host() string
 	}
 
+	// RequestDoer interface
 	RequestDoer interface {
 		Do(*http.Request) (*http.Response, error)
 	}
 
+	// Options for codefresh
 	Options struct {
 		Host       string
 		Token      string

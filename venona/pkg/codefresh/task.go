@@ -16,19 +16,20 @@ package codefresh
 
 import "encoding/json"
 
+// Const for task types
 const (
 	TypeCreatePod = "CreatePod"
 	TypeCreatePVC = "CreatePvc"
 	TypeDeletePod = "DeletePod"
 	TypeDeletePVC = "DeletePvc"
 )
-
+// UnmarshalTasks with json
 func UnmarshalTasks(data []byte) ([]Task, error) {
 	var r []Task
 	err := json.Unmarshal(data, &r)
 	return r, err
 }
-
+// Marshal tasks
 func (r *Tasks) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
