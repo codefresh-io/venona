@@ -69,7 +69,7 @@ func (a Agent) fetchTasks() {
 				a.Logger.Error(err.Error())
 				continue
 			}
-			a.Logger.Debug("Recieved new tasks", "len", len(tasks))
+			a.Logger.Debug("Received new tasks", "len", len(tasks))
 			creationTasks := []codefresh.Task{}
 			deletionTasks := []codefresh.Task{}
 			for _, t := range tasks {
