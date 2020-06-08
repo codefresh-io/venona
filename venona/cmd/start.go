@@ -94,9 +94,9 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	viper.BindEnv("codefreshToken", "CODEFRESH_TOKEN")
-	viper.BindEnv("codefreshHost", "CODEFRESH_HOST")
-	viper.BindEnv("agentID", "AGENT_ID")
+	dieOnError(viper.BindEnv("codefreshToken", "CODEFRESH_TOKEN"))
+	dieOnError(viper.BindEnv("codefreshHost", "CODEFRESH_HOST"))
+	dieOnError(viper.BindEnv("agentID", "AGENT_ID"))
 
 	viper.SetDefault("codefreshHost", defaultCodefreshHost)
 
@@ -108,8 +108,8 @@ func init() {
 	startCmd.PersistentFlags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval to pull new tasks from Codefresh")
 	startCmd.PersistentFlags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval to report status back to Codefresh")
 
-	startCmd.MarkFlagRequired("codefresh-token")
-	startCmd.MarkFlagRequired("agent-id")
+	dieOnError(startCmd.MarkFlagRequired("codefresh-token"))
+	dieOnError(startCmd.MarkFlagRequired("agent-id"))
 
 	rootCmd.AddCommand(startCmd)
 }
