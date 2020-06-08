@@ -12,3 +12,8 @@ test-fmt:
 .PHONY: fmt
 fmt:
 	go fmt ./...
+
+.PHONY: mock
+# example: make mock PKG=./pkg/runtime NAME=Runtime
+mock:
+	@sh ./scripts/mock.sh $(PKG) $(NAME)
