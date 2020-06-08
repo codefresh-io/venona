@@ -45,7 +45,8 @@ steps:
     title: Build Docker Image
     stage: Build
     tag: ${{CF_BRANCH_TAG_NORMALIZED}}
-    dockerfile: venona/Dockerfile
+    dockerfile: Dockerfile
+    working_directory: ${{main_clone}}/venona
     image_name: codefresh/venona
     when:
       steps:
