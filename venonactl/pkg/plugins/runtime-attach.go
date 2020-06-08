@@ -4,10 +4,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	"gopkg.in/yaml.v2"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -29,7 +31,7 @@ type venonaConf struct {
 
 const (
 	runtimeAttachFilesPattern = ".*.runtime-attach.yaml"
-	runtimeSecretName         = "venonaconf"
+	runtimeSecretName         = "runnerconf"
 )
 
 func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
@@ -112,7 +114,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	// read current venona conf
 	currentVenonaConf, err := readCurrentVenonaConf(opt.AgentKubeBuilder, opt.ClusterNamespace)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
+		u.logger.Error(fmt.Sprintf("Cannot read runnerconf: %v ", err))
 		return nil, err
 	}
 
@@ -133,13 +135,13 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		// marshel prior persist
 		d, err := yaml.Marshal(runtime)
 		if err != nil {
-			u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
+			u.logger.Error(fmt.Sprintf("Cannot marshal merged runnerconf: %v ", err))
 			return nil, err
 		}
 
 		runtimes[name] = base64.StdEncoding.EncodeToString([]byte(d))
 	}
-	v["venonaConf"] = runtimes
+	v["runnerConf"] = runtimes
 
 	cs.CoreV1().Secrets(opt.ClusterNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
@@ -171,6 +173,24 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 			return nil, err
 		}
 
+		ticker := time.NewTicker(5 * time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				u.logger.Debug("Validating old runner pod termination")
+				_, err = cs.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+				if err != nil {
+					if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
+						if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
+							return v, nil
+						}
+					}
+				}
+			case <-time.After(60 * time.Second):
+				u.logger.Error("Failed to validate old venona pod termination")
+				return v, fmt.Errorf("Failed to validate old venona pod termination")
+			}
+		}
 	}
 
 	return v, nil
@@ -203,12 +223,12 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return err
 	}
-	// Delete the entry from venonaconf - if this is the only , delete the secret
+	// Delete the entry from runnerconf - if this is the only , delete the secret
 
 	// read current venona conf
 	currentVenonaConf, err := readCurrentVenonaConf(deleteOpt.AgentKubeBuilder, deleteOpt.AgentNamespace)
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot read venonaconf: %v ", err))
+		u.logger.Error(fmt.Sprintf("Cannot read runnerconf: %v ", err))
 		return err
 	}
 	name := strings.ReplaceAll(deleteOpt.RuntimeEnvironment, "/", ".")
@@ -226,7 +246,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 			// marshel prior persist
 			d, err := yaml.Marshal(runtime)
 			if err != nil {
-				u.logger.Error(fmt.Sprintf("Cannot marshal merged venonaconf: %v ", err))
+				u.logger.Error(fmt.Sprintf("Cannot marshal merged runnerconf: %v ", err))
 				return err
 			}
 
@@ -234,7 +254,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		}
 
 		shouldDelete = false
-		v["venonaConf"] = runtimes
+		v["runnerConf"] = runtimes
 
 		cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
@@ -269,4 +289,16 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 
 func (u *runtimeAttachPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
+}
+
+func (u *runtimeAttachPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}
+
+func (u *runtimeAttachPlugin) Test(opt TestOptions) error {
+	return nil
+}
+
+func (u *runtimeAttachPlugin) Name() string {
+	return RuntimeAttachType
 }

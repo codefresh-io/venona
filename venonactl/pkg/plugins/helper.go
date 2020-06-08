@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	// import all cloud providers auth clients
+	authv1 "k8s.io/api/authorization/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -33,9 +34,11 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 
+	"github.com/Masterminds/semver"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
@@ -49,8 +52,18 @@ type (
 		cpu                  string
 		localDiskMinimumSize string
 		momorySize           string
+		rbac                 []rbacValidation
+	}
+
+	rbacValidation struct {
+		Namespace string
+		Resource  string
+		Verbs     []string
+		Group     string
 	}
 )
+
+var requiredK8sVersion, _ = semver.NewConstraint(">= 1.10.0")
 
 func unescape(s string) template.HTML {
 	return template.HTML(s)
@@ -149,8 +162,48 @@ func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string, l
 	return KubeObjectsFromTemplates(templatesMap, values, pattern, logger)
 }
 
-func ensureClusterRequirements(client *kubernetes.Clientset, req validationRequest) (validationResult, error) {
-	result := validationResult{}
+func ensureClusterRequirements(client *kubernetes.Clientset, req validationRequest, logger logger.Logger) (validationResult, error) {
+	result := validationResult{true, nil}
+	specs := []*authv1.SelfSubjectAccessReview{}
+	for _, rbac := range req.rbac {
+		for _, verb := range rbac.Verbs {
+			attr := &authv1.ResourceAttributes{
+				Resource: rbac.Resource,
+				Verb:     verb,
+				Group:    rbac.Group,
+			}
+			if rbac.Namespace != "" {
+				attr.Namespace = rbac.Namespace
+			}
+			specs = append(specs, &authv1.SelfSubjectAccessReview{
+				Spec: authv1.SelfSubjectAccessReviewSpec{
+					ResourceAttributes: attr,
+				},
+			})
+		}
+	}
+	rbacres := testRBAC(client, specs)
+	if len(rbacres) > 0 {
+		result.isValid = false
+		for _, res := range rbacres {
+			result.message = append(result.message, res)
+		}
+		return result, nil
+	}
+
+	v, err := client.ServerVersion()
+	if err != nil {
+		// should not fail if can't get version
+		logger.Warn("Failed to validate kubernetes version", "cause", err)
+	} else if res, err := testKubernetesVersion(v); !res {
+		if err != nil {
+			logger.Warn("Failed to validate kubernetes version", "cause", err)
+		} else {
+			result.isValid = false
+			result.message = append(result.message, fmt.Sprintf("Cluster does not meet the version requirements, minimum supported version is: '1.10.0' found version: '%v'", v))
+		}
+	}
+
 	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
 	if err != nil {
 		return result, err
@@ -159,7 +212,6 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 		return result, errors.New("Nodes not found")
 	}
 
-	result.isValid = true
 	if len(nodes.Items) == 0 {
 		result.message = append(result.message, "No nodes in cluster")
 		result.isValid = false
@@ -179,6 +231,34 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 		return result, nil
 	}
 	return result, nil
+}
+
+func handleValidationResult(res validationResult, logger logger.Logger) error {
+	if !res.isValid {
+		for _, m := range res.message {
+			logger.Error(m)
+		}
+		return errors.New("Failed to run acceptance test on cluster")
+	}
+
+	for _, m := range res.message {
+		logger.Warn(m)
+	}
+	return nil
+}
+
+func testKubernetesVersion(version *version.Info) (bool, error) {
+	v, err := semver.NewVersion(version.String())
+	if err != nil {
+		return false, err
+	}
+	// extract only major, minor and patch
+	verStr := fmt.Sprintf("%v.%v.%v", v.Major(), v.Minor(), v.Patch())
+	v, err = semver.NewVersion(verStr)
+	if err != nil {
+		return false, err
+	}
+	return requiredK8sVersion.Check(v), nil
 }
 
 func testNode(n v1.Node, req validationRequest) []string {
@@ -212,4 +292,28 @@ func testNode(n v1.Node, req validationRequest) []string {
 	}
 
 	return result
+}
+
+func testRBAC(client *kubernetes.Clientset, specs []*authv1.SelfSubjectAccessReview) []string {
+	res := []string{}
+	for _, sar := range specs {
+		resp, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(sar)
+		if err != nil {
+			res = append(res, err.Error())
+			continue
+		}
+		if !resp.Status.Allowed {
+			verb := sar.Spec.ResourceAttributes.Verb
+			namespace := sar.Spec.ResourceAttributes.Namespace
+			resource := sar.Spec.ResourceAttributes.Resource
+			group := sar.Spec.ResourceAttributes.Group
+			msg := strings.Builder{}
+			msg.WriteString(fmt.Sprintf("Insufficient permission, %s %s/%s is not allowed", verb, group, resource))
+			if namespace != "" {
+				msg.WriteString(fmt.Sprintf(" on namespace %s", namespace))
+			}
+			res = append(res, msg.String())
+		}
+	}
+	return res
 }

@@ -24,7 +24,7 @@ var uninstallAgentCmd = &cobra.Command{
 	Short: "Uninstall Codefresh's agent",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		lgr := createLogger("UninstallAgent", verbose)
+		lgr := createLogger("UninstallAgent", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		

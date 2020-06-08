@@ -4,8 +4,9 @@ go 1.13
 
 require (
 	github.com/Azure/go-autorest/autorest v0.10.0 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
+	github.com/briandowns/spinner v1.11.1
 	github.com/codefresh-io/go-sdk v0.18.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gophercloud/gophercloud v0.8.0 // indirect

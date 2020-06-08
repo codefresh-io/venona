@@ -18,7 +18,6 @@ package plugins
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/codefresh"
@@ -84,27 +83,6 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		return nil, err
 	}
 
-	if !opt.SkipAcceptanceTest {
-		u.logger.Debug("Running acceptance tests")
-		res, err := ensureClusterRequirements(cs, validationRequest{
-			cpu:        "1",
-			momorySize: "1Gi",
-		})
-		if err != nil {
-			return nil, err
-		}
-		if !res.isValid {
-			for _, m := range res.message {
-				u.logger.Error(m)
-			}
-			return nil, errors.New("Failed to run acceptance test on cluster")
-		}
-
-		for _, m := range res.message {
-			u.logger.Warn(m)
-		}
-	}
-
 	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
 	err = install(&installOptions{
 		logger:         u.logger,
@@ -161,4 +139,62 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 
 func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
+}
+
+func (u *runtimeEnvironmentPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}
+
+func (u *runtimeEnvironmentPlugin) Test(opt TestOptions) error {
+	validationRequest := validationRequest{
+		rbac: []rbacValidation{
+			{
+				Resource:  "ServiceAccount",
+				Verbs:     []string{"create", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "ConfigMap",
+				Verbs:     []string{"create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "Service",
+				Verbs:     []string{"create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "Role",
+				Group:     "rbac.authorization.k8s.io",
+				Verbs:     []string{"create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "RoleBinding",
+				Group:     "rbac.authorization.k8s.io",
+				Verbs:     []string{"create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "persistentvolumeclaims",
+				Namespace: opt.ClusterNamespace,
+				Verbs:     []string{"create", "update", "delete"},
+			},
+			{
+				Resource:  "pods",
+				Namespace: opt.ClusterNamespace,
+				Verbs:     []string{"create", "update", "delete"},
+			},
+		},
+	}
+	return test(testOptions{
+		logger:            u.logger,
+		kubeBuilder:       opt.KubeBuilder,
+		namespace:         opt.ClusterNamespace,
+		validationRequest: validationRequest,
+	})
+}
+
+func (u *runtimeEnvironmentPlugin) Name() string {
+	return RuntimeEnvironmentPluginType
 }

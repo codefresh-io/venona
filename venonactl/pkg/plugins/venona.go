@@ -18,20 +18,29 @@ package plugins
 
 import (
 	"encoding/base64"
-	"errors"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
+	v1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // venonaPlugin installs assets on Kubernetes Dind runtimectl Env
 type venonaPlugin struct {
 	logger logger.Logger
+}
+
+type migrationData struct {
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Tolerations  []v1.Toleration   `json:"tolerations,omitempty"`
+	Env          []v1.EnvVar
 }
 
 const (
@@ -72,26 +81,6 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
-	}
-	if !opt.SkipAcceptanceTest {
-		u.logger.Debug("Running acceptance tests")
-		res, err := ensureClusterRequirements(cs, validationRequest{
-			cpu:        "500m",
-			momorySize: "1Gi",
-		})
-		if err != nil {
-			return nil, err
-		}
-		if !res.isValid {
-			for _, m := range res.message {
-				u.logger.Error(m)
-			}
-			return nil, errors.New("Failed to run acceptance test on cluster")
-		}
-
-		for _, m := range res.message {
-			u.logger.Warn(m)
-		}
 	}
 
 	return v, install(&installOptions{
@@ -224,4 +213,114 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	}
 
 	return v, nil
+}
+
+func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
+	var deletePriorUpgrade = map[string]interface{}{
+		"deployment.venona.yaml": nil,
+		"secret.venona.yaml":     nil,
+	}
+
+	kubeClientset, err := opt.KubeBuilder.BuildClient()
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return err
+	}
+	v["AppName"] = "venona" // use old app name for migration
+	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
+	if err != nil {
+		return err
+	}
+	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
+		return err
+	}
+	if len(list.Items) == 0 {
+		u.logger.Debug("Runner pod not found , existing migration")
+		return nil
+	}
+	migrationData := migrationData{
+		Tolerations:  list.Items[0].Spec.Tolerations,
+		NodeSelector: list.Items[0].Spec.NodeSelector,
+		Env:          list.Items[0].Spec.Containers[0].Env,
+	}
+	var jsonData []byte
+	jsonData, err = json.Marshal(migrationData)
+	err = ioutil.WriteFile("migration.json", jsonData, 0644)
+	if err != nil {
+		u.logger.Error("Cannot write migration json")
+	}
+
+	podName := list.Items[0].ObjectMeta.Name
+	for fileName := range kubeObjects {
+		if _, ok := deletePriorUpgrade[fileName]; ok {
+			u.logger.Debug(fmt.Sprintf("Deleting previous deplopyment of %s", fileName))
+			delOpt := &deleteOptions{
+				logger:         u.logger,
+				templates:      templates.TemplatesMap(),
+				templateValues: v,
+				kubeClientSet:  kubeClientset,
+				namespace:      opt.ClusterNamespace,
+				matchPattern:   fileName,
+				operatorType:   VenonaPluginType,
+			}
+			err := uninstall(delOpt)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			u.logger.Debug("Validating old runner pod termination")
+			_, err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+			if err != nil {
+				if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
+					if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
+						return nil
+					}
+				}
+			}
+		case <-time.After(60 * time.Second):
+			u.logger.Error("Failed to validate old venona pod termination")
+			return fmt.Errorf("Failed to validate old venona pod termination")
+		}
+	}
+}
+
+func (u *venonaPlugin) Test(opt TestOptions) error {
+	validationRequest := validationRequest{
+		cpu:        "500m",
+		momorySize: "1Gi",
+		rbac: []rbacValidation{
+			{
+				Resource:  "deployment",
+				Verbs:     []string{"create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "secret",
+				Verbs:     []string{"create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource: "ClusterRoleBinding",
+				Group:    "rbac.authorization.k8s.io",
+				Verbs:    []string{"create", "update", "delete"},
+			},
+		},
+	}
+	return test(testOptions{
+		logger:            u.logger,
+		kubeBuilder:       opt.KubeBuilder,
+		namespace:         opt.ClusterNamespace,
+		validationRequest: validationRequest,
+	})
+}
+
+func (u *venonaPlugin) Name() string {
+	return VenonaPluginType
 }

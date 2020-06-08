@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"strings"
+	"time"
 
 	"encoding/json"
 
+	"github.com/briandowns/spinner"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
@@ -32,7 +33,8 @@ var (
 	commit  = "none"
 	date    = "unknown"
 
-	verbose bool
+	verbose      bool
+	logFormatter string
 
 	configPath string
 	cfAPIHost  string
@@ -126,7 +128,7 @@ func isUsingDefaultStorageClass(sc string) bool {
 
 func dieOnError(err error) {
 	if err != nil {
-		fmt.Printf("Error: %s", err.Error())
+		fmt.Printf("Error: %s\n", err.Error())
 		os.Exit(1)
 	}
 }
@@ -152,27 +154,22 @@ func getKubeClientBuilder(context string, namespace string, path string, inClust
 	})
 }
 
-func createLogger(command string, verbose bool) logger.Logger {
+func createLogger(command string, verbose bool, logFormatter string) logger.Logger {
 	logFile := "venonalog.json"
 	os.Remove(logFile)
 	return logger.New(&logger.Options{
-		Command:   command,
-		Verbose:   verbose,
-		LogToFile: logFile,
+		Command:      command,
+		Verbose:      verbose,
+		LogToFile:    logFile,
+		LogFormatter: logFormatter,
 	})
 }
 
-type nodeSelector map[string]string
-
-func parseNodeSelector(s string) (nodeSelector, error) {
-	if s == "" {
-		return nodeSelector{}, nil
-	}
-	v := strings.Split(s, "=")
-	if len(v) != 2 {
-		return nil, errors.New("node selector must be in form \"key=value\"")
-	}
-	return nodeSelector{v[0]: v[1]}, nil
+func createSpinner(prefix, suffix string) *spinner.Spinner {
+	s := spinner.New([]string{"   ", ".  ", ".. ", "..."}, 520*time.Millisecond)
+	s.Suffix = suffix
+	s.Prefix = prefix
+	return s
 }
 
 func loadTolerationsFromFile(filename string) string {
@@ -228,19 +225,10 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 	}
 }
 
-// String returns a k8s compliant string representation of the nodeSelector. Only a single value is supported.
-func (ns nodeSelector) String() string {
-	var s string
-	for k, v := range ns {
-		s = fmt.Sprintf("%s: %q", k, v)
-	}
-	return s
-}
-
-// Parsing helpers --set-value , --set-file 
+// Parsing helpers --set-value , --set-file
 // by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 
-// parses --set-value options 
+// parses --set-value options
 func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
 	base := map[string]interface{}{}
 	for _, value := range setValuesOpts {
@@ -251,7 +239,7 @@ func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
 	return base, nil
 }
 
-// parses --set-file options 
+// parses --set-file options
 func parseSetFiles(setFilesOpts []string) (map[string]interface{}, error) {
 	base := map[string]interface{}{}
 	for _, value := range setFilesOpts {

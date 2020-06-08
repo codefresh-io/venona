@@ -141,3 +141,15 @@ func (u *enginePlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
 	return v, nil
 }
+
+func (u *enginePlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}
+
+func (u *enginePlugin) Test(opt TestOptions) error {
+	return nil
+}
+
+func (u *enginePlugin) Name() string {
+	return EnginePluginType
+}

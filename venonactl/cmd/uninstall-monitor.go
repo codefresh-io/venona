@@ -21,7 +21,7 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 	Short: "Uninstall Codefresh's monitor",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		lgr := createLogger("UninstallMonitor", verbose)
+		lgr := createLogger("UninstallMonitor", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, uninstallMonitorAgentCmdOptions.kube.context, uninstallMonitorAgentCmdOptions.kube.namespace, false)

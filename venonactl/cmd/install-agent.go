@@ -37,11 +37,10 @@ var installAgentCmdOptions struct {
 	venona struct {
 		version string
 	}
-	agentToken                string
-	agentID                   string
-	kubernetesRunnerType      bool
-	tolerations               string
-	skipClusterAcceptanceTest bool
+	agentToken           string
+	agentID              string
+	kubernetesRunnerType bool
+	tolerations          string
 }
 
 var installAgentCmd = &cobra.Command{
@@ -49,7 +48,7 @@ var installAgentCmd = &cobra.Command{
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		lgr := createLogger("Install-agent", verbose)
+		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithAgentAPI(lgr, installAgentCmdOptions.agentToken, installAgentCmdOptions.agentID)
 		extendStoreWithKubeClient(lgr)
@@ -59,8 +58,7 @@ var installAgentCmd = &cobra.Command{
 			cfAPIHost = "https://g.codefresh.io"
 		}
 		builderInstallOpt := &plugins.InstallOptions{
-			CodefreshHost:      cfAPIHost,
-			SkipAcceptanceTest: installAgentCmdOptions.skipClusterAcceptanceTest,
+			CodefreshHost: cfAPIHost,
 		}
 
 		if installAgentCmdOptions.agentToken == "" {
@@ -94,13 +92,10 @@ var installAgentCmd = &cobra.Command{
 			version := installAgentCmdOptions.venona.version
 			lgr.Info("Version set manually", "version", version)
 			s.Image.Tag = version
+			s.Version.Current.Version = version
 		}
 
-		kns, err := parseNodeSelector(installAgentCmdOptions.kube.nodeSelector)
-		if err != nil {
-			dieOnError(err)
-		}
-		s.KubernetesAPI.NodeSelector = kns.String()
+		s.KubernetesAPI.NodeSelector = installAgentCmdOptions.kube.nodeSelector
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
@@ -109,6 +104,7 @@ var installAgentCmd = &cobra.Command{
 		builder.Add(plugins.VenonaPluginType)
 
 		values := s.BuildValues()
+		var err error
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -135,7 +131,6 @@ func init() {
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
-	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.skipClusterAcceptanceTest, "skip-cluster-test", false, "Do not run cluster acceptance test")
 }
 
 func fillCodefreshAPI(logger logger.Logger) {

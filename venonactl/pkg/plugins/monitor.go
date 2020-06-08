@@ -18,6 +18,7 @@ package plugins
 
 import (
 	"fmt"
+
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 )
@@ -80,4 +81,46 @@ func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 
 func (u *monitorAgentPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	return nil, nil
+}
+func (u *monitorAgentPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}
+
+func (u *monitorAgentPlugin) Test(opt TestOptions) error {
+	validationRequest := validationRequest{
+		rbac: []rbacValidation{
+			{
+				Group:     "apps",
+				Resource:  "*",
+				Verbs:     []string{"get", "list", "watch"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "*",
+				Verbs:     []string{"get", "list", "watch", "create", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Group:     "extensions",
+				Resource:  "*",
+				Verbs:     []string{"get", "list", "watch"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "pods",
+				Verbs:     []string{"deletecollection"},
+				Namespace: opt.ClusterNamespace,
+			},
+		},
+	}
+	return test(testOptions{
+		logger:            u.logger,
+		kubeBuilder:       opt.KubeBuilder,
+		namespace:         opt.ClusterNamespace,
+		validationRequest: validationRequest,
+	})
+}
+
+func (u *monitorAgentPlugin) Name() string {
+	return MonitorAgentPluginType
 }

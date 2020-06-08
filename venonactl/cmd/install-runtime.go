@@ -34,13 +34,12 @@ var installRuntimeCmdOptions struct {
 		context      string
 		nodeSelector string
 	}
-	storageClass              string
-	runtimeEnvironmentName    string
-	kubernetesRunnerType      bool
-	tolerations               string
-	templateValues            []string
-	templateFileValues        []string
-	skipClusterAcceptanceTest bool
+	storageClass           string
+	runtimeEnvironmentName string
+	kubernetesRunnerType   bool
+	tolerations            string
+	templateValues         []string
+	templateFileValues     []string
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -49,7 +48,7 @@ var installRuntimeCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		s := store.GetStore()
-		lgr := createLogger("Install-runtime", verbose)
+		lgr := createLogger("Install-runtime", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithAgentAPI(lgr, installRuntimeCmdOptions.codefreshToken, "")
 		extendStoreWithKubeClient(lgr)
@@ -82,11 +81,7 @@ var installRuntimeCmd = &cobra.Command{
 			s.KubernetesAPI.Tolerations = tolerations
 		}
 
-		kns, err := parseNodeSelector(installRuntimeCmdOptions.kube.nodeSelector)
-		if err != nil {
-			dieOnError(err)
-		}
-		s.KubernetesAPI.NodeSelector = kns.String()
+		s.KubernetesAPI.NodeSelector = installRuntimeCmdOptions.kube.nodeSelector
 
 		builder := plugins.NewBuilder(lgr)
 		isDefault := isUsingDefaultStorageClass(installRuntimeCmdOptions.storageClass)
@@ -100,7 +95,6 @@ var installRuntimeCmd = &cobra.Command{
 			CodefreshToken:        installRuntimeCmdOptions.codefreshToken,
 			RuntimeEnvironment:    installRuntimeCmdOptions.runtimeEnvironmentName,
 			ClusterNamespace:      installRuntimeCmdOptions.kube.namespace,
-			SkipAcceptanceTest:    installRuntimeCmdOptions.skipClusterAcceptanceTest,
 		}
 
 		if installRuntimeCmdOptions.kubernetesRunnerType {
@@ -131,6 +125,7 @@ var installRuntimeCmd = &cobra.Command{
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		values := s.BuildValues()
 
+		var err error
 		if len(installRuntimeCmdOptions.templateValues) > 0 {
 			setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
 			if err != nil {
@@ -178,6 +173,4 @@ func init() {
 
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
-	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.skipClusterAcceptanceTest, "skip-cluster-test", false, "Do not run cluster acceptance test")
-
 }

@@ -29,7 +29,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print Venona version",
 	Run: func(cmd *cobra.Command, args []string) {
 		s := store.GetStore()
-		lgr := createLogger("Version", verbose)
+		lgr := createLogger("Version", verbose, logFormatter)
 		buildBasicStore(lgr)
 		fmt.Printf("Date: %s\n", s.Version.Current.Date)
 		fmt.Printf("Commit: %s\n", s.Version.Current.Commit)
@@ -39,4 +39,5 @@ var versionCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
+
 }

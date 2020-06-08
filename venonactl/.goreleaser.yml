@@ -25,6 +25,9 @@ archives:
     386: i386
     amd64: x86_64
   name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  format_overrides:
+  - goos: windows
+    format: zip
 changelog:
   sort: asc
   filters:

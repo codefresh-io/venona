@@ -108,3 +108,84 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 	return v, nil
 
 }
+func (u *volumeProvisionerPlugin) Migrate(*MigrateOptions, Values) error {
+	return fmt.Errorf("not supported")
+}
+
+func (u *volumeProvisionerPlugin) Test(opt TestOptions) error {
+	validationRequest := validationRequest{
+		rbac: []rbacValidation{
+			{
+				Resource:  "persistentvolumes",
+				Verbs:     []string{"get", "list", "watch", "create", "delete", "patch"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource: "persistentvolumeclaims",
+				Verbs:    []string{"get", "list", "watch", "update"},
+			},
+			{
+				Resource: "storageclasses",
+				Group:    "storage.k8s.io",
+				Verbs:    []string{"get", "list", "watch"},
+			},
+			{
+				Resource:  "events",
+				Group:     "",
+				Verbs:     []string{"list", "watch", "create", "update", "patch"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "secrets",
+				Group:     "",
+				Verbs:     []string{"get", "list"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource: "nodes",
+				Group:    "",
+				Verbs:    []string{"get", "list", "watch"},
+			},
+			{
+				Resource:  "pods",
+				Group:     "",
+				Verbs:     []string{"get", "list", "watch", "create", "delete", "patch"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "endpoints",
+				Group:     "",
+				Verbs:     []string{"get", "list", "watch", "create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "DaemonSet",
+				Group:     "",
+				Verbs:     []string{"get", "create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "CronJob",
+				Group:     "batch",
+				Verbs:     []string{"get", "create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+			{
+				Resource:  "ServiceAccount",
+				Group:     "",
+				Verbs:     []string{"get", "create", "update", "delete"},
+				Namespace: opt.ClusterNamespace,
+			},
+		},
+	}
+	return test(testOptions{
+		logger:            u.logger,
+		kubeBuilder:       opt.KubeBuilder,
+		namespace:         opt.ClusterNamespace,
+		validationRequest: validationRequest,
+	})
+}
+
+func (u *volumeProvisionerPlugin) Name() string {
+	return VolumeProvisionerPluginType
+}

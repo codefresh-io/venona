@@ -27,13 +27,13 @@ import (
 var installMonitorAgentCmdOptions struct {
 	kube struct {
 		namespace    string
-		inCluster    bool
 		context      string
 		nodeSelector string
 	}
 	clusterId      string
 	helm3          bool
 	codefreshToken string
+	codefreshHost  string
 }
 
 // installK8sAgentCmd represents the install command
@@ -44,10 +44,10 @@ var installMonitorAgentCmd = &cobra.Command{
 
 		s := store.GetStore()
 
-		lgr := createLogger("Install-monitor-agent", verbose)
+		lgr := createLogger("Install-monitor-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
-		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, installMonitorAgentCmdOptions.kube.inCluster)
+		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, false)
 
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.MonitorAgentPluginType)
@@ -65,8 +65,8 @@ var installMonitorAgentCmd = &cobra.Command{
 		s.ClusterId = installMonitorAgentCmdOptions.clusterId
 		s.Helm3 = installMonitorAgentCmdOptions.helm3
 
-		if cfAPIHost == "" {
-			cfAPIHost = "https://g.codefresh.io"
+		if installMonitorAgentCmdOptions.codefreshHost == "" {
+			installMonitorAgentCmdOptions.codefreshHost = "https://g.codefresh.io"
 		}
 
 		if installMonitorAgentCmdOptions.codefreshToken == "" {
@@ -74,7 +74,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		}
 
 		s.CodefreshAPI = &store.CodefreshAPI{
-			Host:  cfAPIHost,
+			Host:  installMonitorAgentCmdOptions.codefreshHost,
 			Token: installMonitorAgentCmdOptions.codefreshToken,
 		}
 
@@ -104,7 +104,7 @@ func init() {
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.clusterId, "clusterId", "", "Cluster Id")
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshToken, "codefreshToken", "", "Codefresh token")
 
-	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if monitor is been installed from inside a cluster")
+	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshHost, "codefreshHost", "", "Override codefresh host if you use your own codefresh installation")
 
 	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.helm3, "helm3", false, "Set flag if cluster use helm3")
 
