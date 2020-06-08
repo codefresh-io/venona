@@ -1,13 +1,12 @@
 version: '1.0'
 mode: parallel
 stages:
-- Prepare
 - Test
 - Build
 steps:
 
   main_clone:
-    stage: Prepare
+    stage: Test
     title: Clone repository
     type: git-clone
     repo: https://github.com/codefresh-io/venona
