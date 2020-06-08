@@ -83,12 +83,15 @@ func (a Agent) fetchTasks() {
 				}
 			}
 
-			candidates := []workflowCandidate{}
-			candidates = append(candidates, groupTasks(creationTasks)...)
-			candidates = append(candidates, groupTasks(deletionTasks)...)
-
-			for _, c := range candidates {
-				if err := a.Runtimes[c.runtime].StartWorkflow(c.tasks); err != nil {
+			for _, tasks := range groupTasks(creationTasks) {
+				reName := tasks[0].Metadata.ReName
+				if err := a.Runtimes[reName].StartWorkflow(tasks); err != nil {
+					a.Logger.Error(err.Error())
+				}
+			}
+			for _, tasks := range groupTasks(deletionTasks) {
+				reName := tasks[0].Metadata.ReName
+				if err := a.Runtimes[reName].TerminateWorkflow(tasks); err != nil {
 					a.Logger.Error(err.Error())
 				}
 			}
@@ -112,8 +115,8 @@ func (a Agent) reportStatus() {
 	}
 }
 
-func groupTasks(tasks []codefresh.Task) []workflowCandidate {
-	candidates := []workflowCandidate{}
+func groupTasks(tasks []codefresh.Task) map[string][]codefresh.Task {
+	candidates := map[string][]codefresh.Task {}
 	for _, task := range tasks {
 		name := task.Metadata.Workflow
 		if name == "" {
@@ -121,13 +124,7 @@ func groupTasks(tasks []codefresh.Task) []workflowCandidate {
 			// Might heppen in older versions on Codefresh
 			name = "_"
 		}
-		for _, c := range candidates {
-			if c.runtime != name {
-				continue
-			}
-			c.tasks = append(c.tasks, task)
-			break
-		}
+		candidates[name] = append(candidates[name], task)
 	}
 	return candidates
 }
