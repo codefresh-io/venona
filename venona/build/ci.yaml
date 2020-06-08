@@ -39,6 +39,18 @@ steps:
       - name: main_clone
         on:
         - success     
+
+  license:
+    title: Check License
+    stage: Test
+    image: golang:1.14.4
+    commands:
+      - cd venona && make license
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success     
   
   build:
     type: build
