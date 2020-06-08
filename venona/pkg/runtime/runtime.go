@@ -31,17 +31,34 @@ type (
 		Kubernetes kubernetes.Kubernetes
 	}
 
-	runtime struct{}
+	runtime struct {
+		client kubernetes.Kubernetes
+	}
 )
 
 // New creates new Runtime client
 func New(opt Options) Runtime {
-	return &runtime{}
+	return &runtime{
+		client: opt.Kubernetes,
+	}
 }
 
 func (r runtime) StartWorkflow(tasks []codefresh.Task) error {
+	for _, task := range tasks {
+		err := r.client.CreateResource(task.Spec)
+		if err != nil {
+			return err // TODO: Return already executed tasks in order to terminate them
+		}
+
+	}
 	return nil
 }
 func (r runtime) TerminateWorkflow(tasks []codefresh.Task) error {
+	for _, task := range tasks {
+		err := r.client.DeleteResource(task.Spec)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

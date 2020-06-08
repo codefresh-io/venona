@@ -26,8 +26,8 @@ var errNotValidType = errors.New("not a valid type")
 type (
 	// Kubernetes API client
 	Kubernetes interface {
-		CreateResource() error
-		DeleteResource() error
+		CreateResource(spec string) error
+		DeleteResource(spec string) error
 	}
 	// Options for Kubernetes
 	Options struct {
@@ -54,11 +54,11 @@ func New(opt Options) (Kubernetes, error) {
 	}, err
 }
 
-func (k kube) CreateResource() error {
+func (k kube) CreateResource(spec string) error {
 	return nil
 }
 
-func (k kube) DeleteResource() error {
+func (k kube) DeleteResource(spec string) error {
 	return nil
 }
 
