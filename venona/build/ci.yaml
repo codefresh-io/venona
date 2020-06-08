@@ -15,7 +15,7 @@ steps:
       username: github
       password: ${{secrets.hybrid.git}}
 
-  test:
+  test: &common
     title: Run Unit Tests
     stage: Test
     image: golang:1.14.4
@@ -28,28 +28,34 @@ steps:
         - success     
 
   gofmt:
-    title: Run GO-FMT
-    stage: Test
-    image: golang:1.14.4
+    <<: *common
+    title: Run go-fmt
     commands:
       - cd venona && make test-fmt
-    when:
-      steps:
-      - name: main_clone
-        on:
-        - success     
-
+  
   license:
+    <<: *common
     title: Check License
-    stage: Test
-    image: golang:1.14.4
     commands:
-      - cd venona && make license
-    when:
-      steps:
-      - name: main_clone
-        on:
-        - success     
+      - cd venona && make license    
+
+  spellcheck:
+    <<: *common
+    title: Spell Check
+    commands:
+      - cd venona && make spellcheck
+
+  lint:
+    <<: *common
+    title: Run Go Lint
+    commands:
+      - cd venona && make lint
+
+  gocyclo:
+    <<: *common
+    title: Run Gocyclo
+    commands:
+      - cd venona && make gocyclo
   
   build:
     type: build

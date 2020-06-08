@@ -15,4 +15,5 @@ do
         exitcode=1
     fi
 done
+
 exit $exitcode
