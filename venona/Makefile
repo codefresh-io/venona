@@ -30,6 +30,11 @@ lint:
 	@go get -u golang.org/x/lint/golint
 	@golint -set_exit_status ./...
 
+.PHONY: security-check
+lint:
+	@go get github.com/securego/gosec/cmd/gosec
+	@gosec ./...
+
 ## License check all the golang files to have the license
 .PHONY: license
 license:
