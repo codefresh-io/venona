@@ -17,3 +17,7 @@ fmt:
 # example: make mock PKG=./pkg/runtime NAME=Runtime
 mock:
 	@sh ./scripts/mock.sh $(PKG) $(NAME)
+
+.PHONY: license
+license:
+	@addlicense -check -f License **/**/*.go
