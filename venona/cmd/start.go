@@ -61,7 +61,7 @@ var startCmd = &cobra.Command{
 				Cert:  config.Cert,
 			})
 			if err != nil {
-				log.Error("Failed to load kubernetes with error", "error", err.Error())
+				log.Error("Failed to load kubernetes", "error", err.Error())
 				continue
 			}
 			re := runtime.New(runtime.Options{
