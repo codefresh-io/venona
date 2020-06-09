@@ -17,6 +17,7 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
+	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -30,7 +31,7 @@ type (
 	// Kubernetes API client
 	Kubernetes interface {
 		CreateResource(spec interface{}) error
-		DeleteResource(spec interface{}) error
+		DeleteResource(opt DeleteOptions) error
 	}
 	// Options for Kubernetes
 	Options struct {
@@ -38,6 +39,12 @@ type (
 		Cert  string
 		Token string
 		Host  string
+	}
+
+	DeleteOptions struct {
+		Name      string
+		Namespace string
+		Kind      string
 	}
 
 	kube struct {
@@ -89,22 +96,15 @@ func (k kube) CreateResource(spec interface{}) error {
 	return err
 }
 
-func (k kube) DeleteResource(spec interface{}) error {
-	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
-	obj, _, err := kubeDecode([]byte(spec.(string)), nil, nil)
-	if err != nil {
-		return err
-	}
+func (k kube) DeleteResource(opt DeleteOptions) error {
 
-	var namespace string
-	switch objT := obj.(type) {
-	case *v1.PersistentVolumeClaim:
-		namespace = objT.ObjectMeta.Namespace
-		err = k.client.CoreV1().PersistentVolumeClaims(namespace).Delete(objT.Name, &metav1.DeleteOptions{})
+	var err error
+	switch opt.Kind {
+	case codefresh.TypeDeletePVC:
+		err = k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
 
-	case *v1.Pod:
-		namespace = objT.ObjectMeta.Namespace
-		err = k.client.CoreV1().Pods(namespace).Delete(objT.Name, &metav1.DeleteOptions{})
+	case codefresh.TypeDeletePod:
+		err = k.client.CoreV1().Pods(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
 	}
 	return err
 }

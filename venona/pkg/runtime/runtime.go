@@ -15,6 +15,8 @@
 package runtime
 
 import (
+	"encoding/json"
+
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 )
@@ -55,7 +57,17 @@ func (r runtime) StartWorkflow(tasks []codefresh.Task) error {
 }
 func (r runtime) TerminateWorkflow(tasks []codefresh.Task) error {
 	for _, task := range tasks {
-		err := r.client.DeleteResource(task.Spec)
+		opt := kubernetes.DeleteOptions{}
+		bytes, err := json.Marshal(task.Spec)
+		if err != nil {
+			return err
+		}
+		opt.Kind = task.Type
+		err = json.Unmarshal(bytes, &opt)
+		if err != nil {
+			return err
+		}
+		err = r.client.DeleteResource(opt)
 		if err != nil {
 			return err
 		}
