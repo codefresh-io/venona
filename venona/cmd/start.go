@@ -107,8 +107,8 @@ func init() {
 	startCmd.PersistentFlags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval to pull new tasks from Codefresh")
 	startCmd.PersistentFlags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval to report status back to Codefresh")
 
-	dieOnError(startCmd.MarkFlagRequired("codefresh-token"))
-	dieOnError(startCmd.MarkFlagRequired("agent-id"))
+	dieOnError(startCmd.MarkPersistentFlagRequired("codefresh-token"))
+	dieOnError(startCmd.MarkPersistentFlagRequired("agent-id"))
 
 	rootCmd.AddCommand(startCmd)
 }
