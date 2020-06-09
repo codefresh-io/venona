@@ -57,7 +57,6 @@ var startCmd = &cobra.Command{
 				Token: config.Token,
 				Type:  config.Type,
 				Host:  config.Host,
-				Name:  config.Name,
 				Cert:  config.Cert,
 			})
 			if err != nil {

@@ -35,7 +35,6 @@ type (
 		Cert  string
 		Token string
 		Host  string
-		Name  string
 	}
 
 	kube struct {
@@ -54,7 +53,7 @@ func New(opt Options) (Kubernetes, error) {
 	}, err
 }
 
-func (k kube) CreateResource(spec string) error {
+func (k kube) CreateResource(spec string) error {)
 	return nil
 }
 
