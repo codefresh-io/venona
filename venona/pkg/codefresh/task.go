@@ -42,7 +42,7 @@ type Tasks []Task
 // Task options
 type Task struct {
 	Type     string   `json:"type"`
-	Spec     string   `json:"spec"`
+	Spec     interface{}   `json:"spec"`
 	Metadata Metadata `json:"metadata"`
 }
 
