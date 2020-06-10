@@ -108,8 +108,11 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 	return v, nil
 
 }
-func (u *volumeProvisionerPlugin) Migrate(*MigrateOptions, Values) error {
-	return fmt.Errorf("not supported")
+func (u *volumeProvisionerPlugin) Migrate(opt *MigrateOptions, v Values) error {
+	return u.Delete(&DeleteOptions{
+		ClusterNamespace: opt.ClusterNamespace,
+		KubeBuilder: opt.KubeBuilder,
+	}, v)
 }
 
 func (u *volumeProvisionerPlugin) Test(opt TestOptions) error {

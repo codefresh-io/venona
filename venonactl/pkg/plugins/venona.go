@@ -226,7 +226,6 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return err
 	}
-	v["AppName"] = "venona" // use old app name for migration
 	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
 	if err != nil {
 		return err
