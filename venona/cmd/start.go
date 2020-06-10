@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/agent"
@@ -23,7 +24,9 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
+	"github.com/codefresh-io/go/venona/pkg/server"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -39,6 +42,7 @@ var startCmdOptions struct {
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
 	configDir                      string
+	serverPort                     string
 }
 
 var startCmd = &cobra.Command{
@@ -88,27 +92,45 @@ var startCmd = &cobra.Command{
 		}
 		dieOnError(agent.Start())
 
+		server := server.Server{
+			Agent:  agent,
+			Port:   fmt.Sprintf(":%s", startCmdOptions.serverPort),
+			Logger: log.New("module", "server"),
+		}
+		dieOnError(server.Start())
+
 	},
 	Long: "Start venona process",
 }
 
 func init() {
-	dieOnError(viper.BindEnv("codefreshToken", "CODEFRESH_TOKEN"))
-	dieOnError(viper.BindEnv("codefreshHost", "CODEFRESH_HOST"))
-	dieOnError(viper.BindEnv("agentID", "AGENT_ID"))
+	dieOnError(viper.BindEnv("codefresh-token", "CODEFRESH_TOKEN"))
+	dieOnError(viper.BindEnv("codefresh-host", "CODEFRESH_HOST"))
+	dieOnError(viper.BindEnv("agent-id", "AGENT_ID"))
+	dieOnError(viper.BindEnv("config-dir", "CONFIG_DIR"))
+	dieOnError(viper.BindEnv("port", "PORT"))
 
-	viper.SetDefault("codefreshHost", defaultCodefreshHost)
+	viper.SetDefault("codefresh-host", defaultCodefreshHost)
+	viper.SetDefault("port", "8080")
 
-	startCmd.PersistentFlags().BoolVar(&startCmdOptions.verbose, "verbose", true, "Show more logs")
-	startCmd.PersistentFlags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agentID"), "ID of the agent [$AGENT_ID]")
-	startCmd.PersistentFlags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("configDir"), "path to configuration folder")
-	startCmd.PersistentFlags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefreshToken"), "Codefresh API token [$CODEFRESH_TOKEN]")
-	startCmd.PersistentFlags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefreshHost"), "Codefresh API host default [$CODEFRESH_HOST]")
-	startCmd.PersistentFlags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval to pull new tasks from Codefresh")
-	startCmd.PersistentFlags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval to report status back to Codefresh")
+	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", true, "Show more logs")
+	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
+	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
+	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
+	startCmd.Flags().StringVar(&startCmdOptions.serverPort, "port", viper.GetString("port"), "The port to start the server [$PORT]")
+	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
+	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval to pull new tasks from Codefresh")
+	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval to report status back to Codefresh")
 
-	dieOnError(startCmd.MarkPersistentFlagRequired("codefresh-token"))
-	dieOnError(startCmd.MarkPersistentFlagRequired("agent-id"))
+	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
+		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
+			startCmd.Flags().Set(f.Name, viper.GetString(f.Name))
+		}
+	})
+
+	dieOnError(startCmd.MarkFlagRequired("codefresh-token"))
+	dieOnError(startCmd.MarkFlagRequired("agent-id"))
+	dieOnError(startCmd.MarkFlagRequired("port"))
 
 	rootCmd.AddCommand(startCmd)
 }

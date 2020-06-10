@@ -2,6 +2,10 @@
 build:
 	@sh ./scripts/build.sh
 
+.PHONY: run
+run: build
+	./venona start
+
 .PHONY: test
 test:
 	@sh ./scripts/test.sh

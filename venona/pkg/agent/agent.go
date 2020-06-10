@@ -38,6 +38,13 @@ type (
 		TaskPullerTicker   *time.Ticker
 		ReportStatusTicker *time.Ticker
 		started            bool
+		lastStatus         Status
+	}
+
+	// Status of the agent
+	Status struct {
+		Message string    `json:"message"`
+		Time    time.Time `json:"time"`
 	}
 
 	workflowCandidate struct {
@@ -55,8 +62,12 @@ func (a Agent) Start() error {
 	a.started = true
 	go a.fetchTasks()
 	go a.reportStatus()
-	time.Sleep(30 * time.Second)
 	return nil
+}
+
+// Status returns the last knows status of the agent and related runtimes
+func (a Agent) Status() Status {
+	return a.lastStatus
 }
 
 func (a Agent) fetchTasks() {
