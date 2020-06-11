@@ -42,6 +42,7 @@ type (
 		Host  string
 	}
 
+	// DeleteOptions to delete resource from the cluster
 	DeleteOptions struct {
 		Name      string
 		Namespace string
