@@ -93,7 +93,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				tasks: []task.Task{
 					{
 						Type: "runtime",
-						Spec: "spec",
+						Spec: "{key:1}",
 					},
 				},
 			},
