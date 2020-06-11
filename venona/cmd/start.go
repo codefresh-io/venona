@@ -93,7 +93,6 @@ var startCmd = &cobra.Command{
 		dieOnError(agent.Start())
 
 		server := server.Server{
-			Agent:  agent,
 			Port:   fmt.Sprintf(":%s", startCmdOptions.serverPort),
 			Logger: log.New("module", "server"),
 		}
