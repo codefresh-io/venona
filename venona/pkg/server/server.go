@@ -29,14 +29,12 @@ func (s Server) Start() error {
 	}
 	r := gin.Default()
 	s.Logger.Debug("Starting HTTP server", "port", s.Port)
-	r.GET("/", status(s.Agent))
+	r.GET("/", s.status)
 	return r.Run(s.Port)
 }
 
-func status(agent agent.Agent) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status": agent.Status(),
-		})
-	}
+func (s Server) status(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"status": s.Agent.Status(),
+	})
 }
