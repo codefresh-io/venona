@@ -17,6 +17,7 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +42,7 @@ type (
 		Host  string
 	}
 
+	// DeleteOptions to delete resource from the cluster
 	DeleteOptions struct {
 		Name      string
 		Namespace string

@@ -77,7 +77,7 @@ func init() {
 
 	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
-			startCmd.Flags().Set(f.Name, viper.GetString(f.Name))
+			dieOnError(startCmd.Flags().Set(f.Name, viper.GetString(f.Name)))
 		}
 	})
 
