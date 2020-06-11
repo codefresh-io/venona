@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package codefresh
+package task
 
 import "encoding/json"
 
@@ -41,9 +41,9 @@ type Tasks []Task
 
 // Task options
 type Task struct {
-	Type     string   `json:"type"`
-	Spec     interface{}   `json:"spec"`
-	Metadata Metadata `json:"metadata"`
+	Type     string      `json:"type"`
+	Spec     interface{} `json:"spec"`
+	Metadata Metadata    `json:"metadata"`
 }
 
 // Metadata options

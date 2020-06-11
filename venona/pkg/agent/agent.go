@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
+	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 )
@@ -48,7 +49,7 @@ type (
 	}
 
 	workflowCandidate struct {
-		tasks   []codefresh.Task
+		tasks   []task.Task
 		runtime string
 	}
 )
@@ -111,31 +112,31 @@ func reportStatus(client codefresh.Codefresh, status codefresh.AgentStatus, logg
 	}
 }
 
-func pullTasks(client codefresh.Codefresh, logger logger.Logger) []codefresh.Task {
+func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 	logger.Debug("Requesting tasks from API server")
 	tasks, err := client.Tasks()
 	if err != nil {
 		logger.Error(err.Error())
-		return []codefresh.Task{}
+		return []task.Task{}
 	}
 	if len(tasks) == 0 {
 		logger.Debug("No new tasks received")
-		return []codefresh.Task{}
+		return []task.Task{}
 	}
 	logger.Debug("Received new tasks", "len", len(tasks))
 	return tasks
 }
 
-func startTasks(tasks []codefresh.Task, runtimes map[string]runtime.Runtime, logger logger.Logger) {
-	creationTasks := []codefresh.Task{}
-	deletionTasks := []codefresh.Task{}
+func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger) {
+	creationTasks := []task.Task{}
+	deletionTasks := []task.Task{}
 	for _, t := range tasks {
 		logger.Debug("Starting tasks", "runtime", t.Metadata.ReName)
-		if t.Type == codefresh.TypeCreatePod || t.Type == codefresh.TypeCreatePVC {
+		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
 			creationTasks = append(creationTasks, t)
 		}
 
-		if t.Type == codefresh.TypeDeletePod || t.Type == codefresh.TypeDeletePVC {
+		if t.Type == task.TypeDeletePod || t.Type == task.TypeDeletePVC {
 			deletionTasks = append(deletionTasks, t)
 		}
 	}
@@ -154,8 +155,8 @@ func startTasks(tasks []codefresh.Task, runtimes map[string]runtime.Runtime, log
 	}
 }
 
-func groupTasks(tasks []codefresh.Task) map[string][]codefresh.Task {
-	candidates := map[string][]codefresh.Task{}
+func groupTasks(tasks []task.Task) map[string][]task.Task {
+	candidates := map[string][]task.Task{}
 	for _, task := range tasks {
 		name := task.Metadata.Workflow
 		if name == "" {

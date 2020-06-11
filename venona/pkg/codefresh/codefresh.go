@@ -23,6 +23,7 @@ import (
 	"path"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/task"
 )
 
 const (
@@ -32,7 +33,7 @@ const (
 type (
 	// Codefresh API client
 	Codefresh interface {
-		Tasks() ([]Task, error)
+		Tasks() ([]task.Task, error)
 		ReportStatus(status AgentStatus) error
 		Host() string
 	}
@@ -83,13 +84,13 @@ func New(opt Options) Codefresh {
 }
 
 // Tasks get from Codefresh all latest tasks
-func (c cf) Tasks() ([]Task, error) {
+func (c cf) Tasks() ([]task.Task, error) {
 	c.logger.Debug("Requesting tasks")
 	res, err := c.doRequest("GET", path.Join("api", "agent", c.agentID, "tasks"), nil)
 	if err != nil {
 		return nil, err
 	}
-	tasks, err := UnmarshalTasks(res)
+	tasks, err := task.UnmarshalTasks(res)
 	if err != nil {
 		return nil, err
 	}

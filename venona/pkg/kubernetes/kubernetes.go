@@ -17,7 +17,8 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
-	"github.com/codefresh-io/go/venona/pkg/codefresh"
+	"github.com/codefresh-io/go/venona/pkg/task"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -100,10 +101,10 @@ func (k kube) DeleteResource(opt DeleteOptions) error {
 
 	var err error
 	switch opt.Kind {
-	case codefresh.TypeDeletePVC:
+	case task.TypeDeletePVC:
 		err = k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
 
-	case codefresh.TypeDeletePod:
+	case task.TypeDeletePod:
 		err = k.client.CoreV1().Pods(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
 	}
 	return err

@@ -17,57 +17,57 @@ package agent
 import (
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/codefresh"
+	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_groupTasks(t *testing.T) {
 	type args struct {
-		tasks []codefresh.Task
+		tasks []task.Task
 	}
 	tests := []struct {
 		name string
 		args args
-		want map[string][]codefresh.Task
+		want map[string][]task.Task
 	}{
 		{
 			name: "should group by workflow name",
 			args: args{
-				tasks: []codefresh.Task{
+				tasks: []task.Task{
 					{
-						Metadata: codefresh.Metadata{
+						Metadata: task.Metadata{
 							Workflow: "1",
 						},
 					},
 					{
-						Metadata: codefresh.Metadata{
+						Metadata: task.Metadata{
 							Workflow: "2",
 						},
 					},
 					{
-						Metadata: codefresh.Metadata{
+						Metadata: task.Metadata{
 							Workflow: "1",
 						},
 					},
 				},
 			},
-			want: map[string][]codefresh.Task{
+			want: map[string][]task.Task{
 				"1": {
 					{
 
-						Metadata: codefresh.Metadata{
+						Metadata: task.Metadata{
 							Workflow: "1",
 						},
 					},
 					{
-						Metadata: codefresh.Metadata{
+						Metadata: task.Metadata{
 							Workflow: "1",
 						},
 					},
 				},
 				"2": {
 					{
-						Metadata: codefresh.Metadata{
+						Metadata: task.Metadata{
 							Workflow: "2",
 						},
 					},

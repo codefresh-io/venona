@@ -17,15 +17,16 @@ package runtime
 import (
 	"encoding/json"
 
-	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
+	"github.com/codefresh-io/go/venona/pkg/task"
+
 )
 
 type (
 	// Runtime API client
 	Runtime interface {
-		StartWorkflow([]codefresh.Task) error
-		TerminateWorkflow([]codefresh.Task) error
+		StartWorkflow([]task.Task) error
+		TerminateWorkflow([]task.Task) error
 	}
 
 	// Options for runtime
@@ -45,7 +46,7 @@ func New(opt Options) Runtime {
 	}
 }
 
-func (r runtime) StartWorkflow(tasks []codefresh.Task) error {
+func (r runtime) StartWorkflow(tasks []task.Task) error {
 	for _, task := range tasks {
 		err := r.client.CreateResource(task.Spec)
 		if err != nil {
@@ -55,7 +56,7 @@ func (r runtime) StartWorkflow(tasks []codefresh.Task) error {
 	}
 	return nil
 }
-func (r runtime) TerminateWorkflow(tasks []codefresh.Task) error {
+func (r runtime) TerminateWorkflow(tasks []task.Task) error {
 	for _, task := range tasks {
 		opt := kubernetes.DeleteOptions{}
 		bytes, err := json.Marshal(task.Spec)
