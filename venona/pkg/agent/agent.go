@@ -37,7 +37,7 @@ type (
 		Logger             logger.Logger
 		TaskPullerTicker   *time.Ticker
 		ReportStatusTicker *time.Ticker
-		started            bool
+		running            bool
 		lastStatus         Status
 	}
 
@@ -55,14 +55,19 @@ type (
 
 // Start starting the agent process
 func (a Agent) Start() error {
-	if a.started {
+	if a.running {
 		return errAlreadyStarted
 	}
 	a.Logger.Debug("Starting agent")
-	a.started = true
-	go a.fetchTasks()
-	go a.reportStatus()
+	a.running = true
+	go a.startTaskPullerRoutine()
+	go a.startStatusReporterRoutine()
 	return nil
+}
+
+// Stop stops the agent routines
+func (a Agent) Stop() {
+	a.running = false
 }
 
 // Status returns the last knows status of the agent and related runtimes
@@ -70,58 +75,81 @@ func (a Agent) Status() Status {
 	return a.lastStatus
 }
 
-func (a Agent) fetchTasks() {
+func (a Agent) startTaskPullerRoutine() {
 	for {
 		select {
 		case <-a.TaskPullerTicker.C:
-			a.Logger.Debug("Requesting tasks from API server")
-			tasks, err := a.Codefresh.Tasks()
-			if err != nil {
-				a.Logger.Error(err.Error())
+			if !a.running {
 				continue
 			}
-			a.Logger.Debug("Received new tasks", "len", len(tasks))
-			creationTasks := []codefresh.Task{}
-			deletionTasks := []codefresh.Task{}
-			for _, t := range tasks {
-				a.Logger.Debug("Starting tasks", "runtime", t.Metadata.ReName)
-				if t.Type == codefresh.TypeCreatePod || t.Type == codefresh.TypeCreatePVC {
-					creationTasks = append(creationTasks, t)
-				}
-
-				if t.Type == codefresh.TypeDeletePod || t.Type == codefresh.TypeDeletePVC {
-					deletionTasks = append(deletionTasks, t)
-				}
-			}
-
-			for _, tasks := range groupTasks(creationTasks) {
-				reName := tasks[0].Metadata.ReName
-				if err := a.Runtimes[reName].StartWorkflow(tasks); err != nil {
-					a.Logger.Error(err.Error())
-				}
-			}
-			for _, tasks := range groupTasks(deletionTasks) {
-				reName := tasks[0].Metadata.ReName
-				if err := a.Runtimes[reName].TerminateWorkflow(tasks); err != nil {
-					a.Logger.Error(err.Error())
-				}
-			}
-
+			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, logger logger.Logger) {
+				tasks := pullTasks(client, logger)
+				startTasks(tasks, runtimes, logger)
+			}(a.Codefresh, a.Runtimes, a.Logger)
 		}
 	}
 }
 
-func (a Agent) reportStatus() {
+func (a Agent) startStatusReporterRoutine() {
 	for {
 		select {
 		case <-a.ReportStatusTicker.C:
-			err := a.Codefresh.ReportStatus(codefresh.AgentStatus{
-				Message: "All good",
-			})
-			if err != nil {
-				a.Logger.Error(err.Error())
+			if !a.running {
 				continue
 			}
+			go reportStatus(a.Codefresh, codefresh.AgentStatus{
+				Message: "All good",
+			}, a.Logger)
+		}
+	}
+}
+
+func reportStatus(client codefresh.Codefresh, status codefresh.AgentStatus, logger logger.Logger) {
+	err := client.ReportStatus(status)
+	if err != nil {
+		logger.Error(err.Error())
+	}
+}
+
+func pullTasks(client codefresh.Codefresh, logger logger.Logger) []codefresh.Task {
+	logger.Debug("Requesting tasks from API server")
+	tasks, err := client.Tasks()
+	if err != nil {
+		logger.Error(err.Error())
+		return []codefresh.Task{}
+	}
+	if len(tasks) == 0 {
+		logger.Debug("No new tasks received")
+		return []codefresh.Task{}
+	}
+	logger.Debug("Received new tasks", "len", len(tasks))
+	return tasks
+}
+
+func startTasks(tasks []codefresh.Task, runtimes map[string]runtime.Runtime, logger logger.Logger) {
+	creationTasks := []codefresh.Task{}
+	deletionTasks := []codefresh.Task{}
+	for _, t := range tasks {
+		logger.Debug("Starting tasks", "runtime", t.Metadata.ReName)
+		if t.Type == codefresh.TypeCreatePod || t.Type == codefresh.TypeCreatePVC {
+			creationTasks = append(creationTasks, t)
+		}
+
+		if t.Type == codefresh.TypeDeletePod || t.Type == codefresh.TypeDeletePVC {
+			deletionTasks = append(deletionTasks, t)
+		}
+	}
+
+	for _, tasks := range groupTasks(creationTasks) {
+		reName := tasks[0].Metadata.ReName
+		if err := runtimes[reName].StartWorkflow(tasks); err != nil {
+			logger.Error(err.Error())
+		}
+	}
+	for _, tasks := range groupTasks(deletionTasks) {
+		reName := tasks[0].Metadata.ReName
+		if err := runtimes[reName].TerminateWorkflow(tasks); err != nil {
+			logger.Error(err.Error())
 		}
 	}
 }

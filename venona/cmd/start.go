@@ -34,7 +34,7 @@ const (
 	defaultCodefreshHost = "https://g.codefresh.io"
 )
 
-var startCmdOptions struct {
+type startOptions struct {
 	codefreshToken                 string
 	codefreshHost                  string
 	verbose                        bool
@@ -45,59 +45,13 @@ var startCmdOptions struct {
 	serverPort                     string
 }
 
+var startCmdOptions startOptions
+
 var startCmd = &cobra.Command{
 	Use: "start",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		log := logger.New(logger.Options{
-			Verbose: startCmdOptions.verbose,
-		})
-		configs, err := config.Load(startCmdOptions.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
-		dieOnError(err)
-		runtimes := map[string]runtime.Runtime{}
-		for _, config := range configs {
-
-			k, err := kubernetes.New(kubernetes.Options{
-				Token: config.Token,
-				Type:  config.Type,
-				Host:  config.Host,
-				Cert:  config.Cert,
-			})
-			if err != nil {
-				log.Error("Failed to load kubernetes", "error", err.Error())
-				continue
-			}
-			re := runtime.New(runtime.Options{
-				Kubernetes: k,
-			})
-			runtimes[config.Name] = re
-
-		}
-
-		cf := codefresh.New(codefresh.Options{
-			Host:    startCmdOptions.codefreshHost,
-			Token:   startCmdOptions.codefreshToken,
-			AgentID: startCmdOptions.agentID,
-			Logger:  log.New("module", "service", "service", "codefresh"),
-		})
-		// load runtimes
-
-		agent := agent.Agent{
-			Codefresh:          cf,
-			Logger:             log.New("module", "agent"),
-			Runtimes:           runtimes,
-			ID:                 startCmdOptions.agentID,
-			TaskPullerTicker:   time.NewTicker(time.Duration(startCmdOptions.taskPullingSecondsInterval) * time.Second),
-			ReportStatusTicker: time.NewTicker(time.Duration(startCmdOptions.statusReportingSecondsInterval) * time.Second),
-		}
-		dieOnError(agent.Start())
-
-		server := server.Server{
-			Port:   fmt.Sprintf(":%s", startCmdOptions.serverPort),
-			Logger: log.New("module", "server"),
-		}
-		dieOnError(server.Start())
-
+		run(startCmdOptions)
 	},
 	Long: "Start venona process",
 }
@@ -132,4 +86,56 @@ func init() {
 	dieOnError(startCmd.MarkFlagRequired("port"))
 
 	rootCmd.AddCommand(startCmd)
+}
+
+func run(options startOptions) {
+	log := logger.New(logger.Options{
+		Verbose: options.verbose,
+	})
+	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
+	dieOnError(err)
+	runtimes := map[string]runtime.Runtime{}
+	{
+		for name, config := range configs {
+			k, err := kubernetes.New(kubernetes.Options{
+				Token: config.Token,
+				Type:  config.Type,
+				Host:  config.Host,
+				Cert:  config.Cert,
+			})
+			if err != nil {
+				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
+				continue
+			}
+			re := runtime.New(runtime.Options{
+				Kubernetes: k,
+			})
+			runtimes[config.Name] = re
+		}
+	}
+	var cf codefresh.Codefresh
+	{
+		cf = codefresh.New(codefresh.Options{
+			Host:    options.codefreshHost,
+			Token:   options.codefreshToken,
+			AgentID: options.agentID,
+			Logger:  log.New("module", "service", "service", "codefresh"),
+		})
+	}
+
+	agent := agent.Agent{
+		Codefresh:          cf,
+		Logger:             log.New("module", "agent"),
+		Runtimes:           runtimes,
+		ID:                 options.agentID,
+		TaskPullerTicker:   time.NewTicker(time.Duration(options.taskPullingSecondsInterval) * time.Second),
+		ReportStatusTicker: time.NewTicker(time.Duration(options.statusReportingSecondsInterval) * time.Second),
+	}
+	dieOnError(agent.Start())
+
+	server := server.Server{
+		Port:   fmt.Sprintf(":%s", options.serverPort),
+		Logger: log.New("module", "server"),
+	}
+	dieOnError(server.Start())
 }
