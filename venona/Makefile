@@ -6,6 +6,9 @@ build:
 run: build
 	./venona start
 
+.PHONY: test-all
+test-all: test test-fmt spellcheck gocyclo lint security-check license
+
 .PHONY: test
 test:
 	@sh ./scripts/test.sh
