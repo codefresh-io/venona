@@ -48,7 +48,10 @@ type startOptions struct {
 	serverPort                     string
 }
 
-var startCmdOptions startOptions
+var (
+	startCmdOptions startOptions
+	handleSignal    = signal.Notify
+)
 
 var startCmd = &cobra.Command{
 	Use: "start",
@@ -69,7 +72,7 @@ func init() {
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 
-	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", true, "Show more logs")
+	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", false, "Show more logs")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
@@ -95,8 +98,6 @@ func run(options startOptions) {
 	log := logger.New(logger.Options{
 		Verbose: options.verbose,
 	})
-
-	go handleSignals()
 
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
@@ -140,13 +141,32 @@ func run(options startOptions) {
 	dieOnError(agent.Start())
 
 	server := server.Server{
-		Port:   fmt.Sprintf(":%s", options.serverPort),
-		Logger: log.New("module", "server"),
+		Port:    fmt.Sprintf(":%s", options.serverPort),
+		Logger:  log.New("module", "server"),
+		EventsC: make(chan server.Event),
 	}
+
+	go handleSignals(&agent, &server, log)
+
 	dieOnError(server.Start())
 }
 
-func handleSignals() {
-	sigChan := make(chan os.Signal, 16)
-	signal.Notify(sigChan, syscall.SIGTERM)
+func handleSignals(a *agent.Agent, s *server.Server, log logger.Logger) {
+	sigChan := make(chan os.Signal)
+	receivedTerminationReq := false
+	handleSignal(sigChan, syscall.SIGTERM) // sent by k8s
+	handleSignal(sigChan, syscall.SIGINT)  // sent by ctrl + c
+
+	for {
+		switch <-sigChan {
+		case syscall.SIGTERM, syscall.SIGINT:
+			if receivedTerminationReq {
+				log.Crit("forcing termination!")
+				os.Exit(0)
+			}
+			receivedTerminationReq = true
+			log.Info("received shutdown request, starting graceful termination...")
+			s.EventsC <- server.Shutdown
+		}
+	}
 }
