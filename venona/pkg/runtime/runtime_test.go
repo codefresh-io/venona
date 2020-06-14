@@ -17,9 +17,9 @@ package runtime
 import (
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
+	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -93,7 +93,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				tasks: []task.Task{
 					{
 						Type: "runtime",
-						Spec: "{key:1}",
+						Spec: `{"Name":"name", "Namespace":"ns"}`,
 					},
 				},
 			},
@@ -109,7 +109,12 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				assert.Error(t, err)
 				return
 			}
-			mo.AssertCalled(t, "DeleteResource", tt.args.tasks[0].Spec)
+			opt := kubernetes.DeleteOptions{}
+			opt.Kind = "runtime"
+			opt.Name = "name"
+			opt.Namespace = "ns"
+
+			mo.AssertCalled(t, "DeleteResource", opt)
 		})
 	}
 }

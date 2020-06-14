@@ -19,9 +19,9 @@ import (
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
-	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
+	"github.com/codefresh-io/go/venona/pkg/task"
 )
 
 var (

@@ -19,7 +19,6 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/task"
-
 )
 
 type (
@@ -59,15 +58,9 @@ func (r runtime) StartWorkflow(tasks []task.Task) error {
 func (r runtime) TerminateWorkflow(tasks []task.Task) error {
 	for _, task := range tasks {
 		opt := kubernetes.DeleteOptions{}
-		bytes, err := json.Marshal(task.Spec)
-		if err != nil {
-			return err
-		}
 		opt.Kind = task.Type
-		err = json.Unmarshal(bytes, &opt)
-		if err != nil {
-			return err
-		}
+		b := []byte(task.Spec.(string))
+		err := json.Unmarshal(b, &opt)
 		err = r.client.DeleteResource(opt)
 		if err != nil {
 			return err
