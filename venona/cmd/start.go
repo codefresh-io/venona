@@ -16,6 +16,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/agent"
@@ -92,6 +95,9 @@ func run(options startOptions) {
 	log := logger.New(logger.Options{
 		Verbose: options.verbose,
 	})
+
+	go handleSignals()
+
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
@@ -138,4 +144,9 @@ func run(options startOptions) {
 		Logger: log.New("module", "server"),
 	}
 	dieOnError(server.Start())
+}
+
+func handleSignals() {
+	sigChan := make(chan os.Signal, 16)
+	signal.Notify(sigChan, syscall.SIGTERM)
 }
