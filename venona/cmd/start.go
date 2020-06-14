@@ -15,9 +15,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -51,6 +53,7 @@ type startOptions struct {
 var (
 	startCmdOptions startOptions
 	handleSignal    = signal.Notify
+	exit            = os.Exit
 )
 
 var startCmd = &cobra.Command{
@@ -151,27 +154,43 @@ func run(options startOptions) {
 	})
 	dieOnError(err)
 
-	go handleSignals(&agent, &server, log)
+	go handleSignals(context.Background(), &agent, &server, log)
 
 	dieOnError(server.Start())
 }
 
-func handleSignals(a *agent.Agent, s *server.Server, log logger.Logger) {
-	sigChan := make(chan os.Signal)
+func handleSignals(ctx context.Context, a *agent.Agent, s *server.Server, log logger.Logger) {
+	sigChan := make(chan os.Signal, 10)
 	receivedTerminationReq := false
-	handleSignal(sigChan, syscall.SIGTERM) // sent by k8s
-	handleSignal(sigChan, syscall.SIGINT)  // sent by ctrl + c
+	receivedTerminationReqMux := sync.Mutex{}
+
+	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT) // sent by k8s
 
 	for {
-		switch <-sigChan {
-		case syscall.SIGTERM, syscall.SIGINT:
-			if receivedTerminationReq {
-				log.Crit("forcing termination!")
-				os.Exit(1)
+		select {
+		case <-ctx.Done():
+			return
+		case sig := <-sigChan:
+			switch sig {
+			case syscall.SIGTERM, syscall.SIGINT:
+				go func() {
+					shouldExit := false
+					receivedTerminationReqMux.Lock()
+					if receivedTerminationReq {
+						shouldExit = true
+					}
+					receivedTerminationReq = true
+					receivedTerminationReqMux.Unlock()
+
+					if shouldExit {
+						log.Crit("forcing termination!")
+						exit(1)
+					}
+
+					log.Crit("received shutdown request, starting graceful termination...")
+					s.EventsC <- server.Shutdown
+				}()
 			}
-			receivedTerminationReq = true
-			log.Crit("received shutdown request, starting graceful termination...")
-			s.EventsC <- server.Shutdown
 		}
 	}
 }
