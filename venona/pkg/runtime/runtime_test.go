@@ -83,6 +83,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 		runtime runtime
 		args    args
 		wantErr bool
+		expectedOpt kubernetes.DeleteOptions
 	}{
 		{
 			name: "should call kube delete resouce",
@@ -97,6 +98,11 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 					},
 				},
 			},
+			expectedOpt: kubernetes.DeleteOptions{
+				Kind: "runtime",
+				Name: "name",
+				Namespace: "ns",
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -109,12 +115,8 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				assert.Error(t, err)
 				return
 			}
-			opt := kubernetes.DeleteOptions{}
-			opt.Kind = "runtime"
-			opt.Name = "name"
-			opt.Namespace = "ns"
 
-			mo.AssertCalled(t, "DeleteResource", opt)
+			mo.AssertCalled(t, "DeleteResource", tt.expectedOpt)
 		})
 	}
 }
