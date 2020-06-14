@@ -140,11 +140,16 @@ func run(options startOptions) {
 	}
 	dieOnError(agent.Start())
 
-	server := server.Server{
-		Port:    fmt.Sprintf(":%s", options.serverPort),
-		Logger:  log.New("module", "server"),
-		EventsC: make(chan server.Event),
+	serverMode := server.Release
+	if options.verbose {
+		serverMode = server.Debug
 	}
+	server, err := server.New(&server.Options{
+		Port:   fmt.Sprintf(":%s", options.serverPort),
+		Logger: log.New("module", "server"),
+		Mode:   serverMode,
+	})
+	dieOnError(err)
 
 	go handleSignals(&agent, &server, log)
 
@@ -162,10 +167,10 @@ func handleSignals(a *agent.Agent, s *server.Server, log logger.Logger) {
 		case syscall.SIGTERM, syscall.SIGINT:
 			if receivedTerminationReq {
 				log.Crit("forcing termination!")
-				os.Exit(0)
+				os.Exit(1)
 			}
 			receivedTerminationReq = true
-			log.Info("received shutdown request, starting graceful termination...")
+			log.Crit("received shutdown request, starting graceful termination...")
 			s.EventsC <- server.Shutdown
 		}
 	}

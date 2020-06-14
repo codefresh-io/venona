@@ -24,17 +24,24 @@ import (
 )
 
 var (
-	errAlreadyStarted = errors.New("Already started")
-	errAlreadyStopped = errors.New("Already stopped")
+	errAlreadyStarted    = errors.New("Already started")
+	errAlreadyStopped    = errors.New("Already stopped")
+	errMustProvideLogger = errors.New("Must provide logger")
 )
 
 type (
 	// Event an event that can be sent to the server events channel
 	Event int
 
+	// Options for creating a new server instance
+	Options struct {
+		Port   string
+		Logger logger.Logger
+		Mode   string
+	}
+
 	// Server is an HTTP server that expose API
 	Server struct {
-		Port    string
 		Logger  logger.Logger
 		EventsC chan Event
 		started bool
@@ -48,23 +55,44 @@ const (
 	Shutdown Event = iota
 )
 
+const (
+	// Release mode
+	Release = gin.ReleaseMode
+	// Debug mode (more logs)
+	Debug = gin.DebugMode
+)
+
+// New returns a new Server instance or an error
+func New(opt *Options) (Server, error) {
+	s := Server{}
+	if opt.Logger == nil {
+		return s, errMustProvideLogger
+	}
+
+	s.Logger = opt.Logger
+	s.EventsC = make(chan Event)
+	gin.SetMode(opt.Mode)
+	r := gin.Default()
+
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+
+	s.srv = &http.Server{
+		Addr:    opt.Port,
+		Handler: r,
+	}
+
+	return s, nil
+}
+
 // Start starts the server and blocks indefinitely unless an error happens
 func (s Server) Start() error {
 	if s.started {
 		return errAlreadyStarted
 	}
 	s.started = true
-	s.Logger.Debug("Starting HTTP server", "port", s.Port)
-
-	r := gin.Default()
-	r.GET("/health", func(c *gin.Context) {
-		c.String(http.StatusOK, "OK")
-	})
-
-	s.srv = &http.Server{
-		Addr:    s.Port,
-		Handler: r,
-	}
+	s.Logger.Info("Starting HTTP server", "addr", s.srv.Addr)
 
 	go s.handleExternalEvents()
 
