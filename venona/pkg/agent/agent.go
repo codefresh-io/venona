@@ -16,6 +16,7 @@ package agent
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
@@ -25,21 +26,40 @@ import (
 )
 
 var (
-	errAlreadyStarted = errors.New("Already started")
+	errAlreadyRunning                         = errors.New("Already running")
+	errAlreadyStopped                         = errors.New("Already stopped")
+	errOptionsRequired                        = errors.New("Options are required")
+	errIDRequired                             = errors.New("ID options is required")
+	errRuntimesRequired                       = errors.New("Runtimes options is required")
+	errLoggerRequired                         = errors.New("Logger options is required")
+	errTaskPullingSecondsIntervalRequired     = errors.New("TaskPullingSecondsInterval options is required")
+	errStatusReportingSecondsIntervalRequired = errors.New("StatusReportingSecondsInterval options is required")
 )
 
 type (
+	// Options for creating a new Agent instance
+	Options struct {
+		ID                             string
+		Codefresh                      codefresh.Codefresh
+		Runtimes                       map[string]runtime.Runtime
+		Logger                         logger.Logger
+		TaskPullingSecondsInterval     int64
+		StatusReportingSecondsInterval int64
+	}
+
 	// Agent holds all the references from Codefresh
 	// in order to run the process
 	Agent struct {
-		ID                 string
-		Codefresh          codefresh.Codefresh
-		Runtimes           map[string]runtime.Runtime
-		Logger             logger.Logger
-		TaskPullerTicker   *time.Ticker
-		ReportStatusTicker *time.Ticker
+		id                 string
+		cf                 codefresh.Codefresh
+		runtimes           map[string]runtime.Runtime
+		log                logger.Logger
+		taskPullerTicker   *time.Ticker
+		reportStatusTicker *time.Ticker
 		running            bool
 		lastStatus         Status
+		stoppedChan        chan struct{}
+		wg                 *sync.WaitGroup
 	}
 
 	// Status of the agent
@@ -54,21 +74,52 @@ type (
 	}
 )
 
+// New creates a new Agent instance
+func New(opt *Options) (Agent, error) {
+	a := Agent{}
+	if err := checkOptions(opt); err != nil {
+		return a, err
+	}
+
+	a.id = opt.ID
+	a.cf = opt.Codefresh
+	a.runtimes = opt.Runtimes
+	a.log = opt.Logger
+	a.taskPullerTicker = time.NewTicker(time.Duration(opt.TaskPullingSecondsInterval) * time.Second)
+	a.reportStatusTicker = time.NewTicker(time.Duration(opt.StatusReportingSecondsInterval) * time.Second)
+	a.stoppedChan = make(chan struct{})
+	a.wg = &sync.WaitGroup{}
+
+	return a, nil
+}
+
 // Start starting the agent process
 func (a Agent) Start() error {
 	if a.running {
-		return errAlreadyStarted
+		return errAlreadyRunning
 	}
-	a.Logger.Info("Starting agent")
 	a.running = true
+	a.log.Info("Starting agent")
+
 	go a.startTaskPullerRoutine()
 	go a.startStatusReporterRoutine()
+
 	return nil
 }
 
-// Stop stops the agent routines
-func (a Agent) Stop() {
+// Stop stops the agents work and blocks until all leftover tasks are finished
+func (a Agent) Stop() error {
+	if !a.running {
+		return errAlreadyStopped
+	}
 	a.running = false
+	a.log.Info("Agent received graceful termination request stopping tasks...")
+	a.reportStatusTicker.Stop()
+	a.stoppedChan <- struct{}{} // signal stop
+	a.taskPullerTicker.Stop()
+	a.stoppedChan <- struct{}{} // signal stop
+	a.wg.Wait()
+	return nil
 }
 
 // Status returns the last knows status of the agent and related runtimes
@@ -79,14 +130,15 @@ func (a Agent) Status() Status {
 func (a Agent) startTaskPullerRoutine() {
 	for {
 		select {
-		case <-a.TaskPullerTicker.C:
-			if !a.running {
-				continue
-			}
+		case <-a.stoppedChan:
+			return
+		case <-a.taskPullerTicker.C:
+			a.wg.Add(1)
 			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, logger logger.Logger) {
 				tasks := pullTasks(client, logger)
 				startTasks(tasks, runtimes, logger)
-			}(a.Codefresh, a.Runtimes, a.Logger)
+				a.wg.Done()
+			}(a.cf, a.runtimes, a.log)
 		}
 	}
 }
@@ -94,13 +146,16 @@ func (a Agent) startTaskPullerRoutine() {
 func (a Agent) startStatusReporterRoutine() {
 	for {
 		select {
-		case <-a.ReportStatusTicker.C:
-			if !a.running {
-				continue
-			}
-			go reportStatus(a.Codefresh, codefresh.AgentStatus{
-				Message: "All good",
-			}, a.Logger)
+		case <-a.stoppedChan:
+			return
+		case <-a.reportStatusTicker.C:
+			a.wg.Add(1)
+			go func(cf codefresh.Codefresh, log logger.Logger) {
+				reportStatus(cf, codefresh.AgentStatus{
+					Message: "All good",
+				}, log)
+				a.wg.Done()
+			}(a.cf, a.log)
 		}
 	}
 }
@@ -167,4 +222,32 @@ func groupTasks(tasks []task.Task) map[string][]task.Task {
 		candidates[name] = append(candidates[name], task)
 	}
 	return candidates
+}
+
+func checkOptions(opt *Options) error {
+	if opt == nil {
+		return errOptionsRequired
+	}
+
+	if opt.ID == "" {
+		return errIDRequired
+	}
+
+	if opt.Runtimes == nil {
+		return errRuntimesRequired
+	}
+
+	if opt.Logger == nil {
+		return errLoggerRequired
+	}
+
+	if opt.TaskPullingSecondsInterval == 0 {
+		return errTaskPullingSecondsIntervalRequired
+	}
+
+	if opt.StatusReportingSecondsInterval == 0 {
+		return errStatusReportingSecondsIntervalRequired
+	}
+
+	return nil
 }

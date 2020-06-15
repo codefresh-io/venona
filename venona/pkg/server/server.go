@@ -30,9 +30,6 @@ var (
 )
 
 type (
-	// Event an event that can be sent to the server events channel
-	Event int
-
 	// Options for creating a new server instance
 	Options struct {
 		Port   string
@@ -42,17 +39,10 @@ type (
 
 	// Server is an HTTP server that expose API
 	Server struct {
-		Logger     logger.Logger
-		EventsChan chan Event
-		running    bool
-		srv        *http.Server
+		log     logger.Logger
+		running bool
+		srv     *http.Server
 	}
-)
-
-const (
-	// Shutdown send this event through a server's event channel
-	// to start graceful termination
-	Shutdown Event = iota
 )
 
 const (
@@ -69,8 +59,7 @@ func New(opt *Options) (Server, error) {
 		return s, errLoggerRequired
 	}
 
-	s.Logger = opt.Logger
-	s.EventsChan = make(chan Event)
+	s.log = opt.Logger
 	gin.SetMode(opt.Mode)
 	r := gin.Default()
 
@@ -89,31 +78,23 @@ func New(opt *Options) (Server, error) {
 // Start starts the server and blocks indefinitely unless an error happens
 func (s Server) Start() error {
 	if s.running {
-		return errAlreadyStarted
+		return errAlreadyRunning
 	}
 	s.running = true
-	s.Logger.Info("Starting HTTP server", "addr", s.srv.Addr)
-
-	go s.handleExternalEvents()
-
+	s.log.Info("Starting HTTP server", "addr", s.srv.Addr)
 	return s.srv.ListenAndServe()
 }
 
-func (s Server) handleExternalEvents() {
-	for {
-		switch <-s.EventsChan {
-		case Shutdown:
-			s.shutdown()
-			return
-		}
+// Stop stops the HTTP server
+func (s Server) Stop() error {
+	if !s.running {
+		return errAlreadyStopped
 	}
-}
-
-func (s Server) shutdown() {
 	ctx := context.Background()
 	err := s.srv.Shutdown(ctx)
 	if err != nil {
-		s.Logger.Error("failed to gracefully terminate server, cause: ", err)
+		s.log.Error("failed to gracefully terminate server, cause: ", err)
 	}
 	s.running = false
+	return nil
 }

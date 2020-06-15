@@ -17,12 +17,10 @@ package agent
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
-	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -86,45 +84,6 @@ func Test_groupTasks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			groupedTasks := groupTasks(tt.args.tasks)
 			assert.Equal(t, tt.want, groupedTasks)
-		})
-	}
-}
-
-func TestAgent_Stop(t *testing.T) {
-	type fields struct {
-		ID                 string
-		Codefresh          codefresh.Codefresh
-		Runtimes           map[string]runtime.Runtime
-		Logger             logger.Logger
-		TaskPullerTicker   *time.Ticker
-		ReportStatusTicker *time.Ticker
-		running            bool
-		lastStatus         Status
-	}
-	tests := []struct {
-		name   string
-		fields fields
-	}{
-		{
-			name:   "should stop agent",
-			fields: fields{},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			a := Agent{
-				ID:                 tt.fields.ID,
-				Codefresh:          tt.fields.Codefresh,
-				Runtimes:           tt.fields.Runtimes,
-				Logger:             tt.fields.Logger,
-				TaskPullerTicker:   tt.fields.TaskPullerTicker,
-				ReportStatusTicker: tt.fields.ReportStatusTicker,
-				running:            tt.fields.running,
-				lastStatus:         tt.fields.lastStatus,
-			}
-			a.Stop()
-
-			assert.Equal(t, false, a.running)
 		})
 	}
 }

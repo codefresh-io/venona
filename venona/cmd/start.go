@@ -21,7 +21,6 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/agent"
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
@@ -133,15 +132,15 @@ func run(options startOptions) {
 		})
 	}
 
-	agent := agent.Agent{
-		Codefresh:          cf,
-		Logger:             log.New("module", "agent"),
-		Runtimes:           runtimes,
-		ID:                 options.agentID,
-		TaskPullerTicker:   time.NewTicker(time.Duration(options.taskPullingSecondsInterval) * time.Second),
-		ReportStatusTicker: time.NewTicker(time.Duration(options.statusReportingSecondsInterval) * time.Second),
-	}
-	dieOnError(agent.Start())
+	agent, err := agent.New(&agent.Options{
+		Codefresh:                      cf,
+		Logger:                         log.New("module", "agent"),
+		Runtimes:                       runtimes,
+		ID:                             options.agentID,
+		TaskPullingSecondsInterval:     options.taskPullingSecondsInterval,
+		StatusReportingSecondsInterval: options.statusReportingSecondsInterval,
+	})
+	dieOnError(err)
 
 	serverMode := server.Release
 	if options.verbose {
@@ -154,12 +153,12 @@ func run(options startOptions) {
 	})
 	dieOnError(err)
 
-	go handleSignals(context.Background(), server.EventsChan, log)
-
+	go handleSignals(context.Background(), server.Stop, agent.Stop, log)
+	dieOnError(agent.Start())
 	dieOnError(server.Start())
 }
 
-func handleSignals(ctx context.Context, sec chan server.Event, log logger.Logger) {
+func handleSignals(ctx context.Context, stopServer, stopAgent func() error, log logger.Logger) {
 	sigChan := make(chan os.Signal, 10)
 	receivedTerminationReq := false
 	receivedTerminationReqMux := sync.Mutex{}
@@ -174,6 +173,7 @@ func handleSignals(ctx context.Context, sec chan server.Event, log logger.Logger
 			switch sig {
 			case syscall.SIGTERM, syscall.SIGINT:
 				go func() {
+					// check if should perform force shutdown
 					shouldExit := false
 					receivedTerminationReqMux.Lock()
 					if receivedTerminationReq {
@@ -182,13 +182,18 @@ func handleSignals(ctx context.Context, sec chan server.Event, log logger.Logger
 					receivedTerminationReq = true
 					receivedTerminationReqMux.Unlock()
 
-					if shouldExit {
+					if shouldExit { // perform force shutdown
 						log.Crit("forcing termination!")
 						exit(1)
 					}
 
 					log.Crit("received shutdown request, starting graceful termination...")
-					sec <- server.Shutdown
+					if err := stopServer(); err != nil {
+						log.Error(err.Error())
+					}
+					if err := stopAgent(); err != nil {
+						log.Error(err.Error())
+					}
 				}()
 			}
 		}
