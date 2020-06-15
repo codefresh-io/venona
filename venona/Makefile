@@ -6,6 +6,10 @@ build:
 run: build
 	./venona start
 
+.PHONY: debug
+debug: build
+	./venona start --verbose
+
 .PHONY: test-all
 test-all: test test-fmt spellcheck gocyclo lint security-check license
 

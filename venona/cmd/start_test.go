@@ -30,11 +30,10 @@ import (
 
 func Test_handleSignals(t *testing.T) {
 	type args struct {
-		sec           chan server.Event
-		log           logger.Logger
-		signals       []os.Signal
-		expectExit    bool
-		expectedEvent server.Event
+		sec        chan server.Event
+		log        logger.Logger
+		signals    []os.Signal
+		expectExit bool
 	}
 	tests := []struct {
 		name string

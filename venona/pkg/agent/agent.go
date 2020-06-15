@@ -26,8 +26,8 @@ import (
 )
 
 var (
-	errAlreadyRunning                         = errors.New("Already running")
-	errAlreadyStopped                         = errors.New("Already stopped")
+	errAlreadyRunning                         = errors.New("Agent already running")
+	errAlreadyStopped                         = errors.New("Agent already stopped")
 	errOptionsRequired                        = errors.New("Options are required")
 	errIDRequired                             = errors.New("ID options is required")
 	errRuntimesRequired                       = errors.New("Runtimes options is required")
@@ -58,7 +58,7 @@ type (
 		reportStatusTicker *time.Ticker
 		running            bool
 		lastStatus         Status
-		stoppedChan        chan struct{}
+		terminationChan    chan struct{}
 		wg                 *sync.WaitGroup
 	}
 
@@ -75,26 +75,36 @@ type (
 )
 
 // New creates a new Agent instance
-func New(opt *Options) (Agent, error) {
-	a := Agent{}
+func New(opt *Options) (*Agent, error) {
 	if err := checkOptions(opt); err != nil {
-		return a, err
+		return nil, err
 	}
 
-	a.id = opt.ID
-	a.cf = opt.Codefresh
-	a.runtimes = opt.Runtimes
-	a.log = opt.Logger
-	a.taskPullerTicker = time.NewTicker(time.Duration(opt.TaskPullingSecondsInterval) * time.Second)
-	a.reportStatusTicker = time.NewTicker(time.Duration(opt.StatusReportingSecondsInterval) * time.Second)
-	a.stoppedChan = make(chan struct{})
-	a.wg = &sync.WaitGroup{}
+	id := opt.ID
+	cf := opt.Codefresh
+	runtimes := opt.Runtimes
+	log := opt.Logger
+	taskPullerTicker := time.NewTicker(time.Duration(opt.TaskPullingSecondsInterval) * time.Second)
+	reportStatusTicker := time.NewTicker(time.Duration(opt.StatusReportingSecondsInterval) * time.Second)
+	terminationChan := make(chan struct{})
+	wg := &sync.WaitGroup{}
 
-	return a, nil
+	return &Agent{
+		id,
+		cf,
+		runtimes,
+		log,
+		taskPullerTicker,
+		reportStatusTicker,
+		false,
+		Status{},
+		terminationChan,
+		wg,
+	}, nil
 }
 
 // Start starting the agent process
-func (a Agent) Start() error {
+func (a *Agent) Start() error {
 	if a.running {
 		return errAlreadyRunning
 	}
@@ -104,58 +114,63 @@ func (a Agent) Start() error {
 	go a.startTaskPullerRoutine()
 	go a.startStatusReporterRoutine()
 
+	reportStatus(a.cf, codefresh.AgentStatus{
+		Message: "All good",
+	}, a.log)
+
 	return nil
 }
 
 // Stop stops the agents work and blocks until all leftover tasks are finished
-func (a Agent) Stop() error {
+func (a *Agent) Stop() error {
 	if !a.running {
 		return errAlreadyStopped
 	}
 	a.running = false
-	a.log.Info("Agent received graceful termination request stopping tasks...")
+	a.log.Warn("Received graceful termination request, stopping tasks...")
 	a.reportStatusTicker.Stop()
-	a.stoppedChan <- struct{}{} // signal stop
+	a.terminationChan <- struct{}{} // signal stop
 	a.taskPullerTicker.Stop()
-	a.stoppedChan <- struct{}{} // signal stop
+	a.terminationChan <- struct{}{} // signal stop
 	a.wg.Wait()
 	return nil
 }
 
 // Status returns the last knows status of the agent and related runtimes
-func (a Agent) Status() Status {
+func (a *Agent) Status() Status {
 	return a.lastStatus
 }
 
-func (a Agent) startTaskPullerRoutine() {
+func (a *Agent) startTaskPullerRoutine() {
 	for {
 		select {
-		case <-a.stoppedChan:
+		case <-a.terminationChan:
 			return
 		case <-a.taskPullerTicker.C:
 			a.wg.Add(1)
-			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, logger logger.Logger) {
+			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger) {
 				tasks := pullTasks(client, logger)
 				startTasks(tasks, runtimes, logger)
-				a.wg.Done()
-			}(a.cf, a.runtimes, a.log)
+				time.Sleep(time.Second * 10)
+				wg.Done()
+			}(a.cf, a.runtimes, a.wg, a.log)
 		}
 	}
 }
 
-func (a Agent) startStatusReporterRoutine() {
+func (a *Agent) startStatusReporterRoutine() {
 	for {
 		select {
-		case <-a.stoppedChan:
+		case <-a.terminationChan:
 			return
 		case <-a.reportStatusTicker.C:
 			a.wg.Add(1)
-			go func(cf codefresh.Codefresh, log logger.Logger) {
+			go func(cf codefresh.Codefresh, wg *sync.WaitGroup, log logger.Logger) {
 				reportStatus(cf, codefresh.AgentStatus{
 					Message: "All good",
 				}, log)
-				a.wg.Done()
-			}(a.cf, a.log)
+				wg.Done()
+			}(a.cf, a.wg, a.log)
 		}
 	}
 }

@@ -24,8 +24,8 @@ import (
 )
 
 var (
-	errAlreadyRunning = errors.New("Already running")
-	errAlreadyStopped = errors.New("Already stopped")
+	errAlreadyRunning = errors.New("Server already running")
+	errAlreadyStopped = errors.New("Server already stopped")
 	errLoggerRequired = errors.New("Logger is required")
 )
 
@@ -53,30 +53,31 @@ const (
 )
 
 // New returns a new Server instance or an error
-func New(opt *Options) (Server, error) {
-	s := Server{}
+func New(opt *Options) (*Server, error) {
 	if opt.Logger == nil {
-		return s, errLoggerRequired
+		return nil, errLoggerRequired
 	}
+	log := opt.Logger
 
-	s.log = opt.Logger
 	gin.SetMode(opt.Mode)
 	r := gin.Default()
-
 	r.GET("/health", func(c *gin.Context) {
 		c.String(http.StatusOK, "OK")
 	})
-
-	s.srv = &http.Server{
+	srv := &http.Server{
 		Addr:    opt.Port,
 		Handler: r,
 	}
 
-	return s, nil
+	return &Server{
+		log,
+		false,
+		srv,
+	}, nil
 }
 
 // Start starts the server and blocks indefinitely unless an error happens
-func (s Server) Start() error {
+func (s *Server) Start() error {
 	if s.running {
 		return errAlreadyRunning
 	}
@@ -86,15 +87,16 @@ func (s Server) Start() error {
 }
 
 // Stop stops the HTTP server
-func (s Server) Stop() error {
+func (s *Server) Stop() error {
 	if !s.running {
 		return errAlreadyStopped
 	}
+	s.running = false
+	s.log.Warn("Received graceful termination request, shutting down...")
 	ctx := context.Background()
 	err := s.srv.Shutdown(ctx)
 	if err != nil {
 		s.log.Error("failed to gracefully terminate server, cause: ", err)
 	}
-	s.running = false
 	return nil
 }

@@ -17,6 +17,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -100,7 +101,7 @@ func run(options startOptions) {
 	log := logger.New(logger.Options{
 		Verbose: options.verbose,
 	})
-
+	log.Debug("Starting", "pid", os.Getpid())
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
@@ -155,7 +156,9 @@ func run(options startOptions) {
 
 	go handleSignals(context.Background(), server.Stop, agent.Stop, log)
 	dieOnError(agent.Start())
-	dieOnError(server.Start())
+	if err := server.Start(); err != nil && err != http.ErrServerClosed {
+		dieOnError(err)
+	}
 }
 
 func handleSignals(ctx context.Context, stopServer, stopAgent func() error, log logger.Logger) {
@@ -183,15 +186,16 @@ func handleSignals(ctx context.Context, stopServer, stopAgent func() error, log 
 					receivedTerminationReqMux.Unlock()
 
 					if shouldExit { // perform force shutdown
-						log.Crit("forcing termination!")
+						log.Warn("forcing termination!")
 						exit(1)
 					}
 
-					log.Crit("received shutdown request, starting graceful termination...")
-					if err := stopServer(); err != nil {
+					log.Warn("Received shutdown request, stopping agent and server...")
+					// order matters, the process will exit as soon as server is stopped
+					if err := stopAgent(); err != nil {
 						log.Error(err.Error())
 					}
-					if err := stopAgent(); err != nil {
+					if err := stopServer(); err != nil {
 						log.Error(err.Error())
 					}
 				}()
