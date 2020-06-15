@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -154,14 +153,14 @@ func run(options startOptions) {
 	})
 	dieOnError(err)
 
-	go handleSignals(context.Background(), server.Stop, agent.Stop, log)
+	go handleSignals(server.Stop, agent.Stop, log)
 	dieOnError(agent.Start())
 	if err := server.Start(); err != nil && err != http.ErrServerClosed {
 		dieOnError(err)
 	}
 }
 
-func handleSignals(ctx context.Context, stopServer, stopAgent func() error, log logger.Logger) {
+func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
 	sigChan := make(chan os.Signal, 10)
 	receivedTerminationReq := false
 	receivedTerminationReqMux := sync.Mutex{}
@@ -169,37 +168,33 @@ func handleSignals(ctx context.Context, stopServer, stopAgent func() error, log 
 	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT) // sent by k8s
 
 	for {
-		select {
-		case <-ctx.Done():
-			return
-		case sig := <-sigChan:
-			switch sig {
-			case syscall.SIGTERM, syscall.SIGINT:
-				go func() {
-					// check if should perform force shutdown
-					shouldExit := false
-					receivedTerminationReqMux.Lock()
-					if receivedTerminationReq {
-						shouldExit = true
-					}
-					receivedTerminationReq = true
-					receivedTerminationReqMux.Unlock()
+		switch <-sigChan {
+		case syscall.SIGTERM, syscall.SIGINT:
+			go func() {
+				// check if should perform force shutdown
+				shouldExit := false
+				receivedTerminationReqMux.Lock()
+				if receivedTerminationReq {
+					shouldExit = true
+				}
+				receivedTerminationReq = true
+				receivedTerminationReqMux.Unlock()
 
-					if shouldExit { // perform force shutdown
-						log.Warn("forcing termination!")
-						exit(1)
-					}
+				if shouldExit { // perform force shutdown
+					log.Warn("forcing termination!")
+					exit(1)
+				}
 
-					log.Warn("Received shutdown request, stopping agent and server...")
-					// order matters, the process will exit as soon as server is stopped
-					if err := stopAgent(); err != nil {
-						log.Error(err.Error())
-					}
-					if err := stopServer(); err != nil {
-						log.Error(err.Error())
-					}
-				}()
-			}
+				log.Warn("Received shutdown request, stopping agent and server...")
+				// order matters, the process will exit as soon as server is stopped
+				if err := stopAgent(); err != nil {
+					log.Error(err.Error())
+				}
+				if err := stopServer(); err != nil {
+					log.Error(err.Error())
+				}
+				return
+			}()
 		}
 	}
 }
