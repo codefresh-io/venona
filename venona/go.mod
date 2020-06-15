@@ -14,7 +14,6 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.5.1
-	github.com/vektra/mockery v1.1.2 // indirect
 	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
 	golang.org/x/sys v0.0.0-20200610111108-226ff32320da // indirect

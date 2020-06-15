@@ -19,9 +19,9 @@ import (
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
-	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
+	"github.com/codefresh-io/go/venona/pkg/task"
 )
 
 var (
@@ -59,7 +59,7 @@ func (a Agent) Start() error {
 	if a.running {
 		return errAlreadyStarted
 	}
-	a.Logger.Debug("Starting agent")
+	a.Logger.Info("Starting agent")
 	a.running = true
 	go a.startTaskPullerRoutine()
 	go a.startStatusReporterRoutine()
@@ -123,7 +123,7 @@ func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 		logger.Debug("No new tasks received")
 		return []task.Task{}
 	}
-	logger.Debug("Received new tasks", "len", len(tasks))
+	logger.Info("Received new tasks", "len", len(tasks))
 	return tasks
 }
 
@@ -131,7 +131,7 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	for _, t := range tasks {
-		logger.Debug("Starting tasks", "runtime", t.Metadata.ReName)
+		logger.Info("Executing tasks", "runtime", t.Metadata.ReName)
 		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
 			creationTasks = append(creationTasks, t)
 		}

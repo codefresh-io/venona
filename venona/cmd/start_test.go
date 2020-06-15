@@ -21,7 +21,6 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/agent"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
 	"github.com/codefresh-io/go/venona/pkg/server"
@@ -31,8 +30,7 @@ import (
 
 func Test_handleSignals(t *testing.T) {
 	type args struct {
-		a             *agent.Agent
-		s             *server.Server
+		sec           chan server.Event
 		log           logger.Logger
 		signals       []os.Signal
 		expectExit    bool
@@ -45,8 +43,7 @@ func Test_handleSignals(t *testing.T) {
 		{
 			"should start graceful termination on SIGTERM",
 			args{
-				&agent.Agent{},
-				createMockServer(),
+				createMockServer().EventsChan,
 				createMockLogger(),
 				[]os.Signal{syscall.SIGTERM},
 				false,
@@ -56,8 +53,7 @@ func Test_handleSignals(t *testing.T) {
 		{
 			"should start graceful termination on SIGINT",
 			args{
-				&agent.Agent{},
-				createMockServer(),
+				createMockServer().EventsChan,
 				createMockLogger(),
 				[]os.Signal{syscall.SIGINT},
 				false,
@@ -67,8 +63,7 @@ func Test_handleSignals(t *testing.T) {
 		{
 			"should call exit if got SIGINT more than once",
 			args{
-				&agent.Agent{},
-				createMockServer(),
+				createMockServer().EventsChan,
 				createMockLogger(),
 				[]os.Signal{syscall.SIGINT, syscall.SIGINT},
 				true,
@@ -92,7 +87,7 @@ func Test_handleSignals(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
-			go handleSignals(ctx, tt.args.a, tt.args.s, tt.args.log)
+			go handleSignals(ctx, tt.args.sec, tt.args.log)
 			<-readyChan // wait for sigChan to be swapped
 
 			for _, sig := range tt.args.signals {
@@ -103,10 +98,10 @@ func Test_handleSignals(t *testing.T) {
 				assert.Equal(t, tt.args.expectExit, <-exitCalled)
 			}
 			if tt.args.expectedEvent != -1 {
-				assert.Equal(t, tt.args.expectedEvent, <-tt.args.s.EventsC)
+				assert.Equal(t, tt.args.expectedEvent, <-tt.args.sec)
 			} else {
 				for range tt.args.signals {
-					<-tt.args.s.EventsC
+					<-tt.args.sec
 				}
 			}
 			cancel() // stops the handleSignals goroutine
@@ -125,7 +120,7 @@ func createMockLogger() *mocks.Logger {
 
 func createMockServer() *server.Server {
 	s := server.Server{
-		EventsC: make(chan server.Event),
+		EventsChan: make(chan server.Event),
 	}
 	return &s
 }

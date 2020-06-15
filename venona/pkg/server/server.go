@@ -24,9 +24,9 @@ import (
 )
 
 var (
-	errAlreadyStarted    = errors.New("Already started")
-	errAlreadyStopped    = errors.New("Already stopped")
-	errMustProvideLogger = errors.New("Must provide logger")
+	errAlreadyRunning = errors.New("Already running")
+	errAlreadyStopped = errors.New("Already stopped")
+	errLoggerRequired = errors.New("Logger is required")
 )
 
 type (
@@ -42,10 +42,10 @@ type (
 
 	// Server is an HTTP server that expose API
 	Server struct {
-		Logger  logger.Logger
-		EventsC chan Event
-		started bool
-		srv     *http.Server
+		Logger     logger.Logger
+		EventsChan chan Event
+		running    bool
+		srv        *http.Server
 	}
 )
 
@@ -66,11 +66,11 @@ const (
 func New(opt *Options) (Server, error) {
 	s := Server{}
 	if opt.Logger == nil {
-		return s, errMustProvideLogger
+		return s, errLoggerRequired
 	}
 
 	s.Logger = opt.Logger
-	s.EventsC = make(chan Event)
+	s.EventsChan = make(chan Event)
 	gin.SetMode(opt.Mode)
 	r := gin.Default()
 
@@ -88,10 +88,10 @@ func New(opt *Options) (Server, error) {
 
 // Start starts the server and blocks indefinitely unless an error happens
 func (s Server) Start() error {
-	if s.started {
+	if s.running {
 		return errAlreadyStarted
 	}
-	s.started = true
+	s.running = true
 	s.Logger.Info("Starting HTTP server", "addr", s.srv.Addr)
 
 	go s.handleExternalEvents()
@@ -101,7 +101,7 @@ func (s Server) Start() error {
 
 func (s Server) handleExternalEvents() {
 	for {
-		switch <-s.EventsC {
+		switch <-s.EventsChan {
 		case Shutdown:
 			s.shutdown()
 			return
@@ -115,5 +115,5 @@ func (s Server) shutdown() {
 	if err != nil {
 		s.Logger.Error("failed to gracefully terminate server, cause: ", err)
 	}
-	s.started = false
+	s.running = false
 }

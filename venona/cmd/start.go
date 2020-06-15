@@ -154,12 +154,12 @@ func run(options startOptions) {
 	})
 	dieOnError(err)
 
-	go handleSignals(context.Background(), &agent, &server, log)
+	go handleSignals(context.Background(), server.EventsChan, log)
 
 	dieOnError(server.Start())
 }
 
-func handleSignals(ctx context.Context, a *agent.Agent, s *server.Server, log logger.Logger) {
+func handleSignals(ctx context.Context, sec chan server.Event, log logger.Logger) {
 	sigChan := make(chan os.Signal, 10)
 	receivedTerminationReq := false
 	receivedTerminationReqMux := sync.Mutex{}
@@ -188,7 +188,7 @@ func handleSignals(ctx context.Context, a *agent.Agent, s *server.Server, log lo
 					}
 
 					log.Crit("received shutdown request, starting graceful termination...")
-					s.EventsC <- server.Shutdown
+					sec <- server.Shutdown
 				}()
 			}
 		}
