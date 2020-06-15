@@ -26,14 +26,17 @@ import (
 )
 
 var (
-	errAlreadyRunning                         = errors.New("Agent already running")
-	errAlreadyStopped                         = errors.New("Agent already stopped")
-	errOptionsRequired                        = errors.New("Options are required")
-	errIDRequired                             = errors.New("ID options is required")
-	errRuntimesRequired                       = errors.New("Runtimes options is required")
-	errLoggerRequired                         = errors.New("Logger options is required")
-	errTaskPullingSecondsIntervalRequired     = errors.New("TaskPullingSecondsInterval options is required")
-	errStatusReportingSecondsIntervalRequired = errors.New("StatusReportingSecondsInterval options is required")
+	errAlreadyRunning   = errors.New("Agent already running")
+	errAlreadyStopped   = errors.New("Agent already stopped")
+	errOptionsRequired  = errors.New("Options are required")
+	errIDRequired       = errors.New("ID options is required")
+	errRuntimesRequired = errors.New("Runtimes options is required")
+	errLoggerRequired   = errors.New("Logger options is required")
+)
+
+const (
+	defaultTaskPullingInterval     = time.Second * 5
+	defaultStatusReportingInterval = time.Minute
 )
 
 type (
@@ -43,8 +46,8 @@ type (
 		Codefresh                      codefresh.Codefresh
 		Runtimes                       map[string]runtime.Runtime
 		Logger                         logger.Logger
-		TaskPullingSecondsInterval     int64
-		StatusReportingSecondsInterval int64
+		TaskPullingSecondsInterval     time.Duration
+		StatusReportingSecondsInterval time.Duration
 	}
 
 	// Agent holds all the references from Codefresh
@@ -84,8 +87,16 @@ func New(opt *Options) (*Agent, error) {
 	cf := opt.Codefresh
 	runtimes := opt.Runtimes
 	log := opt.Logger
-	taskPullerTicker := time.NewTicker(time.Duration(opt.TaskPullingSecondsInterval) * time.Second)
-	reportStatusTicker := time.NewTicker(time.Duration(opt.StatusReportingSecondsInterval) * time.Second)
+	taskPullingInterval := defaultTaskPullingInterval
+	if opt.TaskPullingSecondsInterval != time.Duration(0) {
+		taskPullingInterval = opt.TaskPullingSecondsInterval
+	}
+	statusReportingInterval := defaultStatusReportingInterval
+	if opt.StatusReportingSecondsInterval != time.Duration(0) {
+		statusReportingInterval = opt.StatusReportingSecondsInterval
+	}
+	taskPullerTicker := time.NewTicker(taskPullingInterval)
+	reportStatusTicker := time.NewTicker(statusReportingInterval)
 	terminationChan := make(chan struct{})
 	wg := &sync.WaitGroup{}
 
@@ -248,20 +259,12 @@ func checkOptions(opt *Options) error {
 		return errIDRequired
 	}
 
-	if opt.Runtimes == nil {
+	if opt.Runtimes == nil || len(opt.Runtimes) == 0 {
 		return errRuntimesRequired
 	}
 
 	if opt.Logger == nil {
 		return errLoggerRequired
-	}
-
-	if opt.TaskPullingSecondsInterval == 0 {
-		return errTaskPullingSecondsIntervalRequired
-	}
-
-	if opt.StatusReportingSecondsInterval == 0 {
-		return errStatusReportingSecondsIntervalRequired
 	}
 
 	return nil

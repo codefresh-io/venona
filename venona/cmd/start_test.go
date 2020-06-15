@@ -60,7 +60,7 @@ func Test_handleSignals(t *testing.T) {
 			args{
 				createMockLogger(),
 				[]os.Signal{syscall.SIGINT, syscall.SIGINT},
-				false,
+				true,
 				time.Millisecond * 100,
 			},
 		},

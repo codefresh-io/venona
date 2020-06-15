@@ -24,9 +24,10 @@ import (
 )
 
 var (
-	errAlreadyRunning = errors.New("Server already running")
-	errAlreadyStopped = errors.New("Server already stopped")
-	errLoggerRequired = errors.New("Logger is required")
+	errAlreadyRunning  = errors.New("Server already running")
+	errAlreadyStopped  = errors.New("Server already stopped")
+	errOptionsRequired = errors.New("Options required")
+	errLoggerRequired  = errors.New("Logger is required")
 )
 
 type (

@@ -21,6 +21,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/agent"
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
@@ -137,8 +138,8 @@ func run(options startOptions) {
 		Logger:                         log.New("module", "agent"),
 		Runtimes:                       runtimes,
 		ID:                             options.agentID,
-		TaskPullingSecondsInterval:     options.taskPullingSecondsInterval,
-		StatusReportingSecondsInterval: options.statusReportingSecondsInterval,
+		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval),
+		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval),
 	})
 	dieOnError(err)
 
@@ -170,7 +171,7 @@ func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
 	for {
 		switch <-sigChan {
 		case syscall.SIGTERM, syscall.SIGINT:
-			go func() {
+			go func(stopServer, stopAgent func() error, log logger.Logger) {
 				// check if should perform force shutdown
 				shouldExit := false
 				receivedTerminationReqMux.Lock()
@@ -194,7 +195,7 @@ func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
 					log.Error(err.Error())
 				}
 				return
-			}()
+			}(stopServer, stopAgent, log)
 		}
 	}
 }
