@@ -104,6 +104,22 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				Namespace: "ns",
 			},
 		},
+		{
+			name: "should fail if spec is not string",
+			runtime: runtime{
+				client: createKubernetesMock(),
+			},
+			args: args{
+				tasks: []task.Task{
+					{
+						Type: "runtime",
+						Spec: 123,
+					},
+				},
+			},
+			wantErr: true,
+
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
