@@ -17,9 +17,9 @@ package runtime
 import (
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
+	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -83,6 +83,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 		runtime runtime
 		args    args
 		wantErr bool
+		expectedOpt kubernetes.DeleteOptions
 	}{
 		{
 			name: "should call kube delete resouce",
@@ -93,10 +94,31 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				tasks: []task.Task{
 					{
 						Type: "runtime",
-						Spec: "{key:1}",
+						Spec: `{"Name":"name", "Namespace":"ns"}`,
 					},
 				},
 			},
+			expectedOpt: kubernetes.DeleteOptions{
+				Kind: "runtime",
+				Name: "name",
+				Namespace: "ns",
+			},
+		},
+		{
+			name: "should fail if spec is not string",
+			runtime: runtime{
+				client: createKubernetesMock(),
+			},
+			args: args{
+				tasks: []task.Task{
+					{
+						Type: "runtime",
+						Spec: 123,
+					},
+				},
+			},
+			wantErr: true,
+
 		},
 	}
 	for _, tt := range tests {
@@ -109,7 +131,8 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				assert.Error(t, err)
 				return
 			}
-			mo.AssertCalled(t, "DeleteResource", tt.args.tasks[0].Spec)
+
+			mo.AssertCalled(t, "DeleteResource", tt.expectedOpt)
 		})
 	}
 }

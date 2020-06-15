@@ -16,10 +16,10 @@ package runtime
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/task"
-
 )
 
 type (
@@ -59,15 +59,13 @@ func (r runtime) StartWorkflow(tasks []task.Task) error {
 func (r runtime) TerminateWorkflow(tasks []task.Task) error {
 	for _, task := range tasks {
 		opt := kubernetes.DeleteOptions{}
-		bytes, err := json.Marshal(task.Spec)
-		if err != nil {
-			return err
-		}
 		opt.Kind = task.Type
-		err = json.Unmarshal(bytes, &opt)
-		if err != nil {
-			return err
+		s, ok := task.Spec.(string)
+		if !ok {
+			return fmt.Errorf("failed to cast to string")
 		}
+		b := []byte(s)
+		err := json.Unmarshal(b, &opt)
 		err = r.client.DeleteResource(opt)
 		if err != nil {
 			return err
