@@ -34,7 +34,8 @@ steps:
     commands:
     - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
     - export VENONA_VERSION=$(cat ./venona/VERSION)
-    - semver-cli equal $VENONACTL_VERSION $VENONA_VERSION
+    - semver-cli equal $VENONACTL_VERSION $
+    - cf_export VERSION=${{VENONA_VERSION}}
     when:
       steps:
       - name: main_clone
@@ -115,7 +116,7 @@ steps:
     stage: Build Artifacts
     candidate: ${{build}}
     tag:
-    - ${{}}
+    - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
     image_name: codefresh/venona
     when:
