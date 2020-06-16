@@ -136,12 +136,8 @@ func run(options startOptions) {
 	}
 	var cf codefresh.Codefresh
 	{
-		opt := codefresh.Options{
-			Host:    options.codefreshHost,
-			Token:   options.codefreshToken,
-			AgentID: options.agentID,
-			Logger:  log.New("module", "service", "service", "codefresh"),
-		}
+
+		var httpClient *http.Client
 		if !options.rejectTLSUnauthorized {
 			// #nosec
 			tr := &http.Transport{
@@ -149,11 +145,17 @@ func run(options startOptions) {
 					InsecureSkipVerify: true,
 				},
 			}
-			opt.HTTPClient = &http.Client{
+			httpClient = &http.Client{
 				Transport: tr,
 			}
 		}
-		cf = codefresh.New(opt)
+		cf = codefresh.New(codefresh.Options{
+			Host:       options.codefreshHost,
+			Token:      options.codefreshToken,
+			AgentID:    options.agentID,
+			Logger:     log.New("module", "service", "service", "codefresh"),
+			HTTPClient: httpClient,
+		})
 	}
 
 	agent, err := agent.New(&agent.Options{
