@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 			args: args{},
 			want: &cf{
 				host:       defaultHost,
-				httpClient: buildClient(false),
+				httpClient: &http.Client{},
 			},
 		},
 		{
@@ -63,7 +63,7 @@ func TestNew(t *testing.T) {
 			},
 			want: &cf{
 				host:       "http://host.com",
-				httpClient: buildClient(false),
+				httpClient: &http.Client{},
 			},
 		},
 	}
