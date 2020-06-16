@@ -119,6 +119,7 @@ steps:
     tags:
     - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
     - ${{VERSION}}-${{CF_REVISION}}
+    - ${{CF_REVISION}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
     image_name: codefresh/venona
     registry: dockerhub
