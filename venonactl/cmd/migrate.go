@@ -38,6 +38,8 @@ var migrateCmd = &cobra.Command{
 		lgr := createLogger("Migrate", verbose, logFormatter)
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.VenonaPluginType)
+		builder.Add(plugins.RuntimeEnvironmentPluginType)
+		builder.Add(plugins.VolumeProvisionerPluginType)
 		s := store.GetStore()
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
@@ -45,6 +47,7 @@ var migrateCmd = &cobra.Command{
 		extendStoreWithAgentAPI(lgr, "", "")
 		fillKubernetesAPI(lgr, migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, false)
 		values := s.BuildValues()
+		values["AppName"] = "venona" // use old app name for migration
 		spn := createSpinner("Migrating runtime (might take a few seconds)", "")
 		spn.Start()
 		defer spn.Stop()
