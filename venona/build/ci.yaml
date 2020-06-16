@@ -121,6 +121,7 @@ steps:
     - ${{VERSION}}-${{CF_REVISION}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
     image_name: codefresh/venona
+    registry: dockerhub
     when:
       steps:
       - name: build
