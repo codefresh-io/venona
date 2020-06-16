@@ -118,8 +118,8 @@ func Test_reportStatus(t *testing.T) {
 	}
 }
 
-func getCodefreshMock() *mocks.Codefresh {
-	cf := mocks.Codefresh{}
+func getCodefreshMock() codefresh.Codefresh {
+	cf := codefresh.MockCodefresh{}
 
 	cf.On("ReportStatus", mock.Anything).Return(fmt.Errorf("bad"))
 
@@ -159,7 +159,7 @@ func TestNew(t *testing.T) {
 			args{
 				&Options{
 					ID:        "",
-					Codefresh: &mocks.Codefresh{},
+					Codefresh: getCodefreshMock(),
 					Runtimes:  runtimes,
 					Logger:    &mocks.Logger{},
 				},
@@ -172,7 +172,7 @@ func TestNew(t *testing.T) {
 			args{
 				&Options{
 					ID:        "foobar",
-					Codefresh: &mocks.Codefresh{},
+					Codefresh: getCodefreshMock(),
 					Runtimes:  nil,
 					Logger:    &mocks.Logger{},
 				},
@@ -185,7 +185,7 @@ func TestNew(t *testing.T) {
 			args{
 				&Options{
 					ID:        "foobar",
-					Codefresh: &mocks.Codefresh{},
+					Codefresh: getCodefreshMock(),
 					Runtimes:  make(map[string]runtime.Runtime),
 					Logger:    &mocks.Logger{},
 				},
@@ -198,7 +198,7 @@ func TestNew(t *testing.T) {
 			args{
 				&Options{
 					ID:        "foobar",
-					Codefresh: &mocks.Codefresh{},
+					Codefresh: getCodefreshMock(),
 					Runtimes:  runtimes,
 					Logger:    nil,
 				},
@@ -229,7 +229,7 @@ func createMockAgent() *Agent {
 	runtimes["x"] = runtime.New(runtime.Options{})
 	a, _ := New(&Options{
 		ID:        "foobar",
-		Codefresh: &mocks.Codefresh{},
+		Codefresh: &codefresh.MockCodefresh{},
 		Logger:    &mocks.Logger{},
 		Runtimes:  runtimes,
 	})

@@ -79,10 +79,10 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 		tasks []task.Task
 	}
 	tests := []struct {
-		name    string
-		runtime runtime
-		args    args
-		wantErr bool
+		name        string
+		runtime     runtime
+		args        args
+		wantErr     bool
 		expectedOpt kubernetes.DeleteOptions
 	}{
 		{
@@ -99,8 +99,8 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				},
 			},
 			expectedOpt: kubernetes.DeleteOptions{
-				Kind: "runtime",
-				Name: "name",
+				Kind:      "runtime",
+				Name:      "name",
 				Namespace: "ns",
 			},
 		},
@@ -118,7 +118,6 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				},
 			},
 			wantErr: true,
-
 		},
 	}
 	for _, tt := range tests {
