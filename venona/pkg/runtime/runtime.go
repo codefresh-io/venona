@@ -26,7 +26,7 @@ type (
 	// Runtime API client
 	Runtime interface {
 		StartWorkflow([]task.Task) error
-		TerminateWorkflow([]task.Task) error
+		TerminateWorkflow([]task.Task) []error
 	}
 
 	// Options for runtime
@@ -55,20 +55,24 @@ func (r runtime) StartWorkflow(tasks []task.Task) error {
 	}
 	return nil
 }
-func (r runtime) TerminateWorkflow(tasks []task.Task) error {
+func (r runtime) TerminateWorkflow(tasks []task.Task) []error {
+	errs := make([]error, 0, 3)
 	for _, task := range tasks {
 		opt := kubernetes.DeleteOptions{}
 		opt.Kind = task.Type
-		s, ok := task.Spec.(string)
-		if !ok {
-			return fmt.Errorf("failed to cast to string")
-		}
-		b := []byte(s)
-		err := json.Unmarshal(b, &opt)
-		err = r.client.DeleteResource(opt)
+		b, err := json.Marshal(task.Spec)
 		if err != nil {
-			return err
+			errs = append(errs, fmt.Errorf("failed to marshal task spec"))
+			continue
+		}
+		if err := json.Unmarshal(b, &opt); err != nil {
+			errs = append(errs, fmt.Errorf("failed to unmarshal task spec"))
+			continue
+		}
+		if err = r.client.DeleteResource(opt); err != nil {
+			errs = append(errs, err)
+			continue
 		}
 	}
-	return nil
+	return errs
 }

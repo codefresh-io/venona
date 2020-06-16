@@ -94,7 +94,10 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				tasks: []task.Task{
 					{
 						Type: "runtime",
-						Spec: `{"Name":"name", "Namespace":"ns"}`,
+						Spec: map[string]interface{}{
+							"name":      "name",
+							"namespace": "ns",
+						},
 					},
 				},
 			},
@@ -125,9 +128,9 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 			r := tt.runtime
 			mo := r.client.(*mocks.Kubernetes)
 
-			err := r.TerminateWorkflow(tt.args.tasks)
+			errs := r.TerminateWorkflow(tt.args.tasks)
 			if tt.wantErr {
-				assert.Error(t, err)
+				assert.Equal(t, len(errs), 1)
 				return
 			}
 

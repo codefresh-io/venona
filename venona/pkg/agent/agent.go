@@ -231,8 +231,10 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	for _, tasks := range groupTasks(deletionTasks) {
 		reName := tasks[0].Metadata.ReName
 		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-		if err := runtimes[reName].TerminateWorkflow(tasks); err != nil {
-			logger.Error(err.Error())
+		if errs := runtimes[reName].TerminateWorkflow(tasks); len(errs) != 0 {
+			for _, err := range errs {
+				logger.Error(err.Error())
+			}
 		}
 	}
 }
