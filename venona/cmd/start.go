@@ -189,7 +189,7 @@ func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
 	receivedTerminationReq := false
 	receivedTerminationReqMux := sync.Mutex{}
 
-	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT) // sent by k8s
+	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT)
 
 	for {
 		switch <-sigChan {
