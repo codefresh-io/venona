@@ -15,10 +15,17 @@
 package agent
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
+	"github.com/codefresh-io/go/venona/pkg/codefresh"
+	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/mocks"
+	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func Test_groupTasks(t *testing.T) {
@@ -81,4 +88,151 @@ func Test_groupTasks(t *testing.T) {
 			assert.Equal(t, tt.want, groupedTasks)
 		})
 	}
+}
+
+func Test_reportStatus(t *testing.T) {
+	type args struct {
+		client codefresh.Codefresh
+		status codefresh.AgentStatus
+		logger logger.Logger
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "should report status",
+			args: args{
+				client: getCodefreshMock(),
+				logger: getLoggerMock(),
+				status: codefresh.AgentStatus{
+					Message: "OK",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			reportStatus(tt.args.client, tt.args.status, tt.args.logger)
+		})
+	}
+}
+
+func getCodefreshMock() codefresh.Codefresh {
+	cf := codefresh.MockCodefresh{}
+
+	cf.On("ReportStatus", mock.Anything).Return(fmt.Errorf("bad"))
+
+	return &cf
+}
+
+func getLoggerMock() *mocks.Logger {
+	l := mocks.Logger{}
+
+	l.On("Error", mock.Anything)
+
+	return &l
+}
+
+func TestNew(t *testing.T) {
+	runtimes := make(map[string]runtime.Runtime)
+	runtimes["x"] = runtime.New(runtime.Options{})
+	type args struct {
+		opt *Options
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *Agent
+		wantErr error
+	}{
+		{
+			"should throw error if options is nil",
+			args{
+				nil,
+			},
+			nil,
+			errOptionsRequired,
+		},
+		{
+			"should throw error if ID is not provided",
+			args{
+				&Options{
+					ID:        "",
+					Codefresh: getCodefreshMock(),
+					Runtimes:  runtimes,
+					Logger:    &mocks.Logger{},
+				},
+			},
+			nil,
+			errIDRequired,
+		},
+		{
+			"should throw error if runtimes is not provided",
+			args{
+				&Options{
+					ID:        "foobar",
+					Codefresh: getCodefreshMock(),
+					Runtimes:  nil,
+					Logger:    &mocks.Logger{},
+				},
+			},
+			nil,
+			errRuntimesRequired,
+		},
+		{
+			"should throw error if runtimes is empty",
+			args{
+				&Options{
+					ID:        "foobar",
+					Codefresh: getCodefreshMock(),
+					Runtimes:  make(map[string]runtime.Runtime),
+					Logger:    &mocks.Logger{},
+				},
+			},
+			nil,
+			errRuntimesRequired,
+		},
+		{
+			"should throw error if logger is nil",
+			args{
+				&Options{
+					ID:        "foobar",
+					Codefresh: getCodefreshMock(),
+					Runtimes:  runtimes,
+					Logger:    nil,
+				},
+			},
+			nil,
+			errLoggerRequired,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := New(tt.args.opt)
+			if tt.wantErr != nil {
+				if err == nil {
+					t.Errorf("expected error \"%v\" but got no error", tt.wantErr)
+				} else if err != tt.wantErr {
+					t.Errorf("expected error \"%v\" but got error \"%v\"", tt.wantErr, err)
+				}
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("New() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func createMockAgent() *Agent {
+	runtimes := make(map[string]runtime.Runtime)
+	runtimes["x"] = runtime.New(runtime.Options{})
+	a, _ := New(&Options{
+		ID:        "foobar",
+		Codefresh: &codefresh.MockCodefresh{},
+		Logger:    &mocks.Logger{},
+		Runtimes:  runtimes,
+	})
+
+	return a
 }

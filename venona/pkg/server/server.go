@@ -15,31 +15,89 @@
 package server
 
 import (
+	"context"
 	"errors"
+	"net/http"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	errAlreadyStarted = errors.New("Already started")
+	errAlreadyRunning  = errors.New("Server already running")
+	errAlreadyStopped  = errors.New("Server already stopped")
+	errOptionsRequired = errors.New("Options required")
+	errLoggerRequired  = errors.New("Logger is required")
 )
 
 type (
+	// Options for creating a new server instance
+	Options struct {
+		Port   string
+		Logger logger.Logger
+		Mode   string
+	}
+
 	// Server is an HTTP server that expose API
 	Server struct {
-		Port    string
-		Logger  logger.Logger
-		started bool
+		log     logger.Logger
+		running bool
+		srv     *http.Server
 	}
 )
 
-// Start starts the server
-func (s Server) Start() error {
-	if s.started {
-		return errAlreadyStarted
+const (
+	// Release mode
+	Release = gin.ReleaseMode
+	// Debug mode (more logs)
+	Debug = gin.DebugMode
+)
+
+// New returns a new Server instance or an error
+func New(opt *Options) (*Server, error) {
+	if opt.Logger == nil {
+		return nil, errLoggerRequired
 	}
+	log := opt.Logger
+
+	gin.SetMode(opt.Mode)
 	r := gin.Default()
-	s.Logger.Debug("Starting HTTP server", "port", s.Port)
-	return r.Run(s.Port)
+	r.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "OK")
+	})
+	srv := &http.Server{
+		Addr:    opt.Port,
+		Handler: r,
+	}
+
+	return &Server{
+		log,
+		false,
+		srv,
+	}, nil
+}
+
+// Start starts the server and blocks indefinitely unless an error happens
+func (s *Server) Start() error {
+	if s.running {
+		return errAlreadyRunning
+	}
+	s.running = true
+	s.log.Info("Starting HTTP server", "addr", s.srv.Addr)
+	return s.srv.ListenAndServe()
+}
+
+// Stop stops the HTTP server
+func (s *Server) Stop() error {
+	if !s.running {
+		return errAlreadyStopped
+	}
+	s.running = false
+	s.log.Warn("Received graceful termination request, shutting down...")
+	ctx := context.Background()
+	err := s.srv.Shutdown(ctx)
+	if err != nil {
+		s.log.Error("failed to gracefully terminate server, cause: ", err)
+	}
+	return nil
 }

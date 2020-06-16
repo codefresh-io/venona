@@ -16,6 +16,7 @@ package agent
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
@@ -25,21 +26,43 @@ import (
 )
 
 var (
-	errAlreadyStarted = errors.New("Already started")
+	errAlreadyRunning   = errors.New("Agent already running")
+	errAlreadyStopped   = errors.New("Agent already stopped")
+	errOptionsRequired  = errors.New("Options are required")
+	errIDRequired       = errors.New("ID options is required")
+	errRuntimesRequired = errors.New("Runtimes options is required")
+	errLoggerRequired   = errors.New("Logger options is required")
+)
+
+const (
+	defaultTaskPullingInterval     = time.Second * 5
+	defaultStatusReportingInterval = time.Minute
 )
 
 type (
+	// Options for creating a new Agent instance
+	Options struct {
+		ID                             string
+		Codefresh                      codefresh.Codefresh
+		Runtimes                       map[string]runtime.Runtime
+		Logger                         logger.Logger
+		TaskPullingSecondsInterval     time.Duration
+		StatusReportingSecondsInterval time.Duration
+	}
+
 	// Agent holds all the references from Codefresh
 	// in order to run the process
 	Agent struct {
-		ID                 string
-		Codefresh          codefresh.Codefresh
-		Runtimes           map[string]runtime.Runtime
-		Logger             logger.Logger
-		TaskPullerTicker   *time.Ticker
-		ReportStatusTicker *time.Ticker
+		id                 string
+		cf                 codefresh.Codefresh
+		runtimes           map[string]runtime.Runtime
+		log                logger.Logger
+		taskPullerTicker   *time.Ticker
+		reportStatusTicker *time.Ticker
 		running            bool
 		lastStatus         Status
+		terminationChan    chan struct{}
+		wg                 *sync.WaitGroup
 	}
 
 	// Status of the agent
@@ -54,53 +77,110 @@ type (
 	}
 )
 
-// Start starting the agent process
-func (a Agent) Start() error {
-	if a.running {
-		return errAlreadyStarted
+// New creates a new Agent instance
+func New(opt *Options) (*Agent, error) {
+	if err := checkOptions(opt); err != nil {
+		return nil, err
 	}
-	a.Logger.Debug("Starting agent")
+	id := opt.ID
+	cf := opt.Codefresh
+	runtimes := opt.Runtimes
+	log := opt.Logger
+	taskPullingInterval := defaultTaskPullingInterval
+	if opt.TaskPullingSecondsInterval != time.Duration(0) {
+		taskPullingInterval = opt.TaskPullingSecondsInterval
+	}
+	statusReportingInterval := defaultStatusReportingInterval
+	if opt.StatusReportingSecondsInterval != time.Duration(0) {
+		statusReportingInterval = opt.StatusReportingSecondsInterval
+	}
+	taskPullerTicker := time.NewTicker(taskPullingInterval)
+	reportStatusTicker := time.NewTicker(statusReportingInterval)
+	terminationChan := make(chan struct{})
+	wg := &sync.WaitGroup{}
+
+	return &Agent{
+		id,
+		cf,
+		runtimes,
+		log,
+		taskPullerTicker,
+		reportStatusTicker,
+		false,
+		Status{},
+		terminationChan,
+		wg,
+	}, nil
+}
+
+// Start starting the agent process
+func (a *Agent) Start() error {
+	if a.running {
+		return errAlreadyRunning
+	}
 	a.running = true
+	a.log.Info("Starting agent")
+
 	go a.startTaskPullerRoutine()
 	go a.startStatusReporterRoutine()
+
+	reportStatus(a.cf, codefresh.AgentStatus{
+		Message: "All good",
+	}, a.log)
+
 	return nil
 }
 
-// Stop stops the agent routines
-func (a Agent) Stop() {
+// Stop stops the agents work and blocks until all leftover tasks are finished
+func (a *Agent) Stop() error {
+	if !a.running {
+		return errAlreadyStopped
+	}
 	a.running = false
+	a.log.Warn("Received graceful termination request, stopping tasks...")
+	a.reportStatusTicker.Stop()
+	a.terminationChan <- struct{}{} // signal stop
+	a.taskPullerTicker.Stop()
+	a.terminationChan <- struct{}{} // signal stop
+	a.wg.Wait()
+	return nil
 }
 
 // Status returns the last knows status of the agent and related runtimes
-func (a Agent) Status() Status {
+func (a *Agent) Status() Status {
 	return a.lastStatus
 }
 
-func (a Agent) startTaskPullerRoutine() {
+func (a *Agent) startTaskPullerRoutine() {
 	for {
 		select {
-		case <-a.TaskPullerTicker.C:
-			if !a.running {
-				continue
-			}
-			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, logger logger.Logger) {
+		case <-a.terminationChan:
+			return
+		case <-a.taskPullerTicker.C:
+			a.wg.Add(1)
+			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger) {
 				tasks := pullTasks(client, logger)
 				startTasks(tasks, runtimes, logger)
-			}(a.Codefresh, a.Runtimes, a.Logger)
+				time.Sleep(time.Second * 10)
+				wg.Done()
+			}(a.cf, a.runtimes, a.wg, a.log)
 		}
 	}
 }
 
-func (a Agent) startStatusReporterRoutine() {
+func (a *Agent) startStatusReporterRoutine() {
 	for {
 		select {
-		case <-a.ReportStatusTicker.C:
-			if !a.running {
-				continue
-			}
-			go reportStatus(a.Codefresh, codefresh.AgentStatus{
-				Message: "All good",
-			}, a.Logger)
+		case <-a.terminationChan:
+			return
+		case <-a.reportStatusTicker.C:
+			a.wg.Add(1)
+			go func(cf codefresh.Codefresh, wg *sync.WaitGroup, log logger.Logger) {
+				reportStatus(cf, codefresh.AgentStatus{
+					Message: "All good",
+				}, log)
+				wg.Done()
+			}(a.cf, a.wg, a.log)
 		}
 	}
 }
@@ -123,7 +203,7 @@ func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 		logger.Debug("No new tasks received")
 		return []task.Task{}
 	}
-	logger.Debug("Received new tasks", "len", len(tasks))
+	logger.Info("Received new tasks", "len", len(tasks))
 	return tasks
 }
 
@@ -131,7 +211,7 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	for _, t := range tasks {
-		logger.Debug("Starting tasks", "runtime", t.Metadata.ReName)
+		logger.Info("Executing tasks", "runtime", t.Metadata.ReName)
 		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
 			creationTasks = append(creationTasks, t)
 		}
@@ -167,4 +247,24 @@ func groupTasks(tasks []task.Task) map[string][]task.Task {
 		candidates[name] = append(candidates[name], task)
 	}
 	return candidates
+}
+
+func checkOptions(opt *Options) error {
+	if opt == nil {
+		return errOptionsRequired
+	}
+
+	if opt.ID == "" {
+		return errIDRequired
+	}
+
+	if opt.Runtimes == nil || len(opt.Runtimes) == 0 {
+		return errRuntimesRequired
+	}
+
+	if opt.Logger == nil {
+		return errLoggerRequired
+	}
+
+	return nil
 }

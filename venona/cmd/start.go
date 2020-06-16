@@ -16,6 +16,11 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/agent"
@@ -45,7 +50,11 @@ type startOptions struct {
 	serverPort                     string
 }
 
-var startCmdOptions startOptions
+var (
+	startCmdOptions startOptions
+	handleSignal    = signal.Notify
+	exit            = os.Exit
+)
 
 var startCmd = &cobra.Command{
 	Use: "start",
@@ -66,7 +75,7 @@ func init() {
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 
-	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", true, "Show more logs")
+	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", false, "Show more logs")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
@@ -92,6 +101,7 @@ func run(options startOptions) {
 	log := logger.New(logger.Options{
 		Verbose: options.verbose,
 	})
+	log.Debug("Starting", "pid", os.Getpid())
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
@@ -123,19 +133,69 @@ func run(options startOptions) {
 		})
 	}
 
-	agent := agent.Agent{
-		Codefresh:          cf,
-		Logger:             log.New("module", "agent"),
-		Runtimes:           runtimes,
-		ID:                 options.agentID,
-		TaskPullerTicker:   time.NewTicker(time.Duration(options.taskPullingSecondsInterval) * time.Second),
-		ReportStatusTicker: time.NewTicker(time.Duration(options.statusReportingSecondsInterval) * time.Second),
-	}
-	dieOnError(agent.Start())
+	agent, err := agent.New(&agent.Options{
+		Codefresh:                      cf,
+		Logger:                         log.New("module", "agent"),
+		Runtimes:                       runtimes,
+		ID:                             options.agentID,
+		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval),
+		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval),
+	})
+	dieOnError(err)
 
-	server := server.Server{
+	serverMode := server.Release
+	if options.verbose {
+		serverMode = server.Debug
+	}
+	server, err := server.New(&server.Options{
 		Port:   fmt.Sprintf(":%s", options.serverPort),
 		Logger: log.New("module", "server"),
+		Mode:   serverMode,
+	})
+	dieOnError(err)
+
+	go handleSignals(server.Stop, agent.Stop, log)
+	dieOnError(agent.Start())
+	if err := server.Start(); err != nil && err != http.ErrServerClosed {
+		dieOnError(err)
 	}
-	dieOnError(server.Start())
+}
+
+func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
+	sigChan := make(chan os.Signal, 10)
+	receivedTerminationReq := false
+	receivedTerminationReqMux := sync.Mutex{}
+
+	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT) // sent by k8s
+
+	for {
+		switch <-sigChan {
+		case syscall.SIGTERM, syscall.SIGINT:
+			go func(stopServer, stopAgent func() error, log logger.Logger) {
+				// check if should perform force shutdown
+				shouldExit := false
+				receivedTerminationReqMux.Lock()
+				if receivedTerminationReq {
+					shouldExit = true
+				}
+				receivedTerminationReq = true
+				receivedTerminationReqMux.Unlock()
+
+				if shouldExit { // perform force shutdown
+					log.Warn("forcing termination!")
+					exit(1)
+				}
+
+				log.Warn("Received shutdown request, stopping agent and server...")
+				// order matters, the process will exit as soon as server is stopped
+				if err := stopAgent(); err != nil {
+					log.Error(err.Error())
+				}
+				if err := stopServer(); err != nil {
+					log.Error(err.Error())
+				}
+				return
+			}(stopServer, stopAgent, log)
+		}
+	}
 }
