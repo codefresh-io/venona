@@ -126,4 +126,7 @@ steps:
       - name: build
         on:
         - success
+      - name: compare-version
+        on:
+        - success
 
