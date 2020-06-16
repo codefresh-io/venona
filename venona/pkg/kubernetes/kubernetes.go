@@ -28,6 +28,7 @@ import (
 )
 
 var errNotValidType = errors.New("not a valid type")
+var kubeDecode =  scheme.Codecs.UniversalDeserializer().Decode
 
 type (
 	// Kubernetes API client
@@ -51,7 +52,7 @@ type (
 	}
 
 	kube struct {
-		client *kubernetes.Clientset
+		client kubernetes.Interface
 	}
 )
 
@@ -73,8 +74,8 @@ func (k kube) CreateResource(spec interface{}) error {
 		return err
 	}
 
-	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
-	obj, _, err := kubeDecode([]byte(string(bytes)), nil, nil)
+	
+	obj, _, err := kubeDecode(bytes, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,7 @@ func (k kube) DeleteResource(opt DeleteOptions) error {
 	return err
 }
 
-func buildKubeClient(host string, token string, crt string) (*kubernetes.Clientset, error) {
+func buildKubeClient(host string, token string, crt string) (kubernetes.Interface, error) {
 	return kubernetes.NewForConfig(&rest.Config{
 		Host:        host,
 		BearerToken: token,

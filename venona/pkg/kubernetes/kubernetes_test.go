@@ -18,6 +18,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/fake"
+	k8stesting "k8s.io/client-go/testing"
 )
 
 func TestNew(t *testing.T) {
@@ -58,6 +62,84 @@ func TestNew(t *testing.T) {
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.EqualError(t, err, tt.errorString)
+			}
+		})
+	}
+}
+
+func createFakeClientSetForPodCreation(t *testing.T, ns string) kubernetes.Interface {
+	client := fake.NewSimpleClientset()
+	client.Fake.PrependReactor("create", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		assert.Equal(t, ns, action.GetNamespace())
+		return true, nil, nil
+	})
+	return client
+}
+
+func createFakeClientSetForPvcCreation(t *testing.T, ns string) kubernetes.Interface {
+	client := fake.NewSimpleClientset()
+	client.Fake.PrependReactor("create", "persistentvolumeclaims", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		assert.Equal(t, ns, action.GetNamespace())
+		return true, nil, nil
+	})
+	return client
+}
+
+func Test_kube_CreateResource(t *testing.T) {
+	type fields struct {
+		client kubernetes.Interface
+	}
+	type args struct {
+		spec interface{}
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "shoul call create pod if spec type is create pod	",
+			fields: fields{
+				client: createFakeClientSetForPodCreation(t, "ns"),
+			},
+			args: args{
+				spec: map[string]interface{}{
+					"kind":       "Pod",
+					"apiVersion": "v1",
+					"metadata": map[string]interface{}{
+						"name":      "dind",
+						"namespace": "ns",
+					},
+				},
+			},
+		},
+		{
+			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
+			fields: fields{
+				client: createFakeClientSetForPvcCreation(t, "ns"),
+			},
+			args: args{
+				spec: map[string]interface{}{
+					"kind":       "PersistentVolumeClaim",
+					"apiVersion": "v1",
+					"metadata": map[string]interface{}{
+						"name":      "dind",
+						"namespace": "ns",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			k := kube{
+				client: tt.fields.client,
+			}
+			err := k.CreateResource(tt.args.spec)
+			if tt.wantErr {
+				assert.Error(t, err)
+				//	assert.EqualError(t, err, tt.errorString)
 			}
 		})
 	}
