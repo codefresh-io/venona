@@ -40,7 +40,7 @@ lint:
 
 .PHONY: security-check
 security-check:
-	@gosec ./...
+	@gosec ./... -nosec
 
 ## License check all the golang files to have the license
 .PHONY: license

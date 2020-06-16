@@ -52,7 +52,6 @@ func (r runtime) StartWorkflow(tasks []task.Task) error {
 		if err != nil {
 			return err // TODO: Return already executed tasks in order to terminate them
 		}
-
 	}
 	return nil
 }

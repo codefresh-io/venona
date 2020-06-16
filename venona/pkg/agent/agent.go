@@ -35,8 +35,8 @@ var (
 )
 
 const (
-	defaultTaskPullingInterval     = time.Second * 5
-	defaultStatusReportingInterval = time.Minute
+	defaultTaskPullingInterval     = time.Second * 3
+	defaultStatusReportingInterval = time.Second * 10
 )
 
 type (
@@ -211,7 +211,7 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	for _, t := range tasks {
-		logger.Info("Executing tasks", "runtime", t.Metadata.ReName)
+		logger.Debug("Received task", "type", t.Type, "workflow", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
 			creationTasks = append(creationTasks, t)
 		}
@@ -223,12 +223,14 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 
 	for _, tasks := range groupTasks(creationTasks) {
 		reName := tasks[0].Metadata.ReName
+		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 		if err := runtimes[reName].StartWorkflow(tasks); err != nil {
 			logger.Error(err.Error())
 		}
 	}
 	for _, tasks := range groupTasks(deletionTasks) {
 		reName := tasks[0].Metadata.ReName
+		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 		if err := runtimes[reName].TerminateWorkflow(tasks); err != nil {
 			logger.Error(err.Error())
 		}

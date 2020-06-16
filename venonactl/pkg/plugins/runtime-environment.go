@@ -141,8 +141,11 @@ func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values,
 	return v, nil
 }
 
-func (u *runtimeEnvironmentPlugin) Migrate(*MigrateOptions, Values) error {
-	return fmt.Errorf("not supported")
+func (u *runtimeEnvironmentPlugin) Migrate(opt *MigrateOptions, v Values) error {
+	return u.Delete(&DeleteOptions{
+		ClusterNamespace: opt.ClusterNamespace,
+		KubeBuilder: opt.KubeBuilder,
+	}, v)
 }
 
 func (u *runtimeEnvironmentPlugin) Test(opt TestOptions) error {

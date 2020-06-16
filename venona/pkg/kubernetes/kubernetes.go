@@ -38,10 +38,11 @@ type (
 	}
 	// Options for Kubernetes
 	Options struct {
-		Type  string
-		Cert  string
-		Token string
-		Host  string
+		Type     string
+		Cert     string
+		Token    string
+		Host     string
+		Insecure bool
 	}
 
 	// DeleteOptions to delete resource from the cluster
@@ -61,7 +62,7 @@ func New(opt Options) (Kubernetes, error) {
 	if opt.Type != "runtime" {
 		return nil, errNotValidType
 	}
-	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert)
+	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert, opt.Insecure)
 	return &kube{
 		client: client,
 	}, err
@@ -113,12 +114,20 @@ func (k kube) DeleteResource(opt DeleteOptions) error {
 	return err
 }
 
-func buildKubeClient(host string, token string, crt string) (kubernetes.Interface, error) {
-	return kubernetes.NewForConfig(&rest.Config{
-		Host:        host,
-		BearerToken: token,
-		TLSClientConfig: rest.TLSClientConfig{
+func buildKubeClient(host string, token string, crt string, insecure bool) (kubernetes.Interface, error) {
+	var tlsconf rest.TLSClientConfig
+	if insecure {
+		tlsconf = rest.TLSClientConfig{
+			Insecure: true,
+		}
+	} else {
+		tlsconf = rest.TLSClientConfig{
 			CAData: []byte(crt),
-		},
+		}
+	}
+	return kubernetes.NewForConfig(&rest.Config{
+		Host:            host,
+		BearerToken:     token,
+		TLSClientConfig: tlsconf,
 	})
 }

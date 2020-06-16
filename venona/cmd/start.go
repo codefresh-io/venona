@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
@@ -43,6 +44,7 @@ type startOptions struct {
 	codefreshToken                 string
 	codefreshHost                  string
 	verbose                        bool
+	rejectTLSUnauthorized          bool
 	agentID                        string
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
@@ -71,18 +73,21 @@ func init() {
 	dieOnError(viper.BindEnv("agent-id", "AGENT_ID"))
 	dieOnError(viper.BindEnv("config-dir", "CONFIG_DIR"))
 	dieOnError(viper.BindEnv("port", "PORT"))
+	dieOnError(viper.BindEnv("NODE_TLS_REJECT_UNAUTHORIZED"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
+	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", false, "Show more logs")
+	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
 	startCmd.Flags().StringVar(&startCmdOptions.serverPort, "port", viper.GetString("port"), "The port to start the server [$PORT]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
-	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval to pull new tasks from Codefresh")
-	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval to report status back to Codefresh")
+	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval (seconds) to pull new tasks from Codefresh")
+	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval (seconds) to report status back to Codefresh")
 
 	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
@@ -101,17 +106,23 @@ func run(options startOptions) {
 	log := logger.New(logger.Options{
 		Verbose: options.verbose,
 	})
+
 	log.Debug("Starting", "pid", os.Getpid())
+	if !options.rejectTLSUnauthorized {
+		log.Warn("Running in insecure mode", "NODE_TLS_REJECT_UNAUTHORIZED", options.rejectTLSUnauthorized)
+	}
+
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
 	{
 		for name, config := range configs {
 			k, err := kubernetes.New(kubernetes.Options{
-				Token: config.Token,
-				Type:  config.Type,
-				Host:  config.Host,
-				Cert:  config.Cert,
+				Token:    config.Token,
+				Type:     config.Type,
+				Host:     config.Host,
+				Cert:     config.Cert,
+				Insecure: !options.rejectTLSUnauthorized,
 			})
 			if err != nil {
 				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
@@ -125,12 +136,24 @@ func run(options startOptions) {
 	}
 	var cf codefresh.Codefresh
 	{
-		cf = codefresh.New(codefresh.Options{
+		opt := codefresh.Options{
 			Host:    options.codefreshHost,
 			Token:   options.codefreshToken,
 			AgentID: options.agentID,
 			Logger:  log.New("module", "service", "service", "codefresh"),
-		})
+		}
+		if !options.rejectTLSUnauthorized {
+			// #nosec
+			tr := &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			}
+			opt.HTTPClient = &http.Client{
+				Transport: tr,
+			}
+		}
+		cf = codefresh.New(opt)
 	}
 
 	agent, err := agent.New(&agent.Options{
@@ -138,8 +161,8 @@ func run(options startOptions) {
 		Logger:                         log.New("module", "agent"),
 		Runtimes:                       runtimes,
 		ID:                             options.agentID,
-		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval),
-		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval),
+		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
+		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
 	})
 	dieOnError(err)
 
@@ -166,7 +189,7 @@ func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
 	receivedTerminationReq := false
 	receivedTerminationReqMux := sync.Mutex{}
 
-	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT) // sent by k8s
+	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT)
 
 	for {
 		switch <-sigChan {

@@ -25,7 +25,23 @@ steps:
       steps:
       - name: main_clone
         on:
-        - success     
+        - success  
+  
+  compare-version:
+    <<: *common
+    title: Compare version to venonactl
+    image: codefresh/semver
+    commands:
+    - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
+    - export VENONA_VERSION=$(cat ./venona/VERSION)
+    - echo "Venona version -> $VENONA_VERSION ---- Venonactl version -> $VENONACTL_VERSION"
+    - semver-cli equal $VENONACTL_VERSION $VENONA_VERSION
+    - cf_export VERSION=$VENONA_VERSION
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success  
 
   gofmt:
     <<: *common
@@ -93,5 +109,24 @@ steps:
       steps:
       - name: main_clone
         on:
-        - success     
+        - success
+  
+  push:
+    type: push
+    title: Push candidate
+    stage: Build Artifacts
+    candidate: ${{build}}
+    tags:
+    - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
+    - ${{VERSION}}-${{CF_COMMIT_ID}}
+    - ${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: codefresh/venona
+    when:
+      steps:
+      - name: build
+        on:
+        - success
+      - name: compare-version
+        on:
+        - success
 
