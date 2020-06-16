@@ -66,19 +66,6 @@ func TestNew(t *testing.T) {
 				httpClient: buildClient(false),
 			},
 		},
-		{
-			name: "Build client with insecure mode",
-			args: args{
-				Options{
-					Host:     "http://host.com",
-					Insecure: true,
-				},
-			},
-			want: &cf{
-				host:       "http://host.com",
-				httpClient: buildClient(true),
-			},
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

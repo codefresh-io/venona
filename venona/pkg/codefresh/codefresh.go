@@ -16,7 +16,6 @@ package codefresh
 
 import (
 	"bytes"
-	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -51,7 +50,6 @@ type (
 		AgentID    string
 		Logger     logger.Logger
 		HTTPClient RequestDoer
-		Insecure   bool
 	}
 
 	cf struct {
@@ -74,7 +72,7 @@ func New(opt Options) Codefresh {
 
 	httpClient := opt.HTTPClient
 	if httpClient == nil {
-		httpClient = buildClient(opt.Insecure)
+		httpClient = &http.Client{}
 	}
 
 	return &cf{
@@ -167,16 +165,4 @@ func (c cf) doRequest(method string, api string, body io.Reader) ([]byte, error)
 		return nil, c.buildErrorFromResponse(resp.StatusCode, data)
 	}
 	return data, nil
-}
-
-func buildClient(insecure bool) *http.Client {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: insecure,
-		},
-	}
-	client := &http.Client{
-		Transport: tr,
-	}
-	return client
 }

@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
@@ -135,13 +136,24 @@ func run(options startOptions) {
 	}
 	var cf codefresh.Codefresh
 	{
-		cf = codefresh.New(codefresh.Options{
-			Host:     options.codefreshHost,
-			Token:    options.codefreshToken,
-			AgentID:  options.agentID,
-			Logger:   log.New("module", "service", "service", "codefresh"),
-			Insecure: !options.rejectTLSUnauthorized,
-		})
+		opt := codefresh.Options{
+			Host:    options.codefreshHost,
+			Token:   options.codefreshToken,
+			AgentID: options.agentID,
+			Logger:  log.New("module", "service", "service", "codefresh"),
+		}
+		if !options.rejectTLSUnauthorized {
+			// #nosec
+			tr := &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			}
+			opt.HTTPClient = &http.Client{
+				Transport: tr,
+			}
+		}
+		cf = codefresh.New(opt)
 	}
 
 	agent, err := agent.New(&agent.Options{
