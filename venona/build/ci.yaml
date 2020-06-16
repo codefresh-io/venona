@@ -115,7 +115,7 @@ steps:
     title: Push candidate
     stage: Build Artifacts
     candidate: ${{build}}
-    tag:
+    tags:
     - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
     image_name: codefresh/venona
