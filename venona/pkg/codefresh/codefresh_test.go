@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 			args: args{},
 			want: &cf{
 				host:       defaultHost,
-				httpClient: &http.Client{},
+				httpClient: buildClient(false),
 			},
 		},
 		{
@@ -63,7 +63,20 @@ func TestNew(t *testing.T) {
 			},
 			want: &cf{
 				host:       "http://host.com",
-				httpClient: &http.Client{},
+				httpClient: buildClient(false),
+			},
+		},
+		{
+			name: "Build client with insecure mode",
+			args: args{
+				Options{
+					Host:     "http://host.com",
+					Insecure: true,
+				},
+			},
+			want: &cf{
+				host:       "http://host.com",
+				httpClient: buildClient(true),
 			},
 		},
 	}
