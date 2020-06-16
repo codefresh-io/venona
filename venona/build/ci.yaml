@@ -34,7 +34,7 @@ steps:
     commands:
     - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
     - export VENONA_VERSION=$(cat ./venona/VERSION)
-    - semver-cli equal $VENONACTL_VERSION $
+    - semver-cli equal $VENONACTL_VERSION $VENONA_VERSION
     - cf_export VERSION=${{VENONA_VERSION}}
     when:
       steps:
