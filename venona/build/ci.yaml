@@ -121,7 +121,7 @@ steps:
     image_name: codefresh/venona
     when:
       steps:
-      - name: main_clone
+      - name: build
         on:
         - success
 
