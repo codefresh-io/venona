@@ -74,6 +74,7 @@ func New(opt Options) Codefresh {
 	if httpClient == nil {
 		httpClient = &http.Client{}
 	}
+
 	return &cf{
 		agentID:    opt.AgentID,
 		httpClient: httpClient,

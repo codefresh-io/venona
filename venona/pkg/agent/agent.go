@@ -35,8 +35,8 @@ var (
 )
 
 const (
-	defaultTaskPullingInterval     = time.Second * 5
-	defaultStatusReportingInterval = time.Minute
+	defaultTaskPullingInterval     = time.Second * 3
+	defaultStatusReportingInterval = time.Second * 10
 )
 
 type (
