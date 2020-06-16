@@ -28,7 +28,7 @@ import (
 )
 
 var errNotValidType = errors.New("not a valid type")
-var kubeDecode =  scheme.Codecs.UniversalDeserializer().Decode
+var kubeDecode = scheme.Codecs.UniversalDeserializer().Decode
 
 type (
 	// Kubernetes API client
@@ -75,7 +75,6 @@ func (k kube) CreateResource(spec interface{}) error {
 		return err
 	}
 
-	
 	obj, _, err := kubeDecode(bytes, nil, nil)
 	if err != nil {
 		return err
