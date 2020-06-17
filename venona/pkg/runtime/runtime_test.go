@@ -18,14 +18,13 @@ import (
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
-	"github.com/codefresh-io/go/venona/pkg/mocks"
 	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-func createKubernetesMock() *mocks.Kubernetes {
-	m := &mocks.Kubernetes{}
+func createKubernetesMock() *kubernetes.MockKubernetes {
+	m := &kubernetes.MockKubernetes{}
 	m.On("CreateResource", mock.Anything).Return(nil)
 	m.On("DeleteResource", mock.Anything).Return(nil)
 	return m
@@ -59,7 +58,7 @@ func Test_runtime_StartWorkflow(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := tt.runtime
-			mo := r.client.(*mocks.Kubernetes)
+			mo := r.client.(*kubernetes.MockKubernetes)
 
 			err := r.StartWorkflow(tt.args.tasks)
 			if tt.wantErr {
@@ -126,7 +125,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := tt.runtime
-			mo := r.client.(*mocks.Kubernetes)
+			mo := r.client.(*kubernetes.MockKubernetes)
 
 			errs := r.TerminateWorkflow(tt.args.tasks)
 			if tt.wantErr {

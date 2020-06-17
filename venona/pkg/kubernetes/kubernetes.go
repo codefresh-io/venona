@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	v1 "k8s.io/api/core/v1"
@@ -54,6 +55,7 @@ type (
 
 	kube struct {
 		client kubernetes.Interface
+		logger logger.Logger
 	}
 )
 
@@ -65,6 +67,7 @@ func New(opt Options) (Kubernetes, error) {
 	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert, opt.Insecure)
 	return &kube{
 		client: client,
+		logger: logger.New(logger.Options{}),
 	}, err
 }
 
@@ -88,6 +91,7 @@ func (k kube) CreateResource(spec interface{}) error {
 		if err != nil {
 			return err
 		}
+		k.logger.Info("PersistentVolumeClaim has been created")
 
 	case *v1.Pod:
 		namespace = objT.ObjectMeta.Namespace
@@ -95,6 +99,7 @@ func (k kube) CreateResource(spec interface{}) error {
 		if err != nil {
 			return err
 		}
+		k.logger.Info("Pod has been created")
 
 	}
 	return err

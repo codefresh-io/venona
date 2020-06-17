@@ -17,7 +17,10 @@ package kubernetes
 import (
 	"testing"
 
+	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
@@ -85,9 +88,16 @@ func createFakeClientSetForPvcCreation(t *testing.T, ns string) kubernetes.Inter
 	return client
 }
 
+func createMockLogger() *mocks.Logger {
+	l := &mocks.Logger{}
+	l.On("Info", mock.Anything).Return(nil)
+	return l
+}
+
 func Test_kube_CreateResource(t *testing.T) {
 	type fields struct {
 		client kubernetes.Interface
+		logger logger.Logger
 	}
 	type args struct {
 		spec interface{}
@@ -97,12 +107,15 @@ func Test_kube_CreateResource(t *testing.T) {
 		fields  fields
 		args    args
 		wantErr bool
+		wantMsg string
 	}{
 		{
 			name: "shoul call create pod if spec type is create pod	",
 			fields: fields{
 				client: createFakeClientSetForPodCreation(t, "ns"),
+				logger: createMockLogger(),
 			},
+			wantMsg: "Pod has been created",
 			args: args{
 				spec: map[string]interface{}{
 					"kind":       "Pod",
@@ -118,7 +131,9 @@ func Test_kube_CreateResource(t *testing.T) {
 			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
 			fields: fields{
 				client: createFakeClientSetForPvcCreation(t, "ns"),
+				logger: createMockLogger(),
 			},
+			wantMsg: "PersistentVolumeClaim has been created",
 			args: args{
 				spec: map[string]interface{}{
 					"kind":       "PersistentVolumeClaim",
@@ -135,8 +150,11 @@ func Test_kube_CreateResource(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			k := kube{
 				client: tt.fields.client,
+				logger: tt.fields.logger,
 			}
+			mo := k.logger.(*mocks.Logger)
 			err := k.CreateResource(tt.args.spec)
+			mo.AssertCalled(t, "Info", tt.wantMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 				//	assert.EqualError(t, err, tt.errorString)
