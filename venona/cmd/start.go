@@ -152,7 +152,7 @@ func run(options startOptions) {
 
 		httpHeaders := http.Header{}
 		{
-			httpHeaders.Add("userAgent", fmt.Sprintf("venona-%s", version))
+			httpHeaders.Add("User-Agent", fmt.Sprintf("codefresh-runner-%s", version))
 		}
 
 		cf = codefresh.New(codefresh.Options{

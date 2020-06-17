@@ -223,15 +223,25 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 
 	for _, tasks := range groupTasks(creationTasks) {
 		reName := tasks[0].Metadata.ReName
+		runtime, ok := runtimes[reName]
+		if !ok {
+			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			continue
+		}
 		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-		if err := runtimes[reName].StartWorkflow(tasks); err != nil {
+		if err := runtime.StartWorkflow(tasks); err != nil {
 			logger.Error(err.Error())
 		}
 	}
 	for _, tasks := range groupTasks(deletionTasks) {
 		reName := tasks[0].Metadata.ReName
+		runtime, ok := runtimes[reName]
+		if !ok {
+			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			continue
+		}
 		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-		if errs := runtimes[reName].TerminateWorkflow(tasks); len(errs) != 0 {
+		if errs := runtime.TerminateWorkflow(tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
 			}
