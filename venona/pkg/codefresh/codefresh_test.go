@@ -69,7 +69,7 @@ func TestNew(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, New(tt.args.opt))
+			assert.Equal(t, tt.want.Host(), New(tt.args.opt).Host())
 		})
 	}
 }
@@ -80,7 +80,7 @@ func Test_cf_prepareURL(t *testing.T) {
 		token      string
 		agentID    string
 		logger     logger.Logger
-		httpClient *http.Client
+		httpClient RequestDoer
 	}
 	type args struct {
 		path string
