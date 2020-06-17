@@ -23,8 +23,8 @@ steps:
     - GO111MODULE=on
     - GOSUMDB=off
     - GOPROXY=direct
-    - GOCACHE="/codefresh/volume/gocache"
-    - GOPATH="/codefresh/volume/gopath"
+    - GOCACHE=/codefresh/volume/gocache
+    - GOPATH=/codefresh/volume/gopath
     commands:
       - cd venona && go mod tidy
       - cf_export $GOCACHE
