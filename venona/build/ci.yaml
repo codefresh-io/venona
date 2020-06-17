@@ -19,7 +19,7 @@ steps:
     title: Download Dependencies
     stage: Test
     image: codefresh/venona-tester
-    environment: &common_vars
+    environment:
     - GO111MODULE=on
     - GOSUMDB=off
     - GOPROXY=direct
@@ -27,8 +27,6 @@ steps:
     - GOPATH=/codefresh/volume/gopath
     commands:
       - cd venona && go mod download
-      - cf_export $GOCACHE
-      - cf_export $GOPATH
     when:
       steps:
       - name: main_clone
@@ -131,10 +129,17 @@ steps:
     <<: *common
     title: Compile
     stage: Build Artifacts
+    # YAML arrays cannot be merged and flatten
+    # https://github.com/yaml/yaml/issues/35
+    # copy the variables from the download_dependencies step
     environment: 
-      - *common_vars
-      - GOOS=linux 
-      - GOARCH=386 
+    - GO111MODULE=on
+    - GOSUMDB=off
+    - GOPROXY=direct
+    - GOCACHE=/codefresh/volume/gocache
+    - GOPATH=/codefresh/volume/gopath
+    - GOOS=linux 
+    - GOARCH=386 
     commands:
       - cd venona && make build
 
