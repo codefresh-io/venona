@@ -34,7 +34,7 @@ steps:
       - name: main_clone
         on:
         - success  
- 
+
   test: &common
     <<: *deps
     commands:
@@ -44,7 +44,7 @@ steps:
       - name: download_dependencies
         on:
         - success  
-  
+
   compare-version:
     <<: *common
     title: Compare version to venonactl
@@ -66,7 +66,7 @@ steps:
     title: Run go-fmt
     commands:
       - cd venona && make test-fmt
-  
+
   license:
     <<: *common
     title: Check License
@@ -84,7 +84,7 @@ steps:
     title: Run Go Lint
     commands:
       - cd venona && make lint
-  
+
   code-security-scan:
     <<: *common
     title: Scan code security issues
@@ -149,7 +149,7 @@ steps:
       - name: compile
         on:
         - success
-  
+
   push:
     type: push
     title: Push candidate
