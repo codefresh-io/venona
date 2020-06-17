@@ -19,6 +19,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
+	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -70,18 +71,26 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func createFakeClientSetForPodCreation(t *testing.T, ns string) kubernetes.Interface {
+func createFakeClientSetForPodOperation(t *testing.T, ns string) kubernetes.Interface {
 	client := fake.NewSimpleClientset()
 	client.Fake.PrependReactor("create", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		assert.Equal(t, ns, action.GetNamespace())
+		return true, nil, nil
+	})
+	client.Fake.PrependReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		assert.Equal(t, ns, action.GetNamespace())
 		return true, nil, nil
 	})
 	return client
 }
 
-func createFakeClientSetForPvcCreation(t *testing.T, ns string) kubernetes.Interface {
+func createFakeClientSetForPvcOperation(t *testing.T, ns string) kubernetes.Interface {
 	client := fake.NewSimpleClientset()
 	client.Fake.PrependReactor("create", "persistentvolumeclaims", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		assert.Equal(t, ns, action.GetNamespace())
+		return true, nil, nil
+	})
+	client.Fake.PrependReactor("delete", "persistentvolumeclaims", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		assert.Equal(t, ns, action.GetNamespace())
 		return true, nil, nil
 	})
@@ -112,7 +121,7 @@ func Test_kube_CreateResource(t *testing.T) {
 		{
 			name: "shoul call create pod if spec type is create pod	",
 			fields: fields{
-				client: createFakeClientSetForPodCreation(t, "ns"),
+				client: createFakeClientSetForPodOperation(t, "ns"),
 				logger: createMockLogger(),
 			},
 			wantMsg: "Pod has been created",
@@ -130,7 +139,7 @@ func Test_kube_CreateResource(t *testing.T) {
 		{
 			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
 			fields: fields{
-				client: createFakeClientSetForPvcCreation(t, "ns"),
+				client: createFakeClientSetForPvcOperation(t, "ns"),
 				logger: createMockLogger(),
 			},
 			wantMsg: "PersistentVolumeClaim has been created",
@@ -159,6 +168,67 @@ func Test_kube_CreateResource(t *testing.T) {
 				assert.Error(t, err)
 				//	assert.EqualError(t, err, tt.errorString)
 			}
+		})
+	}
+}
+
+func Test_kube_DeleteResource(t *testing.T) {
+	type fields struct {
+		client kubernetes.Interface
+		logger logger.Logger
+	}
+	type args struct {
+		opt DeleteOptions
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+		wantMsg string
+	}{
+		{
+			name: "shoul call create pod if spec type is create pod	",
+			fields: fields{
+				client: createFakeClientSetForPodOperation(t, "ns"),
+				logger: createMockLogger(),
+			},
+			wantMsg: "Pod has been deleted",
+			args: args{
+				DeleteOptions{
+					Kind:      task.TypeDeletePod,
+					Namespace: "ns",
+					Name:      "name",
+				},
+			},
+		},
+		{
+			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
+			fields: fields{
+				client: createFakeClientSetForPvcOperation(t, "ns"),
+				logger: createMockLogger(),
+			},
+			wantMsg: "PersistentVolumeClaim has been deleted",
+			args: args{
+				DeleteOptions{
+					Kind:      task.TypeDeletePVC,
+					Namespace: "ns",
+					Name:      "name",
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			k := kube{
+				client: tt.fields.client,
+				logger: tt.fields.logger,
+			}
+			if err := k.DeleteResource(tt.args.opt); (err != nil) != tt.wantErr {
+				t.Errorf("kube.DeleteResource() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			mo := k.logger.(*mocks.Logger)
+			mo.AssertCalled(t, "Info", tt.wantMsg)
 		})
 	}
 }
