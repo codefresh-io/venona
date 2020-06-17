@@ -38,13 +38,18 @@ type (
 		Host() string
 	}
 
+	// RequestDoer runs HTTP request
+	RequestDoer interface {
+		Do(*http.Request) (*http.Response, error)
+	}
+
 	// Options for codefresh
 	Options struct {
 		Host       string
 		Token      string
 		AgentID    string
 		Logger     logger.Logger
-		HTTPClient http.Client
+		HTTPClient RequestDoer
 	}
 
 	cf struct {
@@ -52,7 +57,7 @@ type (
 		token      string
 		agentID    string
 		logger     logger.Logger
-		httpClient http.Client
+		httpClient RequestDoer
 	}
 )
 

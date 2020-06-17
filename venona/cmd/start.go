@@ -154,7 +154,7 @@ func run(options startOptions) {
 			Token:      options.codefreshToken,
 			AgentID:    options.agentID,
 			Logger:     log.New("module", "service", "service", "codefresh"),
-			HTTPClient: httpClient,
+			HTTPClient: &httpClient,
 		})
 	}
 
