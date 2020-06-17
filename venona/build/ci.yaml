@@ -19,7 +19,7 @@ steps:
     title: Download Dependencies
     stage: Test
     image: codefresh/venona-tester
-    environment:
+    environment: &common_vars
     - GO111MODULE=on
     - GOSUMDB=off
     - GOPROXY=direct
@@ -131,7 +131,8 @@ steps:
     <<: *common
     title: Compile
     stage: Build Artifacts
-    environment:
+    environment: 
+      - *common_vars
       - GOOS=linux 
       - GOARCH=386 
     commands:
