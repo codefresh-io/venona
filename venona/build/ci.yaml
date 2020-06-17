@@ -67,9 +67,9 @@ steps:
     commands:
       - cd venona && make lint
   
-  security:
+  code-security-scan:
     <<: *common
-    title: Run Security Check
+    title: Scanning code security issues
     commands:
       - cd venona && make security-check
 
@@ -78,6 +78,18 @@ steps:
     title: Run Gocyclo
     commands:
       - cd venona && make gocyclo
+
+  image-security-scan:
+    <<: *common
+    title: Scanning docker image
+    commands:
+      - cd venona && make docker-security-scan TAG=${{CF_BRANCH_TAG_NORMALIZED}}
+    when:
+      steps:
+      - name: build
+        on:
+        - success 
+    
   
   upload-codecov:
     <<: *common

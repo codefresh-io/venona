@@ -8,4 +8,7 @@ RUN go get github.com/client9/misspell/cmd/misspell && \
     go get github.com/google/addlicense && \
     go get github.com/github/hub
 
+RUN apk add curl
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin
+
 # codefresh/venona-tester
