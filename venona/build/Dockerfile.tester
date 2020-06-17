@@ -9,16 +9,4 @@ RUN go get github.com/client9/misspell/cmd/misspell && \
     go get github.com/google/addlicense && \
     go get github.com/github/hub
 
-
-FROM alpine:3.12
-
-RUN apk update && apk add --no-cache ca-certificates && apk upgrade && apk add git make
-
-COPY --from=os /go/bin/misspell /usr/local/bin/misspell
-COPY --from=os /go/bin/gocyclo /usr/local/bin/gocyclo
-COPY --from=os /go/bin/golint /usr/local/bin/golint
-COPY --from=os /go/bin/gosec /usr/local/bin/gosec
-COPY --from=os /go/bin/addlicense /usr/local/bin/addlicense
-COPY --from=os /go/bin/hub /usr/local/bin/hub
-
 # codefresh/venona-tester
