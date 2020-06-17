@@ -113,7 +113,6 @@ func (k kube) DeleteResource(opt DeleteOptions) error {
 		err = k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
 		k.logger.Info("PersistentVolumeClaim has been deleted")
 
-
 	case task.TypeDeletePod:
 		err = k.client.CoreV1().Pods(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
 		k.logger.Info("Pod has been deleted")
