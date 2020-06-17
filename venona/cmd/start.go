@@ -107,7 +107,7 @@ func run(options startOptions) {
 		Verbose: options.verbose,
 	})
 
-	log.Debug("Starting", "pid", os.Getpid())
+	log.Debug("Starting", "pid", os.Getpid(), "version", version)
 	if !options.rejectTLSUnauthorized {
 		log.Warn("Running in insecure mode", "NODE_TLS_REJECT_UNAUTHORIZED", options.rejectTLSUnauthorized)
 	}
