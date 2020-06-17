@@ -137,16 +137,16 @@ func run(options startOptions) {
 	var cf codefresh.Codefresh
 	{
 
-		var httpClient *http.Client
+		var httpClient http.Client
 		if !options.rejectTLSUnauthorized {
 			// #nosec
-			tr := &http.Transport{
+			tr := http.Transport{
 				TLSClientConfig: &tls.Config{
 					InsecureSkipVerify: true,
 				},
 			}
-			httpClient = &http.Client{
-				Transport: tr,
+			httpClient = http.Client{
+				Transport: &tr,
 			}
 		}
 		cf = codefresh.New(codefresh.Options{

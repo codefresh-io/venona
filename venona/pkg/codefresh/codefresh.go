@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"reflect"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -39,18 +38,13 @@ type (
 		Host() string
 	}
 
-	// RequestDoer interface
-	RequestDoer interface {
-		Do(*http.Request) (*http.Response, error)
-	}
-
 	// Options for codefresh
 	Options struct {
 		Host       string
 		Token      string
 		AgentID    string
 		Logger     logger.Logger
-		HTTPClient RequestDoer
+		HTTPClient http.Client
 	}
 
 	cf struct {
@@ -58,9 +52,7 @@ type (
 		token      string
 		agentID    string
 		logger     logger.Logger
-		httpClient interface {
-			Do(*http.Request) (*http.Response, error)
-		}
+		httpClient http.Client
 	}
 )
 
@@ -71,14 +63,9 @@ func New(opt Options) Codefresh {
 		host = defaultHost
 	}
 
-	httpClient := opt.HTTPClient
-	if reflect.ValueOf(httpClient).IsNil() {
-		httpClient = &http.Client{}
-	}
-
 	return &cf{
 		agentID:    opt.AgentID,
-		httpClient: httpClient,
+		httpClient: opt.HTTPClient,
 		host:       host,
 		logger:     opt.Logger,
 		token:      opt.Token,

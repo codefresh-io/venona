@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 			args: args{},
 			want: &cf{
 				host:       defaultHost,
-				httpClient: &http.Client{},
+				httpClient: http.Client{},
 			},
 		},
 		{
@@ -63,7 +63,7 @@ func TestNew(t *testing.T) {
 			},
 			want: &cf{
 				host:       "http://host.com",
-				httpClient: &http.Client{},
+				httpClient: http.Client{},
 			},
 		},
 	}
@@ -80,9 +80,7 @@ func Test_cf_prepareURL(t *testing.T) {
 		token      string
 		agentID    string
 		logger     logger.Logger
-		httpClient interface {
-			Do(*http.Request) (*http.Response, error)
-		}
+		httpClient http.Client
 	}
 	type args struct {
 		path string
