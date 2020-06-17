@@ -103,7 +103,7 @@ steps:
       - cd venona && make docker-security-scan TAG=${{CF_BRANCH_TAG_NORMALIZED}}
     when:
       steps:
-      - name: build
+      - name: build_image
         on:
         - success 
 
