@@ -107,7 +107,7 @@ steps:
       - name: build
         on:
         - success 
-    
+
   upload-codecov:
     <<: *common
     title: Upload Code Coverage
