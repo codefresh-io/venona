@@ -19,3 +19,7 @@ COPY VERSION .
 RUN apk update && apk add --no-cache ca-certificates && apk upgrade
 
 COPY --from=godev ./venona/venona /venona
+
+ENTRYPOINT [ "/venona" ]
+
+CMD [ "start" ]
