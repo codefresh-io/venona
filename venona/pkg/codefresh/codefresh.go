@@ -50,6 +50,7 @@ type (
 		AgentID    string
 		Logger     logger.Logger
 		HTTPClient RequestDoer
+		Headers    http.Header
 	}
 
 	cf struct {
@@ -58,6 +59,7 @@ type (
 		agentID    string
 		logger     logger.Logger
 		httpClient RequestDoer
+		headers    http.Header
 	}
 )
 
@@ -74,6 +76,7 @@ func New(opt Options) Codefresh {
 		host:       host,
 		logger:     opt.Logger,
 		token:      opt.Token,
+		headers:    opt.Headers,
 	}
 }
 
@@ -135,10 +138,10 @@ func (c cf) prepareRequest(method string, api string, data io.Reader) (*http.Req
 	if err != nil {
 		return nil, err
 	}
+	req.Header = c.headers.Clone()
 	if c.token != "" {
 		req.Header.Add("Authorization", c.token)
 	}
-	req.Header.Add("Codefresh-Agent-Version", "")
 	req.Header.Add("Content-Type", "application/json")
 	return req, nil
 }

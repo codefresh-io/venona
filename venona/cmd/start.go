@@ -149,12 +149,19 @@ func run(options startOptions) {
 				Transport: &tr,
 			}
 		}
+
+		httpHeaders := http.Header{}
+		{
+			httpHeaders.Add("Codefresh-Agent-Version", version)
+		}
+
 		cf = codefresh.New(codefresh.Options{
 			Host:       options.codefreshHost,
 			Token:      options.codefreshToken,
 			AgentID:    options.agentID,
 			Logger:     log.New("module", "service", "service", "codefresh"),
 			HTTPClient: &httpClient,
+			Headers:    httpHeaders,
 		})
 	}
 
