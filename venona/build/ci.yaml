@@ -15,15 +15,33 @@ steps:
       username: github
       password: ${{secrets.hybrid.git}}
 
-  test: &common
-    title: Run Unit Tests
+  download_dependencies: &deps
+    title: Download Dependencies
     stage: Test
     image: codefresh/venona-tester
+    environment:
+    - GO111MODULE=on
+    - GOSUMDB=off
+    - GOPROXY=direct
+    - GOCACHE="${{CF_VOLUME_PATH}}/gocache"
+    - GOPATH="${{CF_VOLUME_PATH}}/gopath"
+    commands:
+      - cd venona && go mod tidy
+      - cf_export $GOCACHE
+      - cf_export $GOPATH
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success  
+ 
+  test: &common
+    <<: *deps
     commands:
       - cd venona && make test
     when:
       steps:
-      - name: main_clone
+      - name: download_dependencies
         on:
         - success  
   
@@ -90,7 +108,6 @@ steps:
         on:
         - success 
     
-  
   upload-codecov:
     <<: *common
     title: Upload Code Coverage
@@ -109,7 +126,17 @@ steps:
         on:
         - success 
 
-  build:
+  upload-codecov:
+    <<: *common
+    title: Compile
+    stage: Build Artifacts
+    environment:
+      - GOOS=linux 
+      - GOARCH=386 
+    commands:
+      - cd venona && make build
+
+  build_image:
     type: build
     title: Build Docker Image
     stage: Build Artifacts
@@ -127,7 +154,7 @@ steps:
     type: push
     title: Push candidate
     stage: Build Artifacts
-    candidate: ${{build}}
+    candidate: ${{build_image}}
     tags:
     - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
     - ${{VERSION}}-${{CF_REVISION}}
@@ -137,7 +164,7 @@ steps:
     registry: dockerhub
     when:
       steps:
-      - name: build
+      - name: build_image
         on:
         - success
       - name: compare-version
