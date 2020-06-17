@@ -126,7 +126,7 @@ steps:
         on:
         - success 
 
-  upload-codecov:
+  compile:
     <<: *common
     title: Compile
     stage: Build Artifacts
@@ -146,7 +146,7 @@ steps:
     image_name: codefresh/venona
     when:
       steps:
-      - name: main_clone
+      - name: compile
         on:
         - success
   
