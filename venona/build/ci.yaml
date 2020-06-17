@@ -69,7 +69,7 @@ steps:
   
   code-security-scan:
     <<: *common
-    title: Scanning code security issues
+    title: Scan code security issues
     commands:
       - cd venona && make security-check
 
@@ -81,7 +81,7 @@ steps:
 
   image-security-scan:
     <<: *common
-    title: Scanning docker image
+    title: Scan Docker Image
     commands:
       - cd venona && make docker-security-scan TAG=${{CF_BRANCH_TAG_NORMALIZED}}
     when:
