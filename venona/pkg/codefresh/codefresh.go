@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"reflect"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -71,7 +72,7 @@ func New(opt Options) Codefresh {
 	}
 
 	httpClient := opt.HTTPClient
-	if httpClient == nil {
+	if reflect.ValueOf(httpClient).IsNil() {
 		httpClient = &http.Client{}
 	}
 
