@@ -71,7 +71,7 @@ func init() {
 	dieOnError(viper.BindEnv("codefresh-token", "CODEFRESH_TOKEN"))
 	dieOnError(viper.BindEnv("codefresh-host", "CODEFRESH_HOST"))
 	dieOnError(viper.BindEnv("agent-id", "AGENT_ID"))
-	dieOnError(viper.BindEnv("config-dir", "CONFIG_DIR"))
+	dieOnError(viper.BindEnv("config-dir", "VENONA_CONFIG_DIR"))
 	dieOnError(viper.BindEnv("port", "PORT"))
 	dieOnError(viper.BindEnv("NODE_TLS_REJECT_UNAUTHORIZED"))
 
