@@ -26,7 +26,7 @@ steps:
     - GOCACHE=/codefresh/volume/gocache
     - GOPATH=/codefresh/volume/gopath
     commands:
-      - cd venona && go mod tidy
+      - cd venona && go mod download
       - cf_export $GOCACHE
       - cf_export $GOPATH
     when:
@@ -37,6 +37,7 @@ steps:
 
   test: &common
     <<: *deps
+    title: Run tests
     commands:
       - cd venona && make test
     when:
