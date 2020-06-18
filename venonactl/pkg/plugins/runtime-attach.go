@@ -129,6 +129,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	// normalize the key in the secret to make sure we are not violating kube naming conventions
 	name := strings.ReplaceAll(opt.RuntimeEnvironment, "/", ".")
 	name = strings.ReplaceAll(name, "@", ".")
+	name = strings.ReplaceAll(name, ":", ".")
 	currentVenonaConf.Runtimes[fmt.Sprintf("%s.runtime.yaml", name)] = rc
 	runtimes := map[string]string{}
 	for name, runtime := range currentVenonaConf.Runtimes {
