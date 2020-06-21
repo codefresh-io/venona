@@ -38,7 +38,7 @@ steps:
     tag: release-1.0
     dockerfile:
       content: |-
-        FROM codefresh/venona:${{CF_HEAD_REVISION}}
+        FROM codefresh/venona:${{CF_PULL_REQUEST_HEAD_BRANCH}}
   
   push:
     type: push
