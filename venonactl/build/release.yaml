@@ -1,0 +1,90 @@
+version: '1.0'
+mode: parallel
+stages:
+- Build & Test
+- Release
+steps:
+
+  compare-version:
+    title: Compare version to venona
+    stage: Build & Test
+    image: codefresh/semver
+    commands:
+    - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
+    - export VENONA_VERSION=$(cat ./venona/VERSION)
+    - echo "Venona version -> $VENONA_VERSION ---- Venonactl version -> $VENONACTL_VERSION"
+    - semver-cli equal $VENONACTL_VERSION $VENONA_VERSION
+    - cf_export VERSION=$VENONACTL_VERSION
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success 
+          
+  create_git_tag:
+    title: Push tag to git
+    image: codefresh/cli
+    stage: Release
+    commands:
+    - export OLD_ORIGIN=$(git remote get-url origin)
+    - git remote rm origin
+    - git remote add origin https://${{GITHUB_TOKEN}}@github.com/codefresh-io/venona.git
+    - git tag ${{VERSION}}
+    - git push --tags
+    - git remote rm origin
+    - git remote add origin $OLD_ORIGIN
+    
+    fail_fast: false
+    when:
+      steps:
+      - name: calculate_version
+      - name: main_clone
+      branch:
+        only:
+        - release-1.0
+  
+  release_binaries:
+    title: Create release in Github with venona CLI
+    image: goreleaser/goreleaser:v0.124.1
+    stage: Release
+    fail_fast: false
+    commands:
+    - cd venonactlh
+    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate # pre-release
+    when:
+      steps:
+      - name: create_git_tag
+        on:
+        - finished
+      branch:
+        only:
+        - release-1.0
+
+
+  build_cli_image:
+    title: "Building venona cli image"
+    type: build
+    stage: Build & Test
+    tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+    working_directory: ${{main_clone}}/venonactl
+    image_name: codefresh/venonacli
+    when:
+      steps:
+      - name: release_binaries
+        on:
+        - success
+
+  push_cli_image:
+    title: "Push image with venona cli"
+    stage: Release
+    type: push
+    candidate: ${{build_cli_image}}
+    tags:
+    - latest
+    - ${{VERSION}}
+    registry: "dockerhub"
+    when:
+      steps:
+        - name: build_cli_image
+          on:
+          - success
