@@ -60,7 +60,7 @@ steps:
     stage: Release
     fail_fast: false
     commands:
-    - cd venonactlh
+    - cd venonactl
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate # pre-release
     when:
       steps:
