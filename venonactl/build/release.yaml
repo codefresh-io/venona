@@ -5,7 +5,17 @@ stages:
 - Release
 steps:
 
-  compare-version:
+  main_clone:
+    stage: Build & Test
+    title: Clone repository
+    type: git-clone
+    repo: https://github.com/codefresh-io/venona
+    revision: ${{CF_BRANCH}}
+    credentials:
+      username: github
+      password: ${{secrets.hybrid.git}}
+
+  export_version:
     title: Compare version to venona
     stage: Build & Test
     image: codefresh/semver
@@ -37,7 +47,7 @@ steps:
     fail_fast: false
     when:
       steps:
-      - name: calculate_version
+      - name: export_version
       - name: main_clone
       branch:
         only:

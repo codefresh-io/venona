@@ -15,7 +15,7 @@ steps:
       username: github
       password: ${{secrets.hybrid.git}}
 
-  compare_version:
+  export_version:
     title: Compare version to venona
     stage: Build & Test
     image: codefresh/semver
