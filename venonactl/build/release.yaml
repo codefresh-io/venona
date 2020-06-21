@@ -6,7 +6,6 @@ stages:
 steps:
 
   main_clone:
-    stage: Build & Test
     title: Clone repository
     type: git-clone
     repo: https://github.com/codefresh-io/venona
@@ -14,6 +13,11 @@ steps:
     credentials:
       username: github
       password: ${{secrets.hybrid.git}}
+    when:
+      condition:
+        all:
+          pullRequestTargetMaster: '"${{CF_PULL_REQUEST_TARGET}}" == "release-1.0"'
+          pullRequestMerged: '"${{CF_PULL_REQUEST_MERGED}}" == "true"'
 
   export_version:
     title: Compare version to venona
@@ -49,9 +53,6 @@ steps:
       steps:
       - name: export_version
       - name: main_clone
-      branch:
-        only:
-        - release-1.0
   
   release_binaries:
     title: Create release in Github with venona CLI
@@ -66,9 +67,6 @@ steps:
       - name: create_git_tag
         on:
         - finished
-      branch:
-        only:
-        - release-1.0
 
 
   build_cli_image:

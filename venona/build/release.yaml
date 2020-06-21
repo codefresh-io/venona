@@ -30,24 +30,6 @@ steps:
         on:
         - success  
 
-
-  validate_pr:
-    <<: *common
-    title: Validate PR merged
-    commands:
-    - |
-      export PR_DATA=$(hub pr list -s merged -f "%i %sH %H %pS%n" | grep "#$CF_PULL_REQUEST_NUMBER ")
-      if [ -z "$PR_DATA" ]
-      then
-        echo "PR not found or not merged"
-        cf_export IS_MERGED=false
-      else
-        echo "PR merged!"
-        cf_export IS_MERGED=true
-      fi
-      cf_export CF_HEAD_REVISION=$(echo $PR_DATA | awk '{print $2}')
-      cf_export CF_HEAD_BRANCH=$(echo $PR_DATA | awk '{print $3}')
-
   build:
     title: Building Docker Image
     type: build
@@ -57,11 +39,6 @@ steps:
     dockerfile:
       content: |-
         FROM codefresh/venona:${{CF_HEAD_REVISION}}
-    when:
-      steps:
-      - name: validate_pr
-        on:
-        - success
   
   push:
     type: push
