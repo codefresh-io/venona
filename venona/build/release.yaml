@@ -51,7 +51,6 @@ steps:
     candidate: ${{build}}
     tags:
     - ${{VERSION}}
-    - latest
     image_name: codefresh/venona
     registry: dockerhub
     when:
