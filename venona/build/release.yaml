@@ -1,0 +1,84 @@
+version: '1.0'
+
+mode: parallel
+
+steps:
+
+  main_clone:
+    title: Clone repository
+    type: git-clone
+    repo: https://github.com/codefresh-io/venona
+    revision: ${{CF_BRANCH}}
+    credentials:
+      username: github
+      password: ${{secrets.hybrid.git}}
+    when:
+      condition:
+        all:
+          pullRequestTargetMaster: '"${{CF_PULL_REQUEST_TARGET}}" == "master"'
+          pullRequestMerged: '"${{CF_PULL_REQUEST_MERGED}}" == "true"'
+ 
+  export_version: &common
+    title: Export latest version
+    image: codefresh/venona-tester
+    commands:
+    - export VENONA_VERSION=$(cat ./venona/VERSION)
+    - cf_export VERSION=$VENONA_VERSION
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success  
+
+
+  validate_pr:
+    <<: *common
+    title: Validate PR merged
+    commands:
+    - |
+      export PR_DATA=$(hub pr list -s merged -f "%i %sH %H %pS%n" | grep "#$CF_PULL_REQUEST_NUMBER ")
+      if [ -z "$PR_DATA" ]
+      then
+        echo "PR not found or not merged"
+        cf_export IS_MERGED=false
+      else
+        echo "PR merged!"
+        cf_export IS_MERGED=true
+      fi
+      cf_export CF_HEAD_REVISION=$(echo $PR_DATA | awk '{print $2}')
+      cf_export CF_HEAD_BRANCH=$(echo $PR_DATA | awk '{print $3}')
+
+  build:
+    title: Building Docker Image
+    type: build
+    working_directory: ${{main_clone}}/venona
+    image_name: codefresh/venona
+    tag: master
+    dockerfile:
+      content: |-
+        FROM codefresh/venona:${{CF_HEAD_REVISION}}
+    when:
+      steps:
+      - name: validate_pr
+        on:
+        - success
+  
+  push:
+    type: push
+    title: Push candidate
+    candidate: ${{build}}
+    tags:
+    - ${{VERSION}}
+    - master
+    - latest
+    image_name: codefresh/venona
+    registry: dockerhub
+    when:
+      steps:
+      - name: build
+        on:
+        - success
+      - name: export_version
+        on:
+        - success
+

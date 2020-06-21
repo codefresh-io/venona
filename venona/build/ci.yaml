@@ -1,0 +1,180 @@
+version: '1.0'
+mode: parallel
+stages:
+- Test
+- Build Artifacts
+steps:
+
+  main_clone:
+    stage: Test
+    title: Clone repository
+    type: git-clone
+    repo: https://github.com/codefresh-io/venona
+    revision: ${{CF_BRANCH}}
+    credentials:
+      username: github
+      password: ${{secrets.hybrid.git}}
+
+  download_dependencies: &deps
+    title: Download Dependencies
+    stage: Test
+    image: codefresh/venona-tester
+    environment:
+    - GO111MODULE=on
+    - GOSUMDB=off
+    - GOPROXY=direct
+    - GOCACHE=/codefresh/volume/gocache
+    - GOPATH=/codefresh/volume/gopath
+    commands:
+      - cd venona && go mod download
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success  
+
+  test: &common
+    <<: *deps
+    title: Run tests
+    commands:
+      - cd venona && make test
+    when:
+      steps:
+      - name: download_dependencies
+        on:
+        - success  
+
+  compare-version:
+    <<: *common
+    title: Compare version to venonactl
+    image: codefresh/semver
+    commands:
+    - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
+    - export VENONA_VERSION=$(cat ./venona/VERSION)
+    - echo "Venona version -> $VENONA_VERSION ---- Venonactl version -> $VENONACTL_VERSION"
+    - semver-cli equal $VENONACTL_VERSION $VENONA_VERSION
+    - cf_export VERSION=$VENONA_VERSION
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success  
+
+  gofmt:
+    <<: *common
+    title: Run go-fmt
+    commands:
+      - cd venona && make test-fmt
+
+  license:
+    <<: *common
+    title: Check License
+    commands:
+      - cd venona && make license    
+
+  spellcheck:
+    <<: *common
+    title: Spell Check
+    commands:
+      - cd venona && make spellcheck
+
+  lint:
+    <<: *common
+    title: Run Go Lint
+    commands:
+      - cd venona && make lint
+
+  code-security-scan:
+    <<: *common
+    title: Scan code security issues
+    commands:
+      - cd venona && make security-check
+
+  gocyclo:
+    <<: *common
+    title: Run Gocyclo
+    commands:
+      - cd venona && make gocyclo
+
+  image-security-scan:
+    <<: *common
+    title: Scan Docker Image
+    commands:
+      - cd venona && make docker-security-scan TAG=${{CF_BRANCH_TAG_NORMALIZED}}
+    when:
+      steps:
+      - name: build_image
+        on:
+        - success 
+
+  upload-codecov:
+    <<: *common
+    title: Upload Code Coverage
+    stage: Build Artifacts
+    commands:
+      - cd venona && make upload-coverage
+    environment:
+    - VCS_COMMIT_ID=${{CF_COMMIT}}
+    - VCS_BRANCH_NAME=${{CF_BRANCH}}
+    - VCS_SLUG=codefresh-io/venona
+    - CI_BUILD_URL=${{CF_BUILD_URL}}
+    - CI_BUILD_ID=${{CF_BUILD_ID}}
+    when:
+      steps:
+      - name: test
+        on:
+        - success 
+
+  compile:
+    <<: *common
+    title: Compile
+    stage: Build Artifacts
+    # YAML arrays cannot be merged and flatten
+    # https://github.com/yaml/yaml/issues/35
+    # copy the variables from the download_dependencies step
+    environment: 
+    - GO111MODULE=on
+    - GOSUMDB=off
+    - GOPROXY=direct
+    - GOCACHE=/codefresh/volume/gocache
+    - GOPATH=/codefresh/volume/gopath
+    - GOOS=linux 
+    - GOARCH=386 
+    commands:
+      - cd venona && make build
+
+  build_image:
+    type: build
+    title: Build Docker Image
+    stage: Build Artifacts
+    tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+    dockerfile: Dockerfile
+    working_directory: ${{main_clone}}/venona
+    image_name: codefresh/venona
+    when:
+      steps:
+      - name: compile
+        on:
+        - success
+
+  push:
+    type: push
+    title: Push candidate
+    stage: Build Artifacts
+    candidate: ${{build_image}}
+    tags:
+    - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
+    - ${{VERSION}}-${{CF_REVISION}}
+    - ${{CF_REVISION}}
+    - ${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: codefresh/venona
+    registry: dockerhub
+    when:
+      steps:
+      - name: build_image
+        on:
+        - success
+      - name: compare-version
+        on:
+        - success
+
