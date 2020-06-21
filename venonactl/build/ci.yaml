@@ -30,7 +30,6 @@ steps:
       - name: main_clone
         on:
         - success 
-        
 
   build_binaries:
     title: Build binaries for all platforms - skip publish
@@ -42,9 +41,6 @@ steps:
     when:
       steps:
       - name: main_clone
-      branch:
-        ignore:
-        - release-1.0
 
   build_cli_image:
     title: "Building venona cli image"
