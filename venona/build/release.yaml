@@ -39,7 +39,12 @@ steps:
     dockerfile:
       content: |-
         FROM codefresh/venona:${{CF_PULL_REQUEST_HEAD_BRANCH}}
-  
+    when:
+      steps:
+      - name: main_clone
+        on:
+        - success 
+
   push:
     type: push
     title: Push candidate
