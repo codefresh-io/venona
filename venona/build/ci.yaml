@@ -44,7 +44,7 @@ steps:
         on:
         - success  
 
-  compare-version:
+  export_version:
     <<: *common
     title: Compare version to venonactl
     image: codefresh/semver
@@ -174,7 +174,7 @@ steps:
       - name: build_image
         on:
         - success
-      - name: compare-version
+      - name: export_version
         on:
         - success
 
