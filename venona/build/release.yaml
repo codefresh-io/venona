@@ -18,7 +18,7 @@ steps:
           pullRequestTargetMaster: '"${{CF_PULL_REQUEST_TARGET}}" == "release-1.0"'
           pullRequestMerged: '"${{CF_PULL_REQUEST_MERGED}}" == "true"'
  
-  export_version: &common
+  export_version:
     title: Export latest version
     image: codefresh/venona-tester
     commands:
