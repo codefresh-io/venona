@@ -83,7 +83,7 @@ func New(opt Options) Codefresh {
 // Tasks get from Codefresh all latest tasks
 func (c cf) Tasks() ([]task.Task, error) {
 	c.logger.Debug("Requesting tasks")
-	res, err := c.doRequest("GET", path.Join("api", "agent", c.agentID, "tasks"), nil)
+	res, err := c.doRequest("GET", path.Join("api", "agent", url.PathEscape(c.agentID), "tasks"), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (c cf) ReportStatus(status AgentStatus) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.doRequest("PUT", path.Join("api", "agent", c.agentID, "status"), bytes.NewBuffer(s))
+	_, err = c.doRequest("PUT", path.Join("api", "agent",  url.PathEscape(c.agentID) , "status"), bytes.NewBuffer(s))
 	if err != nil {
 		return err
 	}
