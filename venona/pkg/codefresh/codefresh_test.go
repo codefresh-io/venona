@@ -83,7 +83,7 @@ func Test_cf_prepareURL(t *testing.T) {
 		httpClient RequestDoer
 	}
 	type args struct {
-		path string
+		paths []string
 	}
 	tests := []struct {
 		name    string
@@ -103,13 +103,24 @@ func Test_cf_prepareURL(t *testing.T) {
 		{
 			name: "Append path to the host",
 			args: args{
-				path: "/123/123",
+				paths: []string{"123", "123"},
 			},
 			fields: fields{
 				host: "http://url",
 			},
 			wantErr: false,
 			want:    mustURL("http://url/123/123"),
+		},
+		{
+			name: "Escape paths",
+			args: args{
+				paths: []string{"docker:desktop/server"},
+			},
+			fields: fields{
+				host: "http://url",
+			},
+			wantErr: false,
+			want:    mustURL("http://url/docker:desktop%2Fserver"),
 		},
 	}
 	for _, tt := range tests {
@@ -121,9 +132,12 @@ func Test_cf_prepareURL(t *testing.T) {
 				logger:     tt.fields.logger,
 				httpClient: tt.fields.httpClient,
 			}
-			_, err := c.prepareURL(tt.args.path)
+			url, err := c.prepareURL(tt.args.paths...)
 			if tt.wantErr {
 				assert.Error(t, err)
+			}
+			if tt.want != nil {
+				assert.Equal(t, tt.want.String(), url.String())
 			}
 		})
 	}
