@@ -83,7 +83,7 @@ func New(opt Options) Codefresh {
 // Tasks get from Codefresh all latest tasks
 func (c cf) Tasks() ([]task.Task, error) {
 	c.logger.Debug("Requesting tasks")
-	res, err := c.doRequest("GET", path.Join("api", "agent", url.PathEscape(c.agentID), "tasks"), nil)
+	res, err := c.doRequest("GET", nil, "api", "agent", c.agentID, "tasks")
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (c cf) ReportStatus(status AgentStatus) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.doRequest("PUT", path.Join("api", "agent",  url.PathEscape(c.agentID) , "status"), bytes.NewBuffer(s))
+	_, err = c.doRequest("PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
 	if err != nil {
 		return err
 	}
@@ -120,20 +120,29 @@ func (c cf) buildErrorFromResponse(status int, body []byte) error {
 	}
 }
 
-func (c cf) prepareURL(path string) (*url.URL, error) {
+func (c cf) prepareURL(paths ...string) (*url.URL, error) {
 	u, err := url.Parse(c.host)
 	if err != nil {
 		return nil, err
 	}
-	u.Path = path
+	accPath := []string{}
+	accRawPath := []string{}
+
+	for _, p := range paths {
+		accRawPath = append(accRawPath, url.PathEscape(p))
+		accPath = append(accPath, p)
+	}
+	u.Path = path.Join(accPath...)
+	u.RawPath = path.Join(accRawPath...)
 	return u, nil
 }
 
-func (c cf) prepareRequest(method string, api string, data io.Reader) (*http.Request, error) {
-	u, err := c.prepareURL(api)
+func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http.Request, error) {
+	u, err := c.prepareURL(apis...)
 	if err != nil {
 		return nil, err
 	}
+
 	req, err := http.NewRequest(method, u.String(), data)
 	if err != nil {
 		return nil, err
@@ -146,8 +155,8 @@ func (c cf) prepareRequest(method string, api string, data io.Reader) (*http.Req
 	return req, nil
 }
 
-func (c cf) doRequest(method string, api string, body io.Reader) ([]byte, error) {
-	req, err := c.prepareRequest(method, api, body)
+func (c cf) doRequest(method string, body io.Reader, apis ...string) ([]byte, error) {
+	req, err := c.prepareRequest(method, body, apis...)
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
