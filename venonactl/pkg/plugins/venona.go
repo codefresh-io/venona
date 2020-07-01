@@ -25,7 +25,6 @@ import (
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
-	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -134,17 +133,6 @@ func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 
 func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
-	// replace of sa creates new secert with sa creds
-	// avoid it till patch fully implemented
-	var skipUpgradeFor = map[string]interface{}{
-		"service-account.venona.yaml": nil,
-		"deployment.venona.yaml":      nil,
-	}
-
-	var deletePriorUpgrade = map[string]interface{}{
-		"deployment.venona.yaml": nil,
-	}
-
 	var err error
 
 	kubeClientset, err := opt.KubeBuilder.BuildClient()
@@ -153,65 +141,22 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 		return nil, err
 	}
 
-	// special case when we need to get the token from the remote to no regenrate it
-	// whole flow should be more like kubectl apply that build a patch
-	// based on remote object and candidate object
-
-	secret, err := kubeClientset.CoreV1().Secrets(opt.ClusterNamespace).Get(opt.Name, metav1.GetOptions{})
+	runnerDeployment, err := kubeClientset.AppsV1().Deployments(opt.ClusterNamespace).Get(AppName, metav1.GetOptions{})
 	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot get runner deployment: %v", err))
 		return nil, err
 	}
-	token := secret.Data["codefresh.token"]
-	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token))
+	image := v["Image"].(map[string]string)
+	runnerDeployment.Spec.Template.Spec.Containers[0].Image = fmt.Sprintf("%v:%v", image["Name"], image["Tag"]) 
+	runnerDeployment.ObjectMeta.Labels["version"] = v["Version"].(string)
+	// runnerDeployment.Spec.Selector.MatchLabels["version"] = v["Version"].(string)
+	// runnerDeployment.Spec.Template.ObjectMeta.Labels["version"] = v["Version"].(string)
 
-	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
+	_, err = kubeClientset.AppsV1().Deployments(opt.ClusterNamespace).Update(runnerDeployment)
 	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot upgrade runner deployment: %v", err))
 		return nil, err
 	}
-
-	for fileName, local := range kubeObjects {
-		if _, ok := deletePriorUpgrade[fileName]; ok {
-			u.logger.Debug(fmt.Sprintf("Deleting previous deplopyment of %s", fileName))
-			delOpt := &deleteOptions{
-				logger:         u.logger,
-				templates:      templates.TemplatesMap(),
-				templateValues: v,
-				kubeClientSet:  kubeClientset,
-				namespace:      opt.ClusterNamespace,
-				matchPattern:   fileName,
-				operatorType:   VenonaPluginType,
-			}
-			err := uninstall(delOpt)
-			if err != nil {
-				return nil, err
-			}
-			installOpt := &installOptions{
-				logger:         u.logger,
-				templates:      templates.TemplatesMap(),
-				templateValues: v,
-				kubeClientSet:  kubeClientset,
-				namespace:      opt.ClusterNamespace,
-				matchPattern:   fileName,
-				dryRun:         opt.DryRun,
-				operatorType:   VenonaPluginType,
-			}
-			err = install(installOpt)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if _, ok := skipUpgradeFor[fileName]; ok {
-			u.logger.Debug(fmt.Sprintf("Skipping upgrade of %s: should be ignored", fileName))
-			continue
-		}
-
-		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return v, nil
 }
 

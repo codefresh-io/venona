@@ -17,31 +17,54 @@ limitations under the License.
 */
 
 import (
-	"os"
-
+	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
+	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var upgradeCmdOpt struct {
 	kube struct {
-		context string
+		context   string
+		namespace string
 	}
-	dryRun bool
 }
 
 // upgradeCmd represents the upgrade command
 var upgradeCmd = &cobra.Command{
-	Use:   "upgrade [name]",
-	Short: "Upgrade existing runtime-environment",
+	Use:   "upgrade",
+	Short: "Upgrade existing 1.X runner",
 	Run: func(cmd *cobra.Command, args []string) {
 		lgr := createLogger("Upgrade", true, logFormatter)
-		lgr.Warn("Upgrade is not supported from version < 1.0.0 to version >= 1.x.x, please run the migration script: https://github.com/codefresh-io/venona/blob/master/scripts/migration.sh to upgrade to the latest version")
-		os.Exit(0)
+		builder := plugins.NewBuilder(lgr)
+		builder.Add(plugins.VenonaPluginType)
+
+		s := store.GetStore()
+		buildBasicStore(lgr)
+		extendStoreWithKubeClient(lgr)
+		extendStoreWithCodefershClient(lgr)
+		extendStoreWithAgentAPI(lgr, "", "")
+		fillKubernetesAPI(lgr, upgradeCmdOpt.kube.context, upgradeCmdOpt.kube.namespace, false)
+		values := s.BuildValues()
+		spn := createSpinner("Upgarding runtime (might take a few seconds)", "")
+		spn.Start()
+		defer spn.Stop()
+		var err error
+		for _, p := range builder.Get() {
+			values, err = p.Upgrade(&plugins.UpgradeOptions{
+				ClusterNamespace: upgradeCmdOpt.kube.namespace,
+				ClusterName:      upgradeCmdOpt.kube.namespace,
+				KubeBuilder:      getKubeClientBuilder(upgradeCmdOpt.kube.context, upgradeCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+			}, values)
+			if err != nil {
+				dieOnError(err)
+			}
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(upgradeCmd)
 	upgradeCmd.Flags().StringVar(&upgradeCmdOpt.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
-	upgradeCmd.Flags().BoolVar(&upgradeCmdOpt.dryRun, "dry-run", false, "Set to to actually upgrade the kubernetes components")
+	upgradeCmd.Flags().StringVar(&upgradeCmdOpt.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona is installed [$KUBE_NAMESPACE]")
 }

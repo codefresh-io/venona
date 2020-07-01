@@ -90,15 +90,12 @@ type (
 	}
 
 	UpgradeOptions struct {
-		CodefreshHost    string
-		CodefreshToken   string
 		ClusterName      string
 		ClusterNamespace string
 		Name             string
 		KubeBuilder      interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
-		DryRun bool
 	}
 
 	MigrateOptions struct {
