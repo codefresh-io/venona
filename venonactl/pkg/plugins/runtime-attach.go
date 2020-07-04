@@ -36,7 +36,7 @@ const (
 
 func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
 
-	config, err := opt.KubeBuilder.BuildConfig().ClientConfig()
+	config, err := opt.KubeBuilder.BuildConfig()
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to get client config on runtime cluster: %v", err)
 	}
