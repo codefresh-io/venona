@@ -25,10 +25,12 @@ import (
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
+	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // venonaPlugin installs assets on Kubernetes Dind runtimectl Env
@@ -39,7 +41,7 @@ type venonaPlugin struct {
 type migrationData struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 	Tolerations  []v1.Toleration   `json:"tolerations,omitempty"`
-	Env          []v1.EnvVar
+	Env          map[string]string `json:"env,omitempty"`
 }
 
 const (
@@ -133,6 +135,17 @@ func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 
 func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 
+	// replace of sa creates new secert with sa creds
+	// avoid it till patch fully implemented
+	var skipUpgradeFor = map[string]interface{}{
+		"service-account.venona.yaml": nil,
+		"deployment.venona.yaml":      nil,
+	}
+
+	var deletePriorUpgrade = map[string]interface{}{
+		"deployment.venona.yaml": nil,
+	}
+
 	var err error
 
 	kubeClientset, err := opt.KubeBuilder.BuildClient()
@@ -141,23 +154,110 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 		return nil, err
 	}
 
-	runnerDeployment, err := kubeClientset.AppsV1().Deployments(opt.ClusterNamespace).Get(AppName, metav1.GetOptions{})
-	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot get runner deployment: %v", err))
-		return nil, err
-	}
-	image := v["Image"].(map[string]string)
-	runnerDeployment.Spec.Template.Spec.Containers[0].Image = fmt.Sprintf("%v:%v", image["Name"], image["Tag"]) 
-	runnerDeployment.ObjectMeta.Labels["version"] = v["Version"].(string)
-	// runnerDeployment.Spec.Selector.MatchLabels["version"] = v["Version"].(string)
-	// runnerDeployment.Spec.Template.ObjectMeta.Labels["version"] = v["Version"].(string)
+	// special case when we need to get the token from the remote to no regenrate it
+	// whole flow should be more like kubectl apply that build a patch
+	// based on remote object and candidate object
 
-	_, err = kubeClientset.AppsV1().Deployments(opt.ClusterNamespace).Update(runnerDeployment)
+	secret, err := kubeClientset.CoreV1().Secrets(opt.ClusterNamespace).Get(opt.Name, metav1.GetOptions{})
 	if err != nil {
-		u.logger.Error(fmt.Sprintf("Cannot upgrade runner deployment: %v", err))
 		return nil, err
 	}
+	token := secret.Data["codefresh.token"]
+	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token))
+
+	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
+	if err != nil {
+		return nil, err
+	}
+	v, err = updateValuesBasedOnPreviousDeployment(opt.ClusterNamespace, kubeClientset, v)
+
+	for fileName, local := range kubeObjects {
+		if _, ok := deletePriorUpgrade[fileName]; ok {
+			u.logger.Debug(fmt.Sprintf("Deleting previous deplopyment of %s", fileName))
+			delOpt := &deleteOptions{
+				logger:         u.logger,
+				templates:      templates.TemplatesMap(),
+				templateValues: v,
+				kubeClientSet:  kubeClientset,
+				namespace:      opt.ClusterNamespace,
+				matchPattern:   fileName,
+				operatorType:   VenonaPluginType,
+			}
+			err := uninstall(delOpt)
+			if err != nil {
+				return nil, err
+			}
+			installOpt := &installOptions{
+				logger:         u.logger,
+				templates:      templates.TemplatesMap(),
+				templateValues: v,
+				kubeClientSet:  kubeClientset,
+				namespace:      opt.ClusterNamespace,
+				matchPattern:   fileName,
+				operatorType:   VenonaPluginType,
+			}
+			err = install(installOpt)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if _, ok := skipUpgradeFor[fileName]; ok {
+			u.logger.Debug(fmt.Sprintf("Skipping upgrade of %s: should be ignored", fileName))
+			continue
+		}
+
+		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return v, nil
+}
+
+func updateValuesBasedOnPreviousDeployment(ns string, kubeClientset *kubernetes.Clientset, v Values) (Values, error) {
+
+	runnerDeployment, err := kubeClientset.AppsV1().Deployments(ns).Get(AppName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	// Update the values with existing deployment values
+	if runnerDeployment.Spec.Template.Spec.NodeSelector != nil {
+
+	}
+	if runnerDeployment.Spec.Template.Spec.NodeSelector != nil {
+		v["NodeSelector"] = nodeSelectorToString(runnerDeployment.Spec.Template.Spec.NodeSelector)
+	}
+	if runnerDeployment.Spec.Template.Spec.Tolerations != nil {
+		v["Tolerations"] = tolerationsToSring(runnerDeployment.Spec.Template.Spec.Tolerations)
+	}
+
+	v["AdditionalEnvVars"] = getEnvVarsFromDeployment(runnerDeployment.Spec.Template.Spec.Containers)
+	return v, nil
+
+}
+
+func getEnvVarsFromDeployment(containers []v1.Container) map[string]string {
+	// Get env for containers
+	preDefinedEnvVars := map[string]interface{}{}
+	newEnvVars := map[string]string{}
+	preDefinedEnvVars["SELF_DEPLOYMENT_NAME"] = "SELF_DEPLOYMENT_NAME"
+	preDefinedEnvVars["CODEFRESH_TOKEN"] = "CODEFRESH_TOKEN"
+	preDefinedEnvVars["CODEFRESH_HOST"] = "CODEFRESH_HOST"
+	preDefinedEnvVars["AGENT_MODE"] = "AGENT_MODE"
+	preDefinedEnvVars["AGENT_NAME"] = "AGENT_NAME"
+	preDefinedEnvVars["AGENT_ID"] = "AGENT_ID"
+	preDefinedEnvVars["VENONA_CONFIG_DIR"] = "VENONA_CONFIG_DIR"
+
+	for _, container := range containers {
+		for _, envVar := range container.Env {
+			if preDefinedEnvVars[envVar.Name] == nil {
+				newEnvVars[envVar.Name] = envVar.Value
+			}
+		}
+	}
+	return newEnvVars
 }
 
 func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
@@ -187,7 +287,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	migrationData := migrationData{
 		Tolerations:  list.Items[0].Spec.Tolerations,
 		NodeSelector: list.Items[0].Spec.NodeSelector,
-		Env:          list.Items[0].Spec.Containers[0].Env,
+		Env:          getEnvVarsFromDeployment(list.Items[0].Spec.Containers),
 	}
 	var jsonData []byte
 	jsonData, err = json.Marshal(migrationData)

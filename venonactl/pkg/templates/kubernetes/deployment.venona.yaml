@@ -38,6 +38,12 @@ spec:
       {{ end }}
       containers:
       - env:
+        {{- if $.AdditionalEnvVars }}
+        {{- range $key, $value := $.AdditionalEnvVars }}
+        - name: {{ $key }}
+          value: {{ $value }}
+        {{- end}}
+        {{- end}}
         - name: SELF_DEPLOYMENT_NAME
           valueFrom:
             fieldRef:
@@ -53,7 +59,7 @@ spec:
           value: {{ .Mode }}
         - name: AGENT_NAME
           value: {{ .AppName }}
-        - name: AGENT_ID
+        - name: "AGENT_ID"
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
           value: "/etc/secrets"

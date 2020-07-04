@@ -52,6 +52,7 @@ var upgradeCmd = &cobra.Command{
 		var err error
 		for _, p := range builder.Get() {
 			values, err = p.Upgrade(&plugins.UpgradeOptions{
+				Name: s.AppName,
 				ClusterNamespace: upgradeCmdOpt.kube.namespace,
 				ClusterName:      upgradeCmdOpt.kube.namespace,
 				KubeBuilder:      getKubeClientBuilder(upgradeCmdOpt.kube.context, upgradeCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),

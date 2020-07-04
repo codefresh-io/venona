@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	// import all cloud providers auth clients
+	"gopkg.in/yaml.v2"
 	authv1 "k8s.io/api/authorization/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -85,6 +86,26 @@ func nodeSelectorParamToYaml(ns string) string {
 		nodeSelectorYaml += fmt.Sprintf("%s: %q", pSplit[0], pSplit[1])
 	}
 	return nodeSelectorYaml
+}
+
+func nodeSelectorToString(nodeSelectors map[string]string) string {
+	str := ""
+	for key, value := range nodeSelectors {
+
+		//str = strings.Join([]string {str, fmt.Sprintf("%s=%s", key, value)} , ",")
+		str = fmt.Sprintf("%s,%s=%s", str, key, value)
+
+	}
+	return strings.TrimPrefix(str, ",")
+}
+func tolerationsToSring(tolerations []v1.Toleration) string {
+	// [{\"effect\":\"NoSchedule\",\"key\":\"dedicated\",\"value\":\"codefresh\"},{\"effect\":\"NoSchedule\",\"key\":\"dedicated\",\"value\":\"codefresh\"}]
+	y, err := yaml.Marshal(&tolerations)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("\n%s", string(y))
+
 }
 
 // ExecuteTemplate - executes templates in tpl str with config as values

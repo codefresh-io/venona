@@ -47,6 +47,8 @@ type (
 
 		// need for define if monitor use cluster role or just role
 		UseNamespaceWithRole bool
+
+		AdditionalEnvVars map[string]string
 	}
 
 	KubernetesAPI struct {
@@ -106,13 +108,14 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Current.Version,
 		},
-		"Namespace":    s.KubernetesAPI.Namespace,
-		"ConfigPath":   s.KubernetesAPI.ConfigPath,
-		"Context":      s.KubernetesAPI.ContextName,
-		"NodeSelector": s.KubernetesAPI.NodeSelector,
-		"Tolerations":  s.KubernetesAPI.Tolerations,
-		"AgentToken":   s.AgentAPI.Token,
-		"AgentId":      s.AgentAPI.Id,
+		"AdditionalEnvVars": s.AdditionalEnvVars,
+		"Namespace":         s.KubernetesAPI.Namespace,
+		"ConfigPath":        s.KubernetesAPI.ConfigPath,
+		"Context":           s.KubernetesAPI.ContextName,
+		"NodeSelector":      s.KubernetesAPI.NodeSelector,
+		"Tolerations":       s.KubernetesAPI.Tolerations,
+		"AgentToken":        s.AgentAPI.Token,
+		"AgentId":           s.AgentAPI.Id,
 		"ServerCert": map[string]string{
 			"Cert": "",
 			"Key":  "",
