@@ -30,6 +30,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // venonaPlugin installs assets on Kubernetes Dind runtimectl Env
@@ -40,7 +41,7 @@ type venonaPlugin struct {
 type migrationData struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 	Tolerations  []v1.Toleration   `json:"tolerations,omitempty"`
-	Env          []v1.EnvVar
+	Env          map[string]string `json:"env,omitempty"`
 }
 
 const (
@@ -168,6 +169,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	if err != nil {
 		return nil, err
 	}
+	v, err = updateValuesBasedOnPreviousDeployment(opt.ClusterNamespace, kubeClientset, v)
 
 	for fileName, local := range kubeObjects {
 		if _, ok := deletePriorUpgrade[fileName]; ok {
@@ -192,7 +194,6 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 				kubeClientSet:  kubeClientset,
 				namespace:      opt.ClusterNamespace,
 				matchPattern:   fileName,
-				dryRun:         opt.DryRun,
 				operatorType:   VenonaPluginType,
 			}
 			err = install(installOpt)
@@ -213,6 +214,50 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	}
 
 	return v, nil
+}
+
+func updateValuesBasedOnPreviousDeployment(ns string, kubeClientset *kubernetes.Clientset, v Values) (Values, error) {
+
+	runnerDeployment, err := kubeClientset.AppsV1().Deployments(ns).Get(AppName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	// Update the values with existing deployment values
+	if runnerDeployment.Spec.Template.Spec.NodeSelector != nil {
+
+	}
+	if runnerDeployment.Spec.Template.Spec.NodeSelector != nil {
+		v["NodeSelector"] = nodeSelectorToString(runnerDeployment.Spec.Template.Spec.NodeSelector)
+	}
+	if runnerDeployment.Spec.Template.Spec.Tolerations != nil {
+		v["Tolerations"] = tolerationsToSring(runnerDeployment.Spec.Template.Spec.Tolerations)
+	}
+
+	v["AdditionalEnvVars"] = getEnvVarsFromDeployment(runnerDeployment.Spec.Template.Spec.Containers)
+	return v, nil
+
+}
+
+func getEnvVarsFromDeployment(containers []v1.Container) map[string]string {
+	// Get env for containers
+	preDefinedEnvVars := map[string]interface{}{}
+	newEnvVars := map[string]string{}
+	preDefinedEnvVars["SELF_DEPLOYMENT_NAME"] = "SELF_DEPLOYMENT_NAME"
+	preDefinedEnvVars["CODEFRESH_TOKEN"] = "CODEFRESH_TOKEN"
+	preDefinedEnvVars["CODEFRESH_HOST"] = "CODEFRESH_HOST"
+	preDefinedEnvVars["AGENT_MODE"] = "AGENT_MODE"
+	preDefinedEnvVars["AGENT_NAME"] = "AGENT_NAME"
+	preDefinedEnvVars["AGENT_ID"] = "AGENT_ID"
+	preDefinedEnvVars["VENONA_CONFIG_DIR"] = "VENONA_CONFIG_DIR"
+
+	for _, container := range containers {
+		for _, envVar := range container.Env {
+			if preDefinedEnvVars[envVar.Name] == nil {
+				newEnvVars[envVar.Name] = envVar.Value
+			}
+		}
+	}
+	return newEnvVars
 }
 
 func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
@@ -242,7 +287,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	migrationData := migrationData{
 		Tolerations:  list.Items[0].Spec.Tolerations,
 		NodeSelector: list.Items[0].Spec.NodeSelector,
-		Env:          list.Items[0].Spec.Containers[0].Env,
+		Env:          getEnvVarsFromDeployment(list.Items[0].Spec.Containers),
 	}
 	var jsonData []byte
 	jsonData, err = json.Marshal(migrationData)
