@@ -389,7 +389,7 @@ spec:
         {{- if $.AdditionalEnvVars }}
         {{- range $key, $value := $.AdditionalEnvVars }}
         - name: {{ $key }}
-          value: {{ $value }}
+          value: "{{ $value}}"
         {{- end}}
         {{- end}}
         - name: SELF_DEPLOYMENT_NAME
