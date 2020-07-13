@@ -47,6 +47,10 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:

@@ -251,6 +251,10 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -411,6 +415,10 @@ spec:
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
           value: "/etc/secrets"
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }}:{{ .Image.Tag }} {{- else }} {{- .Image.Name }}:{{ .Image.Tag }} {{- end}}
         volumeMounts:
         - name: runnerconf

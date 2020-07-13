@@ -63,6 +63,10 @@ spec:
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
           value: "/etc/secrets"
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }}:{{ .Image.Tag }} {{- else }} {{- .Image.Name }}:{{ .Image.Tag }} {{- end}}
         volumeMounts:
         - name: runnerconf

@@ -233,6 +233,13 @@ func updateValuesBasedOnPreviousDeployment(ns string, kubeClientset *kubernetes.
 		v["Tolerations"] = tolerationsToSring(runnerDeployment.Spec.Template.Spec.Tolerations)
 	}
 
+	for _, envVar := range runnerDeployment.Spec.Template.Spec.Containers[0].Env {
+		if envVar.Name == "DOCKER_REGISTRY" {
+			v["DockerRegistry"] = envVar.Value
+			break
+		}
+	}
+
 	v["AdditionalEnvVars"] = getEnvVarsFromDeployment(runnerDeployment.Spec.Template.Spec.Containers)
 	return v, nil
 
