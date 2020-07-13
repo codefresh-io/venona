@@ -166,7 +166,7 @@ func init() {
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.storageClass, "storage-class", "", "Set a name of your custom storage class, note: this will not install volume provisioning components")
-	installRuntimeCmd.Flags().StringVar(&installAgentCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
+	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
 
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")

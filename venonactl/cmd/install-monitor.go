@@ -106,7 +106,7 @@ func init() {
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.clusterId, "clusterId", "", "Cluster Id")
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshToken, "codefreshToken", "", "Codefresh token")
-	installMonitorAgentCmd.Flags().StringVar(&installAgentCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
+	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
 
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshHost, "codefreshHost", "", "Override codefresh host if you use your own codefresh installation")
 
