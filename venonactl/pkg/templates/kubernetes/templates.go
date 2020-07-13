@@ -411,7 +411,7 @@ spec:
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
           value: "/etc/secrets"
-        image: {{ .Image.Name }}:{{ .Image.Tag }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }}:{{ .Image.Tag }} {{- else }} {{- .Image.Name }}:{{ .Image.Tag }} {{- end}}        
         volumeMounts:
         - name: runnerconf
           mountPath: "/etc/secrets"

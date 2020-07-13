@@ -31,7 +31,7 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-        image: {{ .Storage.VolumeProvisioner.Image }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image.Name }} {{- else }} {{- .Storage.VolumeProvisioner.Image.Name }} {{- end}}
         imagePullPolicy: Always
         resources:
           requests:

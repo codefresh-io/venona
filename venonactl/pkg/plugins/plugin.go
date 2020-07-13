@@ -56,6 +56,7 @@ type (
 		RegisterWithAgent     bool
 		MarkAsDefault         bool
 		StorageClass          string
+		DockerRegistry        string
 		IsDefaultStorageClass bool
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)

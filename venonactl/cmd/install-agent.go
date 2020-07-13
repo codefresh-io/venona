@@ -43,6 +43,7 @@ var installAgentCmdOptions struct {
 	kubernetesRunnerType bool
 	tolerations          string
 	envVars              string
+	dockerRegistry       string
 }
 
 var installAgentCmd = &cobra.Command{
@@ -96,6 +97,7 @@ var installAgentCmd = &cobra.Command{
 			s.Image.Tag = version
 			s.Version.Current.Version = version
 		}
+		s.DockerRegistry = installAgentCmdOptions.dockerRegistry
 		if installAgentCmdOptions.envVars != "" {
 			s.AdditionalEnvVars = make(map[string]string)
 			parts := strings.Split(installAgentCmdOptions.envVars, ",")
@@ -138,6 +140,7 @@ func init() {
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.envVars, "envVars", "", "More env vars to be declared \"key=value\"")
+	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
 
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")

@@ -21,9 +21,10 @@ type (
 	Values struct {
 		AppName string
 
-		Mode       string
-		Image      *Image
-		AgentToken string
+		Mode           string
+		Image          *Image
+		DockerRegistry string
+		AgentToken     string
 
 		ServerCert *certs.ServerCert
 
@@ -113,6 +114,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"ConfigPath":        s.KubernetesAPI.ConfigPath,
 		"Context":           s.KubernetesAPI.ContextName,
 		"NodeSelector":      s.KubernetesAPI.NodeSelector,
+		"DockerRegistry":    s.DockerRegistry,
 		"Tolerations":       s.KubernetesAPI.Tolerations,
 		"AgentToken":        s.AgentAPI.Token,
 		"AgentId":           s.AgentAPI.Id,

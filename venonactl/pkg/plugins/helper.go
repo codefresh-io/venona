@@ -121,6 +121,7 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 
 	buf := bytes.NewBufferString("")
 	err = template.Execute(buf, data)
+	fmt.Println(buf)
 	if err != nil {
 		return "", err
 	}
