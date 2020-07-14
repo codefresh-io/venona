@@ -31,7 +31,7 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-        image: {{ .Storage.VolumeProvisioner.Image }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
         resources:
           requests:
@@ -47,6 +47,10 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:

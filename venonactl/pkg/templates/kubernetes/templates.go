@@ -128,7 +128,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: dind-volume-cleanup
-              image: codefresh/dind-volume-cleanup
+              image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-cleanup {{- else }}codefresh/dind-volume-cleanup {{- end}}
               env:
               - name: PROVISIONED_BY
                 value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
@@ -168,7 +168,7 @@ spec:
         {{ .Tolerations | indent 8 }}
       {{ end }}
       containers:
-        - image: codefresh/dind-volume-utils:v5
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
           imagePullPolicy: Always
           command:
@@ -235,7 +235,7 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-        image: {{ .Storage.VolumeProvisioner.Image }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
         resources:
           requests:
@@ -251,6 +251,10 @@ spec:
         env:
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -308,7 +312,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Monitor.AppName }}
-        image: "{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }}"
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
           - name: SERVICE_NAME
@@ -411,7 +415,11 @@ spec:
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
           value: "/etc/secrets"
-        image: {{ .Image.Name }}:{{ .Image.Tag }}
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }}:{{ .Image.Tag }} {{- else }} {{- .Image.Name }}:{{ .Image.Tag }} {{- end}}
         volumeMounts:
         - name: runnerconf
           mountPath: "/etc/secrets"

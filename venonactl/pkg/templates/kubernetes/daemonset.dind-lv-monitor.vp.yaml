@@ -32,7 +32,7 @@ spec:
         {{ .Tolerations | indent 8 }}
       {{ end }}
       containers:
-        - image: codefresh/dind-volume-utils:v5
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
           imagePullPolicy: Always
           command:
