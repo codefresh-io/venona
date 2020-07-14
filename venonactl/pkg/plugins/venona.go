@@ -236,7 +236,8 @@ func updateValuesBasedOnPreviousDeployment(ns string, kubeClientset *kubernetes.
 	for _, envVar := range runnerDeployment.Spec.Template.Spec.Containers[0].Env {
 		if envVar.Name == "DOCKER_REGISTRY" {
 			v["DockerRegistry"] = envVar.Value
-			break
+		} else if envVar.Name == "AGENT_ID" {
+			v["AgentId"] = envVar.Value
 		}
 	}
 
