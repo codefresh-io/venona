@@ -7,7 +7,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/briandowns/spinner v1.11.1
-	github.com/codefresh-io/go-sdk v0.18.0
+	github.com/codefresh-io/go-sdk v0.19.4
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gophercloud/gophercloud v0.8.0 // indirect
 	github.com/huandu/xstrings v1.3.0 // indirect

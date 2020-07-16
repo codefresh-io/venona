@@ -60,6 +60,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 		KubernetesRunnerType:  opt.KubernetesRunnerType,
 		BuildNodeSelector:     opt.BuildNodeSelector,
 		Annotations:           opt.Annotations,
+		Insecure:              opt.Insecure,
 	}
 
 	// Set storage Class by backend
@@ -144,7 +145,7 @@ func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values,
 func (u *runtimeEnvironmentPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	return u.Delete(&DeleteOptions{
 		ClusterNamespace: opt.ClusterNamespace,
-		KubeBuilder: opt.KubeBuilder,
+		KubeBuilder:      opt.KubeBuilder,
 	}, v)
 }
 
