@@ -75,6 +75,7 @@ type (
 		RuntimeClusterName    string
 		RuntimeServiceAccount string
 		RestartAgent          bool
+		Insecure              bool
 	}
 
 	DeleteOptions struct {

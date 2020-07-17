@@ -18,7 +18,9 @@ package codefresh
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 
 	"archive/zip"
 
@@ -39,6 +41,7 @@ type (
 		ClusterNamespace      string
 		RegisterWithAgent     bool
 		MarkAsDefault         bool
+		Insecure              bool
 		StorageClass          string
 		IsDefaultStorageClass bool
 		KubernetesRunnerType  bool
@@ -73,13 +76,27 @@ type (
 
 // NewCodefreshAPI - creates new codefresh api
 func NewCodefreshAPI(opt *APIOptions) API {
+	httpClient := &http.Client{}
+	if opt.Insecure {
+		// #nosec
+		tr := http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
+		httpClient = &http.Client{
+			Transport: &tr,
+		}
+	}
+
 	return &api{
 		logger: opt.Logger,
 		codefresh: codefresh.New(&codefresh.ClientOptions{
 			Auth: codefresh.AuthOptions{
 				Token: opt.CodefreshToken,
 			},
-			Host: opt.CodefreshHost,
+			Host:   opt.CodefreshHost,
+			Client: httpClient,
 		}),
 		clustername:           opt.ClusterName,
 		clusternamespace:      opt.ClusterNamespace,
@@ -123,7 +140,7 @@ func (a *api) Sign() (*certs.ServerCert, error) {
 	respBodyReaderAt := bytes.NewReader(byteArray)
 	zipReader, err := zip.NewReader(respBodyReaderAt, int64(len(byteArray)))
 	if err != nil {
-		a.logger.Debug("Failed to create zip reader from given certificate " + fmt.Sprintf("%s",byteArray))
+		a.logger.Debug("Failed to create zip reader from given certificate " + fmt.Sprintf("%s", byteArray))
 		return nil, err
 	}
 	for _, zf := range zipReader.File {
