@@ -8,7 +8,7 @@ steps:
     title: Clone repository
     type: git-clone
     repo: https://github.com/codefresh-io/venona
-    revision: ${{CF_BRANCH}}
+    revision: ${{CF_PULL_REQUEST_TARGET}}
     credentials:
       username: github
       password: ${{secrets.hybrid.git}}
