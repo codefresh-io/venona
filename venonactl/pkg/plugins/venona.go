@@ -140,6 +140,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	var skipUpgradeFor = map[string]interface{}{
 		"service-account.venona.yaml": nil,
 		"deployment.venona.yaml":      nil,
+		"venonaconf.secret.venona.yaml": nil,
 	}
 
 	var deletePriorUpgrade = map[string]interface{}{
