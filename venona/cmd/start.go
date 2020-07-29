@@ -139,10 +139,10 @@ func run(options startOptions) {
 
 		var httpClient http.Client
 		if !options.rejectTLSUnauthorized {
-			
+
 			customTransport := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-			
+
 			httpClient = http.Client{
 				Transport: customTransport,
 			}
