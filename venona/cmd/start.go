@@ -137,11 +137,10 @@ func run(options startOptions) {
 	}
 	var cf codefresh.Codefresh
 	{
-		// #nosec
 		var httpClient http.Client
 		if !options.rejectTLSUnauthorized {
-
 			customTransport := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
+			// #nosec
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 			httpClient = http.Client{

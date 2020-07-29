@@ -77,9 +77,9 @@ type (
 // NewCodefreshAPI - creates new codefresh api
 func NewCodefreshAPI(opt *APIOptions) API {
 	httpClient := &http.Client{}
-	// #nosec
 	if opt.Insecure {
 		customTransport := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
+		// #nosec
 		customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 		httpClient = &http.Client{
