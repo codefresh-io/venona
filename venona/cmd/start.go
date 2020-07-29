@@ -136,7 +136,7 @@ func run(options startOptions) {
 	}
 	var cf codefresh.Codefresh
 	{
-
+		// #nosec
 		var httpClient http.Client
 		if !options.rejectTLSUnauthorized {
 
