@@ -74,12 +74,13 @@ func init() {
 	dieOnError(viper.BindEnv("config-dir", "VENONA_CONFIG_DIR"))
 	dieOnError(viper.BindEnv("port", "PORT"))
 	dieOnError(viper.BindEnv("NODE_TLS_REJECT_UNAUTHORIZED"))
+	dieOnError(viper.BindEnv("verbose", "VERBOSE"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
 
-	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", false, "Show more logs")
+	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
