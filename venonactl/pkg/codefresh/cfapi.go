@@ -78,15 +78,12 @@ type (
 func NewCodefreshAPI(opt *APIOptions) API {
 	httpClient := &http.Client{}
 	if opt.Insecure {
-		// #nosec
-		tr := http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		}
-		httpClient = &http.Client{
-			Transport: &tr,
-		}
+		customTransport := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
+			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			
+			httpClient = &http.Client{
+				Transport: customTransport,
+			}
 	}
 
 	return &api{
