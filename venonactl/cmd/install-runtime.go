@@ -23,6 +23,9 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	cliValues "helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"	
 )
 
 var installRuntimeCmdOptions struct {
@@ -42,6 +45,7 @@ var installRuntimeCmdOptions struct {
 	tolerations            string
 	templateValues         []string
 	templateFileValues     []string
+	templateValueFiles     []string
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -130,21 +134,39 @@ var installRuntimeCmd = &cobra.Command{
 		values := s.BuildValues()
 
 		var err error
-		if len(installRuntimeCmdOptions.templateValues) > 0 {
-			setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
-			if err != nil {
-				dieOnError(err)
+		valueOpts := &cliValues.Options{}
+		if len(installRuntimeCmdOptions.templateValueFiles) > 0 {
+			for _, v := range(installRuntimeCmdOptions.templateValueFiles) {
+				valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
 			}
-			values = mergeMaps(values, setValues)
+		}
+
+		if len(installRuntimeCmdOptions.templateValues) > 0 {
+			for _, v := range(installRuntimeCmdOptions.templateValues) {
+				valueOpts.Values = append(valueOpts.Values, v)
+			}			
+			// setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
+			// if err != nil {
+			// 	dieOnError(err)
+			// }
+			// values = mergeMaps(values, setValues)
 		}
 
 		if len(installRuntimeCmdOptions.templateFileValues) > 0 {
-			setFileValues, err := parseSetFiles(installRuntimeCmdOptions.templateFileValues)
-			if err != nil {
-				dieOnError(err)
-			}
-			values = mergeMaps(values, setFileValues)
+			for _, v := range(installRuntimeCmdOptions.templateFileValues) {
+				valueOpts.FileValues = append(valueOpts.FileValues, v)
+			}				
+			// setFileValues, err := parseSetFiles(installRuntimeCmdOptions.templateFileValues)
+			// if err != nil {
+			// 	dieOnError(err)
+			// }
+			// values = mergeMaps(values, setFileValues)
 		}
+		cliValues, err := valueOpts.MergeValues(getter.Providers{})
+		if err != nil {
+			dieOnError(err)
+		}
+		values = mergeMaps(values, cliValues)
 
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
@@ -179,4 +201,5 @@ func init() {
 
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
+	installRuntimeCmd.Flags().StringArrayVarP(&installRuntimeCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 }

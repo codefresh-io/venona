@@ -25,6 +25,8 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	cliValues "helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"	
 )
 
 var installAgentCmdOptions struct {
@@ -44,6 +46,9 @@ var installAgentCmdOptions struct {
 	tolerations          string
 	envVars              []string
 	dockerRegistry       string
+	templateValues       []string
+	templateFileValues   []string
+	templateValueFiles   []string
 }
 
 var installAgentCmd = &cobra.Command{
@@ -116,6 +121,30 @@ var installAgentCmd = &cobra.Command{
 
 		values := s.BuildValues()
 		var err error
+		valueOpts := &cliValues.Options{}
+		if len(installAgentCmdOptions.templateValueFiles) > 0 {
+			for _, v := range(installAgentCmdOptions.templateValueFiles) {
+				valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
+			}
+		}
+
+		if len(installAgentCmdOptions.templateValues) > 0 {
+			for _, v := range(installAgentCmdOptions.templateValues) {
+				valueOpts.Values = append(valueOpts.Values, v)
+			}			
+		}
+
+		if len(installAgentCmdOptions.templateFileValues) > 0 {
+			for _, v := range(installAgentCmdOptions.templateFileValues) {
+				valueOpts.FileValues = append(valueOpts.FileValues, v)
+			}
+		}
+		cliValues, err := valueOpts.MergeValues(getter.Providers{})
+		if err != nil {
+			dieOnError(err)
+		}
+		values = mergeMaps(values, cliValues)
+
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -144,6 +173,11 @@ func init() {
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+
+	installAgentCmd.Flags().StringArrayVar(&installAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
+	installAgentCmd.Flags().StringArrayVar(&installAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
+	installAgentCmd.Flags().StringArrayVarP(&installAgentCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
+
 }
 
 func fillCodefreshAPI(logger logger.Logger) {

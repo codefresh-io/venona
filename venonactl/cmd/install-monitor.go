@@ -23,6 +23,9 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	cliValues "helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"	
+
 )
 
 var installMonitorAgentCmdOptions struct {
@@ -36,6 +39,9 @@ var installMonitorAgentCmdOptions struct {
 	codefreshToken string
 	codefreshHost  string
 	dockerRegistry string
+	templateValues         []string
+	templateFileValues     []string
+	templateValueFiles     []string
 }
 
 // installK8sAgentCmd represents the install command
@@ -88,7 +94,30 @@ var installMonitorAgentCmd = &cobra.Command{
 		}
 
 		values := s.BuildValues()
+		var err error
+		valueOpts := &cliValues.Options{}
+		if len(installMonitorAgentCmdOptions.templateValueFiles) > 0 {
+			for _, v := range(installMonitorAgentCmdOptions.templateValueFiles) {
+				valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
+			}
+		}
 
+		if len(installMonitorAgentCmdOptions.templateValues) > 0 {
+			for _, v := range(installMonitorAgentCmdOptions.templateValues) {
+				valueOpts.Values = append(valueOpts.Values, v)
+			}
+		}
+
+		if len(installMonitorAgentCmdOptions.templateFileValues) > 0 {
+			for _, v := range(installMonitorAgentCmdOptions.templateFileValues) {
+				valueOpts.FileValues = append(valueOpts.FileValues, v)
+			}	
+		}
+		cliValues, err := valueOpts.MergeValues(getter.Providers{})
+		if err != nil {
+			dieOnError(err)
+		}
+		values = mergeMaps(values, cliValues)
 		for _, p := range builder.Get() {
 			_, err := p.Install(builderInstallOpt, values)
 			dieOnError(err)
@@ -111,5 +140,8 @@ func init() {
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshHost, "codefreshHost", "", "Override codefresh host if you use your own codefresh installation")
 
 	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.helm3, "helm3", false, "Set flag if cluster use helm3")
+	installMonitorAgentCmd.Flags().StringArrayVar(&installMonitorAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	installMonitorAgentCmd.Flags().StringArrayVar(&installMonitorAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
+	installMonitorAgentCmd.Flags().StringArrayVarP(&installMonitorAgentCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 
 }
