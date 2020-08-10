@@ -65,21 +65,23 @@ var installAgentCmd = &cobra.Command{
 			dieOnError(err)
 		}
 		// Merge cmd options with template
-		paramOrValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
-		paramOrValueStr(templateValuesMap, "Token", &cfAPIToken)		
-		paramOrValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
-		paramOrValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
-		paramOrValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
-		paramOrValueStr(templateValuesMap, "Namespace", &installAgentCmdOptions.kube.namespace)
-		paramOrValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
-		paramOrValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
-		paramOrValueStr(templateValuesMap, "Tolerations", &installAgentCmdOptions.tolerations)
-		//paramOrValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
-		paramOrValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		mergeValueStr(templateValuesMap, "Namespace", &installAgentCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
+		mergeValueStr(templateValuesMap, "Tolerations", &installAgentCmdOptions.tolerations)
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
+
+		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
+		mergeValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
+		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
+
+		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 	
-		paramOrValueBool(templateValuesMap, "InCluster", &installAgentCmdOptions.kube.inCluster)
-		//paramOrValueBool(templateValuesMap, "", &installAgentCmdOptions.dryRun)
-		paramOrValueBool(templateValuesMap, "kubernetesRunnerType", &installAgentCmdOptions.kubernetesRunnerType)
+		mergeValueBool(templateValuesMap, "InCluster", &installAgentCmdOptions.kube.inCluster)
+		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installAgentCmdOptions.kubernetesRunnerType)
 
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)

@@ -23,8 +23,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	cliValues "helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/getter"	
 
 )
 
@@ -49,6 +47,26 @@ var installMonitorAgentCmd = &cobra.Command{
 	Use:   "monitor",
 	Short: "Install Codefresh's monitor agent on cluster",
 	Run: func(cmd *cobra.Command, args []string) {
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			installMonitorAgentCmdOptions.templateValueFiles, 
+			installMonitorAgentCmdOptions.templateValues, 
+			installMonitorAgentCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &installMonitorAgentCmdOptions.codefreshHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
+		mergeValueStr(templateValuesMap, "Token", &installMonitorAgentCmdOptions.codefreshToken)
+		mergeValueStr(templateValuesMap, "Namespace", &installMonitorAgentCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installMonitorAgentCmdOptions.kube.context)
+
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installMonitorAgentCmdOptions.dockerRegistry)
+		mergeValueStr(templateValuesMap, "ClusterId", &installMonitorAgentCmdOptions.clusterId)
+		mergeValueBool(templateValuesMap, "helm3", &installMonitorAgentCmdOptions.helm3)
 
 		s := store.GetStore()
 
@@ -94,30 +112,8 @@ var installMonitorAgentCmd = &cobra.Command{
 		}
 
 		values := s.BuildValues()
-		var err error
-		valueOpts := &cliValues.Options{}
-		if len(installMonitorAgentCmdOptions.templateValueFiles) > 0 {
-			for _, v := range(installMonitorAgentCmdOptions.templateValueFiles) {
-				valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
-			}
-		}
+		values = mergeMaps(values, templateValuesMap)
 
-		if len(installMonitorAgentCmdOptions.templateValues) > 0 {
-			for _, v := range(installMonitorAgentCmdOptions.templateValues) {
-				valueOpts.Values = append(valueOpts.Values, v)
-			}
-		}
-
-		if len(installMonitorAgentCmdOptions.templateFileValues) > 0 {
-			for _, v := range(installMonitorAgentCmdOptions.templateFileValues) {
-				valueOpts.FileValues = append(valueOpts.FileValues, v)
-			}	
-		}
-		cliValues, err := valueOpts.MergeValues(getter.Providers{})
-		if err != nil {
-			dieOnError(err)
-		}
-		values = mergeMaps(values, cliValues)
 		for _, p := range builder.Get() {
 			_, err := p.Install(builderInstallOpt, values)
 			dieOnError(err)

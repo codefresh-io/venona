@@ -60,23 +60,23 @@ var installRuntimeCmd = &cobra.Command{
 			dieOnError(err)
 		}
 		// Merge cmd options with template
-		paramOrValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
-		paramOrValueStr(templateValuesMap, "Token", &cfAPIToken)
-		paramOrValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)		
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
+		mergeValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)		
 
-		paramOrValueStr(templateValuesMap, "Namespace", &installRuntimeCmdOptions.kube.namespace)
-		paramOrValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
-		paramOrValueStr(templateValuesMap, "RuntimeEnvironmentName", &installRuntimeCmdOptions.runtimeEnvironmentName)
-		paramOrValueStr(templateValuesMap, "NodeSelector", &installRuntimeCmdOptions.kube.nodeSelector)
-		paramOrValueStr(templateValuesMap, "Tolerations", &installRuntimeCmdOptions.tolerations)
-		//paramOrValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
-		paramOrValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
-		paramOrValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
+		mergeValueStr(templateValuesMap, "Namespace", &installRuntimeCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "RuntimeEnvironmentName", &installRuntimeCmdOptions.runtimeEnvironmentName)
+		mergeValueStr(templateValuesMap, "NodeSelector", &installRuntimeCmdOptions.kube.nodeSelector)
+		mergeValueStr(templateValuesMap, "Tolerations", &installRuntimeCmdOptions.tolerations)
+		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
+		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
 		
-		paramOrValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
-		paramOrValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
-		//paramOrValueBool(templateValuesMap, "", &installAgentCmdOptions.dryRun)
-		paramOrValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
+		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
+		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
+		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
 
 
 		s := store.GetStore()

@@ -14,12 +14,32 @@ var uninstallMonitorAgentCmdOptions struct {
 		namespace string
 		kubePath  string
 	}
+	templateValues       []string
+	templateFileValues   []string
+	templateValueFiles   []string	
 }
 
 var uninstallMonitorAgentCmd = &cobra.Command{
 	Use:   "monitor",
 	Short: "Uninstall Codefresh's monitor",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			uninstallMonitorAgentCmdOptions.templateValueFiles, 
+			uninstallMonitorAgentCmdOptions.templateValues, 
+			uninstallMonitorAgentCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "ConfigPath", &uninstallMonitorAgentCmdOptions.kube.kubePath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		mergeValueStr(templateValuesMap, "Namespace", &uninstallMonitorAgentCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &uninstallMonitorAgentCmdOptions.kube.context)
+
 		s := store.GetStore()
 		lgr := createLogger("UninstallMonitor", verbose, logFormatter)
 		buildBasicStore(lgr)
@@ -55,8 +75,10 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 
 		builder.Add(plugins.MonitorAgentPluginType)
 		deleteOptions.ClusterNamespace = s.KubernetesAPI.Namespace
+		values := s.BuildValues()
+		values = mergeMaps(values, templateValuesMap)		
 		for _, p := range builder.Get() {
-			err := p.Delete(deleteOptions, s.BuildValues())
+			err := p.Delete(deleteOptions, values)
 			if err != nil {
 				dieOnError(err)
 			}
@@ -73,5 +95,8 @@ func init() {
 	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which monitor should be uninstalled [$KUBE_NAMESPACE]")
 	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be uninstalled (default is current-context) [$KUBE_CONTEXT]")
 	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallMonitorAgentCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
+	uninstallMonitorAgentCmd.Flags().StringArrayVar(&uninstallMonitorAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
+	uninstallMonitorAgentCmd.Flags().StringArrayVar(&uninstallMonitorAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
+	uninstallMonitorAgentCmd.Flags().StringArrayVarP(&uninstallMonitorAgentCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 
 }
