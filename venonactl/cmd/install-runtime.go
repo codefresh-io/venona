@@ -24,8 +24,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	cliValues "helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/getter"	
 )
 
 var installRuntimeCmdOptions struct {
@@ -52,6 +50,34 @@ var installRuntimeCmd = &cobra.Command{
 	Use:   "runtime",
 	Short: "Install Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			installRuntimeCmdOptions.templateValueFiles, 
+			installRuntimeCmdOptions.templateValues, 
+			installRuntimeCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		paramOrValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		paramOrValueStr(templateValuesMap, "Token", &cfAPIToken)
+		paramOrValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)		
+
+		paramOrValueStr(templateValuesMap, "Namespace", &installRuntimeCmdOptions.kube.namespace)
+		paramOrValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
+		paramOrValueStr(templateValuesMap, "RuntimeEnvironmentName", &installRuntimeCmdOptions.runtimeEnvironmentName)
+		paramOrValueStr(templateValuesMap, "NodeSelector", &installRuntimeCmdOptions.kube.nodeSelector)
+		paramOrValueStr(templateValuesMap, "Tolerations", &installRuntimeCmdOptions.tolerations)
+		//paramOrValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
+		paramOrValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
+		paramOrValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
+		
+		paramOrValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
+		paramOrValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
+		//paramOrValueBool(templateValuesMap, "", &installAgentCmdOptions.dryRun)
+		paramOrValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
+
 
 		s := store.GetStore()
 		lgr := createLogger("Install-runtime", verbose, logFormatter)
@@ -133,40 +159,7 @@ var installRuntimeCmd = &cobra.Command{
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		values := s.BuildValues()
 
-		var err error
-		valueOpts := &cliValues.Options{}
-		if len(installRuntimeCmdOptions.templateValueFiles) > 0 {
-			for _, v := range(installRuntimeCmdOptions.templateValueFiles) {
-				valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
-			}
-		}
-
-		if len(installRuntimeCmdOptions.templateValues) > 0 {
-			for _, v := range(installRuntimeCmdOptions.templateValues) {
-				valueOpts.Values = append(valueOpts.Values, v)
-			}			
-			// setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
-			// if err != nil {
-			// 	dieOnError(err)
-			// }
-			// values = mergeMaps(values, setValues)
-		}
-
-		if len(installRuntimeCmdOptions.templateFileValues) > 0 {
-			for _, v := range(installRuntimeCmdOptions.templateFileValues) {
-				valueOpts.FileValues = append(valueOpts.FileValues, v)
-			}				
-			// setFileValues, err := parseSetFiles(installRuntimeCmdOptions.templateFileValues)
-			// if err != nil {
-			// 	dieOnError(err)
-			// }
-			// values = mergeMaps(values, setFileValues)
-		}
-		cliValues, err := valueOpts.MergeValues(getter.Providers{})
-		if err != nil {
-			dieOnError(err)
-		}
-		values = mergeMaps(values, cliValues)
+		values = mergeMaps(values, templateValuesMap)
 
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)

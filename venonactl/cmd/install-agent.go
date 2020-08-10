@@ -25,8 +25,8 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	cliValues "helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/getter"	
+	// cliValues "helm.sh/helm/v3/pkg/cli/values"
+	// "helm.sh/helm/v3/pkg/getter"	
 )
 
 var installAgentCmdOptions struct {
@@ -55,9 +55,36 @@ var installAgentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			installAgentCmdOptions.templateValueFiles, 
+			installAgentCmdOptions.templateValues, 
+			installAgentCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		paramOrValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		paramOrValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		paramOrValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
+		paramOrValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
+		paramOrValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
+		paramOrValueStr(templateValuesMap, "Namespace", &installAgentCmdOptions.kube.namespace)
+		paramOrValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
+		paramOrValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
+		paramOrValueStr(templateValuesMap, "Tolerations", &installAgentCmdOptions.tolerations)
+		//paramOrValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
+		paramOrValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
+	
+		paramOrValueBool(templateValuesMap, "InCluster", &installAgentCmdOptions.kube.inCluster)
+		//paramOrValueBool(templateValuesMap, "", &installAgentCmdOptions.dryRun)
+		paramOrValueBool(templateValuesMap, "kubernetesRunnerType", &installAgentCmdOptions.kubernetesRunnerType)
+
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
+
 		extendStoreWithAgentAPI(lgr, installAgentCmdOptions.agentToken, installAgentCmdOptions.agentID)
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
@@ -69,6 +96,9 @@ var installAgentCmd = &cobra.Command{
 			CodefreshHost: cfAPIHost,
 		}
 
+		if installAgentCmdOptions.agentToken == "" {
+			installAgentCmdOptions.agentToken = cfAPIToken	
+		}
 		if installAgentCmdOptions.agentToken == "" {
 			dieOnError(fmt.Errorf("Agent token is required in order to install agent"))
 		}
@@ -120,31 +150,8 @@ var installAgentCmd = &cobra.Command{
 		builder.Add(plugins.VenonaPluginType)
 
 		values := s.BuildValues()
-		var err error
-		valueOpts := &cliValues.Options{}
-		if len(installAgentCmdOptions.templateValueFiles) > 0 {
-			for _, v := range(installAgentCmdOptions.templateValueFiles) {
-				valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
-			}
-		}
-
-		if len(installAgentCmdOptions.templateValues) > 0 {
-			for _, v := range(installAgentCmdOptions.templateValues) {
-				valueOpts.Values = append(valueOpts.Values, v)
-			}			
-		}
-
-		if len(installAgentCmdOptions.templateFileValues) > 0 {
-			for _, v := range(installAgentCmdOptions.templateFileValues) {
-				valueOpts.FileValues = append(valueOpts.FileValues, v)
-			}
-		}
-		cliValues, err := valueOpts.MergeValues(getter.Providers{})
-		if err != nil {
-			dieOnError(err)
-		}
-		values = mergeMaps(values, cliValues)
-
+		values = mergeMaps(values, templateValuesMap)
+		
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {

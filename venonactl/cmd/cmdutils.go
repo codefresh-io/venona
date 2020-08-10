@@ -26,6 +26,9 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	"helm.sh/helm/v3/pkg/strvals"
+	cliValues "helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"
+	"github.com/stretchr/objx"	
 )
 
 var (
@@ -228,6 +231,32 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 // Parsing helpers --set-value , --set-file
 // by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 
+// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file> 
+// using helm libraries
+func templateValuesToMap(templateValueFiles, templateValues, templateFileValues []string) (map[string]interface{}, error) {
+	valueOpts := &cliValues.Options{}
+	if len(templateValueFiles) > 0 {
+		for _, v := range(templateValueFiles) {
+			valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
+		}
+	}
+	
+	if len(templateValues) > 0 {
+		for _, v := range(templateValues) {
+			valueOpts.Values = append(valueOpts.Values, v)
+		}			
+	}
+	
+	if len(templateFileValues) > 0 {
+		for _, v := range(templateFileValues) {
+			valueOpts.FileValues = append(valueOpts.FileValues, v)
+		}
+	}
+	valuesMap, err := valueOpts.MergeValues(getter.Providers{})
+	return valuesMap, err
+}
+
+
 // parses --set-value options
 func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
 	base := map[string]interface{}{}
@@ -272,3 +301,25 @@ func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
 	}
 	return out
 }
+
+// paramOrValueStr - for merging cli parameters with mapped parameters
+func paramOrValueStr(valuesMap map[string]interface{}, key string, param *string) {
+	mapX := objx.New(valuesMap)
+	if param != nil && *param != "" {
+		//mapX.Set(key)
+	    return
+    }
+   
+    val := mapX.Get(key).String()
+    *param = val
+}
+
+// paramOrValueBool - for merging cli parameters with mapped parameters
+func paramOrValueBool(valuesMap map[string]interface{}, key string, param *bool) {
+	if param != nil ||*param == true {
+		return
+	}
+	mapX := objx.New(valuesMap)
+	val := mapX.Get(key).Bool()
+	*param = val
+ }
