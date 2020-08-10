@@ -158,7 +158,6 @@ var installRuntimeCmd = &cobra.Command{
 
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		values := s.BuildValues()
-
 		values = mergeMaps(values, templateValuesMap)
 
 		for _, p := range builder.Get() {

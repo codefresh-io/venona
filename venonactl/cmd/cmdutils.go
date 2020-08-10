@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"encoding/base64"
+
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -222,7 +222,7 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 	s := store.GetStore()
 	logger.Debug("Using agent's token", "Token", token)
 	s.AgentAPI = &store.AgentAPI{
-		Token: base64.StdEncoding.EncodeToString([]byte(token)),
+		Token: token,
 		Id:    agentID,
 	}
 }

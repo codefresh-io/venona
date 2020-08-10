@@ -649,7 +649,7 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 data:
-  codefresh.token: {{ .AgentToken }}`
+  codefresh.token: {{ .AgentToken | b64enc }}`
 
 	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `---
 apiVersion: v1
