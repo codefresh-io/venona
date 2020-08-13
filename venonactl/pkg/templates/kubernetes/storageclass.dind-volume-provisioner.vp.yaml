@@ -29,4 +29,6 @@ parameters:
   fsType: {{ .Storage.FsType | default "ext4" }}
   # "true" or "false" (default - "false")
   encrypted: {{ .Storage.Encrypted | default "false" }}
+  # KMS Key ID
+  kmsKeyId: {{ .Storage.KmsKeyId }}
 {{- end }}
