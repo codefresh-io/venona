@@ -75,8 +75,6 @@ github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghf
 github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5/go.mod h1:/iP1qXHoty45bqomnu2LM+VVyAEdWN+vtSHGlQgyxbw=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cockroachdb/datadriven v0.0.0-20190809214429-80d97fb3cbaa/go.mod h1:zn76sxSg3SzpJ0PPJaLDCu+Bu0Lg3sKTORVIj19EIF8=
-github.com/codefresh-io/go-sdk v0.18.0 h1:tSP1m89l66qQ2PF5NvuUCL5dCorxQUGhyq7lyRKv35Q=
-github.com/codefresh-io/go-sdk v0.18.0/go.mod h1:b6hK9euSW+MDXUDHU1+YgP8vzcij749I31ZIZSXed+I=
 github.com/codefresh-io/go-sdk v0.19.4 h1:f0r6lc+XuWQxN152qE80cRw6zWGll2aalo+MRgAfoHg=
 github.com/codefresh-io/go-sdk v0.19.4/go.mod h1:b6hK9euSW+MDXUDHU1+YgP8vzcij749I31ZIZSXed+I=
 github.com/containerd/cgroups v0.0.0-20190919134610-bf292b21730f/go.mod h1:OApqhQ4XNSNC13gXIwDjhOQxjWa/NxkwZXJ1EvqT0ko=
