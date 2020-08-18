@@ -733,6 +733,12 @@ parameters:
   AvailabilityZone: {{ .Storage.AvailabilityZone }}
   # ext4 or xfs (default to ext4 )
   fsType: {{ .Storage.FsType | default "ext4" }}
+  # "true" or "false" (default - "false")
+  encrypted: "{{ .Storage.Encrypted | default "false" }}"
+  {{ if .Storage.KmsKeyId }}
+  # KMS Key ID
+  kmsKeyId: {{ .Storage.KmsKeyId }}
+  {{- end }}
 {{- end }}`
 
 	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
