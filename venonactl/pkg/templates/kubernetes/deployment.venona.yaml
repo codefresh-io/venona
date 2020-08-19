@@ -37,6 +37,18 @@ spec:
         {{ .Tolerations | indent 8 }}
       {{ end }}
       containers:
+      {{if (ne .Runner.MemoryRequest "") or (ne .Runner.MemoryLimit "") or (ne .Runner.CPURequest "") or (ne .Runner.CPULimit)  }}
+      resources:
+      {{ end }}
+      {{ if (ne .Runner.MemoryRequest "") or (ne .Runner.CPURequest "" )}}
+        requests:
+        {{ if (ne .Runner.MemoryRequest "") }}
+          memory: {{ .Runner.MemoryRequest | indent 8}}
+        {{ end}}
+        {{ if (ne .Runner.CPURequest "") }}
+          cpu: {{ .Runner.CPURequest | indent 8}}
+        {{ end}}
+      {{ end }}
       - env:
         {{- if $.AdditionalEnvVars }}
         {{- range $key, $value := $.AdditionalEnvVars }}

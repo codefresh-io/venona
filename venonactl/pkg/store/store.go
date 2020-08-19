@@ -32,6 +32,8 @@ type (
 
 		KubernetesAPI *KubernetesAPI
 
+		Runner *Runner
+
 		AgentAPI *AgentAPI
 
 		ClusterInCodefresh string
@@ -87,6 +89,13 @@ type (
 		Commit  string
 		Date    string
 	}
+
+	Runner struct {
+		MemoryRequest  string
+		MemoryLimit    string
+		CPURequest     string
+		CPULimit      string
+	}
 )
 
 func GetStore() *Values {
@@ -122,6 +131,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Cert": "",
 			"Key":  "",
 			"Ca":   "",
+		},
+		"Runner": map[string]string{
+			"MemoryRequest": s.Runner.MemoryRequest,
+			"MemoryLimit": s.Runner.MemoryLimit,
+			"CpuRequest": s.Runner.CPURequest,
+			"CpuLimit": s.Runner.CPULimit,
 		},
 		"Storage": map[string]interface{}{
 			"Backend":              "local",
