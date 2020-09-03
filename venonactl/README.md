@@ -189,7 +189,9 @@ codefresh install runtime [options] \
                     --set-value=Storage.AvailabilityZone=us-east-1d \
                     --kube-node-selector=failure-domain.beta.kubernetes.io/zone=us-east-1d \
                     [--set-value Storage.VolumeProvisioner.NodeSelector=kubernetes.io/role=master] \
-                    [--set-value Storage.AwsAccessKeyId=ABCDF --set-value Storage.AwsSecretAccessKey=ZYXWV]
+                    [--set-value Storage.AwsAccessKeyId=ABCDF --set-value Storage.AwsSecretAccessKey=ZYXWV] \
+                    [--set-value=Storage.Encrypted=true] \
+                    [--set-value=Storage.KmsKeyId=<key id>]
 ```
 
 #### Kubernetes RBAC
