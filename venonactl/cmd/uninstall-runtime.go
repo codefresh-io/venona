@@ -25,12 +25,34 @@ var uninstallRunimeCmdOptions struct {
 	runtimeEnvironmentName string
 	storageClassName       string
 	restartAgent  bool
+	templateValues       []string
+	templateFileValues   []string
+	templateValueFiles   []string
 }
 
 var uninstallRuntimeCmd = &cobra.Command{
 	Use:   "runtime",
 	Short: "Uninstall Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			uninstallRunimeCmdOptions.templateValueFiles, 
+			uninstallRunimeCmdOptions.templateValues, 
+			uninstallRunimeCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "ConfigPath", &uninstallRunimeCmdOptions.kube.kubePath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
+
+		mergeValueStr(templateValuesMap, "Namespace", &uninstallRunimeCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &uninstallRunimeCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "RuntimeEnvironmentName", &uninstallRunimeCmdOptions.runtimeEnvironmentName)
+		mergeValueStr(templateValuesMap, "StorageClass", &uninstallRunimeCmdOptions.storageClassName)
+		
 		s := store.GetStore()
 		lgr := createLogger("UninstallRuntime", verbose, logFormatter)
 		buildBasicStore(lgr)
@@ -84,8 +106,10 @@ var uninstallRuntimeCmd = &cobra.Command{
 			deleteOptions.ClusterNamespace = uninstallRunimeCmdOptions.kube.namespace
 			deleteOptions.AgentNamespace = uninstallRunimeCmdOptions.kubeVenona.namespace
 			deleteOptions.RuntimeEnvironment = uninstallRunimeCmdOptions.runtimeEnvironmentName
+			values := s.BuildValues()
+			values = mergeMaps(values, templateValuesMap)			
 			for _, p := range builder.Get() {
-					err := p.Delete(deleteOptions, s.BuildValues())
+					err := p.Delete(deleteOptions, values)
 					if err != nil {
 						dieOnError(err)
 					}
@@ -111,5 +135,9 @@ func init() {
 	uninstallRuntimeCmd.Flags().BoolVar(&uninstallRunimeCmdOptions.restartAgent, "restart-agent", viper.GetBool("restart-agent"), "Restart agent after attach operation")
 
 	uninstallRuntimeCmd.Flags().StringVar(&uninstallRunimeCmdOptions.storageClassName, "storage-class-name", viper.GetString("storage-class-name"), "Storage class name of the runtime to be uninstalled")
+
+	uninstallRuntimeCmd.Flags().StringArrayVar(&uninstallRunimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
+	uninstallRuntimeCmd.Flags().StringArrayVar(&uninstallRunimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
+	uninstallRuntimeCmd.Flags().StringArrayVarP(&uninstallRunimeCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 
 }

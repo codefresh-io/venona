@@ -98,6 +98,12 @@ rules:
   verbs:
   - get
 ```
+#### Install using --values <values.yaml>
+`codefresh runner init --values <values.yaml> [parameters]`
+the values from values.yaml are applied to the templates in [pkg/templates/kubernetes](pkg/templates/kubernetes)
+
+See BuildValues() func in [store.go](pkg/store/store.go) for the format  
+Example with explaination is in [values-example.yaml](values-example.yaml) 
 
 #### Install on GCP
   * Make sure your user has `Kubernetes Engine Cluster Admin` role in google console

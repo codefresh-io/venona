@@ -419,7 +419,7 @@ spec:
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
         {{- end }}
-        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }}:{{ .Image.Tag }} {{- else }} {{- .Image.Name }}:{{ .Image.Tag }} {{- end}}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }} {{- else }} {{- .Image.Name }}{{- end}}:{{ .Image.Tag | default "latest"}}
         volumeMounts:
         - name: runnerconf
           mountPath: "/etc/secrets"
@@ -649,7 +649,7 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 data:
-  codefresh.token: {{ .AgentToken }}`
+  codefresh.token: {{ .AgentToken | b64enc }}`
 
 	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `---
 apiVersion: v1

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"encoding/base64"
+
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,7 +25,9 @@ import (
 	k8sApi "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"helm.sh/helm/v3/pkg/strvals"
+	cliValues "helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"
+	"github.com/stretchr/objx"	
 )
 
 var (
@@ -220,7 +222,7 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 	s := store.GetStore()
 	logger.Debug("Using agent's token", "Token", token)
 	s.AgentAPI = &store.AgentAPI{
-		Token: base64.StdEncoding.EncodeToString([]byte(token)),
+		Token: token,
 		Id:    agentID,
 	}
 }
@@ -228,30 +230,29 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 // Parsing helpers --set-value , --set-file
 // by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 
-// parses --set-value options
-func parseSetValues(setValuesOpts []string) (map[string]interface{}, error) {
-	base := map[string]interface{}{}
-	for _, value := range setValuesOpts {
-		if err := strvals.ParseInto(value, base); err != nil {
-			return nil, fmt.Errorf("Cannot parse option --set-value %s", value)
+// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file> 
+// using helm libraries
+func templateValuesToMap(templateValueFiles, templateValues, templateFileValues []string) (map[string]interface{}, error) {
+	valueOpts := &cliValues.Options{}
+	if len(templateValueFiles) > 0 {
+		for _, v := range(templateValueFiles) {
+			valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
 		}
 	}
-	return base, nil
-}
-
-// parses --set-file options
-func parseSetFiles(setFilesOpts []string) (map[string]interface{}, error) {
-	base := map[string]interface{}{}
-	for _, value := range setFilesOpts {
-		reader := func(rs []rune) (interface{}, error) {
-			bytes, err := ioutil.ReadFile(string(rs))
-			return string(bytes), err
-		}
-		if err := strvals.ParseIntoFile(value, base, reader); err != nil {
-			return nil, fmt.Errorf("Cannot parse option --set-file %s", value)
+	
+	if len(templateValues) > 0 {
+		for _, v := range(templateValues) {
+			valueOpts.Values = append(valueOpts.Values, v)
+		}			
+	}
+	
+	if len(templateFileValues) > 0 {
+		for _, v := range(templateFileValues) {
+			valueOpts.FileValues = append(valueOpts.FileValues, v)
 		}
 	}
-	return base, nil
+	valuesMap, err := valueOpts.MergeValues(getter.Providers{})
+	return valuesMap, err
 }
 
 func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
@@ -272,3 +273,25 @@ func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
 	}
 	return out
 }
+
+// mergeValueStr - for merging cli parameters with mapped parameters
+func mergeValueStr(valuesMap map[string]interface{}, key string, param *string) {
+	mapX := objx.New(valuesMap)
+	if param != nil && *param != "" {
+		mapX.Set(key, *param)
+	    return
+    }
+    val := mapX.Get(key).String()
+    *param = val
+}
+
+// mergeValueBool - for merging cli parameters with mapped parameters
+func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
+	mapX := objx.New(valuesMap)
+	if param != nil ||*param == true {
+		mapX.Set(key, *param)
+		return
+	}
+	val := mapX.Get(key).Bool()
+	*param = val
+ }

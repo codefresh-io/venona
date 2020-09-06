@@ -25,6 +25,8 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	// cliValues "helm.sh/helm/v3/pkg/cli/values"
+	// "helm.sh/helm/v3/pkg/getter"	
 )
 
 var installAgentCmdOptions struct {
@@ -44,15 +46,47 @@ var installAgentCmdOptions struct {
 	tolerations          string
 	envVars              []string
 	dockerRegistry       string
+	templateValues       []string
+	templateFileValues   []string
+	templateValueFiles   []string
 }
 
 var installAgentCmd = &cobra.Command{
 	Use:   "agent",
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			installAgentCmdOptions.templateValueFiles, 
+			installAgentCmdOptions.templateValues, 
+			installAgentCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		mergeValueStr(templateValuesMap, "Namespace", &installAgentCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
+		mergeValueStr(templateValuesMap, "Tolerations", &installAgentCmdOptions.tolerations)
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
+
+		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
+		mergeValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
+		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
+
+		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
+	
+		mergeValueBool(templateValuesMap, "InCluster", &installAgentCmdOptions.kube.inCluster)
+		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installAgentCmdOptions.kubernetesRunnerType)
+
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
+
 		extendStoreWithAgentAPI(lgr, installAgentCmdOptions.agentToken, installAgentCmdOptions.agentID)
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
@@ -64,6 +98,9 @@ var installAgentCmd = &cobra.Command{
 			CodefreshHost: cfAPIHost,
 		}
 
+		if installAgentCmdOptions.agentToken == "" {
+			installAgentCmdOptions.agentToken = cfAPIToken	
+		}
 		if installAgentCmdOptions.agentToken == "" {
 			dieOnError(fmt.Errorf("Agent token is required in order to install agent"))
 		}
@@ -115,7 +152,8 @@ var installAgentCmd = &cobra.Command{
 		builder.Add(plugins.VenonaPluginType)
 
 		values := s.BuildValues()
-		var err error
+		values = mergeMaps(values, templateValuesMap)
+		
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -144,6 +182,11 @@ func init() {
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
+
+	installAgentCmd.Flags().StringArrayVar(&installAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
+	installAgentCmd.Flags().StringArrayVar(&installAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
+	installAgentCmd.Flags().StringArrayVarP(&installAgentCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
+
 }
 
 func fillCodefreshAPI(logger logger.Logger) {
