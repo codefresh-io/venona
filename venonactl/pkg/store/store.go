@@ -11,6 +11,7 @@ const (
 	ModeInCluster          = "InCluster"
 	ApplicationName        = "runner"
 	MonitorApplicationName = "monitor"
+	AppProxy			   = "app-proxy"
 )
 
 var (
@@ -146,6 +147,13 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Image": map[string]string{
 				"Name": "codefresh/agent",
 				"Tag":  "stable",
+			},
+		},
+		"AppProxy": map[string]interface{}{
+			"AppName": AppProxy,
+			"Image": map[string]string{
+				"Name": "codefresh/cf-app-proxy",
+				"Tag":  "latest",
 			},
 		},
 	}

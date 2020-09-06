@@ -19,6 +19,7 @@ const (
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-runner"
 	RuntimeAttachType             = "runtime-attach"
+	AppProxyPluginType			  = "app-proxy"
 )
 
 type (
@@ -216,6 +217,12 @@ func build(t string, logger logger.Logger) Plugin {
 	if t == MonitorAgentPluginType {
 		return &monitorAgentPlugin{
 			logger: logger.New("installer", MonitorAgentPluginType),
+		}
+	}
+
+	if t == AppProxyPluginType {
+		return &appProxyPlugin{
+			logger: logger.New("installer", AppProxyPluginType),
 		}
 	}
 

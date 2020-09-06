@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }} 
+  name:  {{ .AppProxy.AppName }}
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .AppProxy.AppName }}
+      version: {{ .Version }}
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .AppProxy.AppName }}
+        version: {{ .Version }}
+    spec:
+      containers:
+      - name: {{ .AppProxy.AppName }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
+        imagePullPolicy: Always
+        env:
+          - name: SERVICE_NAME
+            value: {{ .Monitor.AppName }}
+          {{- if .Monitor.UseNamespaceWithRole }}
+          - name: ROLE_BINDING
+            value: "true"
+          {{- end }}
+          - name: PORT
+            value: "3000"
+          - name: CODEFRESH_HOST
+            value: {{ .CodefreshHost }}
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
