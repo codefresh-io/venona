@@ -29,12 +29,6 @@ spec:
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
-          - name: SERVICE_NAME
-            value: {{ .Monitor.AppName }}
-          {{- if .Monitor.UseNamespaceWithRole }}
-          - name: ROLE_BINDING
-            value: "true"
-          {{- end }}
           - name: PORT
             value: "3000"
           - name: CODEFRESH_HOST
