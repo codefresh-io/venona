@@ -294,4 +294,5 @@ func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
 	}
 	val := mapX.Get(key).Bool()
 	*param = val
- }
+}
+

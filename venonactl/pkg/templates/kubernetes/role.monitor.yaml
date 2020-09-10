@@ -1,4 +1,5 @@
-{{- if .Monitor.RbacEnabled }}
+{{- if .CreateRbac }}
+{{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: Role
 {{- else }}
@@ -44,4 +45,5 @@ rules:
   - get
   - list
   - watch
+{{- end }}
 {{- end }}

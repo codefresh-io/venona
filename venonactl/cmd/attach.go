@@ -107,7 +107,9 @@ var attachRuntimeCmd = &cobra.Command{
 		}
 
 		// runtime
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kube.context, attachRuntimeCmdOptions.kube.namespace, attachRuntimeCmdOptions.kube.kubePath, false)
+		var runtimeInCluster bool
+		mergeValueBool(templateValuesMap, "RuntimeInCluster", &runtimeInCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kube.context, attachRuntimeCmdOptions.kube.namespace, attachRuntimeCmdOptions.kube.kubePath, runtimeInCluster)
 
 		// agent
 		builderInstallOpt.AgentKubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kubeVenona.context,
