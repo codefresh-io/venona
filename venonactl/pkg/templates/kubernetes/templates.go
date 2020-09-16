@@ -737,7 +737,7 @@ spec:
   type: LoadBalancer
 `
 
-  templatesMap["service.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["service.monitor.yaml"] = `{{- if .CreateRbac }}
 apiVersion: v1
 kind: Service
 metadata:
