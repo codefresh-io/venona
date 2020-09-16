@@ -24,12 +24,10 @@ import (
 )
 
 var installAppProxyCmdOptions struct {
-
-	kube   struct {
-		namespace    string
-		context      string
+	kube struct {
+		namespace string
+		context   string
 	}
-
 }
 
 var installAppProxyCmd = &cobra.Command{
@@ -46,7 +44,7 @@ var installAppProxyCmd = &cobra.Command{
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost: cfAPIHost,
 		}
-		
+
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
 		fillKubernetesAPI(lgr, installAppProxyCmdOptions.kube.context, installAppProxyCmdOptions.kube.namespace, false)
@@ -71,7 +69,6 @@ var installAppProxyCmd = &cobra.Command{
 			}
 		}
 		lgr.Info("App proxy installation completed Successfully")
-
 
 	},
 }
