@@ -124,8 +124,10 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Key":  "",
 			"Ca":   "",
 		},
+		"CreateRbac": true,
 		"Storage": map[string]interface{}{
 			"Backend":              "local",
+			"CreateStorageClass": true,
 			"StorageClassName":     fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
 			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
 			"AvailabilityZone":     "",
@@ -139,6 +141,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			},
 		},
 		"Monitor": map[string]interface{}{
+			"Enabled": true,
 			"UseNamespaceWithRole": s.UseNamespaceWithRole,
 			//TODO: need verify it on cluster level
 			"RbacEnabled": true,

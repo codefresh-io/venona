@@ -23,6 +23,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
 )
 
 var installMonitorAgentCmdOptions struct {
@@ -36,6 +37,9 @@ var installMonitorAgentCmdOptions struct {
 	codefreshToken string
 	codefreshHost  string
 	dockerRegistry string
+	templateValues         []string
+	templateFileValues     []string
+	templateValueFiles     []string
 }
 
 // installK8sAgentCmd represents the install command
@@ -43,6 +47,26 @@ var installMonitorAgentCmd = &cobra.Command{
 	Use:   "monitor",
 	Short: "Install Codefresh's monitor agent on cluster",
 	Run: func(cmd *cobra.Command, args []string) {
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			installMonitorAgentCmdOptions.templateValueFiles, 
+			installMonitorAgentCmdOptions.templateValues, 
+			installMonitorAgentCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &installMonitorAgentCmdOptions.codefreshHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
+		mergeValueStr(templateValuesMap, "Token", &installMonitorAgentCmdOptions.codefreshToken)
+		mergeValueStr(templateValuesMap, "Namespace", &installMonitorAgentCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installMonitorAgentCmdOptions.kube.context)
+
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installMonitorAgentCmdOptions.dockerRegistry)
+		mergeValueStr(templateValuesMap, "ClusterId", &installMonitorAgentCmdOptions.clusterId)
+		mergeValueBool(templateValuesMap, "helm3", &installMonitorAgentCmdOptions.helm3)
 
 		s := store.GetStore()
 
@@ -88,6 +112,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		}
 
 		values := s.BuildValues()
+		values = mergeMaps(values, templateValuesMap)
 
 		for _, p := range builder.Get() {
 			_, err := p.Install(builderInstallOpt, values)
@@ -111,5 +136,8 @@ func init() {
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshHost, "codefreshHost", "", "Override codefresh host if you use your own codefresh installation")
 
 	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.helm3, "helm3", false, "Set flag if cluster use helm3")
+	installMonitorAgentCmd.Flags().StringArrayVar(&installMonitorAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	installMonitorAgentCmd.Flags().StringArrayVar(&installMonitorAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
+	installMonitorAgentCmd.Flags().StringArrayVarP(&installMonitorAgentCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 
 }

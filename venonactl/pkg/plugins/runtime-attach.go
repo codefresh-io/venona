@@ -57,8 +57,18 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to read service account runtime cluster: %v", err)
 	}
 
-	secretRef := sa.Secrets[0]
-	secret, err := cs.CoreV1().Secrets(opt.RuntimeClusterName).Get(secretRef.Name, getOpt)
+	var saSecretName string
+	saSecretPattern := fmt.Sprintf("%s-token-", opt.RuntimeServiceAccount)
+	for _, secretRef := range(sa.Secrets) {
+		if strings.Contains(secretRef.Name, saSecretPattern) {
+			saSecretName = secretRef.Name
+			break
+		}
+	}
+	if saSecretName == "" {
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret %s from service account %s", saSecretPattern, opt.RuntimeServiceAccount)
+	}
+	secret, err := cs.CoreV1().Secrets(opt.RuntimeClusterName).Get(saSecretName, getOpt)
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret from service account on runtime cluster: %v", err)
 	}

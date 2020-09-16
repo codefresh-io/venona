@@ -17,7 +17,7 @@ limitations under the License.
 package plugins
 
 import (
-	"encoding/base64"
+
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -67,7 +67,7 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 			return nil, err
 		}
 		u.logger.Debug("Token created")
-		v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
+		v["AgentToken"] = token.Value
 		if err != nil {
 			return nil, err
 		}
@@ -164,7 +164,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 		return nil, err
 	}
 	token := secret.Data["codefresh.token"]
-	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token))
+	v["AgentToken"] = token
 
 	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
 	if err != nil {
