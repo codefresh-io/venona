@@ -183,6 +183,54 @@ spec:
           path: {{ $localVolumeParentDir }}
 {{- end -}}`
 
+	templatesMap["deployment.app-proxy.yaml"] = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }} 
+  name:  {{ .AppProxy.AppName }}
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .AppProxy.AppName }}
+      version: {{ .Version }}
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .AppProxy.AppName }}
+        version: {{ .Version }}
+    spec:
+      containers:
+      - name: {{ .AppProxy.AppName }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
+        imagePullPolicy: Always
+        env:
+          - name: PORT
+            value: "3000"
+          - name: CODEFRESH_HOST
+            value: {{ .CodefreshHost }}
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+`
+
 	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -673,6 +721,21 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 {{- end }}`
+
+	templatesMap["service.app-proxy.yaml"] = `apiVersion: v1
+kind: Service
+metadata:
+  name: app-proxy-service
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    app: {{ .AppProxy.AppName }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+`
 
 	templatesMap["service.monitor.yaml"] = `{{- if .CreateRbac }}
 apiVersion: v1

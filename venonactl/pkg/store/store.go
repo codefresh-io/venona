@@ -11,6 +11,7 @@ const (
 	ModeInCluster          = "InCluster"
 	ApplicationName        = "runner"
 	MonitorApplicationName = "monitor"
+	AppProxy               = "app-proxy"
 )
 
 var (
@@ -126,7 +127,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"CreateRbac": true,
 		"Storage": map[string]interface{}{
 			"Backend":              "local",
-			"CreateStorageClass": true,
+			"CreateStorageClass":   true,
 			"StorageClassName":     fmt.Sprintf("dind-local-volumes-%s-%s", ApplicationName, s.KubernetesAPI.Namespace),
 			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
 			"AvailabilityZone":     "",
@@ -140,7 +141,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			},
 		},
 		"Monitor": map[string]interface{}{
-			"Enabled": true,
+			"Enabled":              true,
 			"UseNamespaceWithRole": s.UseNamespaceWithRole,
 			//TODO: need verify it on cluster level
 			"RbacEnabled": true,
@@ -149,6 +150,13 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Image": map[string]string{
 				"Name": "codefresh/agent",
 				"Tag":  "stable",
+			},
+		},
+		"AppProxy": map[string]interface{}{
+			"AppName": AppProxy,
+			"Image": map[string]string{
+				"Name": "codefresh/cf-app-proxy",
+				"Tag":  "latest",
 			},
 		},
 	}
