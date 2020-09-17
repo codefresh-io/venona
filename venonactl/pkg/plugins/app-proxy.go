@@ -71,9 +71,12 @@ Loop:
 			return v, fmt.Errorf("Failed to get app-proxy-service internal ip")
 		}
 	}
-	u.logger.Info(fmt.Sprintf("app proxy has ingress ip: %v", ingressIP))
+	u.logger.Info(fmt.Sprintf("app proxy has ingress ip: %v\n", ingressIP))
 	// update IPC
 	file := os.NewFile(3, "pipe")
+	if file == nil {
+		return v, nil
+	}
 	data := map[string]interface{}{
 		"ingressIP": ingressIP,
 	}
@@ -84,7 +87,7 @@ Loop:
 		u.logger.Error("Failed to write to stream", err)
 		return v, fmt.Errorf("Failed to write to stream")
 	}
-	u.logger.Debug(fmt.Sprintf("%v bytes were written to stream", n))
+	u.logger.Debug(fmt.Sprintf("%v bytes were written to stream\n", n))
 	return v, err
 
 }
