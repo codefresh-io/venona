@@ -58,7 +58,11 @@ Loop:
 			if err == nil {
 				ips := service.Status.LoadBalancer.Ingress
 				if len(ips) > 0 {
-					ingressIP = ips[0].IP
+					if ips[0].IP != "" {
+						ingressIP = ips[0].IP
+					} else {
+						ingressIP = ips[0].Hostname
+					}
 					break Loop
 				}
 			}
@@ -67,8 +71,12 @@ Loop:
 			return v, fmt.Errorf("Failed to get app-proxy-service internal ip")
 		}
 	}
+	u.logger.Info(fmt.Sprintf("app proxy has ingress ip: %v\n", ingressIP))
 	// update IPC
 	file := os.NewFile(3, "pipe")
+	if file == nil {
+		return v, nil
+	}
 	data := map[string]interface{}{
 		"ingressIP": ingressIP,
 	}
@@ -79,8 +87,7 @@ Loop:
 		u.logger.Error("Failed to write to stream", err)
 		return v, fmt.Errorf("Failed to write to stream")
 	}
-	u.logger.Info(fmt.Sprintf("%s bytes were written to stream", n))
-	fmt.Sprintf(" ip : %s", ingressIP)
+	u.logger.Debug(fmt.Sprintf("%v bytes were written to stream\n", n))
 	return v, err
 
 }
