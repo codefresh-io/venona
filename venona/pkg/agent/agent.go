@@ -217,16 +217,15 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	// divide tasks by types
 	for _, t := range tasks {
 		logger.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
-		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
+		switch t.Type {
+		case task.TypeCreatePod, task.TypeCreatePVC:
 			creationTasks = append(creationTasks, t)
-		}
-
-		if t.Type == task.TypeDeletePod || t.Type == task.TypeDeletePVC {
+		case task.TypeDeletePod, task.TypeDeletePVC:
 			deletionTasks = append(deletionTasks, t)
-		}
-
-		if t.Type == task.TypeProxyRequest {
+		case task.TypeProxyRequest:
 			proxyTasks = append(proxyTasks, t)
+		default:
+			logger.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		}
 	}
 
