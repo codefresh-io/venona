@@ -71,7 +71,7 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
-		mergeValueStr(templateValuesMap, "Tolerations", &installAgentCmdOptions.tolerations)
+		mergeValueStr(templateValuesMap, "Tolerations", getTolerations())
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
 
 		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
@@ -111,22 +111,7 @@ var installAgentCmd = &cobra.Command{
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
 
-		if installAgentCmdOptions.tolerations != "" {
-			var tolerationsString string
-
-			if installAgentCmdOptions.tolerations[0] == '@' {
-				tolerationsString = loadTolerationsFromFile(installAgentCmdOptions.tolerations[1:])
-			} else {
-				tolerationsString = installAgentCmdOptions.tolerations
-			}
-
-			tolerations, err := parseTolerations(tolerationsString)
-			if err != nil {
-				dieOnError(err)
-			}
-
-			s.KubernetesAPI.Tolerations = tolerations
-		}
+		s.KubernetesAPI.Tolerations = *getTolerations()
 
 		if installAgentCmdOptions.venona.version != "" {
 			version := installAgentCmdOptions.venona.version
@@ -162,6 +147,28 @@ var installAgentCmd = &cobra.Command{
 		}
 		lgr.Info("Agent installation completed Successfully")
 	},
+}
+
+func getTolerations() (*string) {
+
+	if installAgentCmdOptions.tolerations != "" {
+		var tolerationsString string
+
+		if installAgentCmdOptions.tolerations[0] == '@' {
+			tolerationsString = loadTolerationsFromFile(installAgentCmdOptions.tolerations[1:])
+		} else {
+			tolerationsString = installAgentCmdOptions.tolerations
+		}
+
+		tolerations, err := parseTolerations(tolerationsString)
+		if err != nil {
+			dieOnError(err)
+		}
+		return &tolerations
+
+	}
+	emptyStr := ""
+	return &emptyStr
 }
 
 func init() {
