@@ -231,8 +231,8 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	}
 
 	// process proxy tasks
-	for _, task := range proxyTasks {
-		err := proxyRequest(&task, logger)
+	for i := range proxyTasks {
+		err := proxyRequest(&proxyTasks[i], logger)
 		if err != nil {
 			logger.Error(err.Error())
 		}
