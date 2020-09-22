@@ -15,6 +15,7 @@
 package agent
 
 import (
+	"bytes"
 	"errors"
 	"sync"
 	"time"
@@ -23,6 +24,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 )
 
 var (
@@ -210,8 +212,11 @@ func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
+	proxyTasks := []task.Task{}
+
+	// divide tasks by types
 	for _, t := range tasks {
-		logger.Debug("Received task", "type", t.Type, "workflow", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+		logger.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
 			creationTasks = append(creationTasks, t)
 		}
@@ -219,8 +224,21 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 		if t.Type == task.TypeDeletePod || t.Type == task.TypeDeletePVC {
 			deletionTasks = append(deletionTasks, t)
 		}
+
+		if t.Type == task.TypeProxyRequest {
+			proxyTasks = append(proxyTasks, t)
+		}
 	}
 
+	// process proxy tasks
+	for _, task := range proxyTasks {
+		err := proxyRequest(&task, logger)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+	}
+
+	// process creation tasks
 	for _, tasks := range groupTasks(creationTasks) {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
@@ -233,6 +251,8 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 			logger.Error(err.Error())
 		}
 	}
+
+	// process deletion tasks
 	for _, tasks := range groupTasks(deletionTasks) {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
@@ -247,6 +267,41 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 			}
 		}
 	}
+}
+
+func proxyRequest(t *task.Task, log logger.Logger) error {
+	spec, ok := t.Spec.(task.ProxyRequestTaskSpec)
+	if !ok {
+		return task.ErrMalformedProxyTaskSpec
+	}
+
+	req, err := retryablehttp.NewRequest(spec.Method, spec.URL, bytes.NewReader(spec.Body))
+	if err != nil {
+		return err
+	}
+
+	// parse headers
+	for key, val := range spec.Headers {
+		req.Header.Add(key, val)
+	}
+
+	client := retryablehttp.NewClient()
+	client.RetryMax = spec.Retries
+	client.HTTPClient.Timeout = time.Millisecond * time.Duration(spec.Timeout)
+
+	log.Info("executing proxy task", "tid", t.Metadata.Workflow, "origin", spec.Origin, "url", spec.URL,
+		"method", spec.Method, "retries", spec.Retries, "timeout", spec.Timeout)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close() // not gonna read that for now
+
+	log.Info("finished proxy task", "tid", t.Metadata.Workflow, "origin", spec.Origin, "url", spec.URL,
+		"method", spec.Method, "status", resp.Status)
+
+	return nil
 }
 
 func groupTasks(tasks []task.Task) map[string][]task.Task {

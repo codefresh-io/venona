@@ -14,14 +14,23 @@
 
 package task
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+)
 
 // Const for task types
 const (
-	TypeCreatePod = "CreatePod"
-	TypeCreatePVC = "CreatePvc"
-	TypeDeletePod = "DeletePod"
-	TypeDeletePVC = "DeletePvc"
+	TypeCreatePod    = "CreatePod"
+	TypeCreatePVC    = "CreatePvc"
+	TypeDeletePod    = "DeletePod"
+	TypeDeletePVC    = "DeletePvc"
+	TypeProxyRequest = "ProxyRequest"
+)
+
+// Var errors
+var (
+	ErrMalformedProxyTaskSpec = errors.New("Could not parse \"ProxyTask\" spec due to malformed structure")
 )
 
 // UnmarshalTasks with json
@@ -52,4 +61,15 @@ type Metadata struct {
 	Account   string `json:"account"`
 	ReName    string `json:"reName"`
 	Workflow  string `json:"workflow"`
+}
+
+// ProxyRequestTaskSpec describes a task of type "ProxyRequest"
+type ProxyRequestTaskSpec struct {
+	Origin  string            `json:"origin"`
+	URL     string            `json:"url"`
+	Method  string            `json:"method"`
+	Body    []byte            `json:"body"`
+	Headers map[string]string `json:"headers"`
+	Timeout int               `json:"timeout"`
+	Retries int               `json:"retries"`
 }

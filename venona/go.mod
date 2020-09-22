@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/hashicorp/go-retryablehttp v0.6.7
 	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
