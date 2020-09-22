@@ -24,6 +24,9 @@ spec:
         app: {{ .AppProxy.AppName }}
         version: {{ .Version }}
     spec:
+      {{- if .CreateRbac }}
+      serviceAccountName: {{ .AppProxy.AppName }}
+      {{- end }}
       containers:
       - name: {{ .AppProxy.AppName }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}

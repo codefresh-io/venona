@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-OUTFILE=/usr/local/bin/venonactl
+OUTFILE=~/.codefresh/agent/venona
 go generate ${PWD}/hack/generate.go
 go fmt ${PWD}/pkg/obj/kubeobj/kubeobj.go
 go fmt ${PWD}/pkg/templates/kubernetes/templates.go
