@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	// cliValues "helm.sh/helm/v3/pkg/cli/values"
-	// "helm.sh/helm/v3/pkg/getter"	
+	// "helm.sh/helm/v3/pkg/getter"
 )
 
 var installAgentCmdOptions struct {
@@ -56,10 +56,10 @@ var installAgentCmd = &cobra.Command{
 	Short: "Install Codefresh's agent ",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			installAgentCmdOptions.templateValueFiles, 
-			installAgentCmdOptions.templateValues, 
+			installAgentCmdOptions.templateValueFiles,
+			installAgentCmdOptions.templateValues,
 			installAgentCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -67,11 +67,12 @@ var installAgentCmd = &cobra.Command{
 		// Merge cmd options with template
 		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
-		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
 		mergeValueStr(templateValuesMap, "Namespace", &installAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
-		mergeValueStr(templateValuesMap, "Tolerations", getTolerations())
+		tolerations := getTolerations()
+		mergeValueStr(templateValuesMap, "Tolerations", &tolerations)
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
 
 		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
@@ -79,7 +80,7 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
 
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
-	
+
 		mergeValueBool(templateValuesMap, "InCluster", &installAgentCmdOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installAgentCmdOptions.kubernetesRunnerType)
 
@@ -99,7 +100,7 @@ var installAgentCmd = &cobra.Command{
 		}
 
 		if installAgentCmdOptions.agentToken == "" {
-			installAgentCmdOptions.agentToken = cfAPIToken	
+			installAgentCmdOptions.agentToken = cfAPIToken
 		}
 		if installAgentCmdOptions.agentToken == "" {
 			dieOnError(fmt.Errorf("Agent token is required in order to install agent"))
@@ -111,7 +112,7 @@ var installAgentCmd = &cobra.Command{
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
 
-		s.KubernetesAPI.Tolerations = *getTolerations()
+		s.KubernetesAPI.Tolerations = tolerations
 
 		if installAgentCmdOptions.venona.version != "" {
 			version := installAgentCmdOptions.venona.version
@@ -138,7 +139,7 @@ var installAgentCmd = &cobra.Command{
 
 		values := s.BuildValues()
 		values = mergeMaps(values, templateValuesMap)
-		
+
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
@@ -149,7 +150,7 @@ var installAgentCmd = &cobra.Command{
 	},
 }
 
-func getTolerations() (*string) {
+func getTolerations() string {
 
 	if installAgentCmdOptions.tolerations != "" {
 		var tolerationsString string
@@ -164,11 +165,10 @@ func getTolerations() (*string) {
 		if err != nil {
 			dieOnError(err)
 		}
-		return &tolerations
+		return tolerations
 
 	}
-	emptyStr := ""
-	return &emptyStr
+	return ""
 }
 
 func init() {
