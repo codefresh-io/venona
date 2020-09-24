@@ -5,6 +5,21 @@ package kubernetes
 func TemplatesMap() map[string]string {
 	templatesMap := make(map[string]string)
 
+	templatesMap["cluster-role-binding.app-proxy.yaml"] = `{{- if .CreateRbac }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .AppProxy.AppName }}-cluster-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ .AppProxy.AppName }} # this service account can get secrets cluster-wide (all namespaces)
+  namespace: {{ .Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .AppProxy.AppName }}-cluster-reader
+  apiGroup: rbac.authorization.k8s.io
+{{- end  }}`
+
 	templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
 ---
 kind: ClusterRoleBinding
@@ -36,6 +51,20 @@ roleRef:
   kind: ClusterRole
   name: system:discovery
   apiGroup: rbac.authorization.k8s.io
+{{- end }}`
+
+	templatesMap["cluster-role.app-proxy.yaml"] = `{{- if .CreateRbac }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .AppProxy.AppName }}-cluster-reader
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
 {{- end }}`
 
 	templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
@@ -209,6 +238,9 @@ spec:
         app: {{ .AppProxy.AppName }}
         version: {{ .Version }}
     spec:
+      {{- if .CreateRbac }}
+      serviceAccountName: {{ .AppProxy.AppName }}
+      {{- end }}
       containers:
       - name: {{ .AppProxy.AppName }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
@@ -688,6 +720,18 @@ metadata:
   namespace: {{ .Namespace }}
 data:
   codefresh.token: {{ .AgentToken | b64enc }}`
+
+	templatesMap["service-account.app-proxy.yaml"] = `{{- if .CreateRbac }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .AppProxy.AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
+{{- end }}
+`
 
 	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
 ---
