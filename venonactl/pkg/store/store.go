@@ -138,6 +138,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Image":        "codefresh/dind-volume-provisioner:v24",
 				"NodeSelector": s.KubernetesAPI.NodeSelector,
 				"Tolerations":  s.KubernetesAPI.Tolerations,
+				"MountAzureJson": false,
 			},
 		},
 		"Monitor": map[string]interface{}{
