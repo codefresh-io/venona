@@ -12,10 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build !windows
+
 package main
 
-import "github.com/codefresh-io/venona/venonactl/cmd"
+import (
+	"os"
+    "os/signal"
+	"syscall"
+	"fmt"
+	"github.com/codefresh-io/venona/venonactl/cmd"
+)
+
+const (
+	waitForSignalEnv       = "WAIT_FOR_DEBUGGER"
+	debuggerPort		   = "4321"
+)
 
 func main() {
+	// Waiting for debugger attach in case if waitForSignalEnv!=""
+	// For debuging venonactl spawned by `codefresh runner ...`
+	if os.Getenv(waitForSignalEnv) != "" {
+		sigs := make(chan os.Signal, 1)
+		goOn := make(chan bool, 1)
+		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGUSR1)
+
+		go func() {
+			sig := <-sigs
+			if sig == syscall.SIGUSR1 {
+				goOn <- true
+			} else if (sig == syscall.SIGTERM || sig == syscall.SIGINT ){
+                fmt.Printf("Exiting ...")
+				os.Exit(0)
+			}
+		}()		
+			
+		fmt.Printf("%s env is set, waiting SIGUSR1.\nYou can run remote debug in vscode and attach dlv debugger:\n\n", waitForSignalEnv)
+	
+		pid := os.Getpid()
+		fmt.Printf("dlv attach --continue --accept-multiclient --headless --listen=:%s %d\n", debuggerPort, pid)
+		fmt.Printf("kill -SIGUSR1 %d\n", pid)
+		
+		<-goOn
+		fmt.Printf("Continue ...")
+	}
 	cmd.Execute()
 }

@@ -1,3 +1,4 @@
+{{- if .CreateRbac }}
 {{- if .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
@@ -20,3 +21,4 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
   {{- end }}
+{{- end }}

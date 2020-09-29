@@ -5,7 +5,23 @@ package kubernetes
 func TemplatesMap() map[string]string {
 	templatesMap := make(map[string]string)
 
-	templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `---
+	templatesMap["cluster-role-binding.app-proxy.yaml"] = `{{- if .CreateRbac }}
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .AppProxy.AppName }}-cluster-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ .AppProxy.AppName }} # this service account can get secrets cluster-wide (all namespaces)
+  namespace: {{ .Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .AppProxy.AppName }}-cluster-reader
+  apiGroup: rbac.authorization.k8s.io
+{{- end  }}`
+
+	templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
+---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -20,22 +36,10 @@ roleRef:
   kind: ClusterRole
   name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   apiGroup: rbac.authorization.k8s.io
-`
+{{- end }}`
 
-	templatesMap["cluster-role-binding.engine.yaml"] = `kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: {{ .AppName }}-{{ .Namespace }}-engine
-subjects:
-- kind: ServiceAccount
-  name: engine
-  namespace: {{ .Namespace }}
-roleRef:
-  kind: ClusterRole
-  name: cluster-admin
-  apiGroup: rbac.authorization.k8s.io`
-
-	templatesMap["cluster-role-binding.venona.yaml"] = `kind: ClusterRoleBinding
+	templatesMap["cluster-role-binding.venona.yaml"] = `{{- if .CreateRbac }}
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}-{{ .Namespace }}
@@ -46,9 +50,25 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: system:discovery
-  apiGroup: rbac.authorization.k8s.io`
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}`
 
-	templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `kind: ClusterRole
+	templatesMap["cluster-role.app-proxy.yaml"] = `{{- if .CreateRbac }}
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .AppProxy.AppName }}-cluster-reader
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+{{- end }}`
+
+	templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
@@ -79,17 +99,7 @@ rules:
   - apiGroups: [""]
     resources: ["endpoints"]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
-`
-
-	templatesMap["cluster-role.engine.yaml"] = `kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: {{ .AppName }}-{{ .Namespace }}-engine
-rules:
-  - apiGroups: [""]
-    resources: ["pods", "persistentvolumeclaims"]
-    verbs: ["get", "create", "delete", "list"]
-`
+{{- end }}`
 
 	templatesMap["codefresh-certs-server-secret.re.yaml"] = `apiVersion: v1
 type: Opaque
@@ -202,6 +212,57 @@ spec:
           path: {{ $localVolumeParentDir }}
 {{- end -}}`
 
+	templatesMap["deployment.app-proxy.yaml"] = `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }} 
+  name:  {{ .AppProxy.AppName }}
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .AppProxy.AppName }}
+      version: {{ .Version }}
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .AppProxy.AppName }}
+        version: {{ .Version }}
+    spec:
+      {{- if .CreateRbac }}
+      serviceAccountName: {{ .AppProxy.AppName }}
+      {{- end }}
+      containers:
+      - name: {{ .AppProxy.AppName }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
+        imagePullPolicy: Always
+        env:
+          - name: PORT
+            value: "3000"
+          - name: CODEFRESH_HOST
+            value: {{ .CodefreshHost }}
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+`
+
 	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -283,7 +344,8 @@ spec:
       {{- end }}
 `
 
-	templatesMap["deployment.monitor.yaml"] = `apiVersion: apps/v1
+	templatesMap["deployment.monitor.yaml"] = `{{- if .Monitor.Enabled }}
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Monitor.AppName }}
@@ -348,6 +410,7 @@ spec:
           timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 5
+{{- end }}          
 `
 
 	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
@@ -419,7 +482,7 @@ spec:
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
         {{- end }}
-        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }}:{{ .Image.Tag }} {{- else }} {{- .Image.Name }}:{{ .Image.Tag }} {{- end}}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }} {{- else }} {{- .Image.Name }}{{- end}}:{{ .Image.Tag | default "latest"}}
         volumeMounts:
         - name: runnerconf
           mountPath: "/etc/secrets"
@@ -474,7 +537,8 @@ spec:
 
 `
 
-	templatesMap["role-binding.re.yaml"] = `kind: RoleBinding
+	templatesMap["role-binding.re.yaml"] = `{{- if .CreateRbac }}
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -486,9 +550,11 @@ subjects:
 roleRef:
   kind: Role
   name: {{ .AppName }}
-  apiGroup: rbac.authorization.k8s.io`
+  apiGroup: rbac.authorization.k8s.io
+{{- end  }}`
 
-	templatesMap["role.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+	templatesMap["role.monitor.yaml"] = `{{- if .CreateRbac }}
+{{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: Role
 {{- else }}
@@ -535,9 +601,10 @@ rules:
   - list
   - watch
 {{- end }}
-`
+{{- end }}`
 
-	templatesMap["role.re.yaml"] = `kind: Role
+	templatesMap["role.re.yaml"] = `{{- if .CreateRbac }}
+kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: {{ .AppName }}
@@ -546,9 +613,10 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "persistentvolumeclaims"]
   verbs: ["get", "create", "delete"]
-`
+{{- end }}`
 
-	templatesMap["rolebinding.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+	templatesMap["rolebinding.monitor.yaml"] = `{{- if .CreateRbac }}
+{{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
 {{- else }}
@@ -574,9 +642,10 @@ roleRef:
   {{- end }}
   name: {{ .Monitor.AppName }}-cluster-reader
 {{- end }}
-`
+{{- end }}`
 
-	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .CreateRbac }}
+{{- if .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
 {{- else }}
@@ -598,9 +667,10 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
   {{- end }}
-`
+{{- end }}`
 
-	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if and .Monitor.RbacEnabled (not .Monitor.UseNamespaceWithRole) }}
+	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if .CreateRbac }}
+{{- if and .Monitor.RbacEnabled (not .Monitor.UseNamespaceWithRole) }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -610,7 +680,7 @@ metadata:
     app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 {{- end }}
-`
+{{- end }}`
 
 	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `apiVersion: v1
 kind: Secret
@@ -649,9 +719,22 @@ metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 data:
-  codefresh.token: {{ .AgentToken }}`
+  codefresh.token: {{ .AgentToken | b64enc }}`
 
-	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `---
+	templatesMap["service-account.app-proxy.yaml"] = `{{- if .CreateRbac }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .AppProxy.AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
+{{- end }}
+`
+
+	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -659,15 +742,10 @@ metadata:
   namespace: {{ .Namespace }}
   labels:
     app: dind-volume-provisioner
-`
+{{- end }}`
 
-	templatesMap["service-account.engine.yaml"] = `apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: engine
-  namespace: {{ .Namespace }}`
-
-	templatesMap["service-account.monitor.yaml"] = `{{- if .Monitor.RbacEnabled }}
+	templatesMap["service-account.monitor.yaml"] = `{{- if .CreateRbac }}
+{{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -677,15 +755,34 @@ metadata:
     app: {{ .Monitor.AppName }}
     version: {{ .Version }}
 {{- end }}
+{{- end }}
 `
 
-	templatesMap["service-account.re.yaml"] = `apiVersion: v1
+	templatesMap["service-account.re.yaml"] = `{{- if .CreateRbac }}
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
-  namespace: {{ .Namespace }}`
+  namespace: {{ .Namespace }}
+{{- end }}`
 
-	templatesMap["service.monitor.yaml"] = `apiVersion: v1
+	templatesMap["service.app-proxy.yaml"] = `apiVersion: v1
+kind: Service
+metadata:
+  name: app-proxy-service
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    app: {{ .AppProxy.AppName }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
+`
+
+	templatesMap["service.monitor.yaml"] = `{{- if .CreateRbac }}
+apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Monitor.AppName }}
@@ -702,9 +799,11 @@ spec:
     targetPort: 9020
   selector:
     app: {{ .Monitor.AppName }}
+{{- end }}
 `
 
-	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `---
+	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `{{- if .Storage.CreateStorageClass }}
+---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -733,13 +832,16 @@ parameters:
   AvailabilityZone: {{ .Storage.AvailabilityZone }}
   # ext4 or xfs (default to ext4 )
   fsType: {{ .Storage.FsType | default "ext4" }}
+  
   # "true" or "false" (default - "false")
   encrypted: "{{ .Storage.Encrypted | default "false" }}"
   {{ if .Storage.KmsKeyId }}
   # KMS Key ID
   kmsKeyId: {{ .Storage.KmsKeyId }}
-  {{- end }}
-{{- end }}`
+  {{- end }}  
+{{- end }}
+{{- end }}
+`
 
 	templatesMap["venonaconf.secret.venona.yaml"] = `apiVersion: v1
 kind: Secret

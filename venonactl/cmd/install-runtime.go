@@ -23,6 +23,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
 )
 
 var installRuntimeCmdOptions struct {
@@ -42,12 +43,41 @@ var installRuntimeCmdOptions struct {
 	tolerations            string
 	templateValues         []string
 	templateFileValues     []string
+	templateValueFiles     []string
 }
 
 var installRuntimeCmd = &cobra.Command{
 	Use:   "runtime",
 	Short: "Install Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		templateValuesMap, err := templateValuesToMap(
+			installRuntimeCmdOptions.templateValueFiles, 
+			installRuntimeCmdOptions.templateValues, 
+			installRuntimeCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
+		mergeValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)		
+
+		mergeValueStr(templateValuesMap, "Namespace", &installRuntimeCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "RuntimeEnvironmentName", &installRuntimeCmdOptions.runtimeEnvironmentName)
+		mergeValueStr(templateValuesMap, "NodeSelector", &installRuntimeCmdOptions.kube.nodeSelector)
+		mergeValueStr(templateValuesMap, "Tolerations", &installRuntimeCmdOptions.tolerations)
+		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
+		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
+		
+		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
+		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
+		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
+
 
 		s := store.GetStore()
 		lgr := createLogger("Install-runtime", verbose, logFormatter)
@@ -128,23 +158,7 @@ var installRuntimeCmd = &cobra.Command{
 
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		values := s.BuildValues()
-
-		var err error
-		if len(installRuntimeCmdOptions.templateValues) > 0 {
-			setValues, err := parseSetValues(installRuntimeCmdOptions.templateValues)
-			if err != nil {
-				dieOnError(err)
-			}
-			values = mergeMaps(values, setValues)
-		}
-
-		if len(installRuntimeCmdOptions.templateFileValues) > 0 {
-			setFileValues, err := parseSetFiles(installRuntimeCmdOptions.templateFileValues)
-			if err != nil {
-				dieOnError(err)
-			}
-			values = mergeMaps(values, setFileValues)
-		}
+		values = mergeMaps(values, templateValuesMap)
 
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
@@ -179,4 +193,5 @@ func init() {
 
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installRuntimeCmd.Flags().StringArrayVar(&installRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
+	installRuntimeCmd.Flags().StringArrayVarP(&installRuntimeCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 }
