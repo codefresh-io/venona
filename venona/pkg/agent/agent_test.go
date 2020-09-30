@@ -285,7 +285,7 @@ func Test_executeAgentTask(t *testing.T) {
 				executorName: "test",
 				executorFunc: func(t *task.AgentTask, l logger.Logger) error {
 					executorCalled = true
-					data, ok := t.Params["data"].(int)
+					data, ok := t.Params["data"].(float64)
 					if !ok {
 						return fmt.Errorf("expected data to be of type int")
 					}
@@ -321,7 +321,7 @@ func Test_executeAgentTask(t *testing.T) {
 				t.Errorf("expected error %v but got nil", tt.wantErr)
 			}
 			if ret != nil && tt.wantErr == nil {
-				t.Errorf("expected nill but got an error: %v", ret)
+				t.Errorf("expected nil but got an error: %v", ret)
 			}
 			if ret != nil && ret.Error() != tt.wantErr.Error() {
 				t.Errorf("expected error: %v but got error: %v", tt.wantErr.Error(), ret.Error())

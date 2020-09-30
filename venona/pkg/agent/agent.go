@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"sync"
 	"time"
@@ -326,6 +327,9 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	if err != nil {
 		return errAgentTaskMalformedParams
 	}
+	if json == nil {
+		json = []byte{}
+	}
 
 	req, err := retryablehttp.NewRequest(method, url, bytes.NewReader(json))
 	if err != nil {
@@ -335,7 +339,7 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	req.Header.Add("x-req-type", "workflow-request")
 	req.Header.Add("x-access-token", token)
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Content-Length", string(len(json)))
+	req.Header.Add("Content-Length", fmt.Sprintf("%v", len(json)))
 
 	log.Info("executing proxy task", "url", url, "method", method)
 
