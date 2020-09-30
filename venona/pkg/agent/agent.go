@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"sync"
 	"time"
 
@@ -41,6 +42,7 @@ var (
 	errUknownAgentTaskType      = errors.New("Agent task has unknown type")
 	errAgentTaskMalformedParams = errors.New("failed to marshal agent task params")
 	errProxyTaskWithoutURL      = errors.New(`url not provided for task of type "proxy"`)
+	errProxyTaskWithoutToken    = errors.New(`token not provided for task of type "proxy"`)
 )
 
 const (
@@ -287,8 +289,13 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 }
 
 func executeAgentTask(t *task.Task, log logger.Logger) error {
-	spec, ok := t.Spec.(task.AgentTask)
-	if !ok {
+	specJSON, err := json.Marshal(t.Spec)
+	if err != nil {
+		return errFailedToParseAgentTask
+	}
+
+	spec := task.AgentTask{}
+	if err = json.Unmarshal(specJSON, &spec); err != nil {
 		return errFailedToParseAgentTask
 	}
 
@@ -302,13 +309,18 @@ func executeAgentTask(t *task.Task, log logger.Logger) error {
 
 func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	spec := objx.Map(t.Params)
+	vars := objx.Map(spec.Get("runtimeContext.context.variables").MSI())
+	token := spec.Get("runtimeContext.context.eventReporting.token").Str()
+	if token == "" {
+		return errProxyTaskWithoutToken
+	}
 
-	url := spec.Get("url").Str()
+	url := vars.Get("proxyUrl").Str()
 	if url == "" {
 		return errProxyTaskWithoutURL
 	}
 
-	method := spec.Get("method").Str("POST")
+	method := vars.Get("method").Str("POST")
 
 	json, err := json.Marshal(t.Params)
 	if err != nil {
@@ -321,6 +333,9 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	}
 
 	req.Header.Add("x-req-type", "workflow-request")
+	req.Header.Add("x-access-token", token)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Length", string(len(json)))
 
 	log.Info("executing proxy task", "url", url, "method", method)
 
@@ -328,9 +343,9 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close() // not gonna read that for now
+	body, _ := ioutil.ReadAll(resp.Body)
 
-	log.Info("finished proxy task", "tid", "url", url, "method", method, "status", resp.Status)
+	log.Info("finished proxy task", "url", url, "method", method, "status", resp.Status, "body", string(body))
 
 	return nil
 }
