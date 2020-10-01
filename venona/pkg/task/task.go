@@ -14,7 +14,9 @@
 
 package task
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // Const for task types
 const (
@@ -22,6 +24,7 @@ const (
 	TypeCreatePVC = "CreatePvc"
 	TypeDeletePod = "DeletePod"
 	TypeDeletePVC = "DeletePvc"
+	TypeAgentTask = "AgentTask"
 )
 
 // UnmarshalTasks with json
@@ -52,4 +55,10 @@ type Metadata struct {
 	Account   string `json:"account"`
 	ReName    string `json:"reName"`
 	Workflow  string `json:"workflow"`
+}
+
+// AgentTask describes a task of type "AgentTask"
+type AgentTask struct {
+	Type   string                 `json:"type"`
+	Params map[string]interface{} `json:"params"`
 }

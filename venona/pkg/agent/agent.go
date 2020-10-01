@@ -15,7 +15,11 @@
 package agent
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"sync"
 	"time"
 
@@ -23,20 +27,30 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
+	"github.com/stretchr/objx"
 )
 
+// internal errors
 var (
-	errAlreadyRunning   = errors.New("Agent already running")
-	errAlreadyStopped   = errors.New("Agent already stopped")
-	errOptionsRequired  = errors.New("Options are required")
-	errIDRequired       = errors.New("ID options is required")
-	errRuntimesRequired = errors.New("Runtimes options is required")
-	errLoggerRequired   = errors.New("Logger options is required")
+	errAlreadyRunning           = errors.New("Agent already running")
+	errAlreadyStopped           = errors.New("Agent already stopped")
+	errOptionsRequired          = errors.New("Options are required")
+	errIDRequired               = errors.New("ID options is required")
+	errRuntimesRequired         = errors.New("Runtimes options is required")
+	errLoggerRequired           = errors.New("Logger options is required")
+	errFailedToParseAgentTask   = errors.New("Failed to parse agent task spec")
+	errUknownAgentTaskType      = errors.New("Agent task has unknown type")
+	errAgentTaskMalformedParams = errors.New("failed to marshal agent task params")
+	errProxyTaskWithoutURL      = errors.New(`url not provided for task of type "proxy"`)
+	errProxyTaskWithoutToken    = errors.New(`token not provided for task of type "proxy"`)
 )
 
 const (
 	defaultTaskPullingInterval     = time.Second * 3
 	defaultStatusReportingInterval = time.Second * 10
+	defaultProxyRequestTimeout     = time.Second * 10
+	defaultProxyRequestRetries     = 3
 )
 
 type (
@@ -74,6 +88,14 @@ type (
 	workflowCandidate struct {
 		tasks   []task.Task
 		runtime string
+	}
+)
+
+var (
+	httpClient = retryablehttp.NewClient()
+
+	agentTaskExecutors = map[string]func(t *task.AgentTask, log logger.Logger) error{
+		"proxy": proxyRequest,
 	}
 )
 
@@ -210,17 +232,33 @@ func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
-	for _, t := range tasks {
-		logger.Debug("Received task", "type", t.Type, "workflow", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
-		if t.Type == task.TypeCreatePod || t.Type == task.TypeCreatePVC {
-			creationTasks = append(creationTasks, t)
-		}
+	agentTasks := []task.Task{}
 
-		if t.Type == task.TypeDeletePod || t.Type == task.TypeDeletePVC {
+	// divide tasks by types
+	for _, t := range tasks {
+		logger.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+		switch t.Type {
+		case task.TypeCreatePod, task.TypeCreatePVC:
+			creationTasks = append(creationTasks, t)
+		case task.TypeDeletePod, task.TypeDeletePVC:
 			deletionTasks = append(deletionTasks, t)
+		case task.TypeAgentTask:
+			agentTasks = append(agentTasks, t)
+		default:
+			logger.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		}
 	}
 
+	// process agent tasks
+	for i := range agentTasks {
+		t := agentTasks[i]
+		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
+		if err := executeAgentTask(&t, logger); err != nil {
+			logger.Error(err.Error())
+		}
+	}
+
+	// process creation tasks
 	for _, tasks := range groupTasks(creationTasks) {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
@@ -233,6 +271,8 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 			logger.Error(err.Error())
 		}
 	}
+
+	// process deletion tasks
 	for _, tasks := range groupTasks(deletionTasks) {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
@@ -247,6 +287,71 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 			}
 		}
 	}
+}
+
+func executeAgentTask(t *task.Task, log logger.Logger) error {
+	specJSON, err := json.Marshal(t.Spec)
+	if err != nil {
+		return errFailedToParseAgentTask
+	}
+
+	spec := task.AgentTask{}
+	if err = json.Unmarshal(specJSON, &spec); err != nil {
+		return errFailedToParseAgentTask
+	}
+
+	e, ok := agentTaskExecutors[spec.Type]
+	if !ok {
+		return errUknownAgentTaskType
+	}
+
+	return e(&spec, log)
+}
+
+func proxyRequest(t *task.AgentTask, log logger.Logger) error {
+	spec := objx.Map(t.Params)
+	vars := objx.Map(spec.Get("runtimeContext.context.variables").MSI())
+	token := spec.Get("runtimeContext.context.eventReporting.token").Str()
+	if token == "" {
+		return errProxyTaskWithoutToken
+	}
+
+	url := vars.Get("proxyUrl").Str()
+	if url == "" {
+		return errProxyTaskWithoutURL
+	}
+
+	method := vars.Get("method").Str("POST")
+
+	json, err := json.Marshal(t.Params)
+	if err != nil {
+		return errAgentTaskMalformedParams
+	}
+	if json == nil {
+		json = []byte{}
+	}
+
+	req, err := retryablehttp.NewRequest(method, url, bytes.NewReader(json))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("x-req-type", "workflow-request")
+	req.Header.Add("x-access-token", token)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Length", fmt.Sprintf("%v", len(json)))
+
+	log.Info("executing proxy task", "url", url, "method", method)
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+
+	log.Info("finished proxy task", "url", url, "method", method, "status", resp.Status, "body", string(body))
+
+	return nil
 }
 
 func groupTasks(tasks []task.Task) map[string][]task.Task {
@@ -281,4 +386,9 @@ func checkOptions(opt *Options) error {
 	}
 
 	return nil
+}
+
+func init() {
+	httpClient.RetryMax = defaultProxyRequestRetries
+	httpClient.HTTPClient.Timeout = defaultProxyRequestTimeout
 }
