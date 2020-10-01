@@ -275,13 +275,16 @@ func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
 }
 
 // mergeValueStr - for merging cli parameters with mapped parameters
-func mergeValueStr(valuesMap map[string]interface{}, key string, param *string) {
+func mergeValueStr(valuesMap map[string]interface{}, key string, param *string, defaultValue ...string) {
 	mapX := objx.New(valuesMap)
 	if param != nil && *param != "" {
 		mapX.Set(key, *param)
 	    return
     }
-    val := mapX.Get(key).String()
+	val := mapX.Get(key).String()
+	if (val == "" && len(defaultValue) > 0) {
+		val = defaultValue[0]
+	}
     *param = val
 }
 

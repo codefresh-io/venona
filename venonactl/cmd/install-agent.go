@@ -124,7 +124,7 @@ var installAgentCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
-		fillLimits()
+		fillLimitsForRunner()
 
 		s.KubernetesAPI.Tolerations = tolerations
 
@@ -185,7 +185,7 @@ func getTolerations() string {
 	return ""
 }
 
-func fillLimits() {
+func fillLimitsForRunner() {
 	s := store.GetStore()
 	s.Runner = &store.Runner{}
 	if (installAgentCmdOptions.limits.memory != "" || installAgentCmdOptions.limits.cpu != "") {

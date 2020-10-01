@@ -35,6 +35,10 @@ type (
 
 		Runner *Runner
 
+		VolumeProvisioner *VolumeProvisioner
+
+		LocalVolumeMonitor *LocalVolumeMonitor
+
 		AgentAPI *AgentAPI
 
 		ClusterInCodefresh string
@@ -95,6 +99,15 @@ type (
 		Limits   *MemoryCPU
 		Requests *MemoryCPU
 	}
+	VolumeProvisioner struct {
+		Limits   *MemoryCPU
+		Requests *MemoryCPU
+	}
+
+	LocalVolumeMonitor struct {
+		Limits   *MemoryCPU
+		Requests *MemoryCPU
+	}
 	MemoryCPU struct {
 		CPU string
 		Memory string 
@@ -135,16 +148,6 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Key":  "",
 			"Ca":   "",
 		},
-		// "Runner": map[string]interface{}{
-		// 	"Limits": map[string]string {
-		// 		"CPU": s.Runner.Limits.CPU,
-		// 		"Memory": s.Runner.Limits.Memory,
-		// 	},
-		// 	"Requests": map[string]string {
-		// 		"CPU": s.Runner.Requests.CPU,
-		// 		"Memory": s.Runner.Requests.Memory,
-		// 	},
-		// },
 		"Runner": s.Runner,
 		"CreateRbac": true,
 		"Storage": map[string]interface{}{
@@ -160,7 +163,9 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Image":        "codefresh/dind-volume-provisioner:v24",
 				"NodeSelector": s.KubernetesAPI.NodeSelector,
 				"Tolerations":  s.KubernetesAPI.Tolerations,
+			    "Resources": s.VolumeProvisioner,
 			},
+			"LocalVolumeMonitor": s.LocalVolumeMonitor,
 		},
 		"Monitor": map[string]interface{}{
 			"Enabled":              true,

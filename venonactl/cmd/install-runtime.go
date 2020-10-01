@@ -44,6 +44,27 @@ var installRuntimeCmdOptions struct {
 	templateValues         []string
 	templateFileValues     []string
 	templateValueFiles     []string
+	VolumeProvisioner struct {
+		limits struct {
+			memory string
+			cpu    string
+		}
+		requests struct {
+			memory string
+			cpu    string
+		}
+	}
+	LocalVolumeMonitor struct {
+		limits struct {
+			memory string
+			cpu    string
+		}
+		requests struct {
+			memory string
+			cpu    string
+		}
+	}
+	
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -74,6 +95,16 @@ var installRuntimeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
 		
+		mergeValueStr(templateValuesMap, "VolumeProvisioner.Requests.CPU", &installRuntimeCmdOptions.VolumeProvisioner.requests.cpu, "200m")
+		mergeValueStr(templateValuesMap, "VolumeProvisioner.Requests.Memory", &installRuntimeCmdOptions.VolumeProvisioner.requests.memory, "200Mi")
+		mergeValueStr(templateValuesMap, "VolumeProvisioner.Limits.CPU", &installRuntimeCmdOptions.VolumeProvisioner.limits.cpu, "1000m")
+		mergeValueStr(templateValuesMap, "VolumeProvisioner.Limits.Memory", &installRuntimeCmdOptions.VolumeProvisioner.limits.memory, "6000Mi")
+
+		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Requests.CPU", &installRuntimeCmdOptions.LocalVolumeMonitor.requests.cpu)
+		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Requests.Memory", &installRuntimeCmdOptions.LocalVolumeMonitor.requests.memory)
+		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Limits.CPU", &installRuntimeCmdOptions.LocalVolumeMonitor.limits.cpu)
+		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Limits.Memory", &installRuntimeCmdOptions.LocalVolumeMonitor.limits.memory)
+
 		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
 		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
@@ -140,6 +171,7 @@ var installRuntimeCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installRuntimeCmdOptions.kube.context, installRuntimeCmdOptions.kube.namespace, installRuntimeCmdOptions.kube.inCluster)
+		fillLimitsForVP()
 
 		if installRuntimeCmdOptions.dryRun {
 			s.DryRun = installRuntimeCmdOptions.dryRun
@@ -169,6 +201,37 @@ var installRuntimeCmd = &cobra.Command{
 		lgr.Info("Runtime installation completed Successfully")
 
 	},
+}
+
+func fillLimitsForVP() {
+	s := store.GetStore()
+	s.VolumeProvisioner = &store.VolumeProvisioner{}
+	if (installRuntimeCmdOptions.VolumeProvisioner.limits.memory != "" || installRuntimeCmdOptions.VolumeProvisioner.limits.cpu != "") {
+		s.VolumeProvisioner.Limits= &store.MemoryCPU{
+			Memory: installRuntimeCmdOptions.VolumeProvisioner.limits.memory,
+			CPU: installRuntimeCmdOptions.VolumeProvisioner.limits.cpu,
+		}
+	}
+	if (installRuntimeCmdOptions.VolumeProvisioner.requests.memory != "" || installRuntimeCmdOptions.VolumeProvisioner.requests.cpu != "") {
+		s.VolumeProvisioner.Requests = &store.MemoryCPU{
+			Memory: installRuntimeCmdOptions.VolumeProvisioner.requests.memory,
+			CPU: installRuntimeCmdOptions.VolumeProvisioner.requests.cpu,
+		}
+	}
+	s.LocalVolumeMonitor = &store.LocalVolumeMonitor{}
+	if (installRuntimeCmdOptions.LocalVolumeMonitor.limits.memory != "" || installRuntimeCmdOptions.LocalVolumeMonitor.limits.cpu != "") {
+		s.LocalVolumeMonitor.Limits= &store.MemoryCPU{
+			Memory: installRuntimeCmdOptions.LocalVolumeMonitor.limits.memory,
+			CPU: installRuntimeCmdOptions.LocalVolumeMonitor.limits.cpu,
+		}
+	}
+	if (installRuntimeCmdOptions.LocalVolumeMonitor.requests.memory != "" || installRuntimeCmdOptions.LocalVolumeMonitor.requests.cpu != "") {
+		s.LocalVolumeMonitor.Requests = &store.MemoryCPU{
+			Memory: installRuntimeCmdOptions.LocalVolumeMonitor.requests.memory,
+			CPU: installRuntimeCmdOptions.LocalVolumeMonitor.requests.cpu,
+		}
+	}
+	
 }
 
 func init() {

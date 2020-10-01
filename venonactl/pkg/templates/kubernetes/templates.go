@@ -180,6 +180,27 @@ spec:
       containers:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
+      {{if or  .Storage.LocalVolumeMonitor.Limits .Storage.LocalVolumeMonitor.Requests }}
+          resources:
+      {{ end }}
+      {{ if .Storage.LocalVolumeMonitor.Requests }}
+            requests:
+        {{ if (ne .Storage.LocalVolumeMonitor.Requests.Memory "") }}
+              memory: "{{ .Storage.LocalVolumeMonitor.Requests.Memory}}"
+        {{ end}}
+        {{ if (ne .Storage.LocalVolumeMonitor.Requests.CPU "") }}
+              cpu: " {{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
+        {{ end}}
+      {{ end }}
+      {{ if .Storage.LocalVolumeMonitor.Limits }}
+            limits:
+        {{ if (ne .Storage.LocalVolumeMonitor.Limits.Memory "") }}
+              memory: "{{ .Storage.LocalVolumeMonitor.Limits.Memory}}"
+        {{ end}}
+        {{ if (ne .Storage.LocalVolumeMonitor.Limits.CPU "") }}
+              cpu: " {{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
+        {{ end}}
+      {{ end }}
           imagePullPolicy: Always
           command:
           - /bin/local-volumes-agent
@@ -296,15 +317,29 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
+      {{if or  .Storage.VolumeProvisioner.Resources.Limits .Storage.VolumeProvisioner.Resources.Requests }}
+        resources:
+      {{ end }}
+      {{ if .Storage.VolumeProvisioner.Resources.Requests }}
+          requests:
+        {{ if (ne .Storage.VolumeProvisioner.Resources.Requests.Memory "") }}
+            memory: "{{ .Storage.VolumeProvisioner.Resources.Requests.Memory}}"
+        {{ end}}
+        {{ if (ne .Storage.VolumeProvisioner.Resources.Requests.CPU "") }}
+            cpu: " {{ .Storage.VolumeProvisioner.Resources.Requests.CPU}}"
+        {{ end}}
+      {{ end }}
+      {{ if .Storage.VolumeProvisioner.Resources.Limits }}
+          limits:
+        {{ if (ne .Storage.VolumeProvisioner.Resources.Limits.Memory "") }}
+            memory: "{{ .Storage.VolumeProvisioner.Resources.Limits.Memory}}"
+        {{ end}}
+        {{ if (ne .Storage.VolumeProvisioner.Resources.Limits.CPU "") }}
+            cpu: " {{ .Storage.VolumeProvisioner.Resources.Limits.CPU}}"
+        {{ end}}
+      {{ end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "200Mi"
-          limits:
-            cpu: "1000m"
-            memory: "6000Mi"
         command:
           - /usr/local/bin/dind-volume-provisioner
           - -v=4
