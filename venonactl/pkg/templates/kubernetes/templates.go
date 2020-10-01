@@ -333,11 +333,30 @@ spec:
       {{- if .Storage.GoogleServiceAccount }}
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /etc/dind-volume-provisioner/credentials/google-service-account.json
+      {{- end }}
+      {{- if .Storage.VolumeProvisioner.MountAzureJson }}
+        - name: AZURE_CREDENTIAL_FILE
+          value: "/etc/kubernetes/azure.json"
+      {{- end }}
         volumeMounts:
+      {{- if .Storage.VolumeProvisioner.MountAzureJson }}
+        - name: azure-json
+          readOnly: true
+          mountPath: "/etc/kubernetes/azure.json"
+      {{- end }}        
+      {{- if .Storage.GoogleServiceAccount }}
         - name: credentials
           readOnly: true
           mountPath: "/etc/dind-volume-provisioner/credentials"
+      {{- end }}
       volumes:
+      {{- if .Storage.VolumeProvisioner.MountAzureJson }}
+        - name: azure-json
+          hostPath:
+            path: /etc/kubernetes/azure.json
+            type: File          
+      {{- end }}
+      {{- if .Storage.GoogleServiceAccount }}
       - name: credentials
         secret:
           secretName: dind-volume-provisioner-{{ .AppName }}
@@ -838,7 +857,21 @@ parameters:
   {{ if .Storage.KmsKeyId }}
   # KMS Key ID
   kmsKeyId: {{ .Storage.KmsKeyId }}
-  {{- end }}  
+  {{- end }}
+{{- else if or (eq .Storage.Backend "azuredisk") (eq .Storage.Backend "azuredisk-csi")}}
+  ## azuredisk or azuredisk-csi
+  volumeBackend: {{ .Storage.Backend }}
+
+  kind: managed
+  skuName: {{ .Storage.SkuName | default "Premium_LRS" }}
+  fsType: {{ .Storage.FsType | default "ext4" }}
+  cachingMode: {{ .Storage.CachingMode | default "None" }}
+  {{- if .Storage.AzureLocation }}
+  location: {{ .Storage.AzureLocation }}
+  {{- end }}
+  {{- if .Storage.AzureResourceGroup }}
+  resourceGroup: {{ .Storage.AzureResourceGroup }}
+  {{- end }}
 {{- end }}
 {{- end }}
 `

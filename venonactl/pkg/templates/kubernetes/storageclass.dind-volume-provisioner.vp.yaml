@@ -34,6 +34,20 @@ parameters:
   {{ if .Storage.KmsKeyId }}
   # KMS Key ID
   kmsKeyId: {{ .Storage.KmsKeyId }}
-  {{- end }}  
+  {{- end }}
+{{- else if or (eq .Storage.Backend "azuredisk") (eq .Storage.Backend "azuredisk-csi")}}
+  ## azuredisk or azuredisk-csi
+  volumeBackend: {{ .Storage.Backend }}
+
+  kind: managed
+  skuName: {{ .Storage.SkuName | default "Premium_LRS" }}
+  fsType: {{ .Storage.FsType | default "ext4" }}
+  cachingMode: {{ .Storage.CachingMode | default "None" }}
+  {{- if .Storage.AzureLocation }}
+  location: {{ .Storage.AzureLocation }}
+  {{- end }}
+  {{- if .Storage.AzureResourceGroup }}
+  resourceGroup: {{ .Storage.AzureResourceGroup }}
+  {{- end }}
 {{- end }}
 {{- end }}
