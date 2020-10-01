@@ -9,6 +9,14 @@
 CodefreshHost: https://my-codefresh.example.com
 Token:         xxxxx.yyyyyyyy
 
+# Runner:
+#   Limits:
+#     CPU: 400m
+#     Memory: 1200Mi
+#   Requests:
+#     CPU: 200m
+#     Memory: 500Mi
+
 # Runner (venona) image 
 Image: 
   Name: codefresh/venona
@@ -19,10 +27,10 @@ Namespace: r1
 ### ConfigPath - kubeconfig from --kube-config-path
 #ConfigPath: 
 ## Context: from both --context (global arg) and 
-Context: gke_codefresh_cluster
+#Context: gke_codefresh_cluster
 
 ### NodeSelector --kube-node-selector
-NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
+#NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 
 ### --tolerations
 # Tolerations: 

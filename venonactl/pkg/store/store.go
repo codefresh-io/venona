@@ -92,10 +92,12 @@ type (
 	}
 
 	Runner struct {
-		MemoryRequest  string
-		MemoryLimit    string
-		CPURequest     string
-		CPULimit      string
+		Limits   *MemoryCPU
+		Requests *MemoryCPU
+	}
+	MemoryCPU struct {
+		CPU string
+		Memory string 
 	}
 )
 
@@ -133,12 +135,17 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Key":  "",
 			"Ca":   "",
 		},
-		"Runner": map[string]string{
-			"MemoryRequest": s.Runner.MemoryRequest,
-			"MemoryLimit": s.Runner.MemoryLimit,
-			"CpuRequest": s.Runner.CPURequest,
-			"CpuLimit": s.Runner.CPULimit,
-		},
+		// "Runner": map[string]interface{}{
+		// 	"Limits": map[string]string {
+		// 		"CPU": s.Runner.Limits.CPU,
+		// 		"Memory": s.Runner.Limits.Memory,
+		// 	},
+		// 	"Requests": map[string]string {
+		// 		"CPU": s.Runner.Requests.CPU,
+		// 		"Memory": s.Runner.Requests.Memory,
+		// 	},
+		// },
+		"Runner": s.Runner,
 		"CreateRbac": true,
 		"Storage": map[string]interface{}{
 			"Backend":              "local",

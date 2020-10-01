@@ -489,6 +489,27 @@ spec:
           readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
+      {{if or  .Runner.Limits .Runner.Requests }}
+        resources:
+      {{ end }}
+      {{ if .Runner.Requests }}
+          requests:
+        {{ if (ne .Runner.Requests.Memory "") }}
+            memory: "{{ .Runner.Requests.Memory}}"
+        {{ end}}
+        {{ if (ne .Runner.Requests.CPU "") }}
+            cpu: " {{ .Runner.Requests.CPU}}"
+        {{ end}}
+      {{ end }}
+      {{ if .Runner.Limits }}
+          limits:
+        {{ if (ne .Runner.Limits.Memory "") }}
+            memory: "{{ .Runner.Limits.Memory}}"
+        {{ end}}
+        {{ if (ne .Runner.Limits.CPU "") }}
+            cpu: " {{ .Runner.Limits.CPU}}"
+        {{ end}}
+      {{ end }}
       restartPolicy: Always
 `
 
