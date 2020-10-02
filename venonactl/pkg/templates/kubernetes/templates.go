@@ -266,6 +266,27 @@ spec:
       - name: {{ .AppProxy.AppName }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
         imagePullPolicy: Always
+      {{if or  .AppProxy.Resources.Limits .AppProxy.Resources.Requests }}
+        resources:
+      {{ end }}
+      {{ if .AppProxy.Resources.Requests }}
+          requests:
+        {{ if (ne .AppProxy.Resources.Requests.Memory "") }}
+            memory: "{{ .AppProxy.Resources.Requests.Memory}}"
+        {{ end}}
+        {{ if (ne .AppProxy.Resources.Requests.CPU "") }}
+            cpu: " {{ .AppProxy.Resources.Requests.CPU}}"
+        {{ end}}
+      {{ end }}
+      {{ if .AppProxy.Resources.Limits }}
+          limits:
+        {{ if (ne .AppProxy.Resources.Limits.Memory "") }}
+            memory: "{{ .AppProxy.Resources.Limits.Memory}}"
+        {{ end}}
+        {{ if (ne .AppProxy.Resources.Limits.CPU "") }}
+            cpu: " {{ .AppProxy.Resources.Limits.CPU}}"
+        {{ end}}
+      {{ end }}
         env:
           - name: PORT
             value: "3000"
@@ -409,6 +430,27 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Monitor.AppName }}
+      {{if or  .Monitor.Resources.Limits .Monitor.Resources.Requests }}
+        resources:
+      {{ end }}
+      {{ if .Monitor.Resources.Requests }}
+          requests:
+        {{ if (ne .Monitor.Resources.Requests.Memory "") }}
+            memory: "{{ .Monitor.Resources.Requests.Memory}}"
+        {{ end}}
+        {{ if (ne .Monitor.Resources.Requests.CPU "") }}
+            cpu: " {{ .Monitor.Resources.Requests.CPU}}"
+        {{ end}}
+      {{ end }}
+      {{ if .Monitor.Resources.Limits }}
+          limits:
+        {{ if (ne .Monitor.Resources.Limits.Memory "") }}
+            memory: "{{ .Monitor.Resources.Limits.Memory}}"
+        {{ end}}
+        {{ if (ne .Monitor.Resources.Limits.CPU "") }}
+            cpu: " {{ .Monitor.Resources.Limits.CPU}}"
+        {{ end}}
+      {{ end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:

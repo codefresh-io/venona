@@ -125,3 +125,17 @@ Namespace: r1
 #   Image:
 #     Name: codefresh/agent,
 #     Tag:  stable,
+  # Limits:
+  #   CPU: 400m
+  #   Memory: 1200Mi
+  # Requests:
+  #   CPU: 200m
+  #   Memory: 500Mi
+
+# AppProxy:
+#   Limits:
+#     CPU: 400m
+#     Memory: 1200Mi
+#   Requests:
+#     CPU: 200m
+#     Memory: 500Mi

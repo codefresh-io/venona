@@ -11,7 +11,7 @@ const (
 	ModeInCluster          = "InCluster"
 	ApplicationName        = "runner"
 	MonitorApplicationName = "monitor"
-	AppProxy               = "app-proxy"
+	AppProxyApplicationName               = "app-proxy"
 )
 
 var (
@@ -38,6 +38,10 @@ type (
 		VolumeProvisioner *VolumeProvisioner
 
 		LocalVolumeMonitor *LocalVolumeMonitor
+
+		Monitor *Monitor
+
+		AppProxy *AppProxy
 
 		AgentAPI *AgentAPI
 
@@ -105,6 +109,14 @@ type (
 	}
 
 	LocalVolumeMonitor struct {
+		Limits   *MemoryCPU
+		Requests *MemoryCPU
+	}
+	Monitor struct {
+		Limits   *MemoryCPU
+		Requests *MemoryCPU
+	}
+	AppProxy struct {
 		Limits   *MemoryCPU
 		Requests *MemoryCPU
 	}
@@ -178,13 +190,15 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Name": "codefresh/agent",
 				"Tag":  "stable",
 			},
+			"Resources": s.Monitor,
 		},
 		"AppProxy": map[string]interface{}{
-			"AppName": AppProxy,
+			"AppName": AppProxyApplicationName,
 			"Image": map[string]string{
 				"Name": "codefresh/cf-app-proxy",
 				"Tag":  "latest",
 			},
+			"Resources": s.AppProxy,
 		},
 	}
 }
