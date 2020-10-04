@@ -213,6 +213,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Tolerations":  s.KubernetesAPI.Tolerations,
 			    "Resources": s.VolumeProvisioner.Resources,
 				"CreateDindVolDirResouces" : s.CreateDindVolDirResouces.Resources,
+				"MountAzureJson": false,
 			},
 			"LocalVolumeMonitor": s.LocalVolumeMonitor.Resources,
 		},

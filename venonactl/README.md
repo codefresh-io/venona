@@ -189,9 +189,61 @@ codefresh install runtime [options] \
                     --set-value=Storage.AvailabilityZone=us-east-1d \
                     --kube-node-selector=failure-domain.beta.kubernetes.io/zone=us-east-1d \
                     [--set-value Storage.VolumeProvisioner.NodeSelector=kubernetes.io/role=master] \
-                    [--set-value Storage.AwsAccessKeyId=ABCDF --set-value Storage.AwsSecretAccessKey=ZYXWV] \
+                    [--set-value Storage.AwsAccessKeyId=ABCDF --set-value Storage.AwsSecretAccessKey=ZYXWV]\
                     [--set-value=Storage.Encrypted=true] \
                     [--set-value=Storage.KmsKeyId=<key id>]
+```
+
+##### **Azure Disk**
+*Prerequisite:* volume provisioner (dind-volume-provisioner) should have permissions to create/delete/get Auzure Disks
+
+Minimal iam Role for dind-volume-provisioner - dind-volume-provisioner-role.json:
+```json
+{
+    "Name": "CodefreshDindVolumeProvisioner",
+    "Description": "Perform create/delete/get disks",
+    "IsCustom": true,
+    "Actions": [
+        "Microsoft.Compute/disks/read",
+        "Microsoft.Compute/disks/write",
+        "Microsoft.Compute/disks/delete"
+
+    ],
+    "AssignableScopes": ["/subscriptions/<your-subsripton_id>"]
+}
+```
+If you use AKS with managed [identities for node group](https://docs.microsoft.com/en-us/azure/aks/use-managed-identity), you can run the script below to assign CodefreshDindVolumeProvisioner role to aks node identity: 
+```bash
+export ROLE_DEFINITIN_FILE=dind-volume-provisioner-role.json
+export SUBSCRIPTION_ID=$(az account show --query "id" | xargs echo )
+export RESOURCE_GROUP=codefresh-rt1
+export AKS_NAME=codefresh-rt1
+export LOCATION=$(az aks show -g $RESOURCE_GROUP -n $AKS_NAME --query location | xargs echo)
+export NODES_RESOURCE_GROUP=MC_${RESOURCE_GROUP}_${AKS_NAME}_${LOCATION}
+export NODE_SERVICE_PRINCIPAL=$(az aks show -g $RESOURCE_GROUP -n $AKS_NAME --query identityProfile.kubeletidentity.objectId | xargs echo)
+
+az role definition create --role-definition @${ROLE_DEFINITIN_FILE}
+az role assignment create --assignee $NODE_SERVICE_PRINCIPAL --scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$NODES_RESOURCE_GROUP --role CodefreshDindVolumeProvisioner
+```
+
+Now create runner with `--set-value Storage.Backend=azuredisk --set Storage.VolumeProvisioner.MountAzureJson=true`:
+```
+codefresh runner init --set-value Storage.Backend=azuredisk --set Storage.VolumeProvisioner.MountAzureJson=true 
+```
+Or using runner-values.yaml file like below:  
+```yaml
+# CodefreshHost: https://g.codefresh.io
+# Token: ******
+# Namespace: default
+# Context: codefresh-rt1 
+# RuntimeInCluster: true
+Storage:
+  Backend: azuredisk
+  VolumeProvisioner:
+    MountAzureJson: true
+```
+```
+codefresh runner init --values runner-values.yaml 
 ```
 
 #### Kubernetes RBAC
