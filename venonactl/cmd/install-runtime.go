@@ -44,25 +44,14 @@ var installRuntimeCmdOptions struct {
 	templateValues         []string
 	templateFileValues     []string
 	templateValueFiles     []string
-	VolumeProvisioner struct {
-		limits struct {
-			memory string
-			cpu    string
-		}
-		requests struct {
-			memory string
-			cpu    string
-		}
+	volumeProvisioner struct {
+		resources			 store.Resources
 	}
-	LocalVolumeMonitor struct {
-		limits struct {
-			memory string
-			cpu    string
-		}
-		requests struct {
-			memory string
-			cpu    string
-		}
+	localVolumeMonitor struct {
+		resources			 store.Resources
+	}
+	createDindVolDirResouces struct {
+		resources 			store.Resources
 	}
 	
 }
@@ -95,15 +84,31 @@ var installRuntimeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
 		
-		mergeValueStr(templateValuesMap, "VolumeProvisioner.Requests.CPU", &installRuntimeCmdOptions.VolumeProvisioner.requests.cpu, "200m")
-		mergeValueStr(templateValuesMap, "VolumeProvisioner.Requests.Memory", &installRuntimeCmdOptions.VolumeProvisioner.requests.memory, "200Mi")
-		mergeValueStr(templateValuesMap, "VolumeProvisioner.Limits.CPU", &installRuntimeCmdOptions.VolumeProvisioner.limits.cpu, "1000m")
-		mergeValueStr(templateValuesMap, "VolumeProvisioner.Limits.Memory", &installRuntimeCmdOptions.VolumeProvisioner.limits.memory, "6000Mi")
+		installRuntimeCmdOptions.volumeProvisioner.resources.Limits = &store.MemoryCPU{}
+		installRuntimeCmdOptions.volumeProvisioner.resources.Requests = &store.MemoryCPU{}
 
-		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Requests.CPU", &installRuntimeCmdOptions.LocalVolumeMonitor.requests.cpu)
-		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Requests.Memory", &installRuntimeCmdOptions.LocalVolumeMonitor.requests.memory)
-		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Limits.CPU", &installRuntimeCmdOptions.LocalVolumeMonitor.limits.cpu)
-		mergeValueStr(templateValuesMap, "LocalVolumeMonitor.Limits.Memory", &installRuntimeCmdOptions.LocalVolumeMonitor.limits.memory)
+		mergeValueStr(templateValuesMap, "Storage.VolumeProvisioner.Requests.CPU", &installRuntimeCmdOptions.volumeProvisioner.resources.Requests.CPU, "200m")
+		mergeValueStr(templateValuesMap, "Storage.VolumeProvisioner.Requests.Memory", &installRuntimeCmdOptions.volumeProvisioner.resources.Requests.Memory, "200Mi")
+		mergeValueStr(templateValuesMap, "Storage.VolumeProvisioner.Limits.CPU", &installRuntimeCmdOptions.volumeProvisioner.resources.Limits.CPU, "1000m")
+		mergeValueStr(templateValuesMap, "Storage.VolumeProvisioner.Limits.Memory", &installRuntimeCmdOptions.volumeProvisioner.resources.Limits.Memory, "6000Mi")
+
+		installRuntimeCmdOptions.localVolumeMonitor.resources.Limits = &store.MemoryCPU{}
+		installRuntimeCmdOptions.localVolumeMonitor.resources.Requests = &store.MemoryCPU{}
+
+		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Requests.CPU", &installRuntimeCmdOptions.localVolumeMonitor.resources.Requests.CPU )
+		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Requests.Memory", &installRuntimeCmdOptions.localVolumeMonitor.resources.Requests.Memory)
+		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Limits.CPU", &installRuntimeCmdOptions.localVolumeMonitor.resources.Limits.CPU)
+		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Limits.Memory", &installRuntimeCmdOptions.localVolumeMonitor.resources.Limits.Memory)
+
+		installRuntimeCmdOptions.createDindVolDirResouces.resources.Limits = &store.MemoryCPU{}
+		installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests = &store.MemoryCPU{}
+
+		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Requests.CPU", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests.CPU )
+		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Requests.Memory", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests.Memory)
+		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Limits.CPU", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Limits.CPU)
+		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Limits.Memory", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Limits.Memory)
+
+
 
 		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
@@ -171,7 +176,18 @@ var installRuntimeCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installRuntimeCmdOptions.kube.context, installRuntimeCmdOptions.kube.namespace, installRuntimeCmdOptions.kube.inCluster)
-		fillLimitsForVP()
+		s.VolumeProvisioner = &store.VolumeProvisioner{
+			Resources: &store.Resources{},
+		}
+		s.LocalVolumeMonitor = &store.LocalVolumeMonitor{
+			Resources: &store.Resources{},
+		}
+		s.CreateDindVolDirResouces = &store.CreateDindVolDirResouces{
+			Resources: &store.Resources{},
+		}
+		fillResouces(s.VolumeProvisioner.Resources, &installRuntimeCmdOptions.volumeProvisioner.resources)
+		fillResouces(s.LocalVolumeMonitor.Resources, &installRuntimeCmdOptions.localVolumeMonitor.resources)
+		fillResouces(s.CreateDindVolDirResouces.Resources, &installRuntimeCmdOptions.createDindVolDirResouces.resources)
 
 		if installRuntimeCmdOptions.dryRun {
 			s.DryRun = installRuntimeCmdOptions.dryRun
@@ -203,36 +219,6 @@ var installRuntimeCmd = &cobra.Command{
 	},
 }
 
-func fillLimitsForVP() {
-	s := store.GetStore()
-	s.VolumeProvisioner = &store.VolumeProvisioner{}
-	if (installRuntimeCmdOptions.VolumeProvisioner.limits.memory != "" || installRuntimeCmdOptions.VolumeProvisioner.limits.cpu != "") {
-		s.VolumeProvisioner.Limits= &store.MemoryCPU{
-			Memory: installRuntimeCmdOptions.VolumeProvisioner.limits.memory,
-			CPU: installRuntimeCmdOptions.VolumeProvisioner.limits.cpu,
-		}
-	}
-	if (installRuntimeCmdOptions.VolumeProvisioner.requests.memory != "" || installRuntimeCmdOptions.VolumeProvisioner.requests.cpu != "") {
-		s.VolumeProvisioner.Requests = &store.MemoryCPU{
-			Memory: installRuntimeCmdOptions.VolumeProvisioner.requests.memory,
-			CPU: installRuntimeCmdOptions.VolumeProvisioner.requests.cpu,
-		}
-	}
-	s.LocalVolumeMonitor = &store.LocalVolumeMonitor{}
-	if (installRuntimeCmdOptions.LocalVolumeMonitor.limits.memory != "" || installRuntimeCmdOptions.LocalVolumeMonitor.limits.cpu != "") {
-		s.LocalVolumeMonitor.Limits= &store.MemoryCPU{
-			Memory: installRuntimeCmdOptions.LocalVolumeMonitor.limits.memory,
-			CPU: installRuntimeCmdOptions.LocalVolumeMonitor.limits.cpu,
-		}
-	}
-	if (installRuntimeCmdOptions.LocalVolumeMonitor.requests.memory != "" || installRuntimeCmdOptions.LocalVolumeMonitor.requests.cpu != "") {
-		s.LocalVolumeMonitor.Requests = &store.MemoryCPU{
-			Memory: installRuntimeCmdOptions.LocalVolumeMonitor.requests.memory,
-			CPU: installRuntimeCmdOptions.LocalVolumeMonitor.requests.cpu,
-		}
-	}
-	
-}
 
 func init() {
 	installCommand.AddCommand(installRuntimeCmd)

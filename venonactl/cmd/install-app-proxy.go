@@ -31,14 +31,7 @@ var installAppProxyCmdOptions struct {
 	templateValues       []string
 	templateFileValues   []string
 	templateValueFiles   []string
-	limits struct {
-		memory string
-		cpu    string
-	}
-	requests struct {
-		memory string
-		cpu    string
-	}
+	resources			 store.Resources
 }
 
 var installAppProxyCmd = &cobra.Command{
@@ -58,10 +51,13 @@ var installAppProxyCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installAppProxyCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
 
-		mergeValueStr(templateValuesMap, "AppProxy.Requests.CPU", &installAppProxyCmdOptions.requests.cpu)
-		mergeValueStr(templateValuesMap, "AppProxy.Requests.Memory", &installAppProxyCmdOptions.requests.memory)
-		mergeValueStr(templateValuesMap, "AppProxy.Limits.CPU", &installAppProxyCmdOptions.limits.cpu)
-		mergeValueStr(templateValuesMap, "AppProxy.Limits.Memory", &installAppProxyCmdOptions.limits.memory)
+		installAppProxyCmdOptions.resources.Limits = &store.MemoryCPU{}
+		installAppProxyCmdOptions.resources.Requests = &store.MemoryCPU{}
+		
+		mergeValueStr(templateValuesMap, "AppProxy.Requests.CPU", &installAppProxyCmdOptions.resources.Requests.CPU)
+		mergeValueStr(templateValuesMap, "AppProxy.Requests.Memory", &installAppProxyCmdOptions.resources.Requests.Memory)
+		mergeValueStr(templateValuesMap, "AppProxy.Limits.CPU", &installAppProxyCmdOptions.resources.Limits.CPU)
+		mergeValueStr(templateValuesMap, "AppProxy.Limits.Memory", &installAppProxyCmdOptions.resources.Limits.Memory)
 		
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
@@ -81,7 +77,9 @@ var installAppProxyCmd = &cobra.Command{
 			Token: "",
 			Id:    "",
 		}
-		fillLimitsForAppProxy()
+		s.AppProxy = &store.AppProxy{}
+		s.AppProxy.Resources = &store.Resources{}
+		fillResouces(s.AppProxy.Resources, &installAppProxyCmdOptions.resources)
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
@@ -103,22 +101,6 @@ var installAppProxyCmd = &cobra.Command{
 	},
 }
 
-func fillLimitsForAppProxy() {
-	s := store.GetStore()
-	s.AppProxy = &store.AppProxy{}
-	if (installAppProxyCmdOptions.limits.memory != "" || installAppProxyCmdOptions.limits.cpu != "") {
-		s.AppProxy.Limits= &store.MemoryCPU{
-			Memory: installAppProxyCmdOptions.limits.memory,
-			CPU: installAppProxyCmdOptions.limits.cpu,
-		}
-	}
-	if (installAppProxyCmdOptions.requests.memory != "" || installAppProxyCmdOptions.requests.cpu != "") {
-		s.AppProxy.Requests = &store.MemoryCPU{
-			Memory: installAppProxyCmdOptions.requests.memory,
-			CPU: installAppProxyCmdOptions.requests.cpu,
-		}
-	}
-}
 
 func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")

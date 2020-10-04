@@ -65,6 +65,26 @@ spec:
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
         {{- end }}
+        {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.CPU }}
+        - name: CREATE_DIND_LIMIT_CPU
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.CPU  }}
+          {{- end }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.Memory }}
+        - name: CREATE_DIND_LIMIT_MEMORY
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.Memory  }}
+          {{- end }}
+        {{- end }}
+        {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.CPU }}
+        - name: CREATE_DIND_REQUESTS_CPU
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.CPU  }}
+          {{- end }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory }}
+        - name: CREATE_DIND_REQUESTS_MEMORY
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory  }}
+          {{- end }}
+        {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:

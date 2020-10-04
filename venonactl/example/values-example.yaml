@@ -74,23 +74,30 @@ Namespace: r1
 #   GoogleServiceAccount: 
 #   AwsAccessKeyId: 
 #   AwsSecretAccessKey: 
-#   VolumeProvisioner:
-#     Image: codefresh/dind-volume-provisioner:v23
-#     NodeSelector: 
-#     Tolerations:
-#     Limits:
-#       CPU: 400m
-#       Memory: 1200Mi
-#     Requests:
-#       CPU: 200m
-#       Memory: 500Mi 
-#   LocalVolumeMonitor: 
-#     Limits:
-#        CPU: 400m
-#        Memory: 1200Mi
-#     Requests:
-#        CPU: 200m
-#        Memory: 500Mi  
+# VolumeProvisioner:
+#   Image: codefresh/dind-volume-provisioner:v23
+#   NodeSelector: 
+#   Tolerations:
+#   Limits:
+#     CPU: 400m
+#     Memory: 1200Mi
+#   Requests:
+#     CPU: 200m
+#     Memory: 500Mi 
+# LocalVolumeMonitor: 
+#   Limits:
+#      CPU: 400m
+#      Memory: 1200Mi
+#   Requests:
+#      CPU: 200m
+#      Memory: 500Mi  
+# CreateDindVolDir:
+#   Limits:
+#     CPU: 400m
+#     Memory: 1200Mi
+#   Requests:
+#     CPU: 200m
+#     Memory: 500Mi 
 
 
 ### Storage parameters example for gke-local-ssd

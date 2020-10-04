@@ -49,14 +49,7 @@ var installAgentCmdOptions struct {
 	templateValues       []string
 	templateFileValues   []string
 	templateValueFiles   []string
-	limits struct {
-		memory string
-		cpu    string
-	}
-	requests struct {
-		memory string
-		cpu    string
-	}
+	resources			 store.Resources
 }
 
 var installAgentCmd = &cobra.Command{
@@ -87,10 +80,13 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
 		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
 
-		mergeValueStr(templateValuesMap, "Runner.Requests.CPU", &installAgentCmdOptions.requests.cpu)
-		mergeValueStr(templateValuesMap, "Runner.Requests.Memory", &installAgentCmdOptions.requests.memory)
-		mergeValueStr(templateValuesMap, "Runner.Limits.CPU", &installAgentCmdOptions.limits.cpu)
-		mergeValueStr(templateValuesMap, "Runner.Limits.Memory", &installAgentCmdOptions.limits.memory)
+		installAgentCmdOptions.resources.Limits = &store.MemoryCPU{}
+		installAgentCmdOptions.resources.Requests = &store.MemoryCPU{}
+
+		mergeValueStr(templateValuesMap, "Runner.Requests.CPU", &installAgentCmdOptions.resources.Requests.CPU)
+		mergeValueStr(templateValuesMap, "Runner.Requests.Memory", &installAgentCmdOptions.resources.Requests.Memory)
+		mergeValueStr(templateValuesMap, "Runner.Limits.CPU", &installAgentCmdOptions.resources.Limits.CPU)
+		mergeValueStr(templateValuesMap, "Runner.Limits.Memory", &installAgentCmdOptions.resources.Limits.Memory)
 
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 
@@ -124,7 +120,9 @@ var installAgentCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
-		fillLimitsForRunner()
+		s.Runner = &store.Runner{}
+		s.Runner.Resources = &store.Resources{}
+		fillResouces(s.Runner.Resources, &installAgentCmdOptions.resources)
 
 		s.KubernetesAPI.Tolerations = tolerations
 
@@ -185,22 +183,6 @@ func getTolerations() string {
 	return ""
 }
 
-func fillLimitsForRunner() {
-	s := store.GetStore()
-	s.Runner = &store.Runner{}
-	if (installAgentCmdOptions.limits.memory != "" || installAgentCmdOptions.limits.cpu != "") {
-		s.Runner.Limits= &store.MemoryCPU{
-			Memory: installAgentCmdOptions.limits.memory,
-			CPU: installAgentCmdOptions.limits.cpu,
-		}
-	}
-	if (installAgentCmdOptions.requests.memory != "" || installAgentCmdOptions.requests.cpu != "") {
-		s.Runner.Requests = &store.MemoryCPU{
-			Memory: installAgentCmdOptions.requests.memory,
-			CPU: installAgentCmdOptions.requests.cpu,
-		}
-	}
-}
 
 func init() {
 	installCommand.AddCommand(installAgentCmd)

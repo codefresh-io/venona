@@ -1,7 +1,6 @@
 package cmd
 
 import (
-
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,9 +24,9 @@ import (
 	k8sApi "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/stretchr/objx"
 	cliValues "helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
-	"github.com/stretchr/objx"	
 )
 
 var (
@@ -216,6 +215,11 @@ func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCl
 	s.KubernetesAPI.ContextName = context
 	s.KubernetesAPI.Namespace = namespace
 
+}
+
+func fillResouces(storageRes, orig *store.Resources) {
+
+	*storageRes = *orig
 }
 
 func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string) {

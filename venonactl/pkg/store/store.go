@@ -39,6 +39,8 @@ type (
 
 		LocalVolumeMonitor *LocalVolumeMonitor
 
+		CreateDindVolDirResouces *CreateDindVolDirResouces
+
 		Monitor *Monitor
 
 		AppProxy *AppProxy
@@ -100,29 +102,31 @@ type (
 	}
 
 	Runner struct {
-		Limits   *MemoryCPU
-		Requests *MemoryCPU
+		Resources *Resources
 	}
 	VolumeProvisioner struct {
-		Limits   *MemoryCPU
-		Requests *MemoryCPU
+		Resources *Resources
 	}
 
 	LocalVolumeMonitor struct {
-		Limits   *MemoryCPU
-		Requests *MemoryCPU
+		Resources *Resources
 	}
 	Monitor struct {
-		Limits   *MemoryCPU
-		Requests *MemoryCPU
+		Resources *Resources
 	}
 	AppProxy struct {
-		Limits   *MemoryCPU
-		Requests *MemoryCPU
+		Resources *Resources
+	}
+	CreateDindVolDirResouces struct {
+		Resources *Resources
 	}
 	MemoryCPU struct {
 		CPU string
 		Memory string 
+	}
+	Resources struct {
+		Limits   *MemoryCPU
+		Requests *MemoryCPU
 	}
 )
 
@@ -135,6 +139,36 @@ func GetStore() *Values {
 }
 
 func (s *Values) BuildValues() map[string]interface{} {
+	if s.Runner == nil {
+		s.Runner = &Runner{
+			Resources: &Resources{},
+		}
+	}
+	if s.AppProxy == nil {
+		s.AppProxy = &AppProxy{
+			Resources: &Resources{},
+		}
+	} 
+	if s.Monitor == nil {
+		s.Monitor = &Monitor{
+			Resources: &Resources{},
+		}
+	}
+	if s.VolumeProvisioner == nil {
+		s.VolumeProvisioner = &VolumeProvisioner{
+			Resources: &Resources{},
+		}
+	}
+	if s.LocalVolumeMonitor == nil {
+		s.LocalVolumeMonitor = &LocalVolumeMonitor{
+			Resources: &Resources{},
+		}
+	}
+	if s.CreateDindVolDirResouces == nil {
+		s.CreateDindVolDirResouces = &CreateDindVolDirResouces{
+			Resources: &Resources{},
+		}
+	}
 	return map[string]interface{}{
 		"AppName":       ApplicationName,
 		"ClusterId":     s.ClusterId,
@@ -160,7 +194,9 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Key":  "",
 			"Ca":   "",
 		},
-		"Runner": s.Runner,
+		"Runner": map[string]interface{}{
+			"Resources": s.Runner.Resources,
+		},
 		"CreateRbac": true,
 		"Storage": map[string]interface{}{
 			"Backend":              "local",
@@ -175,9 +211,10 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Image":        "codefresh/dind-volume-provisioner:v24",
 				"NodeSelector": s.KubernetesAPI.NodeSelector,
 				"Tolerations":  s.KubernetesAPI.Tolerations,
-			    "Resources": s.VolumeProvisioner,
+			    "Resources": s.VolumeProvisioner.Resources,
+				"CreateDindVolDirResouces" : s.CreateDindVolDirResouces.Resources,
 			},
-			"LocalVolumeMonitor": s.LocalVolumeMonitor,
+			"LocalVolumeMonitor": s.LocalVolumeMonitor.Resources,
 		},
 		"Monitor": map[string]interface{}{
 			"Enabled":              true,
@@ -190,7 +227,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Name": "codefresh/agent",
 				"Tag":  "stable",
 			},
-			"Resources": s.Monitor,
+			"Resources": s.Monitor.Resources,
 		},
 		"AppProxy": map[string]interface{}{
 			"AppName": AppProxyApplicationName,
@@ -198,7 +235,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Name": "codefresh/cf-app-proxy",
 				"Tag":  "latest",
 			},
-			"Resources": s.AppProxy,
+			"Resources": s.AppProxy.Resources,
 		},
 	}
 }

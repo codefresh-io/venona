@@ -40,14 +40,7 @@ var installMonitorAgentCmdOptions struct {
 	templateValues         []string
 	templateFileValues     []string
 	templateValueFiles     []string
-	limits struct {
-		memory string
-		cpu    string
-	}
-	requests struct {
-		memory string
-		cpu    string
-	}
+	resources			 store.Resources
 }
 
 // installK8sAgentCmd represents the install command
@@ -72,10 +65,13 @@ var installMonitorAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installMonitorAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installMonitorAgentCmdOptions.kube.context)
 
-		mergeValueStr(templateValuesMap, "Monitor.Requests.CPU", &installMonitorAgentCmdOptions.requests.cpu)
-		mergeValueStr(templateValuesMap, "Monitor.Requests.Memory", &installMonitorAgentCmdOptions.requests.memory)
-		mergeValueStr(templateValuesMap, "Monitor.Limits.CPU", &installMonitorAgentCmdOptions.limits.cpu)
-		mergeValueStr(templateValuesMap, "Monitor.Limits.Memory", &installMonitorAgentCmdOptions.limits.memory)
+		installMonitorAgentCmdOptions.resources.Limits = &store.MemoryCPU{}
+		installMonitorAgentCmdOptions.resources.Requests = &store.MemoryCPU{}
+
+		mergeValueStr(templateValuesMap, "Monitor.Requests.CPU", &installMonitorAgentCmdOptions.resources.Requests.CPU)
+		mergeValueStr(templateValuesMap, "Monitor.Requests.Memory", &installMonitorAgentCmdOptions.resources.Requests.Memory)
+		mergeValueStr(templateValuesMap, "Monitor.Limits.CPU", &installMonitorAgentCmdOptions.resources.Limits.CPU)
+		mergeValueStr(templateValuesMap, "Monitor.Limits.Memory", &installMonitorAgentCmdOptions.resources.Limits.Memory)
 
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installMonitorAgentCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "ClusterId", &installMonitorAgentCmdOptions.clusterId)
@@ -87,7 +83,10 @@ var installMonitorAgentCmd = &cobra.Command{
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, false)
-		fillLimitsForMonitor()
+		s.Monitor = &store.Monitor{
+			Resources: &store.Resources{},
+		}
+		fillResouces(s.Monitor.Resources, &installMonitorAgentCmdOptions.resources)
 
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.MonitorAgentPluginType)
@@ -136,22 +135,6 @@ var installMonitorAgentCmd = &cobra.Command{
 	},
 }
 
-func fillLimitsForMonitor() {
-	s := store.GetStore()
-	s.Monitor = &store.Monitor{}
-	if (installMonitorAgentCmdOptions.limits.memory != "" || installMonitorAgentCmdOptions.limits.cpu != "") {
-		s.Monitor.Limits= &store.MemoryCPU{
-			Memory: installMonitorAgentCmdOptions.limits.memory,
-			CPU: installMonitorAgentCmdOptions.limits.cpu,
-		}
-	}
-	if (installMonitorAgentCmdOptions.requests.memory != "" || installMonitorAgentCmdOptions.requests.cpu != "") {
-		s.Monitor.Requests = &store.MemoryCPU{
-			Memory: installMonitorAgentCmdOptions.requests.memory,
-			CPU: installMonitorAgentCmdOptions.requests.cpu,
-		}
-	}
-}
 
 func init() {
 	installCommand.AddCommand(installMonitorAgentCmd)

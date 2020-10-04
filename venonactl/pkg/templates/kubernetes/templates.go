@@ -372,6 +372,26 @@ spec:
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
         {{- end }}
+        {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.CPU }}
+        - name: CREATE_DIND_LIMIT_CPU
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.CPU  }}
+          {{- end }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.Memory }}
+        - name: CREATE_DIND_LIMIT_MEMORY
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.Memory  }}
+          {{- end }}
+        {{- end }}
+        {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.CPU }}
+        - name: CREATE_DIND_REQUESTS_CPU
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.CPU  }}
+          {{- end }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory }}
+        - name: CREATE_DIND_REQUESTS_MEMORY
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory  }}
+          {{- end }}
+        {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -566,25 +586,25 @@ spec:
           readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
-      {{if or  .Runner.Limits .Runner.Requests }}
+      {{if or  .Runner.Resources.Limits .Runner.Resources.Requests }}
         resources:
       {{ end }}
-      {{ if .Runner.Requests }}
+      {{ if .Runner.Resources.Requests }}
           requests:
-        {{ if (ne .Runner.Requests.Memory "") }}
-            memory: "{{ .Runner.Requests.Memory}}"
+        {{ if (ne .Runner.Resources.Requests.Memory "") }}
+            memory: "{{ .Runner.Resources.Requests.Memory}}"
         {{ end}}
-        {{ if (ne .Runner.Requests.CPU "") }}
-            cpu: " {{ .Runner.Requests.CPU}}"
+        {{ if (ne .Runner.Resources.Requests.CPU "") }}
+            cpu: " {{ .Runner.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
-      {{ if .Runner.Limits }}
+      {{ if .Runner.Resources.Limits }}
           limits:
-        {{ if (ne .Runner.Limits.Memory "") }}
-            memory: "{{ .Runner.Limits.Memory}}"
+        {{ if (ne .Runner.Resources.Limits.Memory "") }}
+            memory: "{{ .Runner.Resources.Limits.Memory}}"
         {{ end}}
-        {{ if (ne .Runner.Limits.CPU "") }}
-            cpu: " {{ .Runner.Limits.CPU}}"
+        {{ if (ne .Runner.Resources.Limits.CPU "") }}
+            cpu: " {{ .Runner.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
       restartPolicy: Always
