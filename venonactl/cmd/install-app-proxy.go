@@ -50,7 +50,7 @@ var installAppProxyCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installAppProxyCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
 
-		mergeValueMSI(templateValuesMap, "AppProxy.resoruces", &installAppProxyCmdOptions.resources)
+		mergeValueMSI(templateValuesMap, "AppProxy.resources", &installAppProxyCmdOptions.resources)
 
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)

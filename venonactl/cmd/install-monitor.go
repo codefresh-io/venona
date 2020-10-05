@@ -64,7 +64,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installMonitorAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installMonitorAgentCmdOptions.kube.context)
 
-		mergeValueMSI(templateValuesMap, "Monitor.resoruces", &installMonitorAgentCmdOptions.resources)
+		mergeValueMSI(templateValuesMap, "Monitor.resources", &installMonitorAgentCmdOptions.resources)
 
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installMonitorAgentCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "ClusterId", &installMonitorAgentCmdOptions.clusterId)

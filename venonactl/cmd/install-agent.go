@@ -80,7 +80,7 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
 		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
 
-		mergeValueMSI(templateValuesMap, "Runner.resoruces", &installAgentCmdOptions.resources)
+		mergeValueMSI(templateValuesMap, "Runner.resources", &installAgentCmdOptions.resources)
 
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 
