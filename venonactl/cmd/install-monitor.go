@@ -23,7 +23,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 )
 
 var installMonitorAgentCmdOptions struct {
@@ -32,15 +31,15 @@ var installMonitorAgentCmdOptions struct {
 		context      string
 		nodeSelector string
 	}
-	clusterId      string
-	helm3          bool
-	codefreshToken string
-	codefreshHost  string
-	dockerRegistry string
-	templateValues         []string
-	templateFileValues     []string
-	templateValueFiles     []string
-	resources			 store.Resources
+	clusterId          string
+	helm3              bool
+	codefreshToken     string
+	codefreshHost      string
+	dockerRegistry     string
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
+	resources          store.Resources
 }
 
 // installK8sAgentCmd represents the install command
@@ -48,10 +47,10 @@ var installMonitorAgentCmd = &cobra.Command{
 	Use:   "monitor",
 	Short: "Install Codefresh's monitor agent on cluster",
 	Run: func(cmd *cobra.Command, args []string) {
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			installMonitorAgentCmdOptions.templateValueFiles, 
-			installMonitorAgentCmdOptions.templateValues, 
+			installMonitorAgentCmdOptions.templateValueFiles,
+			installMonitorAgentCmdOptions.templateValues,
 			installMonitorAgentCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -83,10 +82,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, false)
-		s.Monitor = &store.Monitor{
-			Resources: &store.Resources{},
-		}
-		fillResouces(s.Monitor.Resources, &installMonitorAgentCmdOptions.resources)
+		s.Monitor.Resources = copyResources(&installMonitorAgentCmdOptions.resources)
 
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.MonitorAgentPluginType)
@@ -134,7 +130,6 @@ var installMonitorAgentCmd = &cobra.Command{
 		lgr.Info("Monitor agent installation completed Successfully")
 	},
 }
-
 
 func init() {
 	installCommand.AddCommand(installMonitorAgentCmd)

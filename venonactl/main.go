@@ -17,16 +17,16 @@
 package main
 
 import (
-	"os"
-    "os/signal"
-	"syscall"
 	"fmt"
 	"github.com/codefresh-io/venona/venonactl/cmd"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 const (
-	waitForSignalEnv       = "WAIT_FOR_DEBUGGER"
-	debuggerPort		   = "4321"
+	waitForSignalEnv = "WAIT_FOR_DEBUGGER"
+	debuggerPort     = "4321"
 )
 
 func main() {
@@ -41,18 +41,18 @@ func main() {
 			sig := <-sigs
 			if sig == syscall.SIGUSR1 {
 				goOn <- true
-			} else if (sig == syscall.SIGTERM || sig == syscall.SIGINT ){
-                fmt.Printf("Exiting ...")
+			} else if sig == syscall.SIGTERM || sig == syscall.SIGINT {
+				fmt.Printf("Exiting ...")
 				os.Exit(0)
 			}
-		}()		
-			
+		}()
+
 		fmt.Printf("%s env is set, waiting SIGUSR1.\nYou can run remote debug in vscode and attach dlv debugger:\n\n", waitForSignalEnv)
-	
+
 		pid := os.Getpid()
 		fmt.Printf("dlv attach --continue --accept-multiclient --headless --listen=:%s %d\n", debuggerPort, pid)
 		fmt.Printf("kill -SIGUSR1 %d\n", pid)
-		
+
 		<-goOn
 		fmt.Printf("Continue ...")
 	}

@@ -19,7 +19,7 @@ const (
 	EnginePluginType              = "engine"
 	DefaultStorageClassNamePrefix = "dind-local-volumes-runner"
 	RuntimeAttachType             = "runtime-attach"
-	AppProxyPluginType			  = "app-proxy"
+	AppProxyPluginType            = "app-proxy"
 )
 
 type (

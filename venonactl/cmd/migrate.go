@@ -17,7 +17,6 @@ limitations under the License.
 */
 
 import (
-
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
@@ -26,7 +25,7 @@ import (
 
 var migrateCmdOpt struct {
 	kube struct {
-		context string
+		context   string
 		namespace string
 	}
 }
@@ -52,10 +51,10 @@ var migrateCmd = &cobra.Command{
 		spn.Start()
 		defer spn.Stop()
 		for _, p := range builder.Get() {
-			err := p.Migrate( &plugins.MigrateOptions{
+			err := p.Migrate(&plugins.MigrateOptions{
 				ClusterNamespace: migrateCmdOpt.kube.namespace,
-				ClusterName: migrateCmdOpt.kube.context,
-				KubeBuilder: getKubeClientBuilder(migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+				ClusterName:      migrateCmdOpt.kube.context,
+				KubeBuilder:      getKubeClientBuilder(migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
 			}, values)
 			if err != nil {
 				dieOnError(err)

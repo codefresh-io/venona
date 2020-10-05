@@ -217,9 +217,23 @@ func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCl
 
 }
 
-func fillResouces(storageRes, orig *store.Resources) {
+func copyResources(resources *store.Resources) store.Resources {
 
-	*storageRes = *orig
+	retVal := store.Resources{}
+
+	if resources.Limits.CPU != "" || resources.Limits.Memory != "" {
+		retVal.Limits = &store.MemoryCPU{
+			CPU:    resources.Limits.CPU,
+			Memory: resources.Limits.Memory,
+		}
+	}
+	if resources.Requests.CPU != "" || resources.Requests.Memory != "" {
+		retVal.Requests = &store.MemoryCPU{
+			CPU:    resources.Requests.CPU,
+			Memory: resources.Requests.Memory,
+		}
+	}
+	return retVal
 }
 
 func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string) {
@@ -234,24 +248,24 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 // Parsing helpers --set-value , --set-file
 // by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 
-// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file> 
+// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file>
 // using helm libraries
 func templateValuesToMap(templateValueFiles, templateValues, templateFileValues []string) (map[string]interface{}, error) {
 	valueOpts := &cliValues.Options{}
 	if len(templateValueFiles) > 0 {
-		for _, v := range(templateValueFiles) {
+		for _, v := range templateValueFiles {
 			valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
 		}
 	}
-	
+
 	if len(templateValues) > 0 {
-		for _, v := range(templateValues) {
+		for _, v := range templateValues {
 			valueOpts.Values = append(valueOpts.Values, v)
-		}			
+		}
 	}
-	
+
 	if len(templateFileValues) > 0 {
-		for _, v := range(templateFileValues) {
+		for _, v := range templateFileValues {
 			valueOpts.FileValues = append(valueOpts.FileValues, v)
 		}
 	}
@@ -283,23 +297,19 @@ func mergeValueStr(valuesMap map[string]interface{}, key string, param *string, 
 	mapX := objx.New(valuesMap)
 	if param != nil && *param != "" {
 		mapX.Set(key, *param)
-	    return
-    }
-	val := mapX.Get(key).String()
-	if (val == "" && len(defaultValue) > 0) {
-		val = defaultValue[0]
+		return
 	}
-    *param = val
+	val := mapX.Get(key).Str(defaultValue...)
+	*param = val
 }
 
 // mergeValueBool - for merging cli parameters with mapped parameters
 func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
 	mapX := objx.New(valuesMap)
-	if param != nil ||*param == true {
+	if param != nil || *param == true {
 		mapX.Set(key, *param)
 		return
 	}
 	val := mapX.Get(key).Bool()
 	*param = val
 }
-

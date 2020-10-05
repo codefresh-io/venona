@@ -14,9 +14,9 @@ var uninstallMonitorAgentCmdOptions struct {
 		namespace string
 		kubePath  string
 	}
-	templateValues       []string
-	templateFileValues   []string
-	templateValueFiles   []string	
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
 }
 
 var uninstallMonitorAgentCmd = &cobra.Command{
@@ -24,10 +24,10 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 	Short: "Uninstall Codefresh's monitor",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			uninstallMonitorAgentCmdOptions.templateValueFiles, 
-			uninstallMonitorAgentCmdOptions.templateValues, 
+			uninstallMonitorAgentCmdOptions.templateValueFiles,
+			uninstallMonitorAgentCmdOptions.templateValues,
 			uninstallMonitorAgentCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -36,7 +36,7 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
 		mergeValueStr(templateValuesMap, "ConfigPath", &uninstallMonitorAgentCmdOptions.kube.kubePath)
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
-		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
 		mergeValueStr(templateValuesMap, "Namespace", &uninstallMonitorAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &uninstallMonitorAgentCmdOptions.kube.context)
 
@@ -76,7 +76,7 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 		builder.Add(plugins.MonitorAgentPluginType)
 		deleteOptions.ClusterNamespace = s.KubernetesAPI.Namespace
 		values := s.BuildValues()
-		values = mergeMaps(values, templateValuesMap)		
+		values = mergeMaps(values, templateValuesMap)
 		for _, p := range builder.Get() {
 			err := p.Delete(deleteOptions, values)
 			if err != nil {

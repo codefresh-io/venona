@@ -40,7 +40,7 @@ spec:
             memory: "{{ .Storage.VolumeProvisioner.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Storage.VolumeProvisioner.Resources.Requests.CPU "") }}
-            cpu: " {{ .Storage.VolumeProvisioner.Resources.Requests.CPU}}"
+            cpu: "{{ .Storage.VolumeProvisioner.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Storage.VolumeProvisioner.Resources.Limits }}
@@ -49,7 +49,7 @@ spec:
             memory: "{{ .Storage.VolumeProvisioner.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Storage.VolumeProvisioner.Resources.Limits.CPU "") }}
-            cpu: " {{ .Storage.VolumeProvisioner.Resources.Limits.CPU}}"
+            cpu: "{{ .Storage.VolumeProvisioner.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}

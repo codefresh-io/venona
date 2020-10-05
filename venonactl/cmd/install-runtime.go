@@ -23,7 +23,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 )
 
 var installRuntimeCmdOptions struct {
@@ -44,16 +43,15 @@ var installRuntimeCmdOptions struct {
 	templateValues         []string
 	templateFileValues     []string
 	templateValueFiles     []string
-	volumeProvisioner struct {
-		resources			 store.Resources
+	volumeProvisioner      struct {
+		resources store.Resources
 	}
 	localVolumeMonitor struct {
-		resources			 store.Resources
+		resources store.Resources
 	}
 	createDindVolDirResouces struct {
-		resources 			store.Resources
+		resources store.Resources
 	}
-	
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -61,10 +59,10 @@ var installRuntimeCmd = &cobra.Command{
 	Short: "Install Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			installRuntimeCmdOptions.templateValueFiles, 
-			installRuntimeCmdOptions.templateValues, 
+			installRuntimeCmdOptions.templateValueFiles,
+			installRuntimeCmdOptions.templateValues,
 			installRuntimeCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -73,7 +71,7 @@ var installRuntimeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
 		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
-		mergeValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)		
+		mergeValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)
 
 		mergeValueStr(templateValuesMap, "Namespace", &installRuntimeCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
@@ -83,7 +81,7 @@ var installRuntimeCmd = &cobra.Command{
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
-		
+
 		installRuntimeCmdOptions.volumeProvisioner.resources.Limits = &store.MemoryCPU{}
 		installRuntimeCmdOptions.volumeProvisioner.resources.Requests = &store.MemoryCPU{}
 
@@ -95,7 +93,7 @@ var installRuntimeCmd = &cobra.Command{
 		installRuntimeCmdOptions.localVolumeMonitor.resources.Limits = &store.MemoryCPU{}
 		installRuntimeCmdOptions.localVolumeMonitor.resources.Requests = &store.MemoryCPU{}
 
-		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Requests.CPU", &installRuntimeCmdOptions.localVolumeMonitor.resources.Requests.CPU )
+		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Requests.CPU", &installRuntimeCmdOptions.localVolumeMonitor.resources.Requests.CPU)
 		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Requests.Memory", &installRuntimeCmdOptions.localVolumeMonitor.resources.Requests.Memory)
 		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Limits.CPU", &installRuntimeCmdOptions.localVolumeMonitor.resources.Limits.CPU)
 		mergeValueStr(templateValuesMap, "Storage.LocalVolumeMonitor.Limits.Memory", &installRuntimeCmdOptions.localVolumeMonitor.resources.Limits.Memory)
@@ -103,17 +101,14 @@ var installRuntimeCmd = &cobra.Command{
 		installRuntimeCmdOptions.createDindVolDirResouces.resources.Limits = &store.MemoryCPU{}
 		installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests = &store.MemoryCPU{}
 
-		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Requests.CPU", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests.CPU )
+		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Requests.CPU", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests.CPU)
 		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Requests.Memory", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Requests.Memory)
 		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Limits.CPU", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Limits.CPU)
 		mergeValueStr(templateValuesMap, "Storage.CreateDindVolDir.Limits.Memory", &installRuntimeCmdOptions.createDindVolDirResouces.resources.Limits.Memory)
 
-
-
 		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
 		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
-
 
 		s := store.GetStore()
 		lgr := createLogger("Install-runtime", verbose, logFormatter)
@@ -176,18 +171,9 @@ var installRuntimeCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installRuntimeCmdOptions.kube.context, installRuntimeCmdOptions.kube.namespace, installRuntimeCmdOptions.kube.inCluster)
-		s.VolumeProvisioner = &store.VolumeProvisioner{
-			Resources: &store.Resources{},
-		}
-		s.LocalVolumeMonitor = &store.LocalVolumeMonitor{
-			Resources: &store.Resources{},
-		}
-		s.CreateDindVolDirResouces = &store.CreateDindVolDirResouces{
-			Resources: &store.Resources{},
-		}
-		fillResouces(s.VolumeProvisioner.Resources, &installRuntimeCmdOptions.volumeProvisioner.resources)
-		fillResouces(s.LocalVolumeMonitor.Resources, &installRuntimeCmdOptions.localVolumeMonitor.resources)
-		fillResouces(s.CreateDindVolDirResouces.Resources, &installRuntimeCmdOptions.createDindVolDirResouces.resources)
+		s.VolumeProvisioner.Resources = copyResources(&installRuntimeCmdOptions.volumeProvisioner.resources)
+		s.LocalVolumeMonitor.Resources = copyResources(&installRuntimeCmdOptions.localVolumeMonitor.resources)
+		s.CreateDindVolDirResouces.Resources = copyResources(&installRuntimeCmdOptions.createDindVolDirResouces.resources)
 
 		if installRuntimeCmdOptions.dryRun {
 			s.DryRun = installRuntimeCmdOptions.dryRun
@@ -218,7 +204,6 @@ var installRuntimeCmd = &cobra.Command{
 
 	},
 }
-
 
 func init() {
 	installCommand.AddCommand(installRuntimeCmd)

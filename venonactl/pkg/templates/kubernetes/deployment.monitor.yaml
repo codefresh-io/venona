@@ -37,7 +37,7 @@ spec:
             memory: "{{ .Monitor.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Monitor.Resources.Requests.CPU "") }}
-            cpu: " {{ .Monitor.Resources.Requests.CPU}}"
+            cpu: "{{ .Monitor.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Monitor.Resources.Limits }}
@@ -46,7 +46,7 @@ spec:
             memory: "{{ .Monitor.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Monitor.Resources.Limits.CPU "") }}
-            cpu: " {{ .Monitor.Resources.Limits.CPU}}"
+            cpu: "{{ .Monitor.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}

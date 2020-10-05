@@ -111,7 +111,7 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 func (u *volumeProvisionerPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	return u.Delete(&DeleteOptions{
 		ClusterNamespace: opt.ClusterNamespace,
-		KubeBuilder: opt.KubeBuilder,
+		KubeBuilder:      opt.KubeBuilder,
 	}, v)
 }
 

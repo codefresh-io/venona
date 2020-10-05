@@ -189,7 +189,7 @@ spec:
               memory: "{{ .Storage.LocalVolumeMonitor.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Storage.LocalVolumeMonitor.Requests.CPU "") }}
-              cpu: " {{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
+              cpu: "{{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Storage.LocalVolumeMonitor.Limits }}
@@ -198,7 +198,7 @@ spec:
               memory: "{{ .Storage.LocalVolumeMonitor.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Storage.LocalVolumeMonitor.Limits.CPU "") }}
-              cpu: " {{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
+              cpu: "{{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
         {{ end}}
       {{ end }}
           imagePullPolicy: Always
@@ -275,7 +275,7 @@ spec:
             memory: "{{ .AppProxy.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .AppProxy.Resources.Requests.CPU "") }}
-            cpu: " {{ .AppProxy.Resources.Requests.CPU}}"
+            cpu: "{{ .AppProxy.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .AppProxy.Resources.Limits }}
@@ -284,7 +284,7 @@ spec:
             memory: "{{ .AppProxy.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .AppProxy.Resources.Limits.CPU "") }}
-            cpu: " {{ .AppProxy.Resources.Limits.CPU}}"
+            cpu: "{{ .AppProxy.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
         env:
@@ -347,7 +347,7 @@ spec:
             memory: "{{ .Storage.VolumeProvisioner.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Storage.VolumeProvisioner.Resources.Requests.CPU "") }}
-            cpu: " {{ .Storage.VolumeProvisioner.Resources.Requests.CPU}}"
+            cpu: "{{ .Storage.VolumeProvisioner.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Storage.VolumeProvisioner.Resources.Limits }}
@@ -356,7 +356,7 @@ spec:
             memory: "{{ .Storage.VolumeProvisioner.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Storage.VolumeProvisioner.Resources.Limits.CPU "") }}
-            cpu: " {{ .Storage.VolumeProvisioner.Resources.Limits.CPU}}"
+            cpu: "{{ .Storage.VolumeProvisioner.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
@@ -478,7 +478,7 @@ spec:
             memory: "{{ .Monitor.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Monitor.Resources.Requests.CPU "") }}
-            cpu: " {{ .Monitor.Resources.Requests.CPU}}"
+            cpu: "{{ .Monitor.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Monitor.Resources.Limits }}
@@ -487,7 +487,7 @@ spec:
             memory: "{{ .Monitor.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Monitor.Resources.Limits.CPU "") }}
-            cpu: " {{ .Monitor.Resources.Limits.CPU}}"
+            cpu: "{{ .Monitor.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
@@ -614,7 +614,7 @@ spec:
             memory: "{{ .Runner.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Runner.Resources.Requests.CPU "") }}
-            cpu: " {{ .Runner.Resources.Requests.CPU}}"
+            cpu: "{{ .Runner.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Runner.Resources.Limits }}
@@ -623,7 +623,7 @@ spec:
             memory: "{{ .Runner.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Runner.Resources.Limits.CPU "") }}
-            cpu: " {{ .Runner.Resources.Limits.CPU}}"
+            cpu: "{{ .Runner.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
       restartPolicy: Always

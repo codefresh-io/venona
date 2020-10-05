@@ -43,7 +43,7 @@ spec:
               memory: "{{ .Storage.LocalVolumeMonitor.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Storage.LocalVolumeMonitor.Requests.CPU "") }}
-              cpu: " {{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
+              cpu: "{{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Storage.LocalVolumeMonitor.Limits }}
@@ -52,7 +52,7 @@ spec:
               memory: "{{ .Storage.LocalVolumeMonitor.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Storage.LocalVolumeMonitor.Limits.CPU "") }}
-              cpu: " {{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
+              cpu: "{{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
         {{ end}}
       {{ end }}
           imagePullPolicy: Always

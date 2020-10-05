@@ -28,17 +28,16 @@ var installAppProxyCmdOptions struct {
 		namespace string
 		context   string
 	}
-	templateValues       []string
-	templateFileValues   []string
-	templateValueFiles   []string
-	resources			 store.Resources
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
+	resources          store.Resources
 }
 
 var installAppProxyCmd = &cobra.Command{
 	Use:   "app-proxy",
 	Short: "Install App proxy ",
 	Run: func(cmd *cobra.Command, args []string) {
-		
 
 		templateValuesMap, err := templateValuesToMap(
 			installAppProxyCmdOptions.templateValueFiles,
@@ -53,12 +52,12 @@ var installAppProxyCmd = &cobra.Command{
 
 		installAppProxyCmdOptions.resources.Limits = &store.MemoryCPU{}
 		installAppProxyCmdOptions.resources.Requests = &store.MemoryCPU{}
-		
+
 		mergeValueStr(templateValuesMap, "AppProxy.Requests.CPU", &installAppProxyCmdOptions.resources.Requests.CPU)
 		mergeValueStr(templateValuesMap, "AppProxy.Requests.Memory", &installAppProxyCmdOptions.resources.Requests.Memory)
 		mergeValueStr(templateValuesMap, "AppProxy.Limits.CPU", &installAppProxyCmdOptions.resources.Limits.CPU)
 		mergeValueStr(templateValuesMap, "AppProxy.Limits.Memory", &installAppProxyCmdOptions.resources.Limits.Memory)
-		
+
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
@@ -77,9 +76,8 @@ var installAppProxyCmd = &cobra.Command{
 			Token: "",
 			Id:    "",
 		}
-		s.AppProxy = &store.AppProxy{}
-		s.AppProxy.Resources = &store.Resources{}
-		fillResouces(s.AppProxy.Resources, &installAppProxyCmdOptions.resources)
+		s.AppProxy.Resources = copyResources(&installAppProxyCmdOptions.resources)
+
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
@@ -100,7 +98,6 @@ var installAppProxyCmd = &cobra.Command{
 
 	},
 }
-
 
 func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")

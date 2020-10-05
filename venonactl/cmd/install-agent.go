@@ -49,7 +49,7 @@ var installAgentCmdOptions struct {
 	templateValues       []string
 	templateFileValues   []string
 	templateValueFiles   []string
-	resources			 store.Resources
+	resources            store.Resources
 }
 
 var installAgentCmd = &cobra.Command{
@@ -120,9 +120,7 @@ var installAgentCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
-		s.Runner = &store.Runner{}
-		s.Runner.Resources = &store.Resources{}
-		fillResouces(s.Runner.Resources, &installAgentCmdOptions.resources)
+		s.Runner.Resources = copyResources(&installAgentCmdOptions.resources)
 
 		s.KubernetesAPI.Tolerations = tolerations
 
@@ -182,7 +180,6 @@ func getTolerations() string {
 	}
 	return ""
 }
-
 
 func init() {
 	installCommand.AddCommand(installAgentCmd)

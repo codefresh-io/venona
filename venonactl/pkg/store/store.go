@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	ModeInCluster          = "InCluster"
-	ApplicationName        = "runner"
-	MonitorApplicationName = "monitor"
-	AppProxyApplicationName               = "app-proxy"
+	ModeInCluster           = "InCluster"
+	ApplicationName         = "runner"
+	MonitorApplicationName  = "monitor"
+	AppProxyApplicationName = "app-proxy"
 )
 
 var (
@@ -33,17 +33,17 @@ type (
 
 		KubernetesAPI *KubernetesAPI
 
-		Runner *Runner
+		Runner Runner
 
-		VolumeProvisioner *VolumeProvisioner
+		VolumeProvisioner VolumeProvisioner
 
-		LocalVolumeMonitor *LocalVolumeMonitor
+		LocalVolumeMonitor LocalVolumeMonitor
 
-		CreateDindVolDirResouces *CreateDindVolDirResouces
+		CreateDindVolDirResouces CreateDindVolDirResouces
 
-		Monitor *Monitor
+		Monitor Monitor
 
-		AppProxy *AppProxy
+		AppProxy AppProxy
 
 		AgentAPI *AgentAPI
 
@@ -102,27 +102,27 @@ type (
 	}
 
 	Runner struct {
-		Resources *Resources
+		Resources Resources
 	}
 	VolumeProvisioner struct {
-		Resources *Resources
+		Resources Resources
 	}
 
 	LocalVolumeMonitor struct {
-		Resources *Resources
+		Resources Resources
 	}
 	Monitor struct {
-		Resources *Resources
+		Resources Resources
 	}
 	AppProxy struct {
-		Resources *Resources
+		Resources Resources
 	}
 	CreateDindVolDirResouces struct {
-		Resources *Resources
+		Resources Resources
 	}
 	MemoryCPU struct {
-		CPU string
-		Memory string 
+		CPU    string
+		Memory string
 	}
 	Resources struct {
 		Limits   *MemoryCPU
@@ -139,36 +139,6 @@ func GetStore() *Values {
 }
 
 func (s *Values) BuildValues() map[string]interface{} {
-	if s.Runner == nil {
-		s.Runner = &Runner{
-			Resources: &Resources{},
-		}
-	}
-	if s.AppProxy == nil {
-		s.AppProxy = &AppProxy{
-			Resources: &Resources{},
-		}
-	} 
-	if s.Monitor == nil {
-		s.Monitor = &Monitor{
-			Resources: &Resources{},
-		}
-	}
-	if s.VolumeProvisioner == nil {
-		s.VolumeProvisioner = &VolumeProvisioner{
-			Resources: &Resources{},
-		}
-	}
-	if s.LocalVolumeMonitor == nil {
-		s.LocalVolumeMonitor = &LocalVolumeMonitor{
-			Resources: &Resources{},
-		}
-	}
-	if s.CreateDindVolDirResouces == nil {
-		s.CreateDindVolDirResouces = &CreateDindVolDirResouces{
-			Resources: &Resources{},
-		}
-	}
 	return map[string]interface{}{
 		"AppName":       ApplicationName,
 		"ClusterId":     s.ClusterId,
@@ -208,12 +178,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AwsAccessKeyId":       "",
 			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image":        "codefresh/dind-volume-provisioner:v24",
-				"NodeSelector": s.KubernetesAPI.NodeSelector,
-				"Tolerations":  s.KubernetesAPI.Tolerations,
-			    "Resources": s.VolumeProvisioner.Resources,
-				"CreateDindVolDirResouces" : s.CreateDindVolDirResouces.Resources,
-				"MountAzureJson": false,
+				"Image":                    "codefresh/dind-volume-provisioner:v24",
+				"NodeSelector":             s.KubernetesAPI.NodeSelector,
+				"Tolerations":              s.KubernetesAPI.Tolerations,
+				"Resources":                s.VolumeProvisioner.Resources,
+				"CreateDindVolDirResouces": s.CreateDindVolDirResouces.Resources,
+				"MountAzureJson":           false,
 			},
 			"LocalVolumeMonitor": s.LocalVolumeMonitor.Resources,
 		},

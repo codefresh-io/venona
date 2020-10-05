@@ -39,20 +39,20 @@ var attachRuntimeCmdOptions struct {
 		kubePath  string
 		context   string
 	}
-	restartAgent bool
-	templateValues       []string
-	templateFileValues   []string
-	templateValueFiles   []string	
+	restartAgent       bool
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
 }
 
 var attachRuntimeCmd = &cobra.Command{
 	Use:   "attach",
 	Short: "Attach Codefresh runtime to agent",
 	Run: func(cmd *cobra.Command, args []string) {
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			attachRuntimeCmdOptions.templateValueFiles, 
-			attachRuntimeCmdOptions.templateValues, 
+			attachRuntimeCmdOptions.templateValueFiles,
+			attachRuntimeCmdOptions.templateValues,
 			attachRuntimeCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -120,7 +120,7 @@ var attachRuntimeCmd = &cobra.Command{
 		builder.Add(plugins.RuntimeAttachType)
 
 		values := s.BuildValues()
-		values = mergeMaps(values, templateValuesMap)		
+		values = mergeMaps(values, templateValuesMap)
 		spn := createSpinner("Attaching runtime to agent (might take a few seconds)", "")
 		spn.Start()
 		for _, p := range builder.Get() {

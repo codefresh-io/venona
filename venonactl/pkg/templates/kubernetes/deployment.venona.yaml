@@ -83,7 +83,7 @@ spec:
             memory: "{{ .Runner.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .Runner.Resources.Requests.CPU "") }}
-            cpu: " {{ .Runner.Resources.Requests.CPU}}"
+            cpu: "{{ .Runner.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .Runner.Resources.Limits }}
@@ -92,7 +92,7 @@ spec:
             memory: "{{ .Runner.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .Runner.Resources.Limits.CPU "") }}
-            cpu: " {{ .Runner.Resources.Limits.CPU}}"
+            cpu: "{{ .Runner.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
       restartPolicy: Always

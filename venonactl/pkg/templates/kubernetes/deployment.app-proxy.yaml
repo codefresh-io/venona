@@ -40,7 +40,7 @@ spec:
             memory: "{{ .AppProxy.Resources.Requests.Memory}}"
         {{ end}}
         {{ if (ne .AppProxy.Resources.Requests.CPU "") }}
-            cpu: " {{ .AppProxy.Resources.Requests.CPU}}"
+            cpu: "{{ .AppProxy.Resources.Requests.CPU}}"
         {{ end}}
       {{ end }}
       {{ if .AppProxy.Resources.Limits }}
@@ -49,7 +49,7 @@ spec:
             memory: "{{ .AppProxy.Resources.Limits.Memory}}"
         {{ end}}
         {{ if (ne .AppProxy.Resources.Limits.CPU "") }}
-            cpu: " {{ .AppProxy.Resources.Limits.CPU}}"
+            cpu: "{{ .AppProxy.Resources.Limits.CPU}}"
         {{ end}}
       {{ end }}
         env:
