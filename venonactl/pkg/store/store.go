@@ -39,8 +39,6 @@ type (
 
 		LocalVolumeMonitor LocalVolumeMonitor
 
-		CreateDindVolDirResouces CreateDindVolDirResouces
-
 		Monitor Monitor
 
 		AppProxy AppProxy
@@ -102,31 +100,20 @@ type (
 	}
 
 	Runner struct {
-		Resources Resources
+		Resources map[string]interface{}
 	}
 	VolumeProvisioner struct {
-		Resources Resources
+		Resources map[string]interface{}
 	}
 
 	LocalVolumeMonitor struct {
-		Resources Resources
+		Resources map[string]interface{}
 	}
 	Monitor struct {
-		Resources Resources
+		Resources map[string]interface{}
 	}
 	AppProxy struct {
-		Resources Resources
-	}
-	CreateDindVolDirResouces struct {
-		Resources Resources
-	}
-	MemoryCPU struct {
-		CPU    string
-		Memory string
-	}
-	Resources struct {
-		Limits   *MemoryCPU
-		Requests *MemoryCPU
+		Resources map[string]interface{}
 	}
 )
 
@@ -178,12 +165,11 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AwsAccessKeyId":       "",
 			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image":                    "codefresh/dind-volume-provisioner:v24",
-				"NodeSelector":             s.KubernetesAPI.NodeSelector,
-				"Tolerations":              s.KubernetesAPI.Tolerations,
-				"Resources":                s.VolumeProvisioner.Resources,
-				"CreateDindVolDirResouces": s.CreateDindVolDirResouces.Resources,
-				"MountAzureJson":           false,
+				"Image":          "codefresh/dind-volume-provisioner:v24",
+				"NodeSelector":   s.KubernetesAPI.NodeSelector,
+				"Tolerations":    s.KubernetesAPI.Tolerations,
+				"Resources":      s.VolumeProvisioner.Resources,
+				"MountAzureJson": false,
 			},
 			"LocalVolumeMonitor": s.LocalVolumeMonitor.Resources,
 		},

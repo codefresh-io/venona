@@ -49,7 +49,7 @@ var installAgentCmdOptions struct {
 	templateValues       []string
 	templateFileValues   []string
 	templateValueFiles   []string
-	resources            store.Resources
+	resources            map[string]interface{}
 }
 
 var installAgentCmd = &cobra.Command{
@@ -80,13 +80,7 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
 		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
 
-		installAgentCmdOptions.resources.Limits = &store.MemoryCPU{}
-		installAgentCmdOptions.resources.Requests = &store.MemoryCPU{}
-
-		mergeValueStr(templateValuesMap, "Runner.Requests.CPU", &installAgentCmdOptions.resources.Requests.CPU)
-		mergeValueStr(templateValuesMap, "Runner.Requests.Memory", &installAgentCmdOptions.resources.Requests.Memory)
-		mergeValueStr(templateValuesMap, "Runner.Limits.CPU", &installAgentCmdOptions.resources.Limits.CPU)
-		mergeValueStr(templateValuesMap, "Runner.Limits.Memory", &installAgentCmdOptions.resources.Limits.Memory)
+		mergeValueMSI(templateValuesMap, "Runner.resoruces", &installAgentCmdOptions.resources)
 
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 
@@ -120,7 +114,7 @@ var installAgentCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
-		s.Runner.Resources = copyResources(&installAgentCmdOptions.resources)
+		s.Runner.Resources = installAgentCmdOptions.resources
 
 		s.KubernetesAPI.Tolerations = tolerations
 

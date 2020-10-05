@@ -10,12 +10,13 @@ CodefreshHost: https://my-codefresh.example.com
 Token:         xxxxx.yyyyyyyy
 
 # Runner:
-#   Limits:
-#     CPU: 400m
-#     Memory: 1200Mi
-#   Requests:
-#     CPU: 200m
-#     Memory: 500Mi
+#   resources:
+#     limits:
+#       cpu: 400m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi
 
 # Runner (venona) image 
 Image: 
@@ -67,37 +68,32 @@ Namespace: r1
 
 ### Storage parameters - for dind-volume-provisoner
 # Storage:
-#   Backend: local
-#   StorageClassName:     
-#   LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
-#   AvailabilityZone: 
-#   GoogleServiceAccount: 
-#   AwsAccessKeyId: 
-#   AwsSecretAccessKey: 
-# VolumeProvisioner:
-#   Image: codefresh/dind-volume-provisioner:v23
-#   NodeSelector: 
-#   Tolerations:
-#   Limits:
-#     CPU: 400m
-#     Memory: 1200Mi
-#   Requests:
-#     CPU: 200m
-#     Memory: 500Mi 
-# LocalVolumeMonitor: 
-#   Limits:
-#      CPU: 400m
-#      Memory: 1200Mi
-#   Requests:
-#      CPU: 200m
-#      Memory: 500Mi  
-# CreateDindVolDir:
-#   Limits:
-#     CPU: 400m
-#     Memory: 1200Mi
-#   Requests:
-#     CPU: 200m
-#     Memory: 500Mi 
+  # Backend: local
+  # StorageClassName:     
+  # LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
+  # AvailabilityZone: 
+  # GoogleServiceAccount: 
+  # AwsAccessKeyId: 
+  # AwsSecretAccessKey: 
+  # VolumeProvisioner:
+    # Image: codefresh/dind-volume-provisioner:v23
+    # NodeSelector: 
+    # Tolerations:
+  #   resources:
+  #     limits:
+  #       cpu: 400m
+  #       memory: 1200Mi
+  #     requests:
+  #       cpu: 200m
+  #       memory: 500Mi 
+  # LocalVolumeMonitor: 
+  #   resources:
+  #     limits:
+  #       cpu: 400m
+  #       memory: 1200Mi
+  #     requests:
+  #       cpu: 200m
+  #       memory: 500Mi  
 
 
 ### Storage parameters example for gke-local-ssd
@@ -125,24 +121,26 @@ Namespace: r1
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
 
 # Monitor:
-#   UseNamespaceWithRole: s.UseNamespaceWithRole
-#   RbacEnabled: true,
-#   Helm3:       s.Helm3,
-#   AppName:     MonitorApplicationName,
-#   Image:
-#     Name: codefresh/agent,
-#     Tag:  stable,
-  # Limits:
-  #   CPU: 400m
-  #   Memory: 1200Mi
-  # Requests:
-  #   CPU: 200m
-  #   Memory: 500Mi
+  # UseNamespaceWithRole: s.UseNamespaceWithRole
+  # RbacEnabled: true,
+  # Helm3:       s.Helm3,
+  # AppName:     MonitorApplicationName,
+  # Image:
+  #   Name: codefresh/agent,
+  #   Tag:  stable,
+  # resources:  
+  #   limits:
+  #     cpu: 400m
+  #     memory: 1200Mi
+  #   requests:
+  #     cpu: 200m
+  #     memory: 500Mi
 
 # AppProxy:
-#   Limits:
-#     CPU: 400m
-#     Memory: 1200Mi
-#   Requests:
-#     CPU: 200m
-#     Memory: 500Mi
+#   resources:
+#     limits:
+#       cpu: 500m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi

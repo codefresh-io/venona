@@ -74,25 +74,6 @@ spec:
           readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
-      {{if or  .Runner.Resources.Limits .Runner.Resources.Requests }}
         resources:
-      {{ end }}
-      {{ if .Runner.Resources.Requests }}
-          requests:
-        {{ if (ne .Runner.Resources.Requests.Memory "") }}
-            memory: "{{ .Runner.Resources.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .Runner.Resources.Requests.CPU "") }}
-            cpu: "{{ .Runner.Resources.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .Runner.Resources.Limits }}
-          limits:
-        {{ if (ne .Runner.Resources.Limits.Memory "") }}
-            memory: "{{ .Runner.Resources.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .Runner.Resources.Limits.CPU "") }}
-            cpu: "{{ .Runner.Resources.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .Runner.Resources | indent 10 }}
       restartPolicy: Always

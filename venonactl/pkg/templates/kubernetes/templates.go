@@ -180,27 +180,8 @@ spec:
       containers:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
-      {{if or  .Storage.LocalVolumeMonitor.Limits .Storage.LocalVolumeMonitor.Requests }}
           resources:
-      {{ end }}
-      {{ if .Storage.LocalVolumeMonitor.Requests }}
-            requests:
-        {{ if (ne .Storage.LocalVolumeMonitor.Requests.Memory "") }}
-              memory: "{{ .Storage.LocalVolumeMonitor.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .Storage.LocalVolumeMonitor.Requests.CPU "") }}
-              cpu: "{{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .Storage.LocalVolumeMonitor.Limits }}
-            limits:
-        {{ if (ne .Storage.LocalVolumeMonitor.Limits.Memory "") }}
-              memory: "{{ .Storage.LocalVolumeMonitor.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .Storage.LocalVolumeMonitor.Limits.CPU "") }}
-              cpu: "{{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .Storage.LocalVolumeMonitor | indent 10 }}
           imagePullPolicy: Always
           command:
           - /bin/local-volumes-agent
@@ -266,27 +247,8 @@ spec:
       - name: {{ .AppProxy.AppName }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
         imagePullPolicy: Always
-      {{if or  .AppProxy.Resources.Limits .AppProxy.Resources.Requests }}
         resources:
-      {{ end }}
-      {{ if .AppProxy.Resources.Requests }}
-          requests:
-        {{ if (ne .AppProxy.Resources.Requests.Memory "") }}
-            memory: "{{ .AppProxy.Resources.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .AppProxy.Resources.Requests.CPU "") }}
-            cpu: "{{ .AppProxy.Resources.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .AppProxy.Resources.Limits }}
-          limits:
-        {{ if (ne .AppProxy.Resources.Limits.Memory "") }}
-            memory: "{{ .AppProxy.Resources.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .AppProxy.Resources.Limits.CPU "") }}
-            cpu: "{{ .AppProxy.Resources.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
           - name: PORT
             value: "3000"
@@ -338,27 +300,8 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
-      {{if or  .Storage.VolumeProvisioner.Resources.Limits .Storage.VolumeProvisioner.Resources.Requests }}
         resources:
-      {{ end }}
-      {{ if .Storage.VolumeProvisioner.Resources.Requests }}
-          requests:
-        {{ if (ne .Storage.VolumeProvisioner.Resources.Requests.Memory "") }}
-            memory: "{{ .Storage.VolumeProvisioner.Resources.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .Storage.VolumeProvisioner.Resources.Requests.CPU "") }}
-            cpu: "{{ .Storage.VolumeProvisioner.Resources.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .Storage.VolumeProvisioner.Resources.Limits }}
-          limits:
-        {{ if (ne .Storage.VolumeProvisioner.Resources.Limits.Memory "") }}
-            memory: "{{ .Storage.VolumeProvisioner.Resources.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .Storage.VolumeProvisioner.Resources.Limits.CPU "") }}
-            cpu: "{{ .Storage.VolumeProvisioner.Resources.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
         command:
@@ -469,27 +412,8 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Monitor.AppName }}
-      {{if or  .Monitor.Resources.Limits .Monitor.Resources.Requests }}
         resources:
-      {{ end }}
-      {{ if .Monitor.Resources.Requests }}
-          requests:
-        {{ if (ne .Monitor.Resources.Requests.Memory "") }}
-            memory: "{{ .Monitor.Resources.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .Monitor.Resources.Requests.CPU "") }}
-            cpu: "{{ .Monitor.Resources.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .Monitor.Resources.Limits }}
-          limits:
-        {{ if (ne .Monitor.Resources.Limits.Memory "") }}
-            memory: "{{ .Monitor.Resources.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .Monitor.Resources.Limits.CPU "") }}
-            cpu: "{{ .Monitor.Resources.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .Monitor.resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
@@ -605,27 +529,8 @@ spec:
           readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
-      {{if or  .Runner.Resources.Limits .Runner.Resources.Requests }}
         resources:
-      {{ end }}
-      {{ if .Runner.Resources.Requests }}
-          requests:
-        {{ if (ne .Runner.Resources.Requests.Memory "") }}
-            memory: "{{ .Runner.Resources.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .Runner.Resources.Requests.CPU "") }}
-            cpu: "{{ .Runner.Resources.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .Runner.Resources.Limits }}
-          limits:
-        {{ if (ne .Runner.Resources.Limits.Memory "") }}
-            memory: "{{ .Runner.Resources.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .Runner.Resources.Limits.CPU "") }}
-            cpu: "{{ .Runner.Resources.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .Runner.Resources | indent 10 }}
       restartPolicy: Always
 `
 

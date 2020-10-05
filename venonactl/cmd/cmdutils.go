@@ -217,25 +217,6 @@ func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCl
 
 }
 
-func copyResources(resources *store.Resources) store.Resources {
-
-	retVal := store.Resources{}
-
-	if resources.Limits.CPU != "" || resources.Limits.Memory != "" {
-		retVal.Limits = &store.MemoryCPU{
-			CPU:    resources.Limits.CPU,
-			Memory: resources.Limits.Memory,
-		}
-	}
-	if resources.Requests.CPU != "" || resources.Requests.Memory != "" {
-		retVal.Requests = &store.MemoryCPU{
-			CPU:    resources.Requests.CPU,
-			Memory: resources.Requests.Memory,
-		}
-	}
-	return retVal
-}
-
 func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string) {
 	s := store.GetStore()
 	logger.Debug("Using agent's token", "Token", token)
@@ -311,5 +292,15 @@ func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
 		return
 	}
 	val := mapX.Get(key).Bool()
+	*param = val
+}
+
+func mergeValueMSI(valuesMap map[string]interface{}, key string, param *map[string]interface{}, defaultValue ...map[string]interface{}) {
+	mapX := objx.New(valuesMap)
+	if param != nil && len(*param) > 0 {
+		mapX.Set(key, *param)
+		return
+	}
+	val := mapX.Get(key).MSI(defaultValue...)
 	*param = val
 }

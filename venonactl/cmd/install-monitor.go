@@ -39,7 +39,7 @@ var installMonitorAgentCmdOptions struct {
 	templateValues     []string
 	templateFileValues []string
 	templateValueFiles []string
-	resources          store.Resources
+	resources          map[string]interface{}
 }
 
 // installK8sAgentCmd represents the install command
@@ -64,13 +64,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installMonitorAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installMonitorAgentCmdOptions.kube.context)
 
-		installMonitorAgentCmdOptions.resources.Limits = &store.MemoryCPU{}
-		installMonitorAgentCmdOptions.resources.Requests = &store.MemoryCPU{}
-
-		mergeValueStr(templateValuesMap, "Monitor.Requests.CPU", &installMonitorAgentCmdOptions.resources.Requests.CPU)
-		mergeValueStr(templateValuesMap, "Monitor.Requests.Memory", &installMonitorAgentCmdOptions.resources.Requests.Memory)
-		mergeValueStr(templateValuesMap, "Monitor.Limits.CPU", &installMonitorAgentCmdOptions.resources.Limits.CPU)
-		mergeValueStr(templateValuesMap, "Monitor.Limits.Memory", &installMonitorAgentCmdOptions.resources.Limits.Memory)
+		mergeValueMSI(templateValuesMap, "Monitor.resoruces", &installMonitorAgentCmdOptions.resources)
 
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installMonitorAgentCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "ClusterId", &installMonitorAgentCmdOptions.clusterId)
@@ -82,7 +76,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, false)
-		s.Monitor.Resources = copyResources(&installMonitorAgentCmdOptions.resources)
+		s.Monitor.Resources = installMonitorAgentCmdOptions.resources
 
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.MonitorAgentPluginType)

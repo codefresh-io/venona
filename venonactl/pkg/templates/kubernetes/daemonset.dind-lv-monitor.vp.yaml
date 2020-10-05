@@ -34,27 +34,8 @@ spec:
       containers:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
-      {{if or  .Storage.LocalVolumeMonitor.Limits .Storage.LocalVolumeMonitor.Requests }}
           resources:
-      {{ end }}
-      {{ if .Storage.LocalVolumeMonitor.Requests }}
-            requests:
-        {{ if (ne .Storage.LocalVolumeMonitor.Requests.Memory "") }}
-              memory: "{{ .Storage.LocalVolumeMonitor.Requests.Memory}}"
-        {{ end}}
-        {{ if (ne .Storage.LocalVolumeMonitor.Requests.CPU "") }}
-              cpu: "{{ .Storage.LocalVolumeMonitor.Requests.CPU}}"
-        {{ end}}
-      {{ end }}
-      {{ if .Storage.LocalVolumeMonitor.Limits }}
-            limits:
-        {{ if (ne .Storage.LocalVolumeMonitor.Limits.Memory "") }}
-              memory: "{{ .Storage.LocalVolumeMonitor.Limits.Memory}}"
-        {{ end}}
-        {{ if (ne .Storage.LocalVolumeMonitor.Limits.CPU "") }}
-              cpu: "{{ .Storage.LocalVolumeMonitor.Limits.CPU}}"
-        {{ end}}
-      {{ end }}
+{{ toYamlMsi .Storage.LocalVolumeMonitor | indent 10 }}
           imagePullPolicy: Always
           command:
           - /bin/local-volumes-agent

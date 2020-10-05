@@ -31,7 +31,7 @@ var installAppProxyCmdOptions struct {
 	templateValues     []string
 	templateFileValues []string
 	templateValueFiles []string
-	resources          store.Resources
+	resources          map[string]interface{}
 }
 
 var installAppProxyCmd = &cobra.Command{
@@ -50,13 +50,7 @@ var installAppProxyCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installAppProxyCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
 
-		installAppProxyCmdOptions.resources.Limits = &store.MemoryCPU{}
-		installAppProxyCmdOptions.resources.Requests = &store.MemoryCPU{}
-
-		mergeValueStr(templateValuesMap, "AppProxy.Requests.CPU", &installAppProxyCmdOptions.resources.Requests.CPU)
-		mergeValueStr(templateValuesMap, "AppProxy.Requests.Memory", &installAppProxyCmdOptions.resources.Requests.Memory)
-		mergeValueStr(templateValuesMap, "AppProxy.Limits.CPU", &installAppProxyCmdOptions.resources.Limits.CPU)
-		mergeValueStr(templateValuesMap, "AppProxy.Limits.Memory", &installAppProxyCmdOptions.resources.Limits.Memory)
+		mergeValueMSI(templateValuesMap, "AppProxy.resoruces", &installAppProxyCmdOptions.resources)
 
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
@@ -68,7 +62,7 @@ var installAppProxyCmd = &cobra.Command{
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost: cfAPIHost,
 		}
-
+		s.AppProxy.Resources = installAppProxyCmdOptions.resources
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
 		fillKubernetesAPI(lgr, installAppProxyCmdOptions.kube.context, installAppProxyCmdOptions.kube.namespace, false)
@@ -76,7 +70,6 @@ var installAppProxyCmd = &cobra.Command{
 			Token: "",
 			Id:    "",
 		}
-		s.AppProxy.Resources = copyResources(&installAppProxyCmdOptions.resources)
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
