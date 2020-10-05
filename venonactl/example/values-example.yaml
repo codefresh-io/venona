@@ -9,6 +9,15 @@
 CodefreshHost: https://my-codefresh.example.com
 Token:         xxxxx.yyyyyyyy
 
+# Runner:
+#   resources:
+#     limits:
+#       cpu: 400m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi
+
 # Runner (venona) image 
 Image: 
   Name: codefresh/venona
@@ -19,10 +28,10 @@ Namespace: r1
 ### ConfigPath - kubeconfig from --kube-config-path
 #ConfigPath: 
 ## Context: from both --context (global arg) and 
-Context: gke_codefresh_cluster
+#Context: gke_codefresh_cluster
 
 ### NodeSelector --kube-node-selector
-NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
+#NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 
 ### --tolerations
 # Tolerations: 
@@ -59,17 +68,33 @@ NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 
 ### Storage parameters - for dind-volume-provisoner
 # Storage:
-#   Backend: local
-#   StorageClassName:     
-#   LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
-#   AvailabilityZone: 
-#   GoogleServiceAccount: 
-#   AwsAccessKeyId: 
-#   AwsSecretAccessKey: 
-#   VolumeProvisioner:
-#     Image: codefresh/dind-volume-provisioner:v23
-#     NodeSelector: 
-#     Tolerations: 
+  # Backend: local
+  # StorageClassName:     
+  # LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
+  # AvailabilityZone: 
+  # GoogleServiceAccount: 
+  # AwsAccessKeyId: 
+  # AwsSecretAccessKey: 
+  # VolumeProvisioner:
+    # Image: codefresh/dind-volume-provisioner:v23
+    # NodeSelector: 
+    # Tolerations:
+  #   resources:
+  #     limits:
+  #       cpu: 400m
+  #       memory: 1200Mi
+  #     requests:
+  #       cpu: 200m
+  #       memory: 500Mi 
+  # LocalVolumeMonitor: 
+  #   resources:
+  #     limits:
+  #       cpu: 400m
+  #       memory: 1200Mi
+  #     requests:
+  #       cpu: 200m
+  #       memory: 500Mi  
+
 
 ### Storage parameters example for gke-local-ssd
 # Storage:
@@ -96,10 +121,26 @@ NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
 
 # Monitor:
-#   UseNamespaceWithRole: s.UseNamespaceWithRole
-#   RbacEnabled: true,
-#   Helm3:       s.Helm3,
-#   AppName:     MonitorApplicationName,
-#   Image:
-#     Name: codefresh/agent,
-#     Tag:  stable,
+  # UseNamespaceWithRole: s.UseNamespaceWithRole
+  # RbacEnabled: true,
+  # Helm3:       s.Helm3,
+  # AppName:     MonitorApplicationName,
+  # Image:
+  #   Name: codefresh/agent,
+  #   Tag:  stable,
+  # resources:  
+  #   limits:
+  #     cpu: 400m
+  #     memory: 1200Mi
+  #   requests:
+  #     cpu: 200m
+  #     memory: 500Mi
+
+# AppProxy:
+#   resources:
+#     limits:
+#       cpu: 500m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi

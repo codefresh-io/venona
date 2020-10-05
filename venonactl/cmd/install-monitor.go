@@ -23,7 +23,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 )
 
 var installMonitorAgentCmdOptions struct {
@@ -32,14 +31,15 @@ var installMonitorAgentCmdOptions struct {
 		context      string
 		nodeSelector string
 	}
-	clusterId      string
-	helm3          bool
-	codefreshToken string
-	codefreshHost  string
-	dockerRegistry string
-	templateValues         []string
-	templateFileValues     []string
-	templateValueFiles     []string
+	clusterId          string
+	helm3              bool
+	codefreshToken     string
+	codefreshHost      string
+	dockerRegistry     string
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
+	resources          map[string]interface{}
 }
 
 // installK8sAgentCmd represents the install command
@@ -47,10 +47,10 @@ var installMonitorAgentCmd = &cobra.Command{
 	Use:   "monitor",
 	Short: "Install Codefresh's monitor agent on cluster",
 	Run: func(cmd *cobra.Command, args []string) {
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			installMonitorAgentCmdOptions.templateValueFiles, 
-			installMonitorAgentCmdOptions.templateValues, 
+			installMonitorAgentCmdOptions.templateValueFiles,
+			installMonitorAgentCmdOptions.templateValues,
 			installMonitorAgentCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -64,6 +64,8 @@ var installMonitorAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &installMonitorAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installMonitorAgentCmdOptions.kube.context)
 
+		mergeValueMSI(templateValuesMap, "Monitor.resources", &installMonitorAgentCmdOptions.resources)
+
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installMonitorAgentCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "ClusterId", &installMonitorAgentCmdOptions.clusterId)
 		mergeValueBool(templateValuesMap, "helm3", &installMonitorAgentCmdOptions.helm3)
@@ -74,6 +76,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
 		fillKubernetesAPI(lgr, installMonitorAgentCmdOptions.kube.context, installMonitorAgentCmdOptions.kube.namespace, false)
+		s.Monitor.Resources = installMonitorAgentCmdOptions.resources
 
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.MonitorAgentPluginType)

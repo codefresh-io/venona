@@ -31,6 +31,8 @@ spec:
       - name: {{ .AppProxy.AppName }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
         imagePullPolicy: Always
+        resources:
+{{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
           - name: PORT
             value: "3000"

@@ -23,7 +23,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 )
 
 var installRuntimeCmdOptions struct {
@@ -44,6 +43,8 @@ var installRuntimeCmdOptions struct {
 	templateValues         []string
 	templateFileValues     []string
 	templateValueFiles     []string
+	volumeProvisioner      map[string]interface{}
+	localVolumeMonitor     map[string]interface{}
 }
 
 var installRuntimeCmd = &cobra.Command{
@@ -51,10 +52,10 @@ var installRuntimeCmd = &cobra.Command{
 	Short: "Install Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			installRuntimeCmdOptions.templateValueFiles, 
-			installRuntimeCmdOptions.templateValues, 
+			installRuntimeCmdOptions.templateValueFiles,
+			installRuntimeCmdOptions.templateValues,
 			installRuntimeCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -63,7 +64,7 @@ var installRuntimeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
 		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
-		mergeValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)		
+		mergeValueStr(templateValuesMap, "Token", &installRuntimeCmdOptions.codefreshToken)
 
 		mergeValueStr(templateValuesMap, "Namespace", &installRuntimeCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
@@ -73,11 +74,23 @@ var installRuntimeCmd = &cobra.Command{
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
-		
+
+		defaultVolumeProvResources := map[string]interface{}{
+			"limits": map[string]string{
+				"cpu":    "1000m",
+				"memory": "6000Mi",
+			},
+			"requests": map[string]string{
+				"cpu":    "200m",
+				"memory": "200Mi",
+			},
+		}
+		mergeValueMSI(templateValuesMap, "Storage.VolumeProvisioner.resources", &installRuntimeCmdOptions.volumeProvisioner, defaultVolumeProvResources)
+		mergeValueMSI(templateValuesMap, "Storage.LocalVolumeMonitor.resources", &installRuntimeCmdOptions.localVolumeMonitor)
+
 		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
 		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
-
 
 		s := store.GetStore()
 		lgr := createLogger("Install-runtime", verbose, logFormatter)
@@ -140,6 +153,8 @@ var installRuntimeCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installRuntimeCmdOptions.kube.context, installRuntimeCmdOptions.kube.namespace, installRuntimeCmdOptions.kube.inCluster)
+		s.VolumeProvisioner.Resources = installRuntimeCmdOptions.volumeProvisioner
+		s.LocalVolumeMonitor.Resources = installRuntimeCmdOptions.localVolumeMonitor
 
 		if installRuntimeCmdOptions.dryRun {
 			s.DryRun = installRuntimeCmdOptions.dryRun

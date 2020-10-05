@@ -28,12 +28,30 @@ var installAppProxyCmdOptions struct {
 		namespace string
 		context   string
 	}
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
+	resources          map[string]interface{}
 }
 
 var installAppProxyCmd = &cobra.Command{
 	Use:   "app-proxy",
 	Short: "Install App proxy ",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		templateValuesMap, err := templateValuesToMap(
+			installAppProxyCmdOptions.templateValueFiles,
+			installAppProxyCmdOptions.templateValues,
+			installAppProxyCmdOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+
+		mergeValueStr(templateValuesMap, "Namespace", &installAppProxyCmdOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
+
+		mergeValueMSI(templateValuesMap, "AppProxy.resources", &installAppProxyCmdOptions.resources)
+
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
@@ -44,7 +62,7 @@ var installAppProxyCmd = &cobra.Command{
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost: cfAPIHost,
 		}
-
+		s.AppProxy.Resources = installAppProxyCmdOptions.resources
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
 		fillKubernetesAPI(lgr, installAppProxyCmdOptions.kube.context, installAppProxyCmdOptions.kube.namespace, false)
@@ -52,13 +70,14 @@ var installAppProxyCmd = &cobra.Command{
 			Token: "",
 			Id:    "",
 		}
+
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 		builder.Add(plugins.AppProxyPluginType)
 
 		values := s.BuildValues()
-		var err error
+		values = mergeMaps(values, templateValuesMap)
 		spn := createSpinner("Installing app proxy (might take a few minutes)", "")
 		spn.Start()
 		defer spn.Stop()
@@ -79,4 +98,6 @@ func init() {
 	installCommand.AddCommand(installAppProxyCmd)
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
+	installAppProxyCmd.Flags().StringArrayVarP(&installAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
+
 }

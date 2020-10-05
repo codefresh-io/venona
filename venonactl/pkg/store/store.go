@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	ModeInCluster          = "InCluster"
-	ApplicationName        = "runner"
-	MonitorApplicationName = "monitor"
-	AppProxy               = "app-proxy"
+	ModeInCluster           = "InCluster"
+	ApplicationName         = "runner"
+	MonitorApplicationName  = "monitor"
+	AppProxyApplicationName = "app-proxy"
 )
 
 var (
@@ -32,6 +32,16 @@ type (
 		CodefreshAPI *CodefreshAPI
 
 		KubernetesAPI *KubernetesAPI
+
+		Runner Runner
+
+		VolumeProvisioner VolumeProvisioner
+
+		LocalVolumeMonitor LocalVolumeMonitor
+
+		Monitor Monitor
+
+		AppProxy AppProxy
 
 		AgentAPI *AgentAPI
 
@@ -88,6 +98,23 @@ type (
 		Commit  string
 		Date    string
 	}
+
+	Runner struct {
+		Resources map[string]interface{}
+	}
+	VolumeProvisioner struct {
+		Resources map[string]interface{}
+	}
+
+	LocalVolumeMonitor struct {
+		Resources map[string]interface{}
+	}
+	Monitor struct {
+		Resources map[string]interface{}
+	}
+	AppProxy struct {
+		Resources map[string]interface{}
+	}
 )
 
 func GetStore() *Values {
@@ -124,6 +151,9 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Key":  "",
 			"Ca":   "",
 		},
+		"Runner": map[string]interface{}{
+			"Resources": s.Runner.Resources,
+		},
 		"CreateRbac": true,
 		"Storage": map[string]interface{}{
 			"Backend":              "local",
@@ -135,11 +165,13 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AwsAccessKeyId":       "",
 			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image":        "codefresh/dind-volume-provisioner:v24",
-				"NodeSelector": s.KubernetesAPI.NodeSelector,
-				"Tolerations":  s.KubernetesAPI.Tolerations,
+				"Image":          "codefresh/dind-volume-provisioner:v24",
+				"NodeSelector":   s.KubernetesAPI.NodeSelector,
+				"Tolerations":    s.KubernetesAPI.Tolerations,
+				"Resources":      s.VolumeProvisioner.Resources,
 				"MountAzureJson": false,
 			},
+			"LocalVolumeMonitor": s.LocalVolumeMonitor.Resources,
 		},
 		"Monitor": map[string]interface{}{
 			"Enabled":              true,
@@ -152,13 +184,15 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Name": "codefresh/agent",
 				"Tag":  "stable",
 			},
+			"Resources": s.Monitor.Resources,
 		},
 		"AppProxy": map[string]interface{}{
-			"AppName": AppProxy,
+			"AppName": AppProxyApplicationName,
 			"Image": map[string]string{
 				"Name": "codefresh/cf-app-proxy",
 				"Tag":  "latest",
 			},
+			"Resources": s.AppProxy.Resources,
 		},
 	}
 }

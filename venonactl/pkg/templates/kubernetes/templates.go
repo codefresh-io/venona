@@ -180,6 +180,8 @@ spec:
       containers:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
+          resources:
+{{ toYamlMsi .Storage.LocalVolumeMonitor | indent 10 }}
           imagePullPolicy: Always
           command:
           - /bin/local-volumes-agent
@@ -245,6 +247,8 @@ spec:
       - name: {{ .AppProxy.AppName }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
         imagePullPolicy: Always
+        resources:
+{{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
           - name: PORT
             value: "3000"
@@ -296,15 +300,10 @@ spec:
       {{ end }}
       containers:
       - name: dind-volume-provisioner
+        resources:
+{{ toYamlMsi .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "200Mi"
-          limits:
-            cpu: "1000m"
-            memory: "6000Mi"
         command:
           - /usr/local/bin/dind-volume-provisioner
           - -v=4
@@ -315,6 +314,26 @@ spec:
         {{- if ne .DockerRegistry "" }}
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
+        {{- end }}
+        {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.CPU }}
+        - name: CREATE_DIND_LIMIT_CPU
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.CPU  }}
+          {{- end }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.Memory }}
+        - name: CREATE_DIND_LIMIT_MEMORY
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Limits.Memory  }}
+          {{- end }}
+        {{- end }}
+        {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.CPU }}
+        - name: CREATE_DIND_REQUESTS_CPU
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.CPU  }}
+          {{- end }}
+          {{- if .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory }}
+        - name: CREATE_DIND_REQUESTS_MEMORY
+          value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory  }}
+          {{- end }}
         {{- end }}
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
@@ -393,6 +412,8 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Monitor.AppName }}
+        resources:
+{{ toYamlMsi .Monitor.resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
@@ -508,6 +529,8 @@ spec:
           readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
+        resources:
+{{ toYamlMsi .Runner.Resources | indent 10 }}
       restartPolicy: Always
 `
 

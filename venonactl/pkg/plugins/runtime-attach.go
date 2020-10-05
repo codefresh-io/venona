@@ -59,7 +59,7 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 
 	var saSecretName string
 	saSecretPattern := fmt.Sprintf("%s-token-", opt.RuntimeServiceAccount)
-	for _, secretRef := range(sa.Secrets) {
+	for _, secretRef := range sa.Secrets {
 		if strings.Contains(secretRef.Name, saSecretPattern) {
 			saSecretName = secretRef.Name
 			break

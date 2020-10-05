@@ -74,4 +74,6 @@ spec:
           readOnly: true
         imagePullPolicy: Always
         name: {{ .AppName }}
+        resources:
+{{ toYamlMsi .Runner.Resources | indent 10 }}
       restartPolicy: Always

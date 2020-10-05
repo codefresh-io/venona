@@ -1,7 +1,6 @@
 package cmd
 
 import (
-
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,9 +24,9 @@ import (
 	k8sApi "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/stretchr/objx"
 	cliValues "helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
-	"github.com/stretchr/objx"	
 )
 
 var (
@@ -230,24 +229,24 @@ func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string)
 // Parsing helpers --set-value , --set-file
 // by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
 
-// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file> 
+// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file>
 // using helm libraries
 func templateValuesToMap(templateValueFiles, templateValues, templateFileValues []string) (map[string]interface{}, error) {
 	valueOpts := &cliValues.Options{}
 	if len(templateValueFiles) > 0 {
-		for _, v := range(templateValueFiles) {
+		for _, v := range templateValueFiles {
 			valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
 		}
 	}
-	
+
 	if len(templateValues) > 0 {
-		for _, v := range(templateValues) {
+		for _, v := range templateValues {
 			valueOpts.Values = append(valueOpts.Values, v)
-		}			
+		}
 	}
-	
+
 	if len(templateFileValues) > 0 {
-		for _, v := range(templateFileValues) {
+		for _, v := range templateFileValues {
 			valueOpts.FileValues = append(valueOpts.FileValues, v)
 		}
 	}
@@ -275,20 +274,20 @@ func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
 }
 
 // mergeValueStr - for merging cli parameters with mapped parameters
-func mergeValueStr(valuesMap map[string]interface{}, key string, param *string) {
+func mergeValueStr(valuesMap map[string]interface{}, key string, param *string, defaultValue ...string) {
 	mapX := objx.New(valuesMap)
 	if param != nil && *param != "" {
 		mapX.Set(key, *param)
-	    return
-    }
-    val := mapX.Get(key).String()
-    *param = val
+		return
+	}
+	val := mapX.Get(key).Str(defaultValue...)
+	*param = val
 }
 
 // mergeValueBool - for merging cli parameters with mapped parameters
 func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
 	mapX := objx.New(valuesMap)
-	if param != nil ||*param == true {
+	if param != nil || *param == true {
 		mapX.Set(key, *param)
 		return
 	}
@@ -296,3 +295,12 @@ func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
 	*param = val
 }
 
+func mergeValueMSI(valuesMap map[string]interface{}, key string, param *map[string]interface{}, defaultValue ...map[string]interface{}) {
+	mapX := objx.New(valuesMap)
+	if param != nil && len(*param) > 0 {
+		mapX.Set(key, *param)
+		return
+	}
+	val := mapX.Get(key).MSI(defaultValue...)
+	*param = val
+}

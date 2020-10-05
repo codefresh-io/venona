@@ -49,6 +49,7 @@ var installAgentCmdOptions struct {
 	templateValues       []string
 	templateFileValues   []string
 	templateValueFiles   []string
+	resources            map[string]interface{}
 }
 
 var installAgentCmd = &cobra.Command{
@@ -78,6 +79,8 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
 		mergeValueStr(templateValuesMap, "AgentId", &installAgentCmdOptions.agentID)
 		mergeValueStr(templateValuesMap, "Image.Tag", &installAgentCmdOptions.venona.version)
+
+		mergeValueMSI(templateValuesMap, "Runner.resources", &installAgentCmdOptions.resources)
 
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 
@@ -111,6 +114,7 @@ var installAgentCmd = &cobra.Command{
 		}
 
 		fillKubernetesAPI(lgr, installAgentCmdOptions.kube.context, installAgentCmdOptions.kube.namespace, false)
+		s.Runner.Resources = installAgentCmdOptions.resources
 
 		s.KubernetesAPI.Tolerations = tolerations
 

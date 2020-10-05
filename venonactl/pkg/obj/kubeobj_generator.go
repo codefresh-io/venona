@@ -60,7 +60,7 @@ var functionsMap map[string]string = map[string]string{
 
 	"storagev1.StorageClass": "StorageV1().StorageClasses()",
 
-	"batchv1.Job":     "BatchV1().Jobs(namespace)",
+	"batchv1.Job":          "BatchV1().Jobs(namespace)",
 	"batchv1beta1.CronJob": "BatchV1beta1().CronJobs(namespace)",
 }
 

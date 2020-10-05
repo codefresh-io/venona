@@ -17,7 +17,6 @@ limitations under the License.
 package plugins
 
 import (
-
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -138,8 +137,8 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	// replace of sa creates new secert with sa creds
 	// avoid it till patch fully implemented
 	var skipUpgradeFor = map[string]interface{}{
-		"service-account.venona.yaml": nil,
-		"deployment.venona.yaml":      nil,
+		"service-account.venona.yaml":   nil,
+		"deployment.venona.yaml":        nil,
 		"venonaconf.secret.venona.yaml": nil,
 	}
 

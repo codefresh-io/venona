@@ -28,6 +28,8 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Monitor.AppName }}
+        resources:
+{{ toYamlMsi .Monitor.resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:

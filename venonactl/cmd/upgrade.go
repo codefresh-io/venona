@@ -28,9 +28,9 @@ var upgradeCmdOpt struct {
 		context   string
 		namespace string
 	}
-	templateValues       []string
-	templateFileValues   []string
-	templateValueFiles   []string	
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
 }
 
 // upgradeCmd represents the upgrade command
@@ -38,10 +38,10 @@ var upgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "Upgrade existing 1.X runner",
 	Run: func(cmd *cobra.Command, args []string) {
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			uninstallAgentCmdOptions.templateValueFiles, 
-			uninstallAgentCmdOptions.templateValues, 
+			uninstallAgentCmdOptions.templateValueFiles,
+			uninstallAgentCmdOptions.templateValues,
 			uninstallAgentCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -49,7 +49,7 @@ var upgradeCmd = &cobra.Command{
 		// Merge cmd options with template
 		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
-		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)		
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
 		mergeValueStr(templateValuesMap, "Namespace", &uninstallAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &uninstallAgentCmdOptions.kube.context)
 
@@ -69,10 +69,10 @@ var upgradeCmd = &cobra.Command{
 		spn := createSpinner("Upgarding runtime (might take a few seconds)", "")
 		spn.Start()
 		defer spn.Stop()
-		
+
 		for _, p := range builder.Get() {
 			values, err = p.Upgrade(&plugins.UpgradeOptions{
-				Name: s.AppName,
+				Name:             s.AppName,
 				ClusterNamespace: upgradeCmdOpt.kube.namespace,
 				ClusterName:      upgradeCmdOpt.kube.namespace,
 				KubeBuilder:      getKubeClientBuilder(upgradeCmdOpt.kube.context, upgradeCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),

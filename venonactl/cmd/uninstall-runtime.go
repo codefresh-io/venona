@@ -1,6 +1,5 @@
 package cmd
 
-
 import (
 	"fmt"
 
@@ -24,20 +23,20 @@ var uninstallRunimeCmdOptions struct {
 	}
 	runtimeEnvironmentName string
 	storageClassName       string
-	restartAgent  bool
-	templateValues       []string
-	templateFileValues   []string
-	templateValueFiles   []string
+	restartAgent           bool
+	templateValues         []string
+	templateFileValues     []string
+	templateValueFiles     []string
 }
 
 var uninstallRuntimeCmd = &cobra.Command{
 	Use:   "runtime",
 	Short: "Uninstall Codefresh's runtime",
 	Run: func(cmd *cobra.Command, args []string) {
-		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file> 
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
 		templateValuesMap, err := templateValuesToMap(
-			uninstallRunimeCmdOptions.templateValueFiles, 
-			uninstallRunimeCmdOptions.templateValues, 
+			uninstallRunimeCmdOptions.templateValueFiles,
+			uninstallRunimeCmdOptions.templateValues,
 			uninstallRunimeCmdOptions.templateFileValues)
 		if err != nil {
 			dieOnError(err)
@@ -52,7 +51,7 @@ var uninstallRuntimeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Context", &uninstallRunimeCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "RuntimeEnvironmentName", &uninstallRunimeCmdOptions.runtimeEnvironmentName)
 		mergeValueStr(templateValuesMap, "StorageClass", &uninstallRunimeCmdOptions.storageClassName)
-		
+
 		s := store.GetStore()
 		lgr := createLogger("UninstallRuntime", verbose, logFormatter)
 		buildBasicStore(lgr)
@@ -60,7 +59,7 @@ var uninstallRuntimeCmd = &cobra.Command{
 
 		s.CodefreshAPI = &store.CodefreshAPI{}
 		s.AgentAPI = &store.AgentAPI{}
-		
+
 		builder := plugins.NewBuilder(lgr)
 		if uninstallRunimeCmdOptions.kube.context == "" {
 			dieOnError(fmt.Errorf("Context name is required in order to uninstall agent"))
@@ -88,9 +87,9 @@ var uninstallRuntimeCmd = &cobra.Command{
 		deleteOptions := &plugins.DeleteOptions{}
 		// runtime
 		deleteOptions.KubeBuilder = getKubeClientBuilder(uninstallRunimeCmdOptions.kube.context,
-			 uninstallRunimeCmdOptions.kube.namespace,
-			 uninstallRunimeCmdOptions.kube.kubePath,
-			 false)
+			uninstallRunimeCmdOptions.kube.namespace,
+			uninstallRunimeCmdOptions.kube.kubePath,
+			false)
 
 		// agent
 		deleteOptions.AgentKubeBuilder = getKubeClientBuilder(uninstallRunimeCmdOptions.kubeVenona.context,
@@ -98,24 +97,24 @@ var uninstallRuntimeCmd = &cobra.Command{
 			uninstallRunimeCmdOptions.kubeVenona.kubePath,
 			false)
 
-			builder.Add(plugins.RuntimeEnvironmentPluginType)
-			if isUsingDefaultStorageClass(uninstallRunimeCmdOptions.storageClassName) {
-				builder.Add(plugins.VolumeProvisionerPluginType)
+		builder.Add(plugins.RuntimeEnvironmentPluginType)
+		if isUsingDefaultStorageClass(uninstallRunimeCmdOptions.storageClassName) {
+			builder.Add(plugins.VolumeProvisionerPluginType)
+		}
+		builder.Add(plugins.RuntimeAttachType)
+		deleteOptions.ClusterNamespace = uninstallRunimeCmdOptions.kube.namespace
+		deleteOptions.AgentNamespace = uninstallRunimeCmdOptions.kubeVenona.namespace
+		deleteOptions.RuntimeEnvironment = uninstallRunimeCmdOptions.runtimeEnvironmentName
+		values := s.BuildValues()
+		values = mergeMaps(values, templateValuesMap)
+		for _, p := range builder.Get() {
+			err := p.Delete(deleteOptions, values)
+			if err != nil {
+				dieOnError(err)
 			}
-			builder.Add(plugins.RuntimeAttachType)
-			deleteOptions.ClusterNamespace = uninstallRunimeCmdOptions.kube.namespace
-			deleteOptions.AgentNamespace = uninstallRunimeCmdOptions.kubeVenona.namespace
-			deleteOptions.RuntimeEnvironment = uninstallRunimeCmdOptions.runtimeEnvironmentName
-			values := s.BuildValues()
-			values = mergeMaps(values, templateValuesMap)			
-			for _, p := range builder.Get() {
-					err := p.Delete(deleteOptions, values)
-					if err != nil {
-						dieOnError(err)
-					}
-				}
+		}
 
-			lgr.Info("Deletion of runtime is completed")
+		lgr.Info("Deletion of runtime is completed")
 	},
 }
 
