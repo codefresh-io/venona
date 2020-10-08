@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
+	netV1beta1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -47,6 +48,11 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.BatchV1beta1().CronJobs(namespace).Create(objT)
+
+	case *netV1beta1.Ingress:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Create(objT)
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
@@ -170,6 +176,11 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.BatchV1beta1().CronJobs(namespace).Get(name, metav1.GetOptions{})
+
+	case *netV1beta1.Ingress:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Get(name, metav1.GetOptions{})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
@@ -299,6 +310,13 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		err = clientset.BatchV1beta1().CronJobs(namespace).Delete(name, &metav1.DeleteOptions{
+			PropagationPolicy: &propagationPolicy,
+		})
+
+	case *netV1beta1.Ingress:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		err = clientset.NetworkingV1beta1().Ingresses(namespace).Delete(name, &metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
@@ -459,6 +477,11 @@ func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespac
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.BatchV1beta1().CronJobs(namespace).Update(objT)
+
+	case *netV1beta1.Ingress:
+		name = objT.ObjectMeta.Name
+		kind = objT.TypeMeta.Kind
+		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Update(objT)
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name

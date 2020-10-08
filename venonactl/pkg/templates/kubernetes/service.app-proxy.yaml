@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: app-proxy-service
+  name: app-proxy
   namespace: {{ .Namespace }}
 spec:
   selector:
@@ -10,4 +10,3 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
-  type: LoadBalancer

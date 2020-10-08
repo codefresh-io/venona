@@ -8,6 +8,7 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
+	"github.com/stretchr/objx"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -45,40 +46,40 @@ func (u *appProxyPlugin) Install(opt *InstallOptions, v Values) (Values, error) 
 		u.logger.Error(fmt.Sprintf("AppProxy installation failed: %v", err))
 		return nil, err
 	}
-	// locating the serivce and get it's internal api
 
-	var ingressIP string
+	// make sure the ingress is ready and has an IP
 	ticker := time.NewTicker(5 * time.Second)
 Loop:
 	for {
 		select {
 		case <-ticker.C:
 			u.logger.Debug("Checking for app-proxy-service")
-			service, err := cs.CoreV1().Services(opt.ClusterNamespace).Get("app-proxy-service", v1.GetOptions{})
+			ingress, err := cs.NetworkingV1beta1().Ingresses(opt.ClusterNamespace).Get("app-proxy", v1.GetOptions{})
 			if err == nil {
-				ips := service.Status.LoadBalancer.Ingress
+				ips := ingress.Status.LoadBalancer.Ingress
 				if len(ips) > 0 {
-					if ips[0].IP != "" {
-						ingressIP = ips[0].IP
-					} else {
-						ingressIP = ips[0].Hostname
-					}
+					// ingress has an IP
 					break Loop
 				}
 			}
 		case <-time.After(600 * time.Second):
-			u.logger.Error("Failed to get app-proxy-service internal ip")
-			return v, fmt.Errorf("Failed to get app-proxy-service internal ip")
+			u.logger.Error("Failed to get app-proxy ingress ip")
+			return v, fmt.Errorf("Failed to get app-proxy ingress ip")
 		}
 	}
-	u.logger.Info(fmt.Sprintf("app proxy has ingress ip: %v\n", ingressIP))
+
+	host := objx.New(v["AppProxy"]).Get("Host").Str()
+	pathPrefix := objx.New(v["AppProxy"]).Get("PathPrefix").Str()
+	appProxyURL := fmt.Sprintf("https://%v%v", host, pathPrefix)
+	u.logger.Info(fmt.Sprintf("\napp proxy is running at: %v", appProxyURL))
+
 	// update IPC
 	file := os.NewFile(3, "pipe")
 	if file == nil {
 		return v, nil
 	}
 	data := map[string]interface{}{
-		"ingressIP": ingressIP,
+		"ingressIP": appProxyURL,
 	}
 	var jsonData []byte
 	jsonData, err = json.Marshal(data)

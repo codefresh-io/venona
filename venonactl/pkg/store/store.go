@@ -113,7 +113,12 @@ type (
 		Resources map[string]interface{}
 	}
 	AppProxy struct {
-		Resources map[string]interface{}
+		Resources    map[string]interface{}
+		Host         string
+		Annotations  map[string]string
+		IngressClass string
+		TLSSecret    string
+		PathPrefix   string
 	}
 )
 
@@ -192,7 +197,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Name": "codefresh/cf-app-proxy",
 				"Tag":  "latest",
 			},
-			"Resources": s.AppProxy.Resources,
+			"Host":         s.AppProxy.Host,
+			"IngressClass": s.AppProxy.IngressClass,
+			"Annotations":  s.AppProxy.Annotations,
+			"Resources":    s.AppProxy.Resources,
+			"TLSSecret":    s.AppProxy.TLSSecret,
+			"PathPrefix":   s.AppProxy.PathPrefix,
 		},
 	}
 }

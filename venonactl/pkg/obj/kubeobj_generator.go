@@ -45,6 +45,8 @@ var functionsMap map[string]string = map[string]string{
 	"v1beta1.Deployment": "ExtensionsV1beta1().Deployments(namespace)",
 	"v1beta1.DaemonSet":  "ExtensionsV1beta1().DaemonSets(namespace)",
 
+	"netV1beta1.Ingress": "NetworkingV1beta1().Ingresses(namespace)",
+
 	"appsv1.Deployment": "AppsV1().Deployments(namespace)",
 	"appsv1.DaemonSet":  "AppsV1().DaemonSets(namespace)",
 
@@ -77,7 +79,8 @@ import (
 
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
     "k8s.io/api/core/v1"
-    v1beta1 "k8s.io/api/extensions/v1beta1"
+	v1beta1 "k8s.io/api/extensions/v1beta1"
+	netV1beta1 "k8s.io/api/networking/v1beta1"
     appsv1 "k8s.io/api/apps/v1"
 
     rbacv1beta1 "k8s.io/api/rbac/v1beta1"

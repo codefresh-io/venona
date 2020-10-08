@@ -17,6 +17,8 @@ limitations under the License.
 */
 
 import (
+	"fmt"
+
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
@@ -32,6 +34,8 @@ var installAppProxyCmdOptions struct {
 	templateFileValues []string
 	templateValueFiles []string
 	resources          map[string]interface{}
+	host               string
+	ingressClass       string
 }
 
 var installAppProxyCmd = &cobra.Command{
@@ -47,8 +51,11 @@ var installAppProxyCmd = &cobra.Command{
 			dieOnError(err)
 		}
 
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
 		mergeValueStr(templateValuesMap, "Namespace", &installAppProxyCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "AppProxy.Host", &installAppProxyCmdOptions.host)
+		mergeValueStr(templateValuesMap, "AppProxy.IngressClass", &installAppProxyCmdOptions.ingressClass)
 
 		mergeValueMSI(templateValuesMap, "AppProxy.resources", &installAppProxyCmdOptions.resources)
 
@@ -56,6 +63,9 @@ var installAppProxyCmd = &cobra.Command{
 		lgr := createLogger("Install-agent", verbose, logFormatter)
 		buildBasicStore(lgr)
 		builder := plugins.NewBuilder(lgr)
+		if installAppProxyCmdOptions.host == "" {
+			dieOnError(fmt.Errorf("host options is required in order to install app-proxy"))
+		}
 		if cfAPIHost == "" {
 			cfAPIHost = "https://g.codefresh.io"
 		}
@@ -81,14 +91,15 @@ var installAppProxyCmd = &cobra.Command{
 		spn := createSpinner("Installing app proxy (might take a few minutes)", "")
 		spn.Start()
 		defer spn.Stop()
+
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
 				dieOnError(err)
 			}
 		}
-		lgr.Info("App proxy installation completed Successfully")
 
+		lgr.Info("App proxy installation completed Successfully")
 	},
 }
 
@@ -96,6 +107,8 @@ func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 	installCommand.AddCommand(installAppProxyCmd)
+	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.host, "host", "", "Host name that will be used by the ingress to route traffic to the App-Proxy service")
+	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.ingressClass, "ingress-class", "", "The ingress class name that will be used by the App-Proxy ingress. If left empty, the default one will be used")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installAppProxyCmd.Flags().StringArrayVarP(&installAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
