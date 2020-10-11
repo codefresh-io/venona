@@ -579,6 +579,33 @@ spec:
 
 `
 
+	templatesMap["ingress.app-proxy.yaml"] = `apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{ if ne .AppProxy.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.IngressClass }}{{ end }}
+    {{ range $key, $value := .AppProxy.Annotations }}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+  name: app-proxy
+  namespace: {{ .Namespace }}
+spec:
+  rules:
+    - host: {{ .AppProxy.Host }}
+      http:
+        paths:
+          - path: {{ if ne .AppProxy.PathPrefix "" }}{{ .AppProxy.PathPrefix }}{{ else }}'/'{{end}}
+            backend:
+              serviceName: app-proxy
+              servicePort: 80
+  {{ if ne .AppProxy.TLSSecret "" }}
+  tls:
+    - hosts:
+        - {{ .AppProxy.Host }}
+      secretName: {{ .AppProxy.TLSSecret }}
+  {{ end }}
+`
+
 	templatesMap["role-binding.re.yaml"] = `{{- if .CreateRbac }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -811,7 +838,7 @@ metadata:
 	templatesMap["service.app-proxy.yaml"] = `apiVersion: v1
 kind: Service
 metadata:
-  name: app-proxy-service
+  name: app-proxy
   namespace: {{ .Namespace }}
 spec:
   selector:
@@ -820,7 +847,6 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
-  type: LoadBalancer
 `
 
 	templatesMap["service.monitor.yaml"] = `{{- if .CreateRbac }}

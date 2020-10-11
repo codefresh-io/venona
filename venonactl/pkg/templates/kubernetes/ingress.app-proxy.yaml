@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    {{ if ne .AppProxy.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.IngressClass }}{{ end }}
+    {{ range $key, $value := .AppProxy.Annotations }}
+    {{ $key }}: {{ $value }}
+    {{ end }}
+  name: app-proxy
+  namespace: {{ .Namespace }}
+spec:
+  rules:
+    - host: {{ .AppProxy.Host }}
+      http:
+        paths:
+          - path: {{ if ne .AppProxy.PathPrefix "" }}{{ .AppProxy.PathPrefix }}{{ else }}'/'{{end}}
+            backend:
+              serviceName: app-proxy
+              servicePort: 80
+  {{ if ne .AppProxy.TLSSecret "" }}
+  tls:
+    - hosts:
+        - {{ .AppProxy.Host }}
+      secretName: {{ .AppProxy.TLSSecret }}
+  {{ end }}

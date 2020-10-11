@@ -137,10 +137,21 @@ Namespace: r1
   #     memory: 500Mi
 
 # AppProxy:
-#   resources:
-#     limits:
-#       cpu: 500m
-#       memory: 1200Mi
-#     requests:
-#       cpu: 200m
-#       memory: 500Mi
+  # resources:
+  #   limits:
+  #     cpu: 500m
+  #     memory: 1200Mi
+  #   requests:
+  #     cpu: 200m
+  #     memory: 500Mi
+
+  
+  # Host: example.com
+  # IngressClass: nginx
+  # TLSSecret: cert-secret-name
+  # PathPrefix: /app-proxy/?(.*)  # default is '/'
+  
+  ### Additional annotations that will be set on the ingress definition
+  # Annotations:
+    # nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
