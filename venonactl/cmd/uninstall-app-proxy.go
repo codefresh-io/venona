@@ -74,19 +74,18 @@ var uninstallAppProxytCmd = &cobra.Command{
 			}
 		}
 
-		lgr.Info("Deletion of monitor is completed")
+		lgr.Info("Deletion of app-proxy is completed")
 	},
 }
 
 func init() {
-	uninstallCommand.AddCommand(uninstallMonitorAgentCmd)
+	uninstallCommand.AddCommand(uninstallAppProxytCmd)
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
-	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallAppProxyCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which monitor should be uninstalled [$KUBE_NAMESPACE]")
-	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be uninstalled (default is current-context) [$KUBE_CONTEXT]")
-	uninstallMonitorAgentCmd.Flags().StringVar(&uninstallAppProxyCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
-	uninstallMonitorAgentCmd.Flags().StringArrayVar(&uninstallAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
-	uninstallMonitorAgentCmd.Flags().StringArrayVar(&uninstallAppProxyCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
-	uninstallMonitorAgentCmd.Flags().StringArrayVarP(&uninstallAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
+	uninstallAppProxytCmd.Flags().StringVar(&uninstallAppProxyCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace from which the app-proxy should be uninstalled [$KUBE_NAMESPACE]")
+	uninstallAppProxytCmd.Flags().StringVar(&uninstallAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context from which the app-proxy should be uninstalled (default is current-context) [$KUBE_CONTEXT]")
+	uninstallAppProxytCmd.Flags().StringArrayVar(&uninstallAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
+	uninstallAppProxytCmd.Flags().StringArrayVar(&uninstallAppProxyCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
+	uninstallAppProxytCmd.Flags().StringArrayVarP(&uninstallAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "Specify values in a YAML file")
 
 }
