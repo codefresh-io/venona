@@ -88,10 +88,6 @@ var installAppProxyCmd = &cobra.Command{
 
 		values := s.BuildValues()
 		values = mergeMaps(values, templateValuesMap)
-		spn := createSpinner("Installing app proxy (might take a few minutes)", "")
-		spn.Start()
-		defer spn.Stop()
-
 		for _, p := range builder.Get() {
 			values, err = p.Install(builderInstallOpt, values)
 			if err != nil {
