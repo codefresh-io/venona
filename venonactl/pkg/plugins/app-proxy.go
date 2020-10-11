@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	"github.com/stretchr/objx"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type appProxyPlugin struct {
@@ -45,27 +43,6 @@ func (u *appProxyPlugin) Install(opt *InstallOptions, v Values) (Values, error) 
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("AppProxy installation failed: %v", err))
 		return nil, err
-	}
-
-	// make sure the ingress is ready and has an IP
-	ticker := time.NewTicker(5 * time.Second)
-Loop:
-	for {
-		select {
-		case <-ticker.C:
-			u.logger.Debug("Checking for app-proxy-service")
-			ingress, err := cs.NetworkingV1beta1().Ingresses(opt.ClusterNamespace).Get("app-proxy", v1.GetOptions{})
-			if err == nil {
-				ips := ingress.Status.LoadBalancer.Ingress
-				if len(ips) > 0 {
-					// ingress has an IP
-					break Loop
-				}
-			}
-		case <-time.After(600 * time.Second):
-			u.logger.Error("Failed to get app-proxy ingress ip")
-			return v, fmt.Errorf("Failed to get app-proxy ingress ip")
-		}
 	}
 
 	host := objx.New(v["AppProxy"]).Get("Host").Str()
