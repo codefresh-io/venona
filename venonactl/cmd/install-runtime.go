@@ -199,7 +199,7 @@ func init() {
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.storageClass, "storage-class", "", "Set a name of your custom storage class, note: this will not install volume provisioning components")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
 
-	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.insecure, "insecure", false, "Set to true to disable TLS when comunicating with the codefresh platform")
+	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.insecure, "insecure", false, "Set to true to disable TLS when communicating with the codefresh platform")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
