@@ -30,6 +30,7 @@ var installAppProxyCmdOptions struct {
 		namespace string
 		context   string
 	}
+	dockerRegistry     string
 	templateValues     []string
 	templateFileValues []string
 	templateValueFiles []string
@@ -56,6 +57,7 @@ var installAppProxyCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "AppProxy.Host", &installAppProxyCmdOptions.host)
 		mergeValueStr(templateValuesMap, "AppProxy.IngressClass", &installAppProxyCmdOptions.ingressClass)
+		mergeValueStr(templateValuesMap, "DockerRegistry", &installAppProxyCmdOptions.dockerRegistry)
 
 		mergeValueMSI(templateValuesMap, "AppProxy.resources", &installAppProxyCmdOptions.resources)
 
@@ -73,6 +75,7 @@ var installAppProxyCmd = &cobra.Command{
 			CodefreshHost: cfAPIHost,
 		}
 		s.AppProxy.Resources = installAppProxyCmdOptions.resources
+		s.DockerRegistry = installAppProxyCmdOptions.dockerRegistry
 		extendStoreWithKubeClient(lgr)
 		fillCodefreshAPI(lgr)
 		fillKubernetesAPI(lgr, installAppProxyCmdOptions.kube.context, installAppProxyCmdOptions.kube.namespace, false)
@@ -103,10 +106,11 @@ func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 	installCommand.AddCommand(installAppProxyCmd)
+	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.host, "host", "", "Host name that will be used by the ingress to route traffic to the App-Proxy service")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.ingressClass, "ingress-class", "", "The ingress class name that will be used by the App-Proxy ingress. If left empty, the default one will be used")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installAppProxyCmd.Flags().StringArrayVarP(&installAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
-
+	installAppProxyCmd.Flags().StringArrayVar(&installAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 }

@@ -254,6 +254,10 @@ spec:
             value: "3000"
           - name: CODEFRESH_HOST
             value: {{ .CodefreshHost }}
+          {{ if ne .AppProxy.PathPrefix "" }}
+          - name: API_PATH_PREFIX
+            value: {{ .AppProxy.PathPrefix }}
+          {{ end }} 
         ports:
         - containerPort: 3000
           protocol: TCP
