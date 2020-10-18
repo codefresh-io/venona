@@ -25,6 +25,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
@@ -39,6 +40,7 @@ var (
 	errIDRequired               = errors.New("ID options is required")
 	errRuntimesRequired         = errors.New("Runtimes options is required")
 	errLoggerRequired           = errors.New("Logger options is required")
+	errRuntimeNotFound          = errors.New("Runtime environment not found")
 	errFailedToParseAgentTask   = errors.New("Failed to parse agent task spec")
 	errUknownAgentTaskType      = errors.New("Agent task has unknown type")
 	errAgentTaskMalformedParams = errors.New("failed to marshal agent task params")
@@ -49,7 +51,7 @@ var (
 const (
 	defaultTaskPullingInterval     = time.Second * 3
 	defaultStatusReportingInterval = time.Second * 10
-	defaultProxyRequestTimeout     = time.Second * 10
+	defaultProxyRequestTimeout     = time.Second * 20
 	defaultProxyRequestRetries     = 3
 )
 
@@ -62,6 +64,7 @@ type (
 		Logger                         logger.Logger
 		TaskPullingSecondsInterval     time.Duration
 		StatusReportingSecondsInterval time.Duration
+		Monitor                        monitoring.Monitor
 	}
 
 	// Agent holds all the references from Codefresh
@@ -77,6 +80,7 @@ type (
 		lastStatus         Status
 		terminationChan    chan struct{}
 		wg                 *sync.WaitGroup
+		monitor            monitoring.Monitor
 	}
 
 	// Status of the agent
@@ -121,6 +125,11 @@ func New(opt *Options) (*Agent, error) {
 	terminationChan := make(chan struct{})
 	wg := &sync.WaitGroup{}
 
+	if opt.Monitor == nil {
+		opt.Monitor = monitoring.NewEmpty()
+	}
+	httpClient.HTTPClient.Transport = opt.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
+
 	return &Agent{
 		id,
 		cf,
@@ -132,6 +141,7 @@ func New(opt *Options) (*Agent, error) {
 		Status{},
 		terminationChan,
 		wg,
+		opt.Monitor,
 	}, nil
 }
 
@@ -180,12 +190,12 @@ func (a *Agent) startTaskPullerRoutine() {
 			return
 		case <-a.taskPullerTicker.C:
 			a.wg.Add(1)
-			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger) {
+			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger, monitor monitoring.Monitor) {
 				tasks := pullTasks(client, logger)
-				startTasks(tasks, runtimes, logger)
+				startTasks(tasks, runtimes, logger, monitor)
 				time.Sleep(time.Second * 10)
 				wg.Done()
-			}(a.cf, a.runtimes, a.wg, a.log)
+			}(a.cf, a.runtimes, a.wg, a.log, a.monitor)
 		}
 	}
 }
@@ -229,7 +239,7 @@ func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 	return tasks
 }
 
-func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger) {
+func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	agentTasks := []task.Task{}
@@ -253,39 +263,54 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 	for i := range agentTasks {
 		t := agentTasks[i]
 		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
+		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
 		if err := executeAgentTask(&t, logger); err != nil {
 			logger.Error(err.Error())
+			noticeError(txn, err, logger)
 		}
+		txn.End()
 	}
 
 	// process creation tasks
 	for _, tasks := range groupTasks(creationTasks) {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
+		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
+
 		if !ok {
 			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			noticeError(txn, errRuntimeNotFound, logger)
+			txn.End()
 			continue
 		}
 		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 		if err := runtime.StartWorkflow(tasks); err != nil {
 			logger.Error(err.Error())
+			noticeError(txn, err, logger)
 		}
+		txn.End()
 	}
 
 	// process deletion tasks
 	for _, tasks := range groupTasks(deletionTasks) {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
+		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
+
 		if !ok {
 			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			noticeError(txn, errRuntimeNotFound, logger)
+			txn.End()
 			continue
 		}
 		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 		if errs := runtime.TerminateWorkflow(tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
+				noticeError(txn, err, logger)
 			}
 		}
+		txn.End()
 	}
 }
 
@@ -386,6 +411,20 @@ func checkOptions(opt *Options) error {
 	}
 
 	return nil
+}
+
+func newTransaction(monitor monitoring.Monitor, taskType, tid, runtime string) monitoring.Transaction {
+	txn := monitor.NewTransaction("runner-tasks-execution", nil, nil)
+	txn.AddAttribute("task-type", taskType)
+	txn.AddAttribute("tid", tid)
+	txn.AddAttribute("runtime-environment", runtime)
+	return txn
+}
+
+func noticeError(txn monitoring.Transaction, error error, log logger.Logger) {
+	if err := txn.NoticeError(error); err != nil {
+		log.Error("Failed to report error to monitor", "err", err)
+	}
 }
 
 func init() {

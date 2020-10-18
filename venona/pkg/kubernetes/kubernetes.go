@@ -19,6 +19,7 @@ import (
 	"errors"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	v1 "k8s.io/api/core/v1"
@@ -43,6 +44,7 @@ type (
 		Cert     string
 		Token    string
 		Host     string
+		Monitor  monitoring.Monitor
 		Insecure bool
 	}
 

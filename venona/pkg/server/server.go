@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,9 +34,10 @@ var (
 type (
 	// Options for creating a new server instance
 	Options struct {
-		Port   string
-		Logger logger.Logger
-		Mode   string
+		Port    string
+		Logger  logger.Logger
+		Mode    string
+		Monitor monitoring.Monitor
 	}
 
 	// Server is an HTTP server that expose API
@@ -62,6 +64,9 @@ func New(opt *Options) (*Server, error) {
 
 	gin.SetMode(opt.Mode)
 	r := gin.Default()
+	if opt.Monitor != nil {
+		r.Use(opt.Monitor.NewGinMiddleware())
+	}
 	r.GET("/health", func(c *gin.Context) {
 		c.String(http.StatusOK, "OK")
 	})
