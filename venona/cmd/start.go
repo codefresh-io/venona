@@ -54,6 +54,7 @@ type startOptions struct {
 	configDir                      string
 	serverPort                     string
 	newrelicLicenseKey             string
+	newrelicAppname                string
 }
 
 var (
@@ -80,10 +81,12 @@ func init() {
 	dieOnError(viper.BindEnv("NODE_TLS_REJECT_UNAUTHORIZED"))
 	dieOnError(viper.BindEnv("verbose", "VERBOSE"))
 	dieOnError(viper.BindEnv("newrelic-license-key", "NEWRELIC_LICENSE_KEY"))
+	dieOnError(viper.BindEnv("newrelic-appname", "NEWRELIC_APPNAME"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
+	viper.SetDefault("newrelic-appname", AppName)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
@@ -95,6 +98,7 @@ func init() {
 	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval (seconds) to pull new tasks from Codefresh")
 	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval (seconds) to report status back to Codefresh")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
+	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 
 	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
@@ -144,7 +148,7 @@ func run(options startOptions) {
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
 	if options.newrelicLicenseKey != "" {
-		conf := nr.NewConfig(AppName, options.newrelicLicenseKey)
+		conf := nr.NewConfig(options.newrelicAppname, options.newrelicLicenseKey)
 		if monitor, err = newrelic.New(conf); err != nil {
 			log.Warn("Failed to create monitor", "error", err)
 		} else {
