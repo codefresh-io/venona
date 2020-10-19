@@ -1,14 +1,11 @@
 ## This is a sample values yamls for usage with 
 ##   venonactl install agent|runtime|monitor --values|-f values.yaml
 ##
-
 ## the values from values.yaml are applied to the templates in [pkg/templates/kubernetes](pkg/templates/kubernetes)
 ## See BuildValues() func in [store.go](pkg/store/store.go) for the format 
-
 # Codefresh host --api-host and token --api-token
-# CodefreshHost: https://my-codefresh.example.com
-# Token:         xxxxx.yyyyyyyy
-
+CodefreshHost: https://my-codefresh.example.com
+Token:         xxxxx.yyyyyyyy
 # Runner:
 #   resources:
 #     limits:
@@ -17,34 +14,29 @@
 #     requests:
 #       cpu: 200m
 #       memory: 500Mi
-
 # Runner (venona) image 
 Image: 
   Name: codefresh/venona
-  Tag: CR-941 # default s.Version.Current.Version,
-
+  Tag: 1.4.16 # default s.Version.Current.Version,
 ## Namespace - from --kube-namespace parameter + env KUBE_NAMESPACE, for venona, runtime, monitor
-Namespace: demo
+Namespace: r1
 ### ConfigPath - kubeconfig from --kube-config-path
 #ConfigPath: 
 ## Context: from both --context (global arg) and 
-Context: rc-codefresh-inc01.cf-op.com
-
+#Context: gke_codefresh_cluster
 ### NodeSelector --kube-node-selector
 #NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
-
 ### --tolerations
 # Tolerations: 
 # - key: codefresh.io
 #   operator: Equal
 #   value: dinds
 #   effect: NoSchedule
-
 ## --docker-registry
 # DockerRegistry:    s.DockerRegistry,
 
 ## -- newrelic
-NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
+# NewRelicLicense: XXXXXXXXXXXXXXXXXXXXX
 # -- OR
 # NewRelicLicense:
 #   valueFrom:
@@ -58,23 +50,17 @@ NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
 #   HTTP_PROXY: 10.20.0.35:8080
 #   HTTPS_PROXY: 10.20.0.35:8080
 #   NO_PROXY: 10.20.0.*,
-
 ### RuntimeEnvironmentName: my-unique-runtime-name
 # RuntimeEnvironmentName: my-unique-runtime-name
-
 ### RuntimeServiceAccount For venonactl attach
 # RuntimeServiceAccount:
-
 ### use InsecureSkipVerify to call cf api
 #insecure: true
-
 ### Use already existing storage class
 #StorageClass: 
-
 ### AgentToken:        s.AgentAPI.Token,
 ### AgentId:           s.AgentAPI.Id,
 # AgentId: gke_codefresh-load_us-central1-c_onprem-tst-1_r1_6
-
 ### Storage parameters - for dind-volume-provisoner
 # Storage:
   # Backend: local
@@ -103,14 +89,11 @@ NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
   #     requests:
   #       cpu: 200m
   #       memory: 500Mi  
-
-
 ### Storage parameters example for gke-local-ssd
 # Storage:
 #   Backend: local
 #   LocalVolumeParentDir: /mnt/disks/ssd0/codefresh-volumes 
 # NodeSelector: cloud.google.com/gke-local-ssd=true 
-
 ### Storage parameter example for gke disks
 # Storage:
 #   Backend: gcedisk
@@ -118,7 +101,6 @@ NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
 #   GoogleServiceAccount: >
 #     {serviceAccount.json context}
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-central1-a
-
 ### Storage parameter example for aws ebs disks
 # Storage:
 #   Backend: ebs
@@ -128,7 +110,6 @@ NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
 #   VolumeProvisioner: 
 #     NodeSelector: kubernetes.io/role=master
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
-
 # Monitor:
   # UseNamespaceWithRole: s.UseNamespaceWithRole
   # RbacEnabled: true,
@@ -144,21 +125,20 @@ NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
   #   requests:
   #     cpu: 200m
   #     memory: 500Mi
-
-AppProxy:
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1200Mi
-    requests:
-      cpu: 200m
-      memory: 500Mi
-
+# AppProxy:
+  # resources:
+  #   limits:
+  #     cpu: 500m
+  #     memory: 1200Mi
+  #   requests:
+  #     cpu: 200m
+  #     memory: 500Mi
   
-  Host: rc-codefresh-inc01.cf-op.com
-  IngressClass: nginx
-  PathPrefix: /app-proxy  # default is '/'
+  # Host: example.com
+  # IngressClass: nginx
+  # TLSSecret: cert-secret-name
+  # PathPrefix: /app-proxy  # default is '/'
   
-  # Additional annotations that will be set on the ingress definition
+  ## Additional annotations that will be set on the ingress definition
   # Annotations:
-  #   nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+    # nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
