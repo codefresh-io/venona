@@ -152,7 +152,7 @@ func run(options startOptions) {
 		if monitor, err = newrelic.New(conf); err != nil {
 			log.Warn("Failed to create monitor", "error", err)
 		} else {
-			log.Info("Using New Relic monitor", "app-name", AppName, "license-key", options.newrelicLicenseKey)
+			log.Info("Using New Relic monitor", "app-name", options.newrelicAppname, "license-key", options.newrelicLicenseKey)
 		}
 	} else {
 		log.Warn("New Relic not starting without license key!")

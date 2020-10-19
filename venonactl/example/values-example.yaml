@@ -6,8 +6,8 @@
 ## See BuildValues() func in [store.go](pkg/store/store.go) for the format 
 
 # Codefresh host --api-host and token --api-token
-CodefreshHost: https://my-codefresh.example.com
-Token:         xxxxx.yyyyyyyy
+# CodefreshHost: https://my-codefresh.example.com
+# Token:         xxxxx.yyyyyyyy
 
 # Runner:
 #   resources:
@@ -21,14 +21,14 @@ Token:         xxxxx.yyyyyyyy
 # Runner (venona) image 
 Image: 
   Name: codefresh/venona
-  Tag: 1.4.16 # default s.Version.Current.Version,
+  Tag: CR-941 # default s.Version.Current.Version,
 
 ## Namespace - from --kube-namespace parameter + env KUBE_NAMESPACE, for venona, runtime, monitor
-Namespace: r1
+Namespace: demo
 ### ConfigPath - kubeconfig from --kube-config-path
 #ConfigPath: 
 ## Context: from both --context (global arg) and 
-#Context: gke_codefresh_cluster
+Context: rc-codefresh-inc01.cf-op.com
 
 ### NodeSelector --kube-node-selector
 #NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
@@ -44,7 +44,7 @@ Namespace: r1
 # DockerRegistry:    s.DockerRegistry,
 
 ## -- newrelic
-# NewRelicLicense: XXXXXXXXXXXXXXXXXXXXX
+NewRelicLicense: dbafbde69c8e492ec43a6ac39a110a48edaebc5d
 # -- OR
 # NewRelicLicense:
 #   valueFrom:
@@ -145,21 +145,20 @@ Namespace: r1
   #     cpu: 200m
   #     memory: 500Mi
 
-# AppProxy:
-  # resources:
-  #   limits:
-  #     cpu: 500m
-  #     memory: 1200Mi
-  #   requests:
-  #     cpu: 200m
-  #     memory: 500Mi
+AppProxy:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1200Mi
+    requests:
+      cpu: 200m
+      memory: 500Mi
 
   
-  # Host: example.com
-  # IngressClass: nginx
-  # TLSSecret: cert-secret-name
-  # PathPrefix: /app-proxy  # default is '/'
+  Host: rc-codefresh-inc01.cf-op.com
+  IngressClass: nginx
+  PathPrefix: /app-proxy  # default is '/'
   
-  ## Additional annotations that will be set on the ingress definition
+  # Additional annotations that will be set on the ingress definition
   # Annotations:
-    # nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+  #   nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
