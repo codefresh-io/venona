@@ -109,6 +109,11 @@ func toYAMLMSI(v map[string]interface{}) string {
 	return strings.TrimSuffix(string(data), "\n")
 }
 
+func isString(v interface{}) bool {
+	_, ok := v.(string)
+	return ok
+}
+
 func nodeSelectorToString(nodeSelectors map[string]string) string {
 	str := ""
 	for key, value := range nodeSelectors {
@@ -135,7 +140,8 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 		"unescape":                unescape,
 		"nodeSelectorParamToYaml": nodeSelectorParamToYaml,
 		"toYaml":                  toYAML,
-		"toYamlMsi":			   toYAMLMSI,	
+		"toYamlMsi":               toYAMLMSI,
+		"isString":                isString,
 	}
 	template, err := template.New("base").Funcs(sprig.FuncMap()).Funcs(funcMap).Parse(tplStr)
 	if err != nil {
@@ -189,7 +195,7 @@ func KubeObjectsFromTemplates(templatesMap map[string]string, data interface{}, 
 	kubeDecode := scheme.Codecs.UniversalDeserializer().Decode
 	kubeObjects := make(map[string]runtime.Object)
 	for n, objStr := range parsedTemplates {
-		logger.Debug(fmt.Sprintf("Deserializing template %s", n))
+		logger.Debug(fmt.Sprintf("Deserializing template %s %s", n, objStr))
 		obj, groupVersionKind, err := kubeDecode([]byte(objStr), nil, nil)
 		if err != nil {
 			logger.Error(fmt.Sprintf("Cannot deserialize kuberentes object %s: %v", n, err))
