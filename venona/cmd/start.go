@@ -29,8 +29,11 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/config"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/monitoring"
+	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
+	nr "github.com/newrelic/go-agent"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -50,6 +53,8 @@ type startOptions struct {
 	statusReportingSecondsInterval int64
 	configDir                      string
 	serverPort                     string
+	newrelicLicenseKey             string
+	newrelicAppname                string
 }
 
 var (
@@ -75,10 +80,13 @@ func init() {
 	dieOnError(viper.BindEnv("port", "PORT"))
 	dieOnError(viper.BindEnv("NODE_TLS_REJECT_UNAUTHORIZED"))
 	dieOnError(viper.BindEnv("verbose", "VERBOSE"))
+	dieOnError(viper.BindEnv("newrelic-license-key", "NEWRELIC_LICENSE_KEY"))
+	dieOnError(viper.BindEnv("newrelic-appname", "NEWRELIC_APPNAME"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
+	viper.SetDefault("newrelic-appname", AppName)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
@@ -89,6 +97,8 @@ func init() {
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
 	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval (seconds) to pull new tasks from Codefresh")
 	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval (seconds) to report status back to Codefresh")
+	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
+	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 
 	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
@@ -135,6 +145,19 @@ func run(options startOptions) {
 			runtimes[config.Name] = re
 		}
 	}
+
+	var monitor monitoring.Monitor = monitoring.NewEmpty()
+	if options.newrelicLicenseKey != "" {
+		conf := nr.NewConfig(options.newrelicAppname, options.newrelicLicenseKey)
+		if monitor, err = newrelic.New(conf); err != nil {
+			log.Warn("Failed to create monitor", "error", err)
+		} else {
+			log.Info("Using New Relic monitor", "app-name", options.newrelicAppname, "license-key", options.newrelicLicenseKey)
+		}
+	} else {
+		log.Warn("New Relic not starting without license key!")
+	}
+
 	var cf codefresh.Codefresh
 	{
 		var httpClient http.Client
@@ -147,6 +170,8 @@ func run(options startOptions) {
 				Transport: customTransport,
 			}
 		}
+
+		httpClient.Transport = monitor.NewRoundTripper(httpClient.Transport)
 
 		httpHeaders := http.Header{}
 		{
@@ -170,6 +195,7 @@ func run(options startOptions) {
 		ID:                             options.agentID,
 		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
 		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
+		Monitor:                        monitor,
 	})
 	dieOnError(err)
 
@@ -178,9 +204,10 @@ func run(options startOptions) {
 		serverMode = server.Debug
 	}
 	server, err := server.New(&server.Options{
-		Port:   fmt.Sprintf(":%s", options.serverPort),
-		Logger: log.New("module", "server"),
-		Mode:   serverMode,
+		Port:    fmt.Sprintf(":%s", options.serverPort),
+		Logger:  log.New("module", "server"),
+		Mode:    serverMode,
+		Monitor: monitor,
 	})
 	dieOnError(err)
 

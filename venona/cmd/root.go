@@ -18,6 +18,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	// AppName holds the name of the application, to be used in monitoring tools
+	AppName = "Codefresh-Runner"
+)
+
 var version string
 
 var rootCmd = &cobra.Command{

@@ -250,6 +250,12 @@ spec:
         resources:
 {{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
+          {{- if $.AppProxy.AdditionalEnvVars }}
+          {{- range $key, $value := $.AppProxy.AdditionalEnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           - name: PORT
             value: "3000"
           - name: CODEFRESH_HOST
@@ -257,7 +263,15 @@ spec:
           {{ if ne .AppProxy.PathPrefix "" }}
           - name: API_PATH_PREFIX
             value: {{ .AppProxy.PathPrefix }}
-          {{ end }} 
+          {{ end }}
+          {{- if .NewRelicLicense }}
+          - name: NEWRELIC_LICENSE_KEY
+          {{- if isString .NewRelicLicense }}
+            value: {{ .NewRelicLicense }}
+          {{- else }}
+{{ toYaml .NewRelicLicense | indent 12 }}
+          {{- end }}
+          {{- end }}
         ports:
         - containerPort: 3000
           protocol: TCP
@@ -525,6 +539,14 @@ spec:
         {{- if ne .DockerRegistry "" }}
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
+        {{- end }}
+        {{- if .NewRelicLicense }}
+        - name: NEWRELIC_LICENSE_KEY
+        {{- if isString .NewRelicLicense }}
+          value: {{ .NewRelicLicense }}
+        {{- else }}
+{{ toYaml .NewRelicLicense | indent 10}}
+        {{- end }}
         {{- end }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }} {{- else }} {{- .Image.Name }}{{- end}}:{{ .Image.Tag | default "latest"}}
         volumeMounts:

@@ -43,6 +43,15 @@ Namespace: r1
 ## --docker-registry
 # DockerRegistry:    s.DockerRegistry,
 
+## -- newrelic
+# NewRelicLicense: XXXXXXXXXXXXXXXXXXXXX
+# -- OR
+# NewRelicLicense:
+#   valueFrom:
+#     secretKeyRef:
+#       name: newrelic
+#       key: license
+
 ### AdditionalEnvVars - for runner deployment, coming from --envVars param
 ### Example for setting proxy
 # AdditionalEnvVars:
