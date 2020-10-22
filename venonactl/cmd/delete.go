@@ -45,6 +45,7 @@ var deleteCmdOptions struct {
 var deleteCmd = &cobra.Command{
 	Use:   "delete [names]",
 	Short: "Delete a Codefresh's runtime-environment",
+	Deprecated: "Venona binary has been deprecated, please use codefresh cli  https://codefresh.io/docs/docs/administration/codefresh-runner ",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
 			return errors.New("requires name of the runtime-environment")
@@ -52,6 +53,7 @@ var deleteCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		return;
 		s := store.GetStore()
 		lgr := createLogger("Delete", verbose)
 		buildBasicStore(lgr)
@@ -113,6 +115,7 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
+	deleteCmd.Deprecated = "Venona binary has been deprecated, please use codefresh cli  https://codefresh.io/docs/docs/administration/codefresh-runner "
 	deleteCmd.Flags().StringVar(&deleteCmdOptions.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
 	deleteCmd.Flags().StringVar(&deleteCmdOptions.revertTo, "revert-to", "", "Set to the name of the runtime-environment to set as default")
 	deleteCmd.Flags().BoolVar(&deleteCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")

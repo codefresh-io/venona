@@ -20,9 +20,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -69,7 +70,9 @@ var installCmdOptions struct {
 var installCmd = &cobra.Command{
 	Use:   "install",
 	Short: "Install Codefresh's runtime-environment",
+	Deprecated: "Venona binary has been deprecated, please use codefresh cli  https://codefresh.io/docs/docs/administration/codefresh-runner ",
 	Run: func(cmd *cobra.Command, args []string) {
+		return
 		s := store.GetStore()
 		lgr := createLogger("Install", verbose)
 		buildBasicStore(lgr)
