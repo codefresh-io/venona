@@ -115,7 +115,6 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deleteCmd)
-	deleteCmd.Deprecated = "Venona binary has been deprecated, please use codefresh cli  https://codefresh.io/docs/docs/administration/codefresh-runner "
 	deleteCmd.Flags().StringVar(&deleteCmdOptions.kube.context, "kube-context-name", "", "Set name to overwrite the context name saved in Codefresh")
 	deleteCmd.Flags().StringVar(&deleteCmdOptions.revertTo, "revert-to", "", "Set to the name of the runtime-environment to set as default")
 	deleteCmd.Flags().BoolVar(&deleteCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
