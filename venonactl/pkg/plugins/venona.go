@@ -162,7 +162,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	if err != nil {
 		return nil, err
 	}
-	token := secret.Data["codefresh.token"]
+	token := string(secret.Data["codefresh.token"])
 	v["AgentToken"] = token
 
 	kubeObjects, err := getKubeObjectsFromTempalte(v, venonaFilesPattern, u.logger)
