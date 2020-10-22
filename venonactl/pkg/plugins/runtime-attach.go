@@ -153,6 +153,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		runtimes[name] = base64.StdEncoding.EncodeToString([]byte(d))
 	}
 	v["runnerConf"] = runtimes
+	v["Namespace"] = opt.ClusterNamespace
 
 	cs.CoreV1().Secrets(opt.ClusterNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
 
