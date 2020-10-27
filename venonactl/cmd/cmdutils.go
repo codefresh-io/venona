@@ -70,7 +70,14 @@ func buildBasicStore(logger logger.Logger) {
 func extendStoreWithCodefershClient(logger logger.Logger) error {
 	s := store.GetStore()
 	if configPath == "" {
-		configPath = fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
+		currentUser, err := user.Current()
+		if err != nil {
+			return err
+		}
+
+		configPath := path.Join(currentUser.HomeDir, ".cfconfig")
+		logger.Debug("cfconfig path not set, using:", "cfconfig", configPath)
+
 	}
 
 	if cfAPIHost == "" && cfAPIToken == "" {
@@ -82,7 +89,7 @@ func extendStoreWithCodefershClient(logger logger.Logger) error {
 		cfAPIToken = context.Token
 		logger.Debug("Using codefresh context", "Context-Name", context.Name, "Host", cfAPIHost)
 	} else {
-		logger.Debug("Reading creentials from environment variables")
+		logger.Debug("Reading credentials from environment variables")
 		if cfAPIHost == "" {
 			cfAPIHost = "https://g.codefresh.io"
 		}
@@ -111,7 +118,7 @@ func extendStoreWithKubeClient(logger logger.Logger) {
 		currentUser, _ := user.Current()
 		if currentUser != nil {
 			kubeConfigPath = path.Join(currentUser.HomeDir, ".kube", "config")
-			logger.Debug("Path to kubeconfig not set, using default")
+			logger.Debug("Path to kubeconfig not set, using:", "kubeconfig", kubeConfigPath)
 		}
 	}
 
