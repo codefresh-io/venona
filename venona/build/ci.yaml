@@ -197,8 +197,8 @@ steps:
         - name: export_version
           on:
           - success
-      # branch:
-      #   only: [ ${{RELEASE_BRANCH_NAME}} ]
+      branch:
+        only: [ "${{RELEASE_BRANCH_NAME}}" ]
     environment:
       - AWS_ACCESS_KEY_ID=${{SEC_SCAN_AWS_KEY_ID}}
       - AWS_SECRET_ACCESS_KEY=${{SEC_SCAN_AWS_SECRET_KEY}}
