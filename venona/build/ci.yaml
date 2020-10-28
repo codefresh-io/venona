@@ -4,6 +4,7 @@ stages:
 - Test
 - Build Artifacts
 - Security scan
+- Push
 steps:
 
   main_clone:
@@ -211,7 +212,7 @@ steps:
   push:
     type: push
     title: Push candidate
-    stage: Build Artifacts
+    stage: Push
     candidate: ${{build_image}}
     tags:
     - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
