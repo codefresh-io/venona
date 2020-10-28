@@ -159,25 +159,25 @@ steps:
       condition:
         any:
          secScanStep: security_scan_1.result == 'success'
-         secScanFail: '"${{IGNORE_Security scan}}" == "true"'
+         secScanFail: '"${{IGNORE_SEC_SCAN}}" == "true"'
     steps:
       security_scan_1:
         image: aquasec/trivy:latest
         title: "Scanning image for security vulnerablities"
         commands:
-          - '! rm ${{SECURITY_SCAN_REPORT_FILE}} 2>/dev/null'
+          - '! rm ${{SEC_SCAN_REPORT_FILE}} 2>/dev/null'
           - |-
             set -o pipefail
             trivy \
               --quiet \
-              ${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}} &> ${{SECURITY_SCAN_REPORT_FILE}}
+              ${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}} &> ${{SEC_SCAN_REPORT_FILE}}
             trivy \
               --quiet \
               --skip-update \
               --ignorefile /tmp/.trivy/trivyignore \
               --ignore-unfixed \
               --exit-code 1 \
-              --severity ${{SECURITY_SCAN_SEVERITY_THRESHOLD}} \
+              --severity ${{SEC_SCAN_SEVERITY_THRESHOLD}} \
               ${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}}
         on_success:
           metadata:
