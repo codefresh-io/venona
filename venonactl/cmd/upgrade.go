@@ -60,7 +60,7 @@ var upgradeCmd = &cobra.Command{
 		s := store.GetStore()
 		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
-		extendStoreWithCodefershClient(lgr)
+		dieOnError(extendStoreWithCodefershClient(lgr))
 		extendStoreWithAgentAPI(lgr, "", "")
 		fillKubernetesAPI(lgr, upgradeCmdOpt.kube.context, upgradeCmdOpt.kube.namespace, false)
 		values := s.BuildValues()

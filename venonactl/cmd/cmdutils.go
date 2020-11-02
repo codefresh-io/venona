@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -75,9 +75,12 @@ func extendStoreWithCodefershClient(logger logger.Logger) error {
 			return err
 		}
 
-		configPath := path.Join(currentUser.HomeDir, ".cfconfig")
-		logger.Debug("cfconfig path not set, using:", "cfconfig", configPath)
+		configPath = filepath.Join(currentUser.HomeDir, ".cfconfig")
+		logger.Debug(fmt.Sprint("cfconfig path not set, using: ", configPath))
+	}
 
+	if _, err := os.Stat(configPath); err != nil {
+		return fmt.Errorf(".cfconfig file not found")
 	}
 
 	if cfAPIHost == "" && cfAPIToken == "" {
@@ -117,7 +120,7 @@ func extendStoreWithKubeClient(logger logger.Logger) {
 	if kubeConfigPath == "" {
 		currentUser, _ := user.Current()
 		if currentUser != nil {
-			kubeConfigPath = path.Join(currentUser.HomeDir, ".kube", "config")
+			kubeConfigPath = filepath.Join(currentUser.HomeDir, ".kube", "config")
 			logger.Debug("Path to kubeconfig not set, using:", "kubeconfig", kubeConfigPath)
 		}
 	}
