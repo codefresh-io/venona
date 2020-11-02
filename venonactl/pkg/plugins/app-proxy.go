@@ -17,9 +17,7 @@ limitations under the License.
 */
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
@@ -66,19 +64,7 @@ func (u *appProxyPlugin) Install(opt *InstallOptions, v Values) (Values, error) 
 	pathPrefix := objx.New(v["AppProxy"]).Get("PathPrefix").Str()
 	appProxyURL := fmt.Sprintf("https://%v%v", host, pathPrefix)
 	u.logger.Info(fmt.Sprintf("\napp proxy is running at: %v", appProxyURL))
-
-	data := map[string]interface{}{
-		"ingressIP": appProxyURL,
-	}
-	var jsonData []byte
-	jsonData, err = json.Marshal(data)
-	err = ioutil.WriteFile("app-proxy.json", jsonData, 0644)
-	if err != nil {
-		u.logger.Error(fmt.Sprintf("Failed to write to stream: %v", err))
-		return v, fmt.Errorf("Failed to write to stream")
-	}
-	return v, err
-
+	return v, nil
 }
 
 func (u *appProxyPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
