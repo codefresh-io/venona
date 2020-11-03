@@ -5,7 +5,9 @@ package kubernetes
 func TemplatesMap() map[string]string {
 	templatesMap := make(map[string]string)
 
-	templatesMap["cluster-role-binding.app-proxy.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["cluster-role-binding.app-proxy.yaml"] = `# used by:
+# - app-proxy pod
+{{- if .CreateRbac }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -20,7 +22,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{- end  }}`
 
-	templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `# used by:
+# - dind-volume-provisioner pod
+{{- if .CreateRbac }}
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -38,7 +42,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{- end }}`
 
-	templatesMap["cluster-role-binding.venona.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["cluster-role-binding.venona.yaml"] = `# used by:
+# - runner pod
+{{- if .CreateRbac }}
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -53,7 +59,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{- end }}`
 
-	templatesMap["cluster-role.app-proxy.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["cluster-role.app-proxy.yaml"] = `# used by:
+# - app-proxy pod
+{{- if .CreateRbac }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -67,7 +75,9 @@ rules:
   verbs: ["get"]
 {{- end }}`
 
-	templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `# used by:
+# - dind-volume-provisioner pod
+{{- if .CreateRbac }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -101,7 +111,9 @@ rules:
     verbs: ["get", "list", "watch", "create", "update", "delete"]
 {{- end }}`
 
-	templatesMap["codefresh-certs-server-secret.re.yaml"] = `apiVersion: v1
+	templatesMap["codefresh-certs-server-secret.re.yaml"] = `# used by:
+# - dind pods
+apiVersion: v1
 type: Opaque
 kind: Secret
 metadata:
@@ -116,7 +128,10 @@ data:
 
 `
 
-	templatesMap["cron-job.dind-volume-cleanup.vp.yaml"] = `{{- if not (eq .Storage.Backend "local") }}
+	templatesMap["cron-job.dind-volume-cleanup.vp.yaml"] = `# component:
+# - name: dind-volume-cleanup
+# - job: cleans dind local volumes
+{{- if not (eq .Storage.Backend "local") }}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -144,7 +159,10 @@ spec:
                 value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 {{- end }}`
 
-	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `{{- if eq .Storage.Backend "local" -}}
+	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `# component:
+# - name: dind-lv-monitor
+# - job: cleans dind local volumes
+{{- if eq .Storage.Backend "local" -}}
 {{- $localVolumeParentDir := ( .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" ) }}
 apiVersion: apps/v1
 kind: DaemonSet
@@ -214,7 +232,10 @@ spec:
           path: {{ $localVolumeParentDir }}
 {{- end -}}`
 
-	templatesMap["deployment.app-proxy.yaml"] = `apiVersion: apps/v1
+	templatesMap["deployment.app-proxy.yaml"] = `# component:
+# - name: app-proxy
+# - job: communicate with behind-firewall integrations (git providers, container registries)
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -285,7 +306,10 @@ spec:
           failureThreshold: 5
 `
 
-	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
+	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `# component:
+# - name: dind-volume-provisioner
+# - job: provision volumes to dind pods
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dind-volume-provisioner-{{ .AppName }}
@@ -400,7 +424,10 @@ spec:
       {{- end }}
 `
 
-	templatesMap["deployment.monitor.yaml"] = `{{- if .Monitor.Enabled }}
+	templatesMap["deployment.monitor.yaml"] = `# component:
+# - name: monitor
+# - job: sends cluster information to codefresh
+{{- if .Monitor.Enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -471,7 +498,10 @@ spec:
 {{- end }}          
 `
 
-	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
+	templatesMap["deployment.venona.yaml"] = `# component:
+# - name: runner
+# - job: creates engine and dind pods
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
@@ -560,7 +590,9 @@ spec:
       restartPolicy: Always
 `
 
-	templatesMap["dind-daemon-conf.re.yaml"] = `---
+	templatesMap["dind-daemon-conf.re.yaml"] = `# used by:
+# - dind pods
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -583,7 +615,9 @@ data:
     }
 `
 
-	templatesMap["dind-headless-service.re.yaml"] = `---
+	templatesMap["dind-headless-service.re.yaml"] = `# used by:
+# - dind pods
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -605,7 +639,9 @@ spec:
 
 `
 
-	templatesMap["ingress.app-proxy.yaml"] = `apiVersion: networking.k8s.io/v1beta1
+	templatesMap["ingress.app-proxy.yaml"] = `# used by:
+# - app-proxy pod
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   annotations:
@@ -632,7 +668,27 @@ spec:
   {{ end }}
 `
 
-	templatesMap["role-binding.re.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["role-binding.engine.yaml"] = `# used by:
+# - engine pods
+{{- if .CreateRbac }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Runtime.EngineAppName }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end  }}`
+
+	templatesMap["role-binding.re.yaml"] = `# used by:
+# - runner pod
+{{- if .CreateRbac }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -648,7 +704,23 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 {{- end  }}`
 
-	templatesMap["role.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["role.engine.yaml"] = `# used by:
+# - engine pods
+{{- if .CreateRbac }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+{{- end }}`
+
+	templatesMap["role.monitor.yaml"] = `# used by:
+# - monitor pod
+{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: Role
@@ -698,7 +770,10 @@ rules:
 {{- end }}
 {{- end }}`
 
-	templatesMap["role.re.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["role.re.yaml"] = `# used when attaching a runtime to the runner pod
+# used by:
+# - runnerconf secret
+{{- if .CreateRbac }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
@@ -710,7 +785,9 @@ rules:
   verbs: ["get", "create", "delete"]
 {{- end }}`
 
-	templatesMap["rolebinding.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["rolebinding.monitor.yaml"] = `# used by:
+# - monitor pod
+{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
@@ -739,7 +816,9 @@ roleRef:
 {{- end }}
 {{- end }}`
 
-	templatesMap["rollback-role-binding.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["rollback-role-binding.monitor.yaml"] = `# used by:
+# - monitor pod
+{{- if .CreateRbac }}
 {{- if .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
@@ -764,7 +843,9 @@ roleRef:
   {{- end }}
 {{- end }}`
 
-	templatesMap["rollback-serviceaccount.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["rollback-serviceaccount.monitor.yaml"] = `# used by:
+# - monitor pod
+{{- if .CreateRbac }}
 {{- if and .Monitor.RbacEnabled (not .Monitor.UseNamespaceWithRole) }}
 apiVersion: v1
 kind: ServiceAccount
@@ -777,7 +858,9 @@ metadata:
 {{- end }}
 {{- end }}`
 
-	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `apiVersion: v1
+	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `# used by:
+# - dind-volume-provisioner pod
+apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -796,7 +879,10 @@ data:
   aws_secret_access_key: {{ .Storage.AwsSecretAccessKey | b64enc }}
 {{- end }}`
 
-	templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
+	templatesMap["secret.runtime-attach.yaml"] = `# contains all the runtimes attached to the runner
+# used by:
+# - runner pod
+apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -807,7 +893,10 @@ data:
   {{ $key }}: {{ $value }}
 {{ end }}`
 
-	templatesMap["secret.venona.yaml"] = `apiVersion: v1
+	templatesMap["secret.venona.yaml"] = `# contains the agent codefresh token
+# used by:
+# - runner pod
+apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
@@ -816,7 +905,9 @@ metadata:
 data:
   codefresh.token: {{ .AgentToken | b64enc }}`
 
-	templatesMap["service-account.app-proxy.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["service-account.app-proxy.yaml"] = `# used by:
+# - app-proxy pod
+{{- if .CreateRbac }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -828,7 +919,9 @@ metadata:
 {{- end }}
 `
 
-	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["service-account.dind-volume-provisioner.vp.yaml"] = `# used by:
+# - dind-volume-provisioner pod
+{{- if .CreateRbac }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -839,7 +932,23 @@ metadata:
     app: dind-volume-provisioner
 {{- end }}`
 
-	templatesMap["service-account.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["service-account.engine.yaml"] = `# used by:
+# - engine pods
+{{- if .CreateRbac }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
+{{- end }}
+`
+
+	templatesMap["service-account.monitor.yaml"] = `# used by:
+# - monitor pod
+{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 apiVersion: v1
 kind: ServiceAccount
@@ -853,7 +962,9 @@ metadata:
 {{- end }}
 `
 
-	templatesMap["service-account.re.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["service-account.re.yaml"] = `# used by:
+# - runner pod
+{{- if .CreateRbac }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -861,7 +972,9 @@ metadata:
   namespace: {{ .Namespace }}
 {{- end }}`
 
-	templatesMap["service.app-proxy.yaml"] = `apiVersion: v1
+	templatesMap["service.app-proxy.yaml"] = `# used by:
+# - app-proxy pod
+apiVersion: v1
 kind: Service
 metadata:
   name: app-proxy
@@ -875,7 +988,9 @@ spec:
       targetPort: 3000
 `
 
-	templatesMap["service.monitor.yaml"] = `{{- if .CreateRbac }}
+	templatesMap["service.monitor.yaml"] = `# used by:
+# - monitor pod
+{{- if .CreateRbac }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -896,7 +1011,10 @@ spec:
 {{- end }}
 `
 
-	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `{{- if .Storage.CreateStorageClass }}
+	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `# used by:
+# - dind-volume-provisioner pod
+# - dind pods
+{{- if .Storage.CreateStorageClass }}
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
