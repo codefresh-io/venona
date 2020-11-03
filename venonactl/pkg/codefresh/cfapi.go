@@ -44,7 +44,6 @@ type (
 		Insecure              bool
 		StorageClass          string
 		IsDefaultStorageClass bool
-		KubernetesRunnerType  bool
 		BuildNodeSelector     map[string]string
 		Annotations           map[string]string
 	}
@@ -64,7 +63,6 @@ type (
 		markAsDefault         bool
 		storageClass          string
 		isDefaultStorageClass bool
-		kubernetesRunnerType  bool
 		buildNodeSelector     map[string]string
 		annotations           map[string]string
 	}
@@ -101,7 +99,6 @@ func NewCodefreshAPI(opt *APIOptions) API {
 		registerWithAgent:     opt.RegisterWithAgent,
 		storageClass:          opt.StorageClass,
 		isDefaultStorageClass: opt.IsDefaultStorageClass,
-		kubernetesRunnerType:  opt.KubernetesRunnerType,
 		buildNodeSelector:     opt.BuildNodeSelector,
 		annotations:           opt.Annotations,
 	}
@@ -185,9 +182,6 @@ func (a *api) Register() (*codefresh.RuntimeEnvironment, error) {
 		Namespace: a.clusternamespace,
 		HasAgent:  a.registerWithAgent,
 		Cluster:   a.clustername,
-	}
-	if a.kubernetesRunnerType {
-		options.RunnerType = codefresh.KubernetesRunnerType
 	}
 	if len(a.buildNodeSelector) != 0 {
 		options.NodeSelector = a.buildNodeSelector

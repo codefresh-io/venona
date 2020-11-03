@@ -42,7 +42,6 @@ var installCmdOptions struct {
 	installOnlyRuntimeEnvironment bool
 	skipRuntimeInstallation       bool
 	runtimeEnvironmentName        string
-	kubernetesRunnerType          bool
 	buildNodeSelector             string
 	buildAnnotations              []string
 	tolerationJSONString          string
