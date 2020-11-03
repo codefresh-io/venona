@@ -69,7 +69,6 @@ type (
 			EnsureNamespaceExists(cs *kubernetes.Clientset) error
 		}
 		DryRun                bool
-		KubernetesRunnerType  bool
 		BuildNodeSelector     map[string]string
 		Annotations           map[string]string
 		RuntimeEnvironment    string

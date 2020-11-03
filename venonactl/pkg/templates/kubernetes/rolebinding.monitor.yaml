@@ -1,3 +1,5 @@
+# used by:
+# - monitor pod
 {{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 {{- if .Monitor.UseNamespaceWithRole }}

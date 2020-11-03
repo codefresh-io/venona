@@ -38,7 +38,6 @@ var installRuntimeCmdOptions struct {
 	storageClass           string
 	dockerRegistry         string
 	runtimeEnvironmentName string
-	kubernetesRunnerType   bool
 	tolerations            string
 	templateValues         []string
 	templateFileValues     []string
@@ -90,7 +89,6 @@ var installRuntimeCmd = &cobra.Command{
 
 		mergeValueBool(templateValuesMap, "InCluster", &installRuntimeCmdOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "insecure", &installRuntimeCmdOptions.insecure)
-		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installRuntimeCmdOptions.kubernetesRunnerType)
 
 		s := store.GetStore()
 		lgr := createLogger("Install-runtime", verbose, logFormatter)
@@ -136,16 +134,11 @@ var installRuntimeCmd = &cobra.Command{
 			StorageClass:          installRuntimeCmdOptions.storageClass,
 			IsDefaultStorageClass: isDefault,
 			DryRun:                installRuntimeCmdOptions.dryRun,
-			KubernetesRunnerType:  installRuntimeCmdOptions.kubernetesRunnerType,
 			CodefreshHost:         cfAPIHost,
 			CodefreshToken:        installRuntimeCmdOptions.codefreshToken,
 			RuntimeEnvironment:    installRuntimeCmdOptions.runtimeEnvironmentName,
 			ClusterNamespace:      installRuntimeCmdOptions.kube.namespace,
 			Insecure:              installRuntimeCmdOptions.insecure,
-		}
-
-		if installRuntimeCmdOptions.kubernetesRunnerType {
-			builder.Add(plugins.EnginePluginType)
 		}
 
 		if isDefault {
@@ -164,6 +157,7 @@ var installRuntimeCmd = &cobra.Command{
 		// s.ClusterInCodefresh = installRuntimeCmdOptions.clusterNameInCodefresh
 
 		builder.Add(plugins.RuntimeEnvironmentPluginType)
+		builder.Add(plugins.EnginePluginType)
 
 		if isDefault {
 			builder.Add(plugins.VolumeProvisionerPluginType)
@@ -202,7 +196,6 @@ func init() {
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.insecure, "insecure", false, "Set to true to disable TLS when communicating with the codefresh platform")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
-	installRuntimeCmd.Flags().BoolVar(&installRuntimeCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.nodeSelector, "kube-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona resources (default is no node selector)")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.tolerations, "tolerations", "", "The kubernetes tolerations as JSON string to be used by venona resources (default is no tolerations)")
 

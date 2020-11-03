@@ -1,3 +1,6 @@
+# component:
+# - name: app-proxy
+# - job: communicate with behind-firewall integrations (git providers, container registries)
 apiVersion: apps/v1
 kind: Deployment
 metadata:

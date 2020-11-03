@@ -1,3 +1,6 @@
+# used by:
+# - dind-volume-provisioner pod
+# - dind pods
 {{- if .Storage.CreateStorageClass }}
 ---
 kind: StorageClass
