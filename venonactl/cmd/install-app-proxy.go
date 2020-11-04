@@ -37,6 +37,7 @@ var installAppProxyCmdOptions struct {
 	resources          map[string]interface{}
 	host               string
 	ingressClass       string
+	dryRun             bool
 }
 
 var installAppProxyCmd = &cobra.Command{
@@ -55,10 +56,9 @@ var installAppProxyCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
 		mergeValueStr(templateValuesMap, "Namespace", &installAppProxyCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
-		mergeValueStr(templateValuesMap, "AppProxy.Host", &installAppProxyCmdOptions.host)
-		mergeValueStr(templateValuesMap, "AppProxy.IngressClass", &installAppProxyCmdOptions.ingressClass)
+		mergeValueStr(templateValuesMap, "AppProxy.Ingress.Host", &installAppProxyCmdOptions.host)
+		mergeValueStr(templateValuesMap, "AppProxy.Ingress.IngressClass", &installAppProxyCmdOptions.ingressClass)
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installAppProxyCmdOptions.dockerRegistry)
-
 		mergeValueMSI(templateValuesMap, "AppProxy.resources", &installAppProxyCmdOptions.resources)
 
 		s := store.GetStore()
@@ -73,6 +73,7 @@ var installAppProxyCmd = &cobra.Command{
 		}
 		builderInstallOpt := &plugins.InstallOptions{
 			CodefreshHost: cfAPIHost,
+			DryRun:        installAppProxyCmdOptions.dryRun,
 		}
 		s.AppProxy.Resources = installAppProxyCmdOptions.resources
 		s.DockerRegistry = installAppProxyCmdOptions.dockerRegistry
@@ -113,4 +114,5 @@ func init() {
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installAppProxyCmd.Flags().StringArrayVarP(&installAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 	installAppProxyCmd.Flags().StringArrayVar(&installAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	installAppProxyCmd.Flags().BoolVar(&installAppProxyCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 }

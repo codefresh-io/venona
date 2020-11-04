@@ -33,6 +33,12 @@ spec:
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
+          {{- if $.Monitor.AdditionalEnvVars }}
+          {{- range $key, $value := $.Monitor.AdditionalEnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           - name: SERVICE_NAME
             value: {{ .Monitor.AppName }}
           {{- if .Monitor.UseNamespaceWithRole }}

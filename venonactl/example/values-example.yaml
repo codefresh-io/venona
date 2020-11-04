@@ -1,14 +1,67 @@
-## This is a sample values yamls for usage with 
-##   venonactl install agent|runtime|monitor --values|-f values.yaml
-##
+###########################################################################################################################
+### This is a sample values yamls for usage with:                                                                       ###
+###   venonactl install agent|runtime|monitor|app-proxy --values|-f values.yaml                                         ###
+###                                                                                                                     ###
+### the values from values.yaml are applied to the templates in [pkg/templates/kubernetes](pkg/templates/kubernetes)    ###
+### See BuildValues() func in [store.go](pkg/store/store.go) for the format                                             ###
+###########################################################################################################################
 
-## the values from values.yaml are applied to the templates in [pkg/templates/kubernetes](pkg/templates/kubernetes)
-## See BuildValues() func in [store.go](pkg/store/store.go) for the format 
+##############################################
+###                                        ###
+###       Codefresh Authentication         ###
+###                                        ###
+##############################################
+### Codefresh host --api-host and token --api-token
+CodefreshHost: https://g.codefresh.io
+Token: 5efb62289c4b7a30ee858ca3.fac149aafef7845e3e79d2440e352873
 
-# Codefresh host --api-host and token --api-token
-CodefreshHost: https://my-codefresh.example.com
-Token:         xxxxx.yyyyyyyy
+### skips certificates validation on TLS connections
+#insecure: true
 
+##############################################
+###                                        ###
+###          Kubernetes Context            ###
+###                                        ###
+##############################################
+### ConfigPath - kubeconfig from --kube-config-path
+#ConfigPath: # default is $(HOME)/.kube/config
+
+### Context: from both --context (global arg) and
+#Context: gke_codefresh_cluster
+
+### Namespace - from --kube-namespace parameter + env KUBE_NAMESPACE, for venona, runtime, monitor, app-proxy
+Namespace: r1
+
+
+##############################################
+###                                        ###
+###            General Options             ###
+###                                        ###
+##############################################
+
+### RuntimeEnvironmentName --runtimeName: used when installing a new runtime
+### will be used to uniquely identify the runtime in Codefresh
+RuntimeEnvironmentName: my-unique-runtime-name
+
+### RuntimeServiceAccount --kube-service-account: used when attaching a runtime to a runner
+### default is: runner
+# RuntimeServiceAccount: runner
+
+### ClusterId --clusterId: used when installing the monitor component
+### this is the name of the cluster integration in codefresh
+# ClusterId: cluster-name
+
+##############################################
+###            Codefresh Runner            ###
+###                                        ###
+###      Pulls tasks from codefresh        ###
+##############################################
+### Runner image: controls the runner pod image
+# Image: 
+#   Name: codefresh/venona
+#   Tag: 1.4.16 # default s.Version.Current.Version,
+
+### Control runner pod resources
 # Runner:
 #   resources:
 #     limits:
@@ -18,92 +71,75 @@ Token:         xxxxx.yyyyyyyy
 #       cpu: 200m
 #       memory: 500Mi
 
-# Runner (venona) image 
-Image: 
-  Name: codefresh/venona
-  Tag: 1.4.16 # default s.Version.Current.Version,
+### NodeSelector --kube-node-selector: controls runner and dind-volume-provisioner pods
+# NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 
-## Namespace - from --kube-namespace parameter + env KUBE_NAMESPACE, for venona, runtime, monitor
-Namespace: r1
-### ConfigPath - kubeconfig from --kube-config-path
-#ConfigPath: 
-## Context: from both --context (global arg) and 
-#Context: gke_codefresh_cluster
-
-### NodeSelector --kube-node-selector
-#NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
-
-### --tolerations
+### Tolerations --tolerations: controls runner, dind-volume-provisioner and dind-lv-monitor
 # Tolerations: 
 # - key: codefresh.io
 #   operator: Equal
 #   value: dinds
 #   effect: NoSchedule
 
-## --docker-registry
-# DockerRegistry:    s.DockerRegistry,
-
-## -- newrelic
-# NewRelicLicense: XXXXXXXXXXXXXXXXXXXXX
-# -- OR
-# NewRelicLicense:
-#   valueFrom:
-#     secretKeyRef:
-#       name: newrelic
-#       key: license
-
-### AdditionalEnvVars - for runner deployment, coming from --envVars param
-### Example for setting proxy
+### AdditionalEnvVars --envVars: adds environment variables to the runner deployment
 # AdditionalEnvVars:
 #   HTTP_PROXY: 10.20.0.35:8080
 #   HTTPS_PROXY: 10.20.0.35:8080
 #   NO_PROXY: 10.20.0.*,
 
-### RuntimeEnvironmentName: my-unique-runtime-name
-# RuntimeEnvironmentName: my-unique-runtime-name
+### Agent options: generally you should only use them if you deleted your runner by mistake
+# AgentToken --agentToken: used by the runner pod to authenticate to codefresh
+# AgentId --agentId: used by codefresh to identify the runner
 
-### RuntimeServiceAccount For venonactl attach
-# RuntimeServiceAccount:
 
-### use InsecureSkipVerify to call cf api
-#insecure: true
+###############################################
+###                Storage                  ###
+###                                         ###
+### codefresh pipelines volume provisioning ###
+################################################
+### StorageClass --storage-class: Use already existing storage class
+### Note: when using this option volume provisioning components will
+### not be installed.
+# StorageClass:  # storage class name
 
-### Use already existing storage class
-#StorageClass: 
-
-### AgentToken:        s.AgentAPI.Token,
-### AgentId:           s.AgentAPI.Id,
-# AgentId: gke_codefresh-load_us-central1-c_onprem-tst-1_r1_6
-
-### Storage parameters - for dind-volume-provisoner
+### Storage parameters for dind-volume-provisoner and dind-lv-monitor
 # Storage:
-  # Backend: local
-  # StorageClassName:     
-  # LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
-  # AvailabilityZone: 
-  # GoogleServiceAccount: 
-  # AwsAccessKeyId: 
-  # AwsSecretAccessKey: 
-  # VolumeProvisioner:
-    # Image: codefresh/dind-volume-provisioner:v23
-    # NodeSelector: 
-    # Tolerations:
-  #   resources:
-  #     limits:
-  #       cpu: 400m
-  #       memory: 1200Mi
-  #     requests:
-  #       cpu: 200m
-  #       memory: 500Mi 
-  # LocalVolumeMonitor: 
-  #   resources:
-  #     limits:
-  #       cpu: 400m
-  #       memory: 1200Mi
-  #     requests:
-  #       cpu: 200m
-  #       memory: 500Mi  
+#   Annotations:
+#     fizz: bazz
+#   Backend: local
+#   StorageClassName: # default is: dind-local-volumes-runner-<namespace>
+#   LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
+#   AvailabilityZone: 
+#   GoogleServiceAccount: 
+#   AwsAccessKeyId: 
+#   AwsSecretAccessKey: 
+#   VolumeProvisioner:
+#     Image: codefresh/dind-volume-provisioner:v23
+#     NodeSelector: 
+#     Tolerations:
+#     resources:
+#       limits:
+#         cpu: 400m
+#         memory: 1200Mi
+#       requests:
+#         cpu: 200m
+#         memory: 500Mi
+#     ServiceAccount: # will also be used by LocalVolumeMonitor
+#       Annotations:
+#         foo: bar2
+#   LocalVolumeMonitor: 
+#     resources:
+#       limits:
+#         cpu: 400m
+#         memory: 1200Mi
+#       requests:
+#         cpu: 200m
+#         memory: 500Mi  
 
+
+#######################################
+### Storage configuration examples: ###
+#######################################
 
 ### Storage parameters example for gke-local-ssd
 # Storage:
@@ -129,37 +165,72 @@ Namespace: r1
 #     NodeSelector: kubernetes.io/role=master
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
 
+
+################################################
+###                 Monitor                  ###
+###                                          ###
+### reports cluster information to codefresh ###
+################################################
 # Monitor:
-  # UseNamespaceWithRole: s.UseNamespaceWithRole
-  # RbacEnabled: true,
-  # Helm3:       s.Helm3,
-  # AppName:     MonitorApplicationName,
-  # Image:
-  #   Name: codefresh/agent,
-  #   Tag:  stable,
-  # resources:  
-  #   limits:
-  #     cpu: 400m
-  #     memory: 1200Mi
-  #   requests:
-  #     cpu: 200m
-  #     memory: 500Mi
+#   Image:
+#     Name: codefresh/agent
+#     Tag:  stable
+#   resources:  
+#     limits:
+#       cpu: 400m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi
+#   AdditionalEnvVars:  # will be set on monitor deployment
+#     HTTP_PROXY: 10.20.0.35:8080
+#     HTTPS_PROXY: 10.20.0.35:8080
+#     NO_PROXY: 10.20.0.*
+#   Helm3: false # is the cluster using helm3
+#   ServiceAccount:
+#     Annotations:
+#       foo: bar
+#       fizz: bazz
 
+########################################################
+###                     App-Proxy                    ###
+###                                                  ###
+### communicates with "behind-firewall" integrations ###
+########################################################
 # AppProxy:
-  # resources:
-  #   limits:
-  #     cpu: 500m
-  #     memory: 1200Mi
-  #   requests:
-  #     cpu: 200m
-  #     memory: 500Mi
+#   Image:
+#     Name: codefresh/cf-app-proxy
+#     Tag: latest # default is latest
+#   resources:
+#     limits:
+#       cpu: 500m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi
+#   AdditionalEnvVars:  # will be set on app-proxy deployment
+#     HTTP_PROXY: 10.20.0.35:8080
+#     HTTPS_PROXY: 10.20.0.35:8080
+#     NO_PROXY: 10.20.0.*
+#   Ingress:
+#     Host: example.com           # The DNS hostname the ingress will use
+#     IngressClass: nginx         # If you have multiple ingress-controllers in the cluster - specify the right ingress class
+#     TLSSecret: cert-secret-name # Use this to configure the TLS certs for the ingress
+#     PathPrefix: /app-proxy      # default is '/'. Use this if you share the hostname with other services
+#     Annotations:                # Extra annotations that will be set on the ingress object
+#       nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+#   ServiceAccount:
+#     Annotations:
+#       foo: bar
+#       fizz: bazz
 
-  
-  # Host: example.com
-  # IngressClass: nginx
-  # TLSSecret: cert-secret-name
-  # PathPrefix: /app-proxy  # default is '/'
-  
-  ## Additional annotations that will be set on the ingress definition
-  # Annotations:
-    # nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+
+########################################################
+###                Codefresh Runtime                 ###
+###                                                  ###
+###         configure engine and dind pods           ###
+########################################################
+# Runtime:
+#   ServiceAccount: # will be used by the engine and dind pods
+#     Annotations:
+#       foo1: bar1
