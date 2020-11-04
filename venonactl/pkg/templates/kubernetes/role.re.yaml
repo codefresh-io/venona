@@ -1,6 +1,3 @@
-# used when attaching a runtime to the runner pod
-# used by:
-# - runnerconf secret
 {{- if .CreateRbac }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1

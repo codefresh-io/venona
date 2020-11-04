@@ -1,5 +1,3 @@
-# used by:
-# - engine pods
 {{- if .CreateRbac }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

@@ -1,10 +1,8 @@
-# used by:
-# - app-proxy pod
 {{- if .CreateRbac }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .AppProxy.AppName }}-cluster-reader
+  name: {{ .AppProxy.AppName }}-cluster-reader-{{ .Namespace }}
   labels:
     app: {{ .AppProxy.AppName }}
     version: {{ .Version }}

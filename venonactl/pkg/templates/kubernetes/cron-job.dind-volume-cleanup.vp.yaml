@@ -1,6 +1,3 @@
-# component:
-# - name: dind-volume-cleanup
-# - job: cleans dind local volumes
 {{- if not (eq .Storage.Backend "local") }}
 apiVersion: batch/v1beta1
 kind: CronJob

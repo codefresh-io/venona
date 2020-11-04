@@ -1,6 +1,3 @@
-# component:
-# - name: dind-volume-provisioner
-# - job: provision volumes to dind pods
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -1,5 +1,3 @@
-# used by:
-# - monitor pod
 {{- if .CreateRbac }}
 apiVersion: v1
 kind: Service

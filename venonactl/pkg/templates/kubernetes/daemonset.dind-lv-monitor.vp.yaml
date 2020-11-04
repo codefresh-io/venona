@@ -1,6 +1,3 @@
-# component:
-# - name: dind-lv-monitor
-# - job: cleans dind local volumes
 {{- if eq .Storage.Backend "local" -}}
 {{- $localVolumeParentDir := ( .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" ) }}
 apiVersion: apps/v1

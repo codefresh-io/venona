@@ -1,5 +1,3 @@
-# used by:
-# - app-proxy pod
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
