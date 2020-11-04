@@ -40,16 +40,15 @@ var installAgentCmdOptions struct {
 	venona struct {
 		version string
 	}
-	agentToken           string
-	agentID              string
-	kubernetesRunnerType bool
-	tolerations          string
-	envVars              []string
-	dockerRegistry       string
-	templateValues       []string
-	templateFileValues   []string
-	templateValueFiles   []string
-	resources            map[string]interface{}
+	agentToken         string
+	agentID            string
+	tolerations        string
+	envVars            []string
+	dockerRegistry     string
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
+	resources          map[string]interface{}
 }
 
 var installAgentCmd = &cobra.Command{
@@ -85,7 +84,6 @@ var installAgentCmd = &cobra.Command{
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 
 		mergeValueBool(templateValuesMap, "InCluster", &installAgentCmdOptions.kube.inCluster)
-		mergeValueBool(templateValuesMap, "kubernetesRunnerType", &installAgentCmdOptions.kubernetesRunnerType)
 
 		s := store.GetStore()
 		lgr := createLogger("Install-agent", verbose, logFormatter)
@@ -192,7 +190,6 @@ func init() {
 
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
 	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
-	installAgentCmd.Flags().BoolVar(&installAgentCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")
 
 	installAgentCmd.Flags().StringArrayVar(&installAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
 	installAgentCmd.Flags().StringArrayVar(&installAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")

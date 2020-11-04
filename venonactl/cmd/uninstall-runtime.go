@@ -62,10 +62,10 @@ var uninstallRuntimeCmd = &cobra.Command{
 
 		builder := plugins.NewBuilder(lgr)
 		if uninstallRunimeCmdOptions.kube.context == "" {
-			dieOnError(fmt.Errorf("Context name is required in order to uninstall agent"))
+			dieOnError(fmt.Errorf("Context name is required in order to uninstall runtime"))
 		}
 		if uninstallRunimeCmdOptions.kube.namespace == "" {
-			dieOnError(fmt.Errorf("Namespace name is required to in order to uninstall agent"))
+			dieOnError(fmt.Errorf("Namespace name is required to in order to uninstall runtime"))
 		}
 		s.KubernetesAPI.ContextName = uninstallRunimeCmdOptions.kube.context
 		s.KubernetesAPI.Namespace = uninstallRunimeCmdOptions.kube.namespace
@@ -102,6 +102,7 @@ var uninstallRuntimeCmd = &cobra.Command{
 			builder.Add(plugins.VolumeProvisionerPluginType)
 		}
 		builder.Add(plugins.RuntimeAttachType)
+		builder.Add(plugins.EnginePluginType)
 		deleteOptions.ClusterNamespace = uninstallRunimeCmdOptions.kube.namespace
 		deleteOptions.AgentNamespace = uninstallRunimeCmdOptions.kubeVenona.namespace
 		deleteOptions.RuntimeEnvironment = uninstallRunimeCmdOptions.runtimeEnvironmentName

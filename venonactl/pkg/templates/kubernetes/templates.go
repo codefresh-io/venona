@@ -9,7 +9,7 @@ func TemplatesMap() map[string]string {
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .AppProxy.AppName }}-cluster-reader
+  name: {{ .AppProxy.AppName }}-cluster-reader-{{ .Namespace }}
 subjects:
 - kind: ServiceAccount
   name: {{ .AppProxy.AppName }} # this service account can get secrets cluster-wide (all namespaces)
@@ -57,7 +57,7 @@ roleRef:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .AppProxy.AppName }}-cluster-reader
+  name: {{ .AppProxy.AppName }}-cluster-reader-{{ .Namespace }}
   labels:
     app: {{ .AppProxy.AppName }}
     version: {{ .Version }}
@@ -632,6 +632,22 @@ spec:
   {{ end }}
 `
 
+	templatesMap["role-binding.engine.yaml"] = `{{- if .CreateRbac }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Runtime.EngineAppName }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end  }}`
+
 	templatesMap["role-binding.re.yaml"] = `{{- if .CreateRbac }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -647,6 +663,18 @@ roleRef:
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io
 {{- end  }}`
+
+	templatesMap["role.engine.yaml"] = `{{- if .CreateRbac }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+{{- end }}`
 
 	templatesMap["role.monitor.yaml"] = `{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
@@ -838,6 +866,18 @@ metadata:
   labels:
     app: dind-volume-provisioner
 {{- end }}`
+
+	templatesMap["service-account.engine.yaml"] = `{{- if .CreateRbac }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Runtime.EngineAppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
+{{- end }}
+`
 
 	templatesMap["service-account.monitor.yaml"] = `{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}

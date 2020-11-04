@@ -12,6 +12,7 @@ const (
 	ApplicationName         = "runner"
 	MonitorApplicationName  = "monitor"
 	AppProxyApplicationName = "app-proxy"
+	EngineAppName           = "codefresh-engine"
 )
 
 var (
@@ -203,6 +204,9 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Resources":    s.AppProxy.Resources,
 			"TLSSecret":    s.AppProxy.TLSSecret,
 			"PathPrefix":   s.AppProxy.PathPrefix,
+		},
+		"Runtime": map[string]interface{}{
+			"EngineAppName": EngineAppName,
 		},
 	}
 }
