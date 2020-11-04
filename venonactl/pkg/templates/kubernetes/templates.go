@@ -740,8 +740,6 @@ rules:
 
 	templatesMap["rolebinding.monitor.yaml"] = `{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
-# used by:
-# - monitor pod
 {{- if .Monitor.UseNamespaceWithRole }}
 kind: RoleBinding
 {{- else }}
