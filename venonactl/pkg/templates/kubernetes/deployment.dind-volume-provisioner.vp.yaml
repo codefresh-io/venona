@@ -40,6 +40,12 @@ spec:
           - -v=4
           - --resync-period=50s
         env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
         {{- if ne .DockerRegistry "" }}

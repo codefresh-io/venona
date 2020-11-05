@@ -34,6 +34,12 @@ spec:
         resources:
 {{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           {{- if $.AppProxy.AdditionalEnvVars }}
           {{- range $key, $value := $.AppProxy.AdditionalEnvVars }}
           - name: {{ $key }}

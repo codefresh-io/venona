@@ -12,24 +12,26 @@
 ###                                        ###
 ##############################################
 ### Codefresh host --api-host and token --api-token
-CodefreshHost: https://g.codefresh.io
-Token: 5efb62289c4b7a30ee858ca3.fac149aafef7845e3e79d2440e352873
+CodefreshHost: https://g.codefresh.io # for on-prem installations
+Token: XXXXXXXXXXXXXXXXX.YYYYYYYYYYYYYYY # generate a token here: https://g.codefresh.io/user/settings
 
-### skips certificates validation on TLS connections
-#insecure: true
+### insecure: skips certificates validation on TLS connections
+### use this if you're getting TLS certificate validation
+### errors during the installation
+# insecure: true
 
 ##############################################
 ###                                        ###
 ###          Kubernetes Context            ###
 ###                                        ###
 ##############################################
-### ConfigPath - kubeconfig from --kube-config-path
+### ConfigPath --kube-config-path $KUBECONFIG: kubeconfig path
 #ConfigPath: # default is $(HOME)/.kube/config
 
-### Context: from both --context (global arg) and
+### Context: --context $KUBE_CONTEXT: which kubernetes context to use
 #Context: gke_codefresh_cluster
 
-### Namespace - from --kube-namespace parameter + env KUBE_NAMESPACE, for venona, runtime, monitor, app-proxy
+### Namespace --kube-namespace $KUBE_NAMESPACE: namespace for the runner, runtime, monitor, app-proxy
 Namespace: r1
 
 
@@ -51,6 +53,14 @@ RuntimeEnvironmentName: my-unique-runtime-name
 ### this is the name of the cluster integration in codefresh
 # ClusterId: cluster-name
 
+### EnvVars: global environment variables that will be set on every component,
+### including runtime components such as engine and dind.
+### Use this if you need to set http_proxy variables
+EnvVars:
+  HTTP_PROXY: http://123.123.123.123:8080
+  HTTPS_PROXY: http://123.123.123.123:8080
+  NO_PROXY: localhost
+
 ##############################################
 ###            Codefresh Runner            ###
 ###                                        ###
@@ -71,6 +81,12 @@ RuntimeEnvironmentName: my-unique-runtime-name
 #       cpu: 200m
 #       memory: 500Mi
 
+### AdditionalEnvVars --envVars: adds environment variables to the runner deployment
+# AdditionalEnvVars:
+#   HTTP_PROXY: 10.20.0.35:8080
+#   HTTPS_PROXY: 10.20.0.35:8080
+#   NO_PROXY: 10.20.0.*
+
 ### NodeSelector --kube-node-selector: controls runner and dind-volume-provisioner pods
 # NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 
@@ -80,12 +96,6 @@ RuntimeEnvironmentName: my-unique-runtime-name
 #   operator: Equal
 #   value: dinds
 #   effect: NoSchedule
-
-### AdditionalEnvVars --envVars: adds environment variables to the runner deployment
-# AdditionalEnvVars:
-#   HTTP_PROXY: 10.20.0.35:8080
-#   HTTPS_PROXY: 10.20.0.35:8080
-#   NO_PROXY: 10.20.0.*,
 
 ### Agent options: generally you should only use them if you deleted your runner by mistake
 # AgentToken --agentToken: used by the runner pod to authenticate to codefresh
@@ -104,7 +114,7 @@ RuntimeEnvironmentName: my-unique-runtime-name
 
 ### Storage parameters for dind-volume-provisoner and dind-lv-monitor
 # Storage:
-#   Annotations:
+#   Annotations: # will be set on the storage class
 #     fizz: bazz
 #   Backend: local
 #   StorageClassName: # default is: dind-local-volumes-runner-<namespace>
@@ -124,8 +134,8 @@ RuntimeEnvironmentName: my-unique-runtime-name
 #       requests:
 #         cpu: 200m
 #         memory: 500Mi
-#     ServiceAccount: # will also be used by LocalVolumeMonitor
-#       Annotations:
+#     ServiceAccount:
+#       Annotations:  # will be set on VolumeProvisioner and LocalVolumeMonitor service account
 #         foo: bar2
 #   LocalVolumeMonitor: 
 #     resources:

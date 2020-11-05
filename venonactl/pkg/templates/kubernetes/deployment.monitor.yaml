@@ -33,6 +33,12 @@ spec:
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           {{- if $.Monitor.AdditionalEnvVars }}
           {{- range $key, $value := $.Monitor.AdditionalEnvVars }}
           - name: {{ $key }}
