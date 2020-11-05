@@ -186,6 +186,12 @@ spec:
           command:
           - /bin/local-volumes-agent
           env:
+            {{- if $.EnvVars }}
+            {{- range $key, $value := $.EnvVars }}
+            - name: {{ $key }}
+              value: "{{ $value}}"
+            {{- end}}
+            {{- end}}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -250,6 +256,12 @@ spec:
         resources:
 {{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           {{- if $.AppProxy.AdditionalEnvVars }}
           {{- range $key, $value := $.AppProxy.AdditionalEnvVars }}
           - name: {{ $key }}
@@ -327,6 +339,12 @@ spec:
           - -v=4
           - --resync-period=50s
         env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
         {{- if ne .DockerRegistry "" }}
@@ -435,6 +453,12 @@ spec:
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           {{- if $.Monitor.AdditionalEnvVars }}
           {{- range $key, $value := $.Monitor.AdditionalEnvVars }}
           - name: {{ $key }}
@@ -517,6 +541,12 @@ spec:
       {{ end }}
       containers:
       - env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
         {{- if $.AdditionalEnvVars }}
         {{- range $key, $value := $.AdditionalEnvVars }}
         - name: {{ $key }}

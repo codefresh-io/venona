@@ -43,7 +43,7 @@ Namespace: r1
 
 ### RuntimeEnvironmentName --runtimeName: used when installing a new runtime
 ### will be used to uniquely identify the runtime in Codefresh
-RuntimeEnvironmentName: my-unique-runtime-name
+# RuntimeEnvironmentName: my-unique-runtime-name
 
 ### RuntimeServiceAccount --kube-service-account: used when attaching a runtime to a runner
 ### default is: runner
@@ -56,10 +56,10 @@ RuntimeEnvironmentName: my-unique-runtime-name
 ### EnvVars: global environment variables that will be set on every component,
 ### including runtime components such as engine and dind.
 ### Use this if you need to set http_proxy variables
-EnvVars:
-  HTTP_PROXY: http://123.123.123.123:8080
-  HTTPS_PROXY: http://123.123.123.123:8080
-  NO_PROXY: localhost
+# EnvVars:
+#   HTTP_PROXY: http://123.123.123.123:8080
+#   HTTPS_PROXY: http://123.123.123.123:8080
+#   NO_PROXY: localhost
 
 ##############################################
 ###            Codefresh Runner            ###

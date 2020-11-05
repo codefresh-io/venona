@@ -113,6 +113,7 @@ func init() {
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	installAppProxyCmd.Flags().StringArrayVarP(&installAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
+	installAppProxyCmd.Flags().StringArrayVar(&installAppProxyCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
 	installAppProxyCmd.Flags().StringArrayVar(&installAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installAppProxyCmd.Flags().BoolVar(&installAppProxyCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 }
