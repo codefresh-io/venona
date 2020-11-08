@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: app-proxy
   namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
 spec:
   selector:
     app: {{ .AppProxy.AppName }}

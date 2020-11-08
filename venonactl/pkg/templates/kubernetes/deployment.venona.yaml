@@ -38,6 +38,12 @@ spec:
       {{ end }}
       containers:
       - env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
         {{- if $.AdditionalEnvVars }}
         {{- range $key, $value := $.AdditionalEnvVars }}
         - name: {{ $key }}

@@ -34,6 +34,12 @@ spec:
         resources:
 {{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           {{- if $.AppProxy.AdditionalEnvVars }}
           {{- range $key, $value := $.AppProxy.AdditionalEnvVars }}
           - name: {{ $key }}
@@ -44,9 +50,9 @@ spec:
             value: "3000"
           - name: CODEFRESH_HOST
             value: {{ .CodefreshHost }}
-          {{ if ne .AppProxy.PathPrefix "" }}
+          {{ if .AppProxy.Ingress.PathPrefix }}
           - name: API_PATH_PREFIX
-            value: {{ .AppProxy.PathPrefix }}
+            value: {{ .AppProxy.Ingress.PathPrefix }}
           {{ end }}
           {{- if .NewRelicLicense }}
           - name: NEWRELIC_LICENSE_KEY

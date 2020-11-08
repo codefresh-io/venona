@@ -16,7 +16,7 @@ subjects:
   namespace: {{ .Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .AppProxy.AppName }}-cluster-reader
+  name: {{ .AppProxy.AppName }}-cluster-reader-{{ .Namespace }}
   apiGroup: rbac.authorization.k8s.io
 {{- end  }}`
 
@@ -186,6 +186,12 @@ spec:
           command:
           - /bin/local-volumes-agent
           env:
+            {{- if $.EnvVars }}
+            {{- range $key, $value := $.EnvVars }}
+            - name: {{ $key }}
+              value: "{{ $value}}"
+            {{- end}}
+            {{- end}}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -250,6 +256,12 @@ spec:
         resources:
 {{ toYamlMsi .AppProxy.resources | indent 10 }}
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           {{- if $.AppProxy.AdditionalEnvVars }}
           {{- range $key, $value := $.AppProxy.AdditionalEnvVars }}
           - name: {{ $key }}
@@ -260,9 +272,9 @@ spec:
             value: "3000"
           - name: CODEFRESH_HOST
             value: {{ .CodefreshHost }}
-          {{ if ne .AppProxy.PathPrefix "" }}
+          {{ if .AppProxy.Ingress.PathPrefix }}
           - name: API_PATH_PREFIX
-            value: {{ .AppProxy.PathPrefix }}
+            value: {{ .AppProxy.Ingress.PathPrefix }}
           {{ end }}
           {{- if .NewRelicLicense }}
           - name: NEWRELIC_LICENSE_KEY
@@ -327,6 +339,12 @@ spec:
           - -v=4
           - --resync-period=50s
         env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
         {{- if ne .DockerRegistry "" }}
@@ -435,6 +453,18 @@ spec:
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
+          {{- if $.Monitor.AdditionalEnvVars }}
+          {{- range $key, $value := $.Monitor.AdditionalEnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
           - name: SERVICE_NAME
             value: {{ .Monitor.AppName }}
           {{- if .Monitor.UseNamespaceWithRole }}
@@ -511,6 +541,12 @@ spec:
       {{ end }}
       containers:
       - env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
         {{- if $.AdditionalEnvVars }}
         {{- range $key, $value := $.AdditionalEnvVars }}
         - name: {{ $key }}
@@ -609,26 +645,26 @@ spec:
 kind: Ingress
 metadata:
   annotations:
-    {{ if ne .AppProxy.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.IngressClass }}{{ end }}
-    {{ range $key, $value := .AppProxy.Annotations }}
+    {{ if ne .AppProxy.Ingress.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.Ingress.IngressClass }}{{ end }}
+    {{ range $key, $value := .AppProxy.Ingress.Annotations }}
     {{ $key }}: {{ $value }}
     {{ end }}
   name: app-proxy
   namespace: {{ .Namespace }}
 spec:
   rules:
-    - host: {{ .AppProxy.Host }}
+    - host: {{ .AppProxy.Ingress.Host }}
       http:
         paths:
-          - path: {{ if ne .AppProxy.PathPrefix "" }}{{ .AppProxy.PathPrefix }}{{ else }}'/'{{end}}
+          - path: {{ if .AppProxy.Ingress.PathPrefix }}{{ .AppProxy.Ingress.PathPrefix }}{{ else }}'/'{{end}}
             backend:
               serviceName: app-proxy
               servicePort: 80
-  {{ if ne .AppProxy.TLSSecret "" }}
+  {{ if .AppProxy.Ingress.TLSSecret }}
   tls:
     - hosts:
-        - {{ .AppProxy.Host }}
-      secretName: {{ .AppProxy.TLSSecret }}
+        - {{ .AppProxy.Ingress.Host }}
+      secretName: {{ .AppProxy.Ingress.TLSSecret }}
   {{ end }}
 `
 
@@ -799,6 +835,10 @@ kind: ServiceAccount
 metadata:
   name: {{ .Monitor.AppName }}-rollback
   namespace: {{ .Namespace }}
+  annotations:
+  {{ range $key, $value := .Monitor.ServiceAccount.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
   labels:
     app: {{ .Monitor.AppName }}
     version: {{ .Version }}
@@ -850,6 +890,10 @@ kind: ServiceAccount
 metadata:
   name: {{ .AppProxy.AppName }}
   namespace: {{ .Namespace }}
+  annotations:
+  {{ range $key, $value := .AppProxy.ServiceAccount.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
   labels:
     app: {{ .AppProxy.AppName }}
     version: {{ .Version }}
@@ -863,6 +907,10 @@ kind: ServiceAccount
 metadata:
   name: volume-provisioner-{{ .AppName }}
   namespace: {{ .Namespace }}
+  annotations:
+  {{ range $key, $value := .Storage.VolumeProvisioner.ServiceAccount.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
   labels:
     app: dind-volume-provisioner
 {{- end }}`
@@ -873,6 +921,10 @@ kind: ServiceAccount
 metadata:
   name: {{ .Runtime.EngineAppName }}
   namespace: {{ .Namespace }}
+  annotations:
+  {{ range $key, $value := .Runtime.ServiceAccount.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
   labels:
     app: {{ .AppProxy.AppName }}
     version: {{ .Version }}
@@ -886,6 +938,10 @@ kind: ServiceAccount
 metadata:
   name: {{ .Monitor.AppName }}
   namespace: {{ .Namespace }}
+  annotations:
+  {{ range $key, $value := .Monitor.ServiceAccount.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
   labels:
     app: {{ .Monitor.AppName }}
     version: {{ .Version }}
@@ -906,6 +962,9 @@ kind: Service
 metadata:
   name: app-proxy
   namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }}
 spec:
   selector:
     app: {{ .AppProxy.AppName }}
@@ -944,6 +1003,10 @@ metadata:
   name: {{ .Storage.StorageClassName }}
   labels:
     app: dind-volume-provisioner
+  annotations:
+  {{ range $key, $value := .Storage.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
 provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
 parameters:
 {{- if eq .Storage.Backend "local" }}

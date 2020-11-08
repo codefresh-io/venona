@@ -2,24 +2,24 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    {{ if ne .AppProxy.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.IngressClass }}{{ end }}
-    {{ range $key, $value := .AppProxy.Annotations }}
+    {{ if ne .AppProxy.Ingress.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.Ingress.IngressClass }}{{ end }}
+    {{ range $key, $value := .AppProxy.Ingress.Annotations }}
     {{ $key }}: {{ $value }}
     {{ end }}
   name: app-proxy
   namespace: {{ .Namespace }}
 spec:
   rules:
-    - host: {{ .AppProxy.Host }}
+    - host: {{ .AppProxy.Ingress.Host }}
       http:
         paths:
-          - path: {{ if ne .AppProxy.PathPrefix "" }}{{ .AppProxy.PathPrefix }}{{ else }}'/'{{end}}
+          - path: {{ if .AppProxy.Ingress.PathPrefix }}{{ .AppProxy.Ingress.PathPrefix }}{{ else }}'/'{{end}}
             backend:
               serviceName: app-proxy
               servicePort: 80
-  {{ if ne .AppProxy.TLSSecret "" }}
+  {{ if .AppProxy.Ingress.TLSSecret }}
   tls:
     - hosts:
-        - {{ .AppProxy.Host }}
-      secretName: {{ .AppProxy.TLSSecret }}
+        - {{ .AppProxy.Ingress.Host }}
+      secretName: {{ .AppProxy.Ingress.TLSSecret }}
   {{ end }}

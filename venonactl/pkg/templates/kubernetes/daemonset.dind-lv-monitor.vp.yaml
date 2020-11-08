@@ -40,6 +40,12 @@ spec:
           command:
           - /bin/local-volumes-agent
           env:
+            {{- if $.EnvVars }}
+            {{- range $key, $value := $.EnvVars }}
+            - name: {{ $key }}
+              value: "{{ $value}}"
+            {{- end}}
+            {{- end}}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

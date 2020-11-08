@@ -60,8 +60,8 @@ func (u *appProxyPlugin) Install(opt *InstallOptions, v Values) (Values, error) 
 		return nil, err
 	}
 
-	host := objx.New(v["AppProxy"]).Get("Host").Str()
-	pathPrefix := objx.New(v["AppProxy"]).Get("PathPrefix").Str()
+	host := objx.New(v["AppProxy"]).Get("Ingress.Host").Str()
+	pathPrefix := objx.New(v["AppProxy"]).Get("Ingress.PathPrefix").Str()
 	appProxyURL := fmt.Sprintf("https://%v%v", host, pathPrefix)
 	u.logger.Info(fmt.Sprintf("app proxy is running at: %v", appProxyURL))
 	return v, nil

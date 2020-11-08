@@ -40,6 +40,7 @@ var installMonitorAgentCmdOptions struct {
 	templateFileValues []string
 	templateValueFiles []string
 	resources          map[string]interface{}
+	dryRun             bool
 }
 
 // installK8sAgentCmd represents the install command
@@ -83,6 +84,7 @@ var installMonitorAgentCmd = &cobra.Command{
 
 		builderInstallOpt := &plugins.InstallOptions{
 			ClusterNamespace: s.KubernetesAPI.Namespace,
+			DryRun:           installMonitorAgentCmdOptions.dryRun,
 		}
 
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
@@ -137,7 +139,7 @@ func init() {
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.dockerRegistry, "docker-registry", "", "The prefix for the container registry that will be used for pulling the required components images. Example: --docker-registry=\"docker.io\"")
 
 	installMonitorAgentCmd.Flags().StringVar(&installMonitorAgentCmdOptions.codefreshHost, "codefreshHost", "", "Override codefresh host if you use your own codefresh installation")
-
+	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installMonitorAgentCmd.Flags().BoolVar(&installMonitorAgentCmdOptions.helm3, "helm3", false, "Set flag if cluster use helm3")
 	installMonitorAgentCmd.Flags().StringArrayVar(&installMonitorAgentCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installMonitorAgentCmd.Flags().StringArrayVar(&installMonitorAgentCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
