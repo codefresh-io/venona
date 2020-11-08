@@ -29,30 +29,52 @@ var allTestPluginTypes = []string{
 	plugins.VolumeProvisionerPluginType,
 	plugins.EnginePluginType,
 	plugins.RuntimeAttachType,
+	plugins.NetworkTesterPluginType,
 }
 
 var testCommandOptions struct {
 	kube struct {
 		namespace string
 		context   string
+		inCluster bool
 	}
-	proxySettings struct {
-		httpProxy  string
-		httpsProxy string
-		noProxy    string
-	}
-	insecure bool
-	plugin   []string
+	insecure           bool
+	plugin             []string
+	templateValues     []string
+	templateFileValues []string
+	templateValueFiles []string
 }
 
 var testCommand = &cobra.Command{
 	Use:   "test",
 	Short: "Run test on the target cluster prior installation",
 	Run: func(cmd *cobra.Command, args []string) {
+		// get valuesMap from --values <values.yaml> --set-value k=v --set-file k=<context-of file>
+		templateValuesMap, err := templateValuesToMap(
+			testCommandOptions.templateValueFiles,
+			testCommandOptions.templateValues,
+			testCommandOptions.templateFileValues)
+		if err != nil {
+			dieOnError(err)
+		}
+		// Merge cmd options with template
+		mergeValueStr(templateValuesMap, "ConfigPath", &kubeConfigPath)
+		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
+		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
+		mergeValueStr(templateValuesMap, "Namespace", &testCommandOptions.kube.namespace)
+		mergeValueStr(templateValuesMap, "Context", &testCommandOptions.kube.context)
+		mergeValueBool(templateValuesMap, "InCluster", &testCommandOptions.kube.inCluster)
+		mergeValueBool(templateValuesMap, "insecure", &testCommandOptions.insecure)
+
 		lgr := createLogger("test", verbose, logFormatter)
 		s := store.GetStore()
+		buildBasicStore(lgr)
 		extendStoreWithKubeClient(lgr)
-		fillKubernetesAPI(lgr, testCommandOptions.kube.context, testCommandOptions.kube.namespace, false)
+		fillKubernetesAPI(lgr, testCommandOptions.kube.context, testCommandOptions.kube.namespace, testCommandOptions.kube.inCluster)
+		fillCodefreshAPI(lgr)
+		extendStoreWithAgentAPI(lgr, "", "")
+		setVerbosity(verbose)
+		setInsecure(testCommandOptions.insecure)
 
 		builder := plugins.NewBuilder(lgr)
 		for _, p := range testCommandOptions.plugin {
@@ -74,24 +96,24 @@ var testCommand = &cobra.Command{
 			if p == plugins.RuntimeAttachType {
 				builder.Add(plugins.RuntimeAttachType)
 			}
+			if p == plugins.NetworkTesterPluginType {
+				builder.Add(plugins.NetworkTesterPluginType)
+			}
 		}
+
+		options := plugins.TestOptions{
+			KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+			ClusterNamespace: s.KubernetesAPI.Namespace,
+		}
+
+		values := s.BuildValues()
+		values = mergeMaps(values, templateValuesMap)
+
 		var finalerr error
 		lgr.Info("Testing requirements")
+
 		for _, p := range builder.Get() {
-			err := p.Test(plugins.TestOptions{
-				KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, false),
-				ClusterNamespace: s.KubernetesAPI.Namespace,
-				ProxySettings: struct {
-					HTTPProxy  string
-					HTTPSProxy string
-					NoProxy    string
-				}{
-					HTTPSProxy: testCommandOptions.proxySettings.httpsProxy,
-					HTTPProxy:  testCommandOptions.proxySettings.httpProxy,
-					NoProxy:    testCommandOptions.proxySettings.noProxy,
-				},
-				Insecure: testCommandOptions.insecure,
-			})
+			err := p.Test(options, values)
 			if err != nil && finalerr == nil {
 				finalerr = err
 			}
@@ -105,17 +127,16 @@ var testCommand = &cobra.Command{
 func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
-	viper.BindEnv("https-proxy", "HTTPS_PROXY")
-	viper.BindEnv("http-proxy", "HTTP_PROXY")
-	viper.BindEnv("no-proxy", "NO_PROXY")
 
 	testCommand.Flags().StringVar(&testCommandOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which monitor should be installed [$KUBE_NAMESPACE]")
 	testCommand.Flags().StringVar(&testCommandOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be installed (default is current-context) [$KUBE_CONTEXT]")
-	testCommand.Flags().StringVar(&testCommandOptions.proxySettings.httpsProxy, "https-proxy", viper.GetString("https-proxy"), "https_proxy setting [$HTTPS_PROXY]")
-	testCommand.Flags().StringVar(&testCommandOptions.proxySettings.httpProxy, "http-proxy", viper.GetString("http-proxy"), "http_proxy setting [$HTTP_PROXY]")
-	testCommand.Flags().StringVar(&testCommandOptions.proxySettings.noProxy, "no-proxy", viper.GetString("no-proxy"), "no_proxy setting [$NO_PROXY]")
 	testCommand.Flags().BoolVar(&testCommandOptions.insecure, "insecure", false, "Set to true to disable certificate validation when using TLS connections")
+	testCommand.Flags().BoolVar(&testCommandOptions.kube.inCluster, "in-cluster", false, "Set flag if the command is running inside a cluster")
 	testCommand.Flags().StringArrayVar(&testCommandOptions.plugin, "installer", allTestPluginTypes, "Which test to run, based on the installer type")
+
+	testCommand.Flags().StringArrayVar(&testCommandOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
+	testCommand.Flags().StringArrayVar(&testCommandOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file, example: --set-file Storage.GoogleServiceAccount=/path/to/service-account.json")
+	testCommand.Flags().StringArrayVarP(&testCommandOptions.templateValueFiles, "values", "f", []string{}, "specify values in a YAML file")
 
 	rootCmd.AddCommand(testCommand)
 }

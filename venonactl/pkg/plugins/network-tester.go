@@ -17,21 +17,44 @@ limitations under the License.
 package plugins
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
+	"io"
+	"strings"
+	"time"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
+	"github.com/codefresh-io/venona/venonactl/pkg/store"
+	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
+	"github.com/stretchr/objx"
+	v1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type networkTesterPlugin struct {
 	logger logger.Logger
 }
 
-// Install venona agent
+const (
+	networkTesterFilesPattern = ".*.network-tester.yaml"
+	networkTestsTimeout       = 120 * time.Second
+	defaultRegistry           = "https://docker.io"
+)
+
+var (
+	errNetworkTestFailed = errors.New("Cluster network tests failed. If you are using a proxy, run again with the correct http proxy environment variables. For more details run again with --verbose")
+)
+var testDomains = []string{
+	"https://g.codefresh.io",
+	"https://codefresh-prod-public-builds-1.firebaseio.com",
+}
+
 func (u *networkTesterPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	return nil, fmt.Errorf("not supported")
 }
 
-// Status of runtimectl environment
 func (u *networkTesterPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
 	return nil, fmt.Errorf("not supported")
 }
@@ -48,7 +71,119 @@ func (u *networkTesterPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *networkTesterPlugin) Test(opt TestOptions) error {
+func (u *networkTesterPlugin) Test(opt TestOptions, v Values) error {
+	cs, err := opt.KubeBuilder.BuildClient()
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
+		return err
+	}
+	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
+		return err
+	}
+
+	dockerRegistry := v["DockerRegistry"].(string)
+	if dockerRegistry == "" {
+		dockerRegistry = defaultRegistry
+	}
+	testDomains = append(testDomains, dockerRegistry)
+
+	if gitProviderURL := objx.New(v["AppProxy"]).Get("GitProviderUrl").Str(); gitProviderURL != "" {
+		testDomains = append(testDomains, gitProviderURL)
+	}
+
+	urls := strings.Join(testDomains, ",")
+	objx.New(v["NetworkTester"]).Set("AdditionalEnvVars.URLS", urls)
+
+	err = install(&installOptions{
+		logger:         u.logger,
+		templates:      templates.TemplatesMap(),
+		templateValues: v,
+		kubeClientSet:  cs,
+		namespace:      opt.ClusterNamespace,
+		matchPattern:   networkTesterFilesPattern,
+		operatorType:   NetworkTesterPluginType,
+	})
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Failed to run network-tester pod: %v", err))
+		return err
+	}
+	// defer cleanup
+	defer func() {
+		err := uninstall(&deleteOptions{
+			templates:      templates.TemplatesMap(),
+			templateValues: v,
+			kubeClientSet:  cs,
+			namespace:      opt.ClusterNamespace,
+			matchPattern:   networkTesterFilesPattern,
+			operatorType:   NetworkTesterPluginType,
+			logger:         u.logger,
+		})
+		if err != nil {
+			u.logger.Error(fmt.Sprintf("Failed to cleanup network-tester pod: %v", err))
+		}
+	}()
+
+	u.logger.Info("Running network tests...")
+
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+	var podLastState *v1.Pod
+	timeoutChan := time.After(networkTestsTimeout)
+Loop:
+	for {
+		select {
+		case <-ticker.C:
+			u.logger.Debug("Waiting for network tester to finish")
+			pod, err := cs.CoreV1().Pods(opt.ClusterNamespace).Get(store.NetworkTesterName, metav1.GetOptions{})
+			if err != nil {
+				if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
+					if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
+						u.logger.Debug("Network tester pod not found")
+					}
+				}
+			}
+			if pod.Status.ContainerStatuses[0].State.Running != nil {
+				u.logger.Debug("Network tester pod: running")
+			}
+			if pod.Status.ContainerStatuses[0].State.Waiting != nil {
+				u.logger.Debug("Network tester pod: waiting")
+			}
+			if pod.Status.ContainerStatuses[0].State.Terminated != nil {
+				u.logger.Debug("Network tester pod: terminated")
+				podLastState = pod
+				break Loop
+			}
+		case <-timeoutChan:
+			u.logger.Error("Network tests timeout reached!")
+			return fmt.Errorf("Network tests timeout reached")
+		}
+	}
+
+	req := cs.CoreV1().Pods(opt.ClusterNamespace).GetLogs(store.NetworkTesterName, &v1.PodLogOptions{})
+	podLogs, err := req.Stream()
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Failed to get network-tester pod logs: %v", err))
+		return err
+	}
+	defer podLogs.Close()
+
+	logsBuf := new(bytes.Buffer)
+	_, err = io.Copy(logsBuf, podLogs)
+	if err != nil {
+		u.logger.Error(fmt.Sprintf("Failed to read network-tester pod logs: %v", err))
+		return err
+	}
+	logs := strings.Trim(logsBuf.String(), "\n")
+	u.logger.Debug(fmt.Sprintf("%s", logs))
+
+	if podLastState.Status.ContainerStatuses[0].State.Terminated.ExitCode != 0 {
+		terminationMessage := strings.Trim(podLastState.Status.ContainerStatuses[0].State.Terminated.Message, "\n")
+		u.logger.Error(fmt.Sprintf("Network tests failed with: %v", terminationMessage))
+		return errNetworkTestFailed
+	}
+
 	return nil
 }
 

@@ -86,7 +86,7 @@ func (u *monitorAgentPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *monitorAgentPlugin) Test(opt TestOptions) error {
+func (u *monitorAgentPlugin) Test(opt TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		rbac: []rbacValidation{
 			{

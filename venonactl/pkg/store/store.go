@@ -13,6 +13,7 @@ const (
 	MonitorApplicationName  = "monitor"
 	AppProxyApplicationName = "app-proxy"
 	EngineAppName           = "codefresh-engine"
+	NetworkTesterName       = "cf-venona-network-tester"
 )
 
 var (
@@ -49,6 +50,10 @@ type (
 		ClusterInCodefresh string
 
 		DryRun bool
+
+		Verbose bool
+
+		Insecure bool
 
 		RuntimeEnvironment string
 
@@ -134,6 +139,8 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"CodefreshHost": s.CodefreshAPI.Host,
 		"Token":         s.CodefreshAPI.Token,
 		"Mode":          ModeInCluster,
+		"Verbose":       s.Verbose,
+		"Insecure":      s.Insecure,
 		"Image": map[string]string{
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Current.Version,
@@ -201,6 +208,13 @@ func (s *Values) BuildValues() map[string]interface{} {
 		},
 		"Runtime": map[string]interface{}{
 			"EngineAppName": EngineAppName,
+		},
+		"NetworkTester": map[string]interface{}{
+			"PodName": NetworkTesterName,
+			"Image": map[string]string{
+				"Name": "codefresh/cf-venona-network-tester",
+				"Tag":  "latest",
+			},
 		},
 	}
 }

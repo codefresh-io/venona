@@ -122,7 +122,7 @@ func (u *appProxyPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *appProxyPlugin) Test(opt TestOptions) error {
+func (u *appProxyPlugin) Test(opt TestOptions, v Values) error {
 	return nil
 }
 

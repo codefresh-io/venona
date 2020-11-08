@@ -130,6 +130,16 @@ func extendStoreWithKubeClient(logger logger.Logger) {
 	}
 }
 
+func setVerbosity(verbose bool) {
+	s := store.GetStore()
+	s.Verbose = verbose
+}
+
+func setInsecure(insecure bool) {
+	s := store.GetStore()
+	s.Insecure = insecure
+}
+
 func isUsingDefaultStorageClass(sc string) bool {
 	if sc == "" {
 		return true
