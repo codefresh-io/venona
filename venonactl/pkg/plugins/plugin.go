@@ -20,6 +20,7 @@ const (
 	DefaultStorageClassNamePrefix = "dind-local-volumes-runner"
 	RuntimeAttachType             = "runtime-attach"
 	AppProxyPluginType            = "app-proxy"
+	NetworkTesterPluginType       = "network-tester"
 )
 
 type (
@@ -113,6 +114,12 @@ type (
 			BuildClient() (*kubernetes.Clientset, error)
 		}
 		ClusterNamespace string
+		ProxySettings    struct {
+			HTTPProxy  string
+			HTTPSProxy string
+			NoProxy    string
+		}
+		Insecure bool
 	}
 
 	StatusOptions struct {

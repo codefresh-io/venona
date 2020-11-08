@@ -36,7 +36,13 @@ var testCommandOptions struct {
 		namespace string
 		context   string
 	}
-	plugin []string
+	proxySettings struct {
+		httpProxy  string
+		httpsProxy string
+		noProxy    string
+	}
+	insecure bool
+	plugin   []string
 }
 
 var testCommand = &cobra.Command{
@@ -75,6 +81,16 @@ var testCommand = &cobra.Command{
 			err := p.Test(plugins.TestOptions{
 				KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, false),
 				ClusterNamespace: s.KubernetesAPI.Namespace,
+				ProxySettings: struct {
+					HTTPProxy  string
+					HTTPSProxy string
+					NoProxy    string
+				}{
+					HTTPSProxy: testCommandOptions.proxySettings.httpsProxy,
+					HTTPProxy:  testCommandOptions.proxySettings.httpProxy,
+					NoProxy:    testCommandOptions.proxySettings.noProxy,
+				},
+				Insecure: testCommandOptions.insecure,
 			})
 			if err != nil && finalerr == nil {
 				finalerr = err
@@ -89,9 +105,16 @@ var testCommand = &cobra.Command{
 func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
+	viper.BindEnv("https-proxy", "HTTPS_PROXY")
+	viper.BindEnv("http-proxy", "HTTP_PROXY")
+	viper.BindEnv("no-proxy", "NO_PROXY")
 
 	testCommand.Flags().StringVar(&testCommandOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which monitor should be installed [$KUBE_NAMESPACE]")
 	testCommand.Flags().StringVar(&testCommandOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be installed (default is current-context) [$KUBE_CONTEXT]")
+	testCommand.Flags().StringVar(&testCommandOptions.proxySettings.httpsProxy, "https-proxy", viper.GetString("https-proxy"), "https_proxy setting [$HTTPS_PROXY]")
+	testCommand.Flags().StringVar(&testCommandOptions.proxySettings.httpProxy, "http-proxy", viper.GetString("http-proxy"), "http_proxy setting [$HTTP_PROXY]")
+	testCommand.Flags().StringVar(&testCommandOptions.proxySettings.noProxy, "no-proxy", viper.GetString("no-proxy"), "no_proxy setting [$NO_PROXY]")
+	testCommand.Flags().BoolVar(&testCommandOptions.insecure, "insecure", false, "Set to true to disable certificate validation when using TLS connections")
 	testCommand.Flags().StringArrayVar(&testCommandOptions.plugin, "installer", allTestPluginTypes, "Which test to run, based on the installer type")
 
 	rootCmd.AddCommand(testCommand)
