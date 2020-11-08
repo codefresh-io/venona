@@ -9,6 +9,6 @@ subjects:
   namespace: {{ .Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .AppProxy.AppName }}-cluster-reader
+  name: {{ .AppProxy.AppName }}-cluster-reader-{{ .Namespace }}
   apiGroup: rbac.authorization.k8s.io
 {{- end  }}
