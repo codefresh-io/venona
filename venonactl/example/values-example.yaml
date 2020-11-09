@@ -48,6 +48,9 @@
 ### default is: runner
 # RuntimeServiceAccount: runner
 
+### SkipClusterTest: only set to true if you want to skip the acceptance tests during the installation
+# SkipClusterTest: true
+
 ### ClusterId --clusterId: used when installing the monitor component
 ### this is the name of the cluster integration in codefresh
 # ClusterId: cluster-name
@@ -60,9 +63,12 @@
 #   HTTPS_PROXY: http://123.123.123.123:8080
 #   NO_PROXY: localhost
 
-### DockerRegistry --docker-registry: the docker registry from which all components
-### images will be pulled. default: docker.io
+### DockerRegistry --docker-registry: The docker registry from which all components images will be pulled [default: docker.io].
+### We will check connectivity from inside the cluster to this domain.
 # DockerRegistry: docker.io
+
+# GitProviderURL: api.github.com # (optional) We will check connectivity to this URL when we run our acceptance tests.
+
 
 ###############################################
 ###            Codefresh Runner             ###
@@ -231,7 +237,6 @@
 #   ServiceAccount:
 #     Annotations:
 #       foo: bar
-#   GitProviderUrl: https://api.github.com # (optional) We will check connectivity to this URL when we run our acceptance tests.
 
 
 ########################################################
@@ -243,3 +248,12 @@
 #   ServiceAccount: # will be used by the engine and dind pods
 #     Annotations:
 #       foo: bar
+
+
+########################################################
+###                    Logging                       ###
+###                                                  ###
+###        configure build logging solution          ###
+########################################################
+# Logging:
+#   FirebaseHost: firebase.io # (optional) We will check connectivity to this URL when we run our acceptance tests.

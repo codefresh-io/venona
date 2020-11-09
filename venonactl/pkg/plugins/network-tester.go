@@ -41,15 +41,13 @@ const (
 	networkTesterFilesPattern = ".*.network-tester.yaml"
 	networkTestsTimeout       = 120 * time.Second
 	defaultRegistry           = "https://docker.io"
+	defaultCodefreshHost      = "https://g.codefresh.io"
+	defaultFirebaseHost       = "https://codefresh-prod-public-builds-1.firebaseio.com"
 )
 
 var (
 	errNetworkTestFailed = errors.New("Cluster network tests failed. If you are using a proxy, run again with the correct http proxy environment variables. For more details run again with --verbose")
 )
-var testDomains = []string{
-	"https://g.codefresh.io",
-	"https://codefresh-prod-public-builds-1.firebaseio.com",
-}
 
 func (u *networkTesterPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 	return nil, fmt.Errorf("not supported")
@@ -71,6 +69,28 @@ func (u *networkTesterPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
+func prepareTestDomains(v map[string]interface{}) []string {
+	testDomains := make([]string, 0, 10)
+
+	vObj := objx.New(v)
+	// codefresh host
+	cfHost := vObj.Get("CodefreshHost").Str(defaultCodefreshHost)
+
+	// registry
+	dockerRegistry := vObj.Get("DockerRegistry").Str(defaultRegistry)
+
+	// logging
+	firebaseURL := vObj.Get("Logging.FirebaseHost").Str(defaultFirebaseHost)
+
+	// git url
+	if gitProviderURL := vObj.Get("GitProviderURL").Str(); gitProviderURL != "" {
+		testDomains = append(testDomains, gitProviderURL)
+	}
+	testDomains = append(testDomains, dockerRegistry, cfHost, firebaseURL)
+
+	return testDomains
+}
+
 func (u *networkTesterPlugin) Test(opt TestOptions, v Values) error {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
@@ -83,16 +103,7 @@ func (u *networkTesterPlugin) Test(opt TestOptions, v Values) error {
 		return err
 	}
 
-	dockerRegistry := v["DockerRegistry"].(string)
-	if dockerRegistry == "" {
-		dockerRegistry = defaultRegistry
-	}
-	testDomains = append(testDomains, dockerRegistry)
-
-	if gitProviderURL := objx.New(v["AppProxy"]).Get("GitProviderUrl").Str(); gitProviderURL != "" {
-		testDomains = append(testDomains, gitProviderURL)
-	}
-
+	testDomains := prepareTestDomains(v)
 	urls := strings.Join(testDomains, ",")
 	objx.New(v["NetworkTester"]).Set("AdditionalEnvVars.URLS", urls)
 
