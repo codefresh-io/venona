@@ -231,7 +231,7 @@
 #   ServiceAccount:
 #     Annotations:
 #       foo: bar
-#   GitProviderUrl: https://api.github.com # (optional) We will check connectivity to this URL during the installation acceptance tests 
+#   GitProviderUrl: https://api.github.com # (optional) We will check connectivity to this URL when we run our acceptance tests.
 
 
 ########################################################
