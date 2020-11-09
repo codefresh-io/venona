@@ -148,7 +148,7 @@ func (u *runtimeEnvironmentPlugin) Migrate(opt *MigrateOptions, v Values) error 
 	}, v)
 }
 
-func (u *runtimeEnvironmentPlugin) Test(opt TestOptions) error {
+func (u *runtimeEnvironmentPlugin) Test(opt TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		rbac: []rbacValidation{
 			{

@@ -20,6 +20,7 @@ const (
 	DefaultStorageClassNamePrefix = "dind-local-volumes-runner"
 	RuntimeAttachType             = "runtime-attach"
 	AppProxyPluginType            = "app-proxy"
+	NetworkTesterPluginType       = "network-tester"
 )
 
 type (
@@ -29,7 +30,7 @@ type (
 		Delete(*DeleteOptions, Values) error
 		Upgrade(*UpgradeOptions, Values) (Values, error)
 		Migrate(*MigrateOptions, Values) error
-		Test(TestOptions) error
+		Test(TestOptions, Values) error
 		Name() string
 	}
 
@@ -111,6 +112,7 @@ type (
 	TestOptions struct {
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
+			EnsureNamespaceExists(cs *kubernetes.Clientset) error
 		}
 		ClusterNamespace string
 	}
@@ -222,6 +224,12 @@ func build(t string, logger logger.Logger) Plugin {
 	if t == AppProxyPluginType {
 		return &appProxyPlugin{
 			logger: logger.New("installer", AppProxyPluginType),
+		}
+	}
+
+	if t == NetworkTesterPluginType {
+		return &networkTesterPlugin{
+			logger: logger.New("network-tester", NetworkTesterPluginType),
 		}
 	}
 

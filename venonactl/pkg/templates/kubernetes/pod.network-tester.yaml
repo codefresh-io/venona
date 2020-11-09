@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ .NetworkTester.PodName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }}
+spec:
+  containers:
+  - name: {{ .NetworkTester.PodName }}
+    image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .NetworkTester.Image.Name }}:{{ .NetworkTester.Image.Tag }} {{- else }} {{- .NetworkTester.Image.Name }}:{{ .NetworkTester.Image.Tag }} {{- end}}
+    imagePullPolicy: Always
+    restartPolicy: Never
+    resources:
+      limits:
+        cpu: 400m
+        memory: 500Mi
+      requests:
+        cpu: 200m
+        memory: 300Mi
+    env:
+      {{- if $.EnvVars }}
+      {{- range $key, $value := $.EnvVars }}
+      - name: {{ $key }}
+        value: "{{ $value}}"
+      {{- end}}
+      {{- end}}
+      {{- if $.NetworkTester.AdditionalEnvVars }}
+      {{- range $key, $value := $.NetworkTester.AdditionalEnvVars }}
+      - name: {{ $key }}
+        value: "{{ $value}}"
+      {{- end}}
+      {{- end}}
+      {{- if .Verbose }}
+      - name: DEBUG
+        value: '1'
+      {{- end }}
+      {{- if .Insecure }}
+      - name: INSECURE
+        value: '1'
+      {{- end }}
+      - name: IN_CLUSTER
+        value: '1'

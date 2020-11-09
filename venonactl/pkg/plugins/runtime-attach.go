@@ -307,7 +307,7 @@ func (u *runtimeAttachPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *runtimeAttachPlugin) Test(opt TestOptions) error {
+func (u *runtimeAttachPlugin) Test(opt TestOptions, v Values) error {
 	return nil
 }
 
