@@ -74,19 +74,30 @@ func prepareTestDomains(v map[string]interface{}) []string {
 
 	vObj := objx.New(v)
 	// codefresh host
-	cfHost := vObj.Get("CodefreshHost").Str(defaultCodefreshHost)
+	if cfHost := vObj.Get("CodefreshHost").Str(); cfHost != "" {
+		testDomains = append(testDomains, cfHost)
+	} else {
+		testDomains = append(testDomains, defaultCodefreshHost)
+	}
 
 	// registry
-	dockerRegistry := vObj.Get("DockerRegistry").Str(defaultRegistry)
+	if dockerRegistry := vObj.Get("DockerRegistry").Str(); dockerRegistry != "" {
+		testDomains = append(testDomains, dockerRegistry)
+	} else {
+		testDomains = append(testDomains, defaultRegistry)
+	}
 
 	// logging
-	firebaseURL := vObj.Get("Logging.FirebaseHost").Str(defaultFirebaseHost)
+	if firebaseURL := vObj.Get("Logging.FirebaseHost").Str(); firebaseURL != "" {
+		testDomains = append(testDomains, firebaseURL)
+	} else {
+		testDomains = append(testDomains, defaultFirebaseHost)
+	}
 
 	// git url
 	if gitProviderURL := vObj.Get("GitProviderURL").Str(); gitProviderURL != "" {
 		testDomains = append(testDomains, gitProviderURL)
 	}
-	testDomains = append(testDomains, dockerRegistry, cfHost, firebaseURL)
 
 	return testDomains
 }
@@ -154,6 +165,10 @@ Loop:
 						u.logger.Debug("Network tester pod not found")
 					}
 				}
+			}
+			if len(pod.Status.ContainerStatuses) == 0 {
+				u.logger.Debug("Network tester pod: creating container")
+				continue
 			}
 			if pod.Status.ContainerStatuses[0].State.Running != nil {
 				u.logger.Debug("Network tester pod: running")
