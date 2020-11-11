@@ -18,7 +18,7 @@ steps:
   export_version:
     title: Compare version to venona
     stage: Build & Test
-    image: quay.io/codefresh/semver
+    image: codefresh/semver
     commands:
     - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
     - export VENONA_VERSION=$(cat ./venona/VERSION)
@@ -48,7 +48,7 @@ steps:
     stage: Build & Test
     tag: ${{CF_BRANCH_TAG_NORMALIZED}}
     working_directory: ${{main_clone}}/venonactl
-    image_name: quay.io/codefresh/venonacli
+    image_name: codefresh/venonacli
     when:
       steps:
       - name: build_binaries

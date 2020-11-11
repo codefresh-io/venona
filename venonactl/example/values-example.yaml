@@ -130,10 +130,12 @@
 #   LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
 #   AvailabilityZone: 
 #   GoogleServiceAccount: 
-#   AwsAccessKeyId: 
+#   AwsAccessKeyId:
+#   AwsSecretAccessKey:
+#   Encrypted:  # encrypt volume, default is false
 #   AwsSecretAccessKey: 
 #   VolumeProvisioner:
-#     Image: quay.io/codefresh/dind-volume-provisioner:v23
+#     Image: codefresh/dind-volume-provisioner:v23
 #     NodeSelector: 
 #     Tolerations:
 #     resources:
@@ -180,6 +182,7 @@
 #   AvailabilityZone: us-east-1d
 #   AwsAccessKeyId: ABCDF
 #   AwsSecretAccessKey: ZYXWV
+#   Encrypted:  # encrypt volume, default is false
 #   VolumeProvisioner: 
 #     NodeSelector: kubernetes.io/role=master
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
@@ -192,7 +195,7 @@
 ################################################
 # Monitor:
 #   Image:
-#     Name: quay.io/codefresh/agent
+#     Name: codefresh/agent
 #     Tag:  stable
 #   resources:  
 #     limits:
@@ -248,7 +251,15 @@
 #   ServiceAccount: # will be used by the engine and dind pods
 #     Annotations:
 #       foo: bar
-
+#   AdditionalEnvVars:  # will be set on engine and dind pods
+#     SOME_VAR: SOME_VALUE
+#   resources: # dind pod resources
+#     limits:
+#       cpu: 500m
+#       memory: 1200Mi
+#     requests:
+#       cpu: 200m
+#       memory: 500Mi
 
 ########################################################
 ###                    Logging                       ###
