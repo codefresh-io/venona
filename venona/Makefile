@@ -45,7 +45,7 @@ security-check:
 .PHONY: docker-security-scan
 docker-security-scan:
 	@trivy image --clear-cache
-	@trivy image codefresh/venona:$(TAG)
+	@trivy image quay.io/codefresh/venona:$(TAG)
 
 ## License check all the golang files to have the license
 .PHONY: license

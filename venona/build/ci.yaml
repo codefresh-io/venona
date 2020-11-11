@@ -20,7 +20,7 @@ steps:
   download_dependencies: &deps
     title: Download Dependencies
     stage: Test
-    image: codefresh/venona-tester
+    image: quay.io/codefresh/venona-tester
     environment:
     - GO111MODULE=on
     - GOSUMDB=off
@@ -49,7 +49,7 @@ steps:
   export_version:
     <<: *common
     title: Compare version to venonactl
-    image: codefresh/semver
+    image: quay.io/codefresh/semver
     commands:
     - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
     - export VENONA_VERSION=$(cat ./venona/VERSION)
@@ -219,7 +219,7 @@ steps:
     - ${{VERSION}}-${{CF_REVISION}}
     - ${{CF_REVISION}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
-    image_name: codefresh/venona
+    image_name: quay.io/codefresh/venona
     registry: dockerhub
     when:
       steps:

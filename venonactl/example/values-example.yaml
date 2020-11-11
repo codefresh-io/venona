@@ -77,7 +77,7 @@
 ###############################################
 ### Runner image: controls the runner pod image
 # Image: 
-#   Name: codefresh/venona
+#   Name: quay.io/codefresh/venona
 #   Tag: 1.4.16 # default s.Version.Current.Version,
 
 ### Control runner pod resources
@@ -131,10 +131,9 @@
 #   AvailabilityZone: 
 #   GoogleServiceAccount: 
 #   AwsAccessKeyId: 
-#   AwsSecretAccessKey:
-#   Encrypted:  # encrypt volume, default is false
+#   AwsSecretAccessKey: 
 #   VolumeProvisioner:
-#     Image: codefresh/dind-volume-provisioner:v23
+#     Image: quay.io/codefresh/dind-volume-provisioner:v23
 #     NodeSelector: 
 #     Tolerations:
 #     resources:
@@ -181,7 +180,6 @@
 #   AvailabilityZone: us-east-1d
 #   AwsAccessKeyId: ABCDF
 #   AwsSecretAccessKey: ZYXWV
-#   Encrypted:  # encrypt volume, default is false
 #   VolumeProvisioner: 
 #     NodeSelector: kubernetes.io/role=master
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
@@ -194,7 +192,7 @@
 ################################################
 # Monitor:
 #   Image:
-#     Name: codefresh/agent
+#     Name: quay.io/codefresh/agent
 #     Tag:  stable
 #   resources:  
 #     limits:
@@ -218,7 +216,7 @@
 ########################################################
 # AppProxy:
 #   Image:
-#     Name: codefresh/cf-app-proxy
+#     Name: quay.io/codefresh/cf-app-proxy
 #     Tag: latest # default is latest
 #   resources:
 #     limits:
@@ -250,15 +248,6 @@
 #   ServiceAccount: # will be used by the engine and dind pods
 #     Annotations:
 #       foo: bar
-#   AdditionalEnvVars:  # will be set on engine and dind pods
-#     SOME_VAR: SOME_VALUE
-#   resources: # dind pod resources
-#     limits:
-#       cpu: 500m
-#       memory: 1200Mi
-#     requests:
-#       cpu: 200m
-#       memory: 500Mi
 
 
 ########################################################
