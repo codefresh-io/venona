@@ -219,7 +219,7 @@
 ########################################################
 # AppProxy:
 #   Image:
-#     Name: quay.io/codefresh/cf-app-proxy
+#     Name: codefresh/cf-app-proxy
 #     Tag: latest # default is latest
 #   resources:
 #     limits:
