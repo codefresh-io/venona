@@ -209,7 +209,7 @@ steps:
         ${{SEC_SCAN_REPORT_FILE}} \
         s3://${{SEC_SCAN_S3_BUCKET}}/${{IMAGE_NAME}}/${{CF_REPO_NAME}}:${{VERSION}}.txt
 
-  push:
+  push-dockerhub:
     type: push
     title: Push candidate
     stage: Push
@@ -221,6 +221,27 @@ steps:
     - ${{CF_BRANCH_TAG_NORMALIZED}}
     image_name: quay.io/codefresh/venona
     registry: dockerhub
+    when:
+      steps:
+      - name: build_image
+        on:
+        - success
+      - name: export_version
+        on:
+        - success
+
+  push-quay:
+    type: push
+    title: Push candidate
+    stage: Push
+    candidate: ${{build_image}}
+    tags:
+    - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
+    - ${{VERSION}}-${{CF_REVISION}}
+    - ${{CF_REVISION}}
+    - ${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: quay.io/codefresh/venona
+    registry: cf-quay
     when:
       steps:
       - name: build_image
