@@ -55,7 +55,7 @@ steps:
         on:
         - success
 
-  push_cli_image:
+  push_cli_image_dockerhub:
     title: "Push image with venona cli"
     stage: Release
     type: push
@@ -63,6 +63,20 @@ steps:
     tags:
     - ${{CF_BRANCH_TAG_NORMALIZED}}
     registry: "dockerhub"
+    when:
+      steps:
+        - name: build_cli_image
+          on:
+          - success
+
+  push_cli_image_quay:
+    title: "Push image with venona cli"
+    stage: Release
+    type: push
+    candidate: ${{build_cli_image}}
+    tags:
+    - ${{CF_BRANCH_TAG_NORMALIZED}}
+    registry: "cf-quay"
     when:
       steps:
         - name: build_cli_image
