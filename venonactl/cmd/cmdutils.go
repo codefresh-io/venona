@@ -324,3 +324,16 @@ func mergeValueMSI(valuesMap map[string]interface{}, key string, param *map[stri
 	val := mapX.Get(key).MSI(defaultValue...)
 	*param = val
 }
+
+func mergeValueMSISliceAsString(valuesMap map[string]interface{}, key string, param *string) {
+	mapX := objx.New(valuesMap)
+	if param != nil && len(*param) > 0 {
+		mapX.Set(key, *param)
+		return
+	}
+	val := mapX.Get(key).MSISlice()
+	y, _ := yaml.Marshal(val)
+
+	*param = fmt.Sprintf("\n%s", string(y))
+	mapX.Set(key, *param)
+}

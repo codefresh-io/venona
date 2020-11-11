@@ -72,7 +72,7 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
 		tolerations := getTolerations()
-		mergeValueStr(templateValuesMap, "Tolerations", &tolerations)
+		mergeValueMSISliceAsString(templateValuesMap, "Tolerations", &tolerations)
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
 
 		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
