@@ -32,10 +32,8 @@ spec:
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
-      {{ if ne .Tolerations "" }}
       tolerations:
-        {{ .Tolerations | indent 8 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
       - env:
         {{- if $.EnvVars }}

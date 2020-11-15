@@ -26,9 +26,7 @@ spec:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
         operator: "Exists"
-      {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 6 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
       - name: dind-volume-provisioner
         resources:

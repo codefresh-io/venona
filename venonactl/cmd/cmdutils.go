@@ -202,21 +202,22 @@ func loadTolerationsFromFile(filename string) string {
 	return string(data)
 }
 
-func parseTolerations(s string) (string, error) {
+func parseTolerations(s string) ([]k8sApi.Toleration, error) {
 	if s == "" {
-		return "", nil
+		return nil, nil
 	}
 	var data []k8sApi.Toleration
 	err := json.Unmarshal([]byte(s), &data)
 	if err != nil {
-		return "", fmt.Errorf("can not parse tolerations: %s", err)
+		return nil, fmt.Errorf("can not parse tolerations: %s", err)
 	}
-	y, err := yaml.Marshal(&data)
-	if err != nil {
-		return "", fmt.Errorf("can not marshel tolerations to yaml: %s", err)
-	}
-	d := fmt.Sprintf("\n%s", string(y))
-	return d, nil
+	// y, err := yaml.Marshal(&data)
+	// if err != nil {
+	// 	return "", fmt.Errorf("can not marshel tolerations to yaml: %s", err)
+	// }
+	// d := fmt.Sprintf("\n%s", string(y))
+	// return d, nil
+	return data, err
 }
 
 func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCluster bool) {

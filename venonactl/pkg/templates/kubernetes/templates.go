@@ -174,9 +174,7 @@ spec:
         - key: 'codefresh/dind'
           operator: 'Exists'
           effect: 'NoSchedule'
-      {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 8 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
@@ -325,9 +323,7 @@ spec:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
         operator: "Exists"
-      {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 6 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
       - name: dind-volume-provisioner
         resources:
@@ -535,10 +531,8 @@ spec:
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
-      {{ if ne .Tolerations "" }}
       tolerations:
-        {{ .Tolerations | indent 8 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
       - env:
         {{- if $.EnvVars }}

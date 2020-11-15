@@ -69,7 +69,10 @@ var installRuntimeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Context", &installRuntimeCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "RuntimeEnvironmentName", &installRuntimeCmdOptions.runtimeEnvironmentName)
 		mergeValueStr(templateValuesMap, "NodeSelector", &installRuntimeCmdOptions.kube.nodeSelector)
-		mergeValueStr(templateValuesMap, "Tolerations", &installRuntimeCmdOptions.tolerations)
+		tolerations := getTolerations()
+		if tolerations != nil {
+			templateValuesMap["Tolerations"] = tolerations
+		}
 		//mergeValueStrArray(&installAgentCmdOptions.envVars, "envVars", nil, "More env vars to be declared \"key=value\"")
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installRuntimeCmdOptions.dockerRegistry)
 		mergeValueStr(templateValuesMap, "StorageClass", &installRuntimeCmdOptions.storageClass)
@@ -107,22 +110,7 @@ var installRuntimeCmd = &cobra.Command{
 			Host: cfAPIHost,
 		}
 
-		if installRuntimeCmdOptions.tolerations != "" {
-			var tolerationsString string
-
-			if installRuntimeCmdOptions.tolerations[0] == '@' {
-				tolerationsString = loadTolerationsFromFile(installRuntimeCmdOptions.tolerations[1:])
-			} else {
-				tolerationsString = installRuntimeCmdOptions.tolerations
-			}
-
-			tolerations, err := parseTolerations(tolerationsString)
-			if err != nil {
-				dieOnError(err)
-			}
-
-			s.KubernetesAPI.Tolerations = tolerations
-		}
+		s.KubernetesAPI.Tolerations = tolerations
 
 		s.KubernetesAPI.NodeSelector = installRuntimeCmdOptions.kube.nodeSelector
 		s.DockerRegistry = installRuntimeCmdOptions.dockerRegistry

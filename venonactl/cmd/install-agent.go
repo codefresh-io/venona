@@ -25,6 +25,7 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	k8sApi "k8s.io/api/core/v1"
 	// cliValues "helm.sh/helm/v3/pkg/cli/values"
 	// "helm.sh/helm/v3/pkg/getter"
 )
@@ -72,7 +73,9 @@ var installAgentCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Context", &installAgentCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "NodeSelector", &installAgentCmdOptions.kube.nodeSelector)
 		tolerations := getTolerations()
-		mergeValueMSISliceAsString(templateValuesMap, "Tolerations", &tolerations)
+		if tolerations != nil {
+			templateValuesMap["Tolerations"] = tolerations
+		}
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installAgentCmdOptions.dockerRegistry)
 
 		mergeValueStr(templateValuesMap, "AgentToken", &installAgentCmdOptions.agentToken)
@@ -152,7 +155,7 @@ var installAgentCmd = &cobra.Command{
 	},
 }
 
-func getTolerations() string {
+func getTolerations() []k8sApi.Toleration {
 
 	if installAgentCmdOptions.tolerations != "" {
 		var tolerationsString string
@@ -170,7 +173,7 @@ func getTolerations() string {
 		return tolerations
 
 	}
-	return ""
+	return nil
 }
 
 func init() {
