@@ -259,6 +259,17 @@
 #     requests:
 #       cpu: 200m
 #       memory: 500Mi
+#   dockerDaemonScheduler:
+#     userVolumeMounts:
+#       my-test:
+#         name: test
+#         mountPath: /etc/ssl/cert
+#         readOnly: true
+#     userVolumes:
+#       test:
+#         name: test
+#         secret: 
+#           secretName: test-secret
 
 
 ########################################################
