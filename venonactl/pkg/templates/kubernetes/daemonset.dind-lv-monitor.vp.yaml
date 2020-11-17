@@ -36,7 +36,7 @@ spec:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
           resources:
-{{ toYamlMsi .Storage.LocalVolumeMonitor | indent 10 }}
+{{ toYaml .Storage.LocalVolumeMonitor | indent 10 }}
           imagePullPolicy: Always
           command:
           - /bin/local-volumes-agent

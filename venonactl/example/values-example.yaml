@@ -259,17 +259,16 @@
 #     requests:
 #       cpu: 200m
 #       memory: 500Mi
-#   dockerDaemonScheduler:
-#     userVolumeMounts:
-#       my-test:
-#         name: test
-#         mountPath: /etc/ssl/cert
-#         readOnly: true
-#     userVolumes:
-#       test:
-#         name: test
-#         secret: 
-#           secretName: test-secret
+#   userVolumeMounts: # will be set for dind pod and will be injcted for each container - https://codefresh.io/docs/docs/administration/codefresh-runner/#custom-volume-mounts
+#     my-test:
+#       name: test
+#       mountPath: /etc/ssl/cert
+#       readOnly: true
+#   userVolumes: # will be set for dind pod and will be injcted for each container - https://codefresh.io/docs/docs/administration/codefresh-runner/#custom-volume-mounts
+#     test:
+#       name: test
+#       secret: 
+#         secretName: test-secret
 
 
 ########################################################

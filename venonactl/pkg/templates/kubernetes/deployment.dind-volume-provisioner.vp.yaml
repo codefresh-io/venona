@@ -32,7 +32,7 @@ spec:
       containers:
       - name: dind-volume-provisioner
         resources:
-{{ toYamlMsi .Storage.VolumeProvisioner.Resources | indent 10 }}
+{{ toYaml .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
         command:
