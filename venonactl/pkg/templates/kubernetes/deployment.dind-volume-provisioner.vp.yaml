@@ -23,10 +23,12 @@ spec:
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-        operator: "Exists"
-{{ toYaml .Tolerations | indent 10}}
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: "Exists"
+
+{{ toYaml .Tolerations | indent 8}}
+
       containers:
       - name: dind-volume-provisioner
         resources:

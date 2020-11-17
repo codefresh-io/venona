@@ -211,12 +211,6 @@ func parseTolerations(s string) ([]k8sApi.Toleration, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can not parse tolerations: %s", err)
 	}
-	// y, err := yaml.Marshal(&data)
-	// if err != nil {
-	// 	return "", fmt.Errorf("can not marshel tolerations to yaml: %s", err)
-	// }
-	// d := fmt.Sprintf("\n%s", string(y))
-	// return d, nil
 	return data, err
 }
 
