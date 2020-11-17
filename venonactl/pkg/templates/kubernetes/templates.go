@@ -174,14 +174,15 @@ spec:
         - key: 'codefresh/dind'
           operator: 'Exists'
           effect: 'NoSchedule'
-      {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 8 }}
-      {{ end }}
+
+{{ toYaml .Tolerations | indent 8}}
+
+
       containers:
         - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
           name: lv-cleaner
           resources:
-{{ toYamlMsi .Storage.LocalVolumeMonitor | indent 10 }}
+{{ toYaml .Storage.LocalVolumeMonitor | indent 10 }}
           imagePullPolicy: Always
           command:
           - /bin/local-volumes-agent
@@ -254,7 +255,7 @@ spec:
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         resources:
-{{ toYamlMsi .AppProxy.resources | indent 10 }}
+{{ toYaml .AppProxy.resources | indent 10 }}
         env:
           {{- if $.EnvVars }}
           {{- range $key, $value := $.EnvVars }}
@@ -322,16 +323,16 @@ spec:
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-        operator: "Exists"
-      {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 6 }}
-      {{ end }}
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: "Exists"
+
+{{ toYaml .Tolerations | indent 8}}
+
       containers:
       - name: dind-volume-provisioner
         resources:
-{{ toYamlMsi .Storage.VolumeProvisioner.Resources | indent 10 }}
+{{ toYaml .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
         command:
@@ -449,7 +450,7 @@ spec:
       containers:
       - name: {{ .Monitor.AppName }}
         resources:
-{{ toYamlMsi .Monitor.resources | indent 10 }}
+{{ toYaml .Monitor.resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
         imagePullPolicy: Always
         env:
@@ -535,10 +536,8 @@ spec:
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
-      {{ if ne .Tolerations "" }}
       tolerations:
-        {{ .Tolerations | indent 8 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
       - env:
         {{- if $.EnvVars }}
@@ -592,7 +591,7 @@ spec:
         imagePullPolicy: Always
         name: {{ .AppName }}
         resources:
-{{ toYamlMsi .Runner.Resources | indent 10 }}
+{{ toYaml .Runner.Resources | indent 10 }}
       restartPolicy: Always
 `
 

@@ -23,16 +23,16 @@ spec:
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-        operator: "Exists"
-      {{ if ne .Tolerations "" }}
-        {{ .Tolerations | indent 6 }}
-      {{ end }}
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: "Exists"
+
+{{ toYaml .Tolerations | indent 8}}
+
       containers:
       - name: dind-volume-provisioner
         resources:
-{{ toYamlMsi .Storage.VolumeProvisioner.Resources | indent 10 }}
+{{ toYaml .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
         command:

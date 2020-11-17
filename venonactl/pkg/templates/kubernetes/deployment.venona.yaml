@@ -32,10 +32,8 @@ spec:
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
-      {{ if ne .Tolerations "" }}
       tolerations:
-        {{ .Tolerations | indent 8 }}
-      {{ end }}
+{{ toYaml .Tolerations | indent 10}}
       containers:
       - env:
         {{- if $.EnvVars }}
@@ -89,5 +87,5 @@ spec:
         imagePullPolicy: Always
         name: {{ .AppName }}
         resources:
-{{ toYamlMsi .Runner.Resources | indent 10 }}
+{{ toYaml .Runner.Resources | indent 10 }}
       restartPolicy: Always

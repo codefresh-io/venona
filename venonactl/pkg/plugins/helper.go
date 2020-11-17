@@ -89,17 +89,15 @@ func nodeSelectorParamToYaml(ns string) string {
 }
 
 func toYAML(v interface{}) string {
-	data, err := yaml.Marshal(v)
-	if err != nil {
-		// Swallow errors inside of a template.
-		return ""
-	}
-	return strings.TrimSuffix(string(data), "\n")
-}
-
-func toYAMLMSI(v map[string]interface{}) string {
-	if len(v) == 0 {
-		return ""
+	switch v.(type) {
+	case map[string]interface{}:
+		if len(v.(map[string]interface{})) == 0 {
+			return ""
+		}
+	case []v1.Toleration:
+		if len(v.([]v1.Toleration)) == 0 {
+			return ""
+		}
 	}
 	data, err := yaml.Marshal(v)
 	if err != nil {
@@ -140,7 +138,6 @@ func ExecuteTemplate(tplStr string, data interface{}) (string, error) {
 		"unescape":                unescape,
 		"nodeSelectorParamToYaml": nodeSelectorParamToYaml,
 		"toYaml":                  toYAML,
-		"toYamlMsi":               toYAMLMSI,
 		"isString":                isString,
 	}
 	template, err := template.New("base").Funcs(sprig.FuncMap()).Funcs(funcMap).Parse(tplStr)

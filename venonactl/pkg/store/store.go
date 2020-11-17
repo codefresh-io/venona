@@ -5,6 +5,7 @@ import (
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
+	k8sApi "k8s.io/api/core/v1"
 )
 
 const (
@@ -75,7 +76,7 @@ type (
 		ContextName  string
 		InCluster    bool
 		NodeSelector string
-		Tolerations  string
+		Tolerations  []k8sApi.Toleration
 	}
 
 	CodefreshAPI struct {
@@ -175,7 +176,6 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"VolumeProvisioner": map[string]interface{}{
 				"Image":          "codefresh/dind-volume-provisioner:v24",
 				"NodeSelector":   s.KubernetesAPI.NodeSelector,
-				"Tolerations":    s.KubernetesAPI.Tolerations,
 				"Resources":      s.VolumeProvisioner.Resources,
 				"MountAzureJson": false,
 			},
