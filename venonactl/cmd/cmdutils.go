@@ -20,7 +20,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
-	"gopkg.in/yaml.v2"
 	k8sApi "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -318,17 +317,4 @@ func mergeValueMSI(valuesMap map[string]interface{}, key string, param *map[stri
 	}
 	val := mapX.Get(key).MSI(defaultValue...)
 	*param = val
-}
-
-func mergeValueMSISliceAsString(valuesMap map[string]interface{}, key string, param *string) {
-	mapX := objx.New(valuesMap)
-	if param != nil && len(*param) > 0 {
-		mapX.Set(key, *param)
-		return
-	}
-	val := mapX.Get(key).MSISlice()
-	y, _ := yaml.Marshal(val)
-
-	*param = fmt.Sprintf("\n%s", string(y))
-	mapX.Set(key, *param)
 }
