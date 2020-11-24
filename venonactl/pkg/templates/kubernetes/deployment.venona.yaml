@@ -79,7 +79,7 @@ spec:
 {{ toYaml .NewRelicLicense | indent 10}}
         {{- end }}
         {{- end }}
-        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }} {{- else }} {{- .Image.Name }}{{- end}}:{{ .Image.Tag | default "latest"}}
+        image: {{- .Image.Name }}:{{ .Image.Tag | default "latest"}}
         volumeMounts:
         - name: runnerconf
           mountPath: "/etc/secrets"
