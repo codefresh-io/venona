@@ -179,7 +179,7 @@ spec:
 
 
       containers:
-        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:v5 {{- else }}codefresh/dind-volume-utils:v5{{- end}}
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/ {{- else }}{{- end}}{{ .Storage.DindVolumeUtils.Image | default "codefresh/dind-volume-utils:v5" }}
           name: lv-cleaner
           resources:
 {{ toYaml .Storage.LocalVolumeMonitor | indent 10 }}
@@ -219,7 +219,8 @@ spec:
       - name: dind-volume-dir
         hostPath:
           path: {{ $localVolumeParentDir }}
-{{- end -}}`
+{{- end -}}
+`
 
 	templatesMap["deployment.app-proxy.yaml"] = `apiVersion: apps/v1
 kind: Deployment
