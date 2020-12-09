@@ -155,7 +155,9 @@
 #       requests:
 #         cpu: 200m
 #         memory: 500Mi  
-
+#   DindVolumeUtils:
+#     Image:  codefresh/dind-volume-utils:v15-arm64
+#
 
 #######################################
 ### Storage configuration examples: ###
