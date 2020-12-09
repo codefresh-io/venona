@@ -156,7 +156,7 @@
 #         cpu: 200m
 #         memory: 500Mi  
 #   DindVolumeUtils:
-#     Image:  codefresh/dind-volume-utils:v15-arm64
+#     Image:  codefresh/dind-volume-utils:v15
 #
 
 #######################################
