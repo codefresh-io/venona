@@ -33,7 +33,7 @@ spec:
 
 
       containers:
-        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/ {{- else }}{{- end}}{{ .Storage.DindVolumeUtils.Image | default "codefresh/dind-volume-utils:v5" }}
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/ {{- else }}{{- end}}{{ .Storage.LocalVolumeMonitor.Image | default "codefresh/dind-volume-utils:v5" }}
           name: lv-cleaner
           resources:
 {{ toYaml .Storage.LocalVolumeMonitor | indent 10 }}
