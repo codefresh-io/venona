@@ -1,0 +1,62 @@
+version: "1.0"
+
+steps: 
+  main_clone:
+    title: 'Cloning main repository...'
+    type: git-clone
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    revision: ${{CF_BRANCH}}
+    git: ${{GIT_CONTEXT}}
+    credentials:
+      username: github
+      password: ${{secrets.hybrid.git}}
+
+  build_image:
+    title: "Building the image..."
+    type: build
+    disable_push: true
+    working_directory: ${{WORKDIR}}
+    dockerfile: ./Dockerfile
+    image_name: ${{IMAGE_NAME}}
+    tag: ${{CF_BRANCH_TAG_NORMALIZED}}
+
+  push_dev_venona:
+    title: "Pushing image to registry wit dev tags"
+    type: push
+    candidate: ${{build_image}}
+    when:
+      branch:
+        ignore: [ "${{RELEASE_BRANCH_NAME}}" ]
+    tags:
+      - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}${{ARM_TAG_POSTFIX}}
+      - ${{VERSION}}-${{CF_REVISION}}${{ARM_TAG_POSTFIX}}
+      - ${{CF_REVISION}}${{ARM_TAG_POSTFIX}}
+      - ${{CF_BRANCH_TAG_NORMALIZED}}${{ARM_TAG_POSTFIX}}
+    scale:
+      push_quay_dev:
+        registry: "${{REGISTRY_INTEGRATION_QUAY}}"
+      push_dockerhub_dev:
+        registry: "${{REGISTRY_INTEGRATION_DOCKERHUB}}"
+      push_gcr_enterprise_dev:
+        registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
+
+  push_prod:
+    title: "Pushing image to registry with prod tags"
+    type: push
+    candidate: ${{build_image}}
+    when:
+      branch:
+        only: [ "${{RELEASE_BRANCH_NAME}}" ]
+    tags:
+      - ${{VERSION}}${{ARM_TAG_POSTFIX}}
+      - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}${{ARM_TAG_POSTFIX}}
+      - ${{VERSION}}-${{CF_REVISION}}${{ARM_TAG_POSTFIX}}
+      - ${{CF_REVISION}}${{ARM_TAG_POSTFIX}}
+      - ${{CF_BRANCH_TAG_NORMALIZED}}${{ARM_TAG_POSTFIX}}
+    scale:
+      push_quay_prod:
+        registry: "${{REGISTRY_INTEGRATION_QUAY}}"
+      push_dockerhub_prod:
+        registry: "${{REGISTRY_INTEGRATION_DOCKERHUB}}"
+      push_gcr_enterprise_prod:
+        registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"

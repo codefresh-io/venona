@@ -1,23 +1,26 @@
 version: '1.0'
 mode: parallel
 stages:
-- Build & Test
+- Clone
+- Build
+- Push
 - Release
 steps:
 
   main_clone:
-    stage: Build & Test
+    stage: Clone
     title: Clone repository
     type: git-clone
-    repo: https://github.com/codefresh-io/venona
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     revision: ${{CF_BRANCH}}
+    git: ${{GIT_CONTEXT}}
     credentials:
       username: github
       password: ${{secrets.hybrid.git}}
 
   export_version:
     title: Compare version to venona
-    stage: Build & Test
+    stage: Build
     image: codefresh/semver
     commands:
     - export VENONACTL_VERSION=$(cat ./venonactl/VERSION)
@@ -31,40 +34,99 @@ steps:
         on:
         - success 
 
-  build_binaries:
-    title: Build binaries for all platforms - skip publish
-    image: goreleaser/goreleaser:v0.124.1
-    stage: Build & Test
-    commands:
-    - cd venonactl
-    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate --skip-publish
-    when:
-      steps:
-      - name: main_clone
-
   build_cli_image:
     title: "Building venona cli image"
     type: build
-    stage: Build & Test
+    stage: Build
     tag: ${{CF_BRANCH_TAG_NORMALIZED}}
     working_directory: ${{main_clone}}/venonactl
-    image_name: codefresh/venonacli
+    image_name: ${{IMAGE_NAME}}
+    build_arguments:
+      - COMMIT=${{CF_REVISION}}
     when:
       steps:
-      - name: build_binaries
+      - name: export_version
         on:
         - success
 
-  push_cli_image:
+  push_cli_image_dev:
     title: "Push image with venona cli"
-    stage: Release
+    stage: Push
     type: push
     candidate: ${{build_cli_image}}
     tags:
     - ${{CF_BRANCH_TAG_NORMALIZED}}
-    registry: "dockerhub"
     when:
+      branch:
+        ignore: [ "${{RELEASE_BRANCH_NAME}}" ]
       steps:
         - name: build_cli_image
           on:
           - success
+    scale:
+      push_quay_dev:
+        registry: "${{REGISTRY_INTEGRATION_QUAY}}"
+      push_dockerhub_dev:
+        registry: "${{REGISTRY_INTEGRATION_DOCKERHUB}}"
+      push_gcr_enterprise_dev:
+        registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
+
+  push_cli_image_prod:
+    title: "Push image with venona cli"
+    stage: Push
+    type: push
+    candidate: ${{build_cli_image}}
+    tags:
+    - ${{VERSION}}
+    when:
+      branch:
+        only: [ "${{RELEASE_BRANCH_NAME}}" ]
+      steps:
+        - name: build_cli_image
+          on:
+          - success
+    scale:
+      push_quay_prod:
+        registry: "${{REGISTRY_INTEGRATION_QUAY}}"
+      push_dockerhub_prod:
+        registry: "${{REGISTRY_INTEGRATION_DOCKERHUB}}"
+      push_gcr_enterprise_prod:
+        registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
+
+  create_git_tag:
+    title: Push tag to git
+    image: quay.io/codefresh/ci-helpers:0.1.0
+    stage: Release
+    commands:
+    - source /get-token/get-gh-token.sh && cf_export GITHUB_TOKEN
+    - export OLD_ORIGIN=$(git remote get-url origin)
+    - git remote rm origin
+    - git remote add origin https://${GITHUB_TOKEN}@github.com/${{CF_REPO_OWNER}}/venona.git
+    - git tag ${{VERSION}}
+    - git push --tags
+    - git remote rm origin
+    - git remote add origin $OLD_ORIGIN
+
+    fail_fast: false
+    when:
+      branch:
+        only: [ "${{RELEASE_BRANCH_NAME}}" ]
+      steps:
+      - name: export_version
+      - name: main_clone
+
+  release_binaries:
+    title: Create release in Github with venona CLI
+    image: goreleaser/goreleaser:v0.124.1
+    stage: Release
+    fail_fast: false
+    commands:
+    - cd venonactl
+    - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate # pre-release
+    when:
+      branch:
+        only: [ "${{RELEASE_BRANCH_NAME}}" ]
+      steps:
+      - name: create_git_tag
+        on:
+        - finished

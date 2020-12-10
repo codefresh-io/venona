@@ -11,8 +11,9 @@ steps:
     stage: Test
     title: Clone repository
     type: git-clone
-    repo: https://github.com/codefresh-io/venona
+    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     revision: ${{CF_BRANCH}}
+    git: ${{GIT_CONTEXT}}
     credentials:
       username: github
       password: ${{secrets.hybrid.git}}
@@ -116,37 +117,43 @@ steps:
         on:
         - success 
 
-  compile:
-    <<: *common
-    title: Compile
-    stage: Build Artifacts
-    # YAML arrays cannot be merged and flatten
-    # https://github.com/yaml/yaml/issues/35
-    # copy the variables from the download_dependencies step
-    environment: 
-    - GO111MODULE=on
-    - GOSUMDB=off
-    - GOPROXY=direct
-    - GOCACHE=/codefresh/volume/gocache
-    - GOPATH=/codefresh/volume/gopath
-    - GOOS=linux 
-    - GOARCH=386 
-    commands:
-      - cd venona && make build
-
   build_image:
     type: build
     title: Build Docker Image
     stage: Build Artifacts
     tag: ${{CF_BRANCH_TAG_NORMALIZED}}
     dockerfile: Dockerfile
-    working_directory: ${{main_clone}}/venona
+    disable_push: true
+    working_directory: ${{WORKDIR}}
     image_name: ${{IMAGE_NAME}}
     when:
       steps:
-      - name: compile
+      - name: main_clone
         on:
         - success
+
+  run_arm_build:
+    type: codefresh-run
+    stage: Build Artifacts
+    when:
+      steps:
+      - name: export_version
+        on:
+        - success
+    arguments:
+      PIPELINE_ID: ${{ARM_PIPELINE_ID}}
+      DETACH: false
+      VARIABLE:
+        - CF_REPO_OWNER=${{CF_REPO_OWNER}}
+        - CF_REPO_NAME=${{CF_REPO_NAME}}
+        - CF_REVISION=${{CF_REVISION}}
+        - CF_BRANCH=${{CF_BRANCH}}
+        - CF_BRANCH_TAG_NORMALIZED=${{CF_BRANCH_TAG_NORMALIZED}}
+        - IMAGE_NAME=${{IMAGE_NAME}}
+        - WORKDIR=${{WORKDIR}}
+        - VERSION=${{VERSION}}
+        - RELEASE_BRANCH_NAME=${{RELEASE_BRANCH_NAME}}
+        - ARM_TAG_POSTFIX="${{ARM_TAG_POSTFIX}}"
 
   security_scan:
     stage: Security scan
@@ -209,9 +216,9 @@ steps:
         ${{SEC_SCAN_REPORT_FILE}} \
         s3://${{SEC_SCAN_S3_BUCKET}}/${{IMAGE_NAME}}/${{CF_REPO_NAME}}:${{VERSION}}.txt
 
-  push:
+  push_dev_image:
     type: push
-    title: Push candidate
+    title: Push candidate image with dev tags
     stage: Push
     candidate: ${{build_image}}
     tags:
@@ -219,9 +226,10 @@ steps:
     - ${{VERSION}}-${{CF_REVISION}}
     - ${{CF_REVISION}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
-    image_name: codefresh/venona
-    registry: dockerhub
+    image_name: ${{IMAGE_NAME}}
     when:
+      branch:
+        ignore: [ "${{RELEASE_BRANCH_NAME}}" ]
       steps:
       - name: build_image
         on:
@@ -229,4 +237,89 @@ steps:
       - name: export_version
         on:
         - success
+    scale:
+      push_quay_dev:
+        registry: "${{REGISTRY_INTEGRATION_QUAY}}"
+      push_dockerhub_dev:
+        registry: "${{REGISTRY_INTEGRATION_DOCKERHUB}}"
+      push_gcr_enterprise_dev:
+        registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
 
+  push_prod_image:
+    type: push
+    title: Push candidate image with prod tags
+    stage: Push
+    candidate: ${{build_image}}
+    tags:
+    - ${{VERSION}}
+    - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
+    - ${{VERSION}}-${{CF_REVISION}}
+    - ${{CF_REVISION}}
+    - ${{CF_BRANCH_TAG_NORMALIZED}}
+    image_name: ${{IMAGE_NAME}}
+    when:
+      branch:
+        only: [ "${{RELEASE_BRANCH_NAME}}" ]
+      steps:
+      - name: build_image
+        on:
+        - success
+      - name: export_version
+        on:
+        - success
+    scale:
+      push_quay_prod:
+        registry: "${{REGISTRY_INTEGRATION_QUAY}}"
+      push_dockerhub_prod:
+        registry: "${{REGISTRY_INTEGRATION_DOCKERHUB}}"
+      push_gcr_enterprise_prod:
+        registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
+
+  create_manifest_list:
+    stage: Push
+    type: "codefresh-inc/multiarch-manifester"
+    when:
+      steps:
+        - name: run_arm_build
+          on:
+          - success
+    arguments:
+      image_name: ${{IMAGE_NAME}}
+      tags:
+        - ${{VERSION}}-${{CF_BRANCH_TAG_NORMALIZED}}
+        - ${{VERSION}}-${{CF_REVISION}}
+        - ${{CF_REVISION}}
+        - ${{CF_BRANCH_TAG_NORMALIZED}}
+      arch_tag_postfixes: 
+        arm64: "${{ARM_TAG_POSTFIX}}"
+      registries:
+        - name: 'quay.io'
+          username: '${{QUAY_USERNAME}}'
+          password: '${{QUAY_PASSWORD}}'
+        - name: 'docker.io'
+          username: '${{DOCKERHUB_USERNAME}}'
+          password: '${{DOCKERHUB_PASSWORD}}'
+        - name: 'gcr.io'
+          path_prefix: codefresh-enterprise
+          username: '${{GCR_USERNAME}}'
+          password: '${{GCR_PASSWORD}}'
+    scale:
+      master_branch_tags:
+        when:
+          branch:
+            only: [ "${{RELEASE_BRANCH_NAME}}" ]
+          steps:
+            - name: push_prod_image
+              on:
+              - success
+        arguments:
+          tags:
+            - ${{VERSION}}
+      dev_branches_tags:
+        when:
+          branch:
+            ignore: [ "${{RELEASE_BRANCH_NAME}}" ]
+          steps:
+            - name: push_dev_image
+              on:
+              - success
