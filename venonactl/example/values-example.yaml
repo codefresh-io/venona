@@ -157,6 +157,8 @@
 #         cpu: 200m
 #         memory: 500Mi  
 #
+#   VolumeCleanup:
+#     Image:
 
 #######################################
 ### Storage configuration examples: ###

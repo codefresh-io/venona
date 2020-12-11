@@ -138,7 +138,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: dind-volume-cleanup
-              image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-cleanup {{- else }}codefresh/dind-volume-cleanup {{- end}}
+              image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/ {{- else }}{{- end}}{{ .Storage.VolumeCleanup.Image | default "codefresh/dind-volume-cleanup" }}
               env:
               - name: PROVISIONED_BY
                 value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
@@ -685,6 +685,14 @@ metadata:
     app: {{ .AppName }}
     version: {{ .Version }}
 spec:
+{{ if .NodeSelector }}
+  nodeSelector:
+{{ .NodeSelector | nodeSelectorParamToYaml | indent 4 | unescape}}
+  {{ end }}
+{{ if .Tolerations }}
+  tolerations:
+{{ toYaml .Tolerations | indent 4}}
+  {{ end }}
   containers:
   - name: {{ .NetworkTester.PodName }}
     image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .NetworkTester.Image.Name }}:{{ .NetworkTester.Image.Tag }} {{- else }} {{- .NetworkTester.Image.Name }}:{{ .NetworkTester.Image.Tag }} {{- end}}
