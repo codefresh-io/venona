@@ -11,9 +11,8 @@ steps:
     stage: Test
     title: Clone repository
     type: git-clone
-    repo: ${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
+    repo: https://github.com/${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}
     revision: ${{CF_BRANCH}}
-    git: ${{GIT_CONTEXT}}
     credentials:
       username: github
       password: ${{secrets.hybrid.git}}
@@ -143,6 +142,8 @@ steps:
     arguments:
       PIPELINE_ID: ${{ARM_PIPELINE_ID}}
       DETACH: false
+      TRIGGER_ID: venona-arm
+      BRANCH: "${{CF_BRANCH}}"
       VARIABLE:
         - CF_REPO_OWNER=${{CF_REPO_OWNER}}
         - CF_REPO_NAME=${{CF_REPO_NAME}}
