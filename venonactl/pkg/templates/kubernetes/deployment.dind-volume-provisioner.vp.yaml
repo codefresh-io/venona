@@ -27,7 +27,7 @@ spec:
           key: node-role.kubernetes.io/master
           operator: "Exists"
 
-{{ toYaml .Tolerations | indent 8}}
+{{ toYaml .Tolerations | indent 8 | unescape}}
 
       containers:
       - name: dind-volume-provisioner

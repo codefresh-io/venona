@@ -175,7 +175,7 @@ spec:
           operator: 'Exists'
           effect: 'NoSchedule'
 
-{{ toYaml .Tolerations | indent 8}}
+{{ toYaml .Tolerations | indent 8 | unescape}}
 
 
       containers:
@@ -327,7 +327,7 @@ spec:
           key: node-role.kubernetes.io/master
           operator: "Exists"
 
-{{ toYaml .Tolerations | indent 8}}
+{{ toYaml .Tolerations | indent 8 | unescape}}
 
       containers:
       - name: dind-volume-provisioner
@@ -537,7 +537,7 @@ spec:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
       {{ end }}
       tolerations:
-{{ toYaml .Tolerations | indent 10}}
+{{ toYaml .Tolerations | indent 8 | unescape }}
       containers:
       - env:
         {{- if $.EnvVars }}
