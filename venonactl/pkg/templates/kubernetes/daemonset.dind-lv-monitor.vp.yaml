@@ -29,7 +29,7 @@ spec:
           operator: 'Exists'
           effect: 'NoSchedule'
 
-{{ toYaml .Tolerations | indent 8}}
+{{ toYaml .Tolerations | indent 8 | unescape}}
 
 
       containers:
