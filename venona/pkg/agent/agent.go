@@ -51,8 +51,8 @@ var (
 const (
 	defaultTaskPullingInterval     = time.Second * 3
 	defaultStatusReportingInterval = time.Second * 10
-	defaultProxyRequestTimeout     = time.Second * 60
-	defaultProxyRequestRetries     = 5
+	defaultProxyRequestTimeout     = time.Second * 10
+	defaultProxyRequestRetries     = 3
 )
 
 type (
@@ -264,11 +264,14 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 		t := agentTasks[i]
 		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
 		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
-		if err := executeAgentTask(&t, logger); err != nil {
-			logger.Error(err.Error())
-			noticeError(txn, err, logger)
-		}
-		endTransaction(txn, logger)
+		go func(tid string) {
+			if err := executeAgentTask(&t, logger); err != nil {
+				logger.Error(err.Error())
+				noticeError(txn, err, logger)
+			}
+			endTransaction(txn, logger)
+			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
+		}(t.Metadata.Workflow)
 	}
 
 	// process creation tasks
