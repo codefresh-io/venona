@@ -264,14 +264,11 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 		t := agentTasks[i]
 		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
 		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
-		go func(tid string) {
-			if err := executeAgentTask(&t, logger); err != nil {
-				logger.Error(err.Error())
-				noticeError(txn, err, logger)
-			}
-			endTransaction(txn, logger)
-			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
-		}(t.Metadata.Workflow)
+		if err := executeAgentTask(&t, logger); err != nil {
+			logger.Error(err.Error())
+			noticeError(txn, err, logger)
+		}
+		endTransaction(txn, logger)
 	}
 
 	// process creation tasks
