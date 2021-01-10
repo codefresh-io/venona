@@ -51,8 +51,8 @@ var (
 const (
 	defaultTaskPullingInterval     = time.Second * 3
 	defaultStatusReportingInterval = time.Second * 10
-	defaultProxyRequestTimeout     = time.Second * 60
-	defaultProxyRequestRetries     = 5
+	defaultProxyRequestTimeout     = time.Second * 30
+	defaultProxyRequestRetries     = 3
 )
 
 type (
