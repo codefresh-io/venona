@@ -646,7 +646,7 @@ metadata:
   annotations:
     {{ if ne .AppProxy.Ingress.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.Ingress.IngressClass }}{{ end }}
     {{ range $key, $value := .AppProxy.Ingress.Annotations }}
-    {{ $key }}: {{ $value }}
+    {{ $key }}: {{ $value | quote | unescape }}
     {{ end }}
   name: app-proxy
   namespace: {{ .Namespace }}
@@ -936,7 +936,7 @@ metadata:
   namespace: {{ .Namespace }}
   annotations:
   {{ range $key, $value := .AppProxy.ServiceAccount.Annotations }}
-    {{ $key }}: {{ $value }}
+    {{ $key }}: {{ $value | quote | unescape }}
   {{ end }}
   labels:
     app: {{ .AppProxy.AppName }}
