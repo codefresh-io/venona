@@ -198,7 +198,7 @@ steps:
         image: quay.io/codefresh/snyk-cli:${{SNYK_IMAGE_TAG}}
         title: "Scanning image for security vulnerablities"
         shell: bash
-        working_directory: ${{main_clone}}
+        working_directory: ${{main_clone}}/venona
         environment:
           - SNYK_TOKEN=${{SNYK_TOKEN}}
           - LOCAL_IMAGE_REF=${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}}
