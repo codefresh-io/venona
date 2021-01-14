@@ -167,10 +167,10 @@ steps:
     success_criteria:
       condition:
         any:
-         secScanStep: security_scan_1.result == 'success'
+         secScanStep: aqua_scan.result == 'success' && snyk_scan.result == 'success'
          secScanFail: '"${{IGNORE_SEC_SCAN}}" == "true"'
     steps:
-      security_scan_1:
+      aqua_scan:
         image: aquasec/trivy:latest
         title: "Scanning image for security vulnerablities"
         commands:
@@ -192,7 +192,26 @@ steps:
           metadata:
             set:
               - '${{build_image.imageId}}':
-                  - SECURITY_CHECK_PASS: true
+                  - SECURITY_SCAN_AQUA: true
+
+      snyk_scan:
+        image: quay.io/codefresh/snyk-cli:${{SNYK_IMAGE_TAG}}
+        title: "Scanning image for security vulnerablities"
+        shell: bash
+        working_directory: ${{main_clone}}/venona
+        environment:
+          - SNYK_TOKEN=${{SNYK_TOKEN}}
+          - LOCAL_IMAGE_REF=${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}}
+        commands:
+          - |
+            snyk test --severity-threshold=${{SNYK_SEVERITY_THRESHOLD}} || fail=1
+            snyk container test --severity-threshold=${{SNYK_SEVERITY_THRESHOLD}} --file=Dockerfile ${LOCAL_IMAGE_REF}
+            if [ "$fail" == "1" ]; then exit 1; fi
+        on_success:
+          metadata:
+            set:
+              - '${{build_image.imageId}}':
+                  - SECURITY_SCAN_SNYK: true
 
   upload_sec_scan_report:
     stage: Security scan
