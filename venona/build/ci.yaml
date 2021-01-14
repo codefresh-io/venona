@@ -171,51 +171,22 @@ steps:
          secScanFail: '"${{IGNORE_SEC_SCAN}}" == "true"'
     steps:
       security_scan_1:
-        image: aquasec/trivy:latest
+        image: snyk/snyk-cli:docker
         title: "Scanning image for security vulnerablities"
+        working_directory: ${{main_clone}}
+        environment:
+          - SNYK_TOKEN=${{SNYK_TOKEN}}
+          - LOCAL_IMAGE_REF=${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}}
         commands:
-          - '! rm ${{SEC_SCAN_REPORT_FILE}} 2>/dev/null'
-          - |-
-            set -o pipefail
-            trivy \
-              --quiet \
-              ${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}} &> ${{SEC_SCAN_REPORT_FILE}}
-            trivy \
-              --quiet \
-              --skip-update \
-              --ignorefile /tmp/.trivy/trivyignore \
-              --ignore-unfixed \
-              --exit-code 1 \
-              --severity ${{SEC_SCAN_SEVERITY_THRESHOLD}} \
-              ${{IMAGE_NAME}}:${{CF_BRANCH_TAG_NORMALIZED_LOWER_CASE}}
+          - |
+            snyk test --severity-threshold=${{SNYK_SEVERITY_THRESHOLD}} || fail=1
+            snyk container test --severity-threshold=${{SNYK_SEVERITY_THRESHOLD}} --file=Dockerfile ${LOCAL_IMAGE_REF}
+            if [ "$fail" == "1" ]; then exit 1; fi
         on_success:
           metadata:
             set:
               - '${{build_image.imageId}}':
                   - SECURITY_CHECK_PASS: true
-
-  upload_sec_scan_report:
-    stage: Security scan
-    image: mesosphere/aws-cli
-    fail_fast: false
-    when:
-      steps:
-        - name: security_scan
-          on:
-          - success
-        - name: export_version
-          on:
-          - success
-      branch:
-        only: [ "${{RELEASE_BRANCH_NAME}}" ]
-    environment:
-      - AWS_ACCESS_KEY_ID=${{SEC_SCAN_AWS_KEY_ID}}
-      - AWS_SECRET_ACCESS_KEY=${{SEC_SCAN_AWS_SECRET_KEY}}
-    commands:
-      - |-
-        aws s3 cp \
-        ${{SEC_SCAN_REPORT_FILE}} \
-        s3://${{SEC_SCAN_S3_BUCKET}}/${{IMAGE_NAME}}/${{CF_REPO_NAME}}:${{VERSION}}.txt
 
   push_dev_image:
     type: push
