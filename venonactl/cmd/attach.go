@@ -43,6 +43,7 @@ var attachRuntimeCmdOptions struct {
 	templateValues     []string
 	templateFileValues []string
 	templateValueFiles []string
+	dryRun             bool
 }
 
 var attachRuntimeCmd = &cobra.Command{
@@ -104,18 +105,20 @@ var attachRuntimeCmd = &cobra.Command{
 			RuntimeClusterName:    attachRuntimeCmdOptions.kube.namespace,
 			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
 			RestartAgent:          attachRuntimeCmdOptions.restartAgent,
+			DryRun:                attachRuntimeCmdOptions.dryRun,
 		}
 
 		// runtime
 		var runtimeInCluster bool
 		mergeValueBool(templateValuesMap, "RuntimeInCluster", &runtimeInCluster)
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kube.context, attachRuntimeCmdOptions.kube.namespace, attachRuntimeCmdOptions.kube.kubePath, runtimeInCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kube.context, attachRuntimeCmdOptions.kube.namespace, attachRuntimeCmdOptions.kube.kubePath, runtimeInCluster, attachRuntimeCmdOptions.dryRun)
 
 		// agent
 		builderInstallOpt.AgentKubeBuilder = getKubeClientBuilder(attachRuntimeCmdOptions.kubeVenona.context,
 			attachRuntimeCmdOptions.kubeVenona.namespace,
 			attachRuntimeCmdOptions.kubeVenona.kubePath,
-			false)
+			false,
+			attachRuntimeCmdOptions.dryRun)
 
 		builder.Add(plugins.RuntimeAttachType)
 
@@ -151,6 +154,7 @@ func init() {
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.context, "kube-context-name-agent", viper.GetString("kube-context-agent"), "Name of the kubernetes context on which venona is installed (default is current-context) [$KUBE_CONTEXT]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kubeVenona.kubePath, "kube-config-path-agent", viper.GetString("kubeconfig-agent"), "Path to kubeconfig file (default is $HOME/.kube/config) for agent [$KUBECONFIG]")
 	attachRuntimeCmd.Flags().BoolVar(&attachRuntimeCmdOptions.restartAgent, "restart-agent", viper.GetBool("restart-agent"), "Restart agent after attach operation")
+	attachRuntimeCmd.Flags().BoolVar(&attachRuntimeCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 
 	attachRuntimeCmd.Flags().StringArrayVar(&attachRuntimeCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
 	attachRuntimeCmd.Flags().StringArrayVar(&attachRuntimeCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")

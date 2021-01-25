@@ -62,7 +62,7 @@ var uninstallAgentCmd = &cobra.Command{
 		s.KubernetesAPI.Namespace = uninstallAgentCmdOptions.kube.namespace
 
 		builder.Add(plugins.VenonaPluginType)
-		deleteOptions.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, false)
+		deleteOptions.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, false, false)
 		deleteOptions.ClusterNamespace = uninstallAgentCmdOptions.kube.namespace
 
 		values := s.BuildValues()

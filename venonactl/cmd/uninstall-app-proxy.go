@@ -61,6 +61,7 @@ var uninstallAppProxytCmd = &cobra.Command{
 			uninstallAppProxyCmdOptions.kube.context,
 			uninstallAppProxyCmdOptions.kube.namespace,
 			kubeConfigPath,
+			false,
 			false)
 
 		builder.Add(plugins.AppProxyPluginType)

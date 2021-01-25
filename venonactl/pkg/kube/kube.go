@@ -22,6 +22,7 @@ type (
 		namespace        string
 		pathToKubeConfig string
 		inCluster        bool
+		dryRun           bool
 	}
 
 	Options struct {
@@ -29,6 +30,7 @@ type (
 		Namespace        string
 		PathToKubeConfig string
 		InCluster        bool
+		DryRun           bool
 	}
 )
 
@@ -38,6 +40,7 @@ func New(o *Options) Kube {
 		namespace:        o.Namespace,
 		pathToKubeConfig: o.PathToKubeConfig,
 		inCluster:        o.InCluster,
+		dryRun:           o.DryRun,
 	}
 }
 
@@ -60,6 +63,9 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 }
 
 func (k *kube) EnsureNamespaceExists(cs *kubernetes.Clientset) error {
+	if k.dryRun == true {
+		return nil
+	}
 	_, err := cs.CoreV1().Namespaces().Get(k.namespace, v1.GetOptions{})
 	if err != nil {
 		nsSpec := &v1Core.Namespace{ObjectMeta: metav1.ObjectMeta{Name: k.namespace}}

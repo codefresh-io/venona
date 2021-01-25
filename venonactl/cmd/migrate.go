@@ -54,7 +54,7 @@ var migrateCmd = &cobra.Command{
 			err := p.Migrate(&plugins.MigrateOptions{
 				ClusterNamespace: migrateCmdOpt.kube.namespace,
 				ClusterName:      migrateCmdOpt.kube.context,
-				KubeBuilder:      getKubeClientBuilder(migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+				KubeBuilder:      getKubeClientBuilder(migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, false),
 			}, values)
 			if err != nil {
 				dieOnError(err)

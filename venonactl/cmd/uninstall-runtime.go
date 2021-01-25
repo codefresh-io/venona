@@ -89,12 +89,14 @@ var uninstallRuntimeCmd = &cobra.Command{
 		deleteOptions.KubeBuilder = getKubeClientBuilder(uninstallRunimeCmdOptions.kube.context,
 			uninstallRunimeCmdOptions.kube.namespace,
 			uninstallRunimeCmdOptions.kube.kubePath,
+			false,
 			false)
 
 		// agent
 		deleteOptions.AgentKubeBuilder = getKubeClientBuilder(uninstallRunimeCmdOptions.kubeVenona.context,
 			uninstallRunimeCmdOptions.kubeVenona.namespace,
 			uninstallRunimeCmdOptions.kubeVenona.kubePath,
+			false,
 			false)
 
 		builder.Add(plugins.RuntimeEnvironmentPluginType)

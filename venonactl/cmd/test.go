@@ -102,7 +102,7 @@ var testCommand = &cobra.Command{
 		}
 
 		options := plugins.TestOptions{
-			KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+			KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, false),
 			ClusterNamespace: s.KubernetesAPI.Namespace,
 		}
 

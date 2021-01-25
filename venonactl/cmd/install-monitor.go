@@ -87,7 +87,7 @@ var installMonitorAgentCmd = &cobra.Command{
 			DryRun:           installMonitorAgentCmdOptions.dryRun,
 		}
 
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, installMonitorAgentCmdOptions.dryRun)
 
 		if installMonitorAgentCmdOptions.clusterId == "" {
 			dieOnError(fmt.Errorf("Cluster id is required in order to install monitor"))
