@@ -110,6 +110,9 @@ func readCurrentVenonaConf(agentKubeBuilder KubeClientBuilder, clusterNamespace 
 }
 
 func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	if opt.DryRun == true {
+		return v, nil
+	}
 	cs, err := opt.AgentKubeBuilder.BuildClient() // on the agent cluster
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))

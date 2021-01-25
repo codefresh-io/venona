@@ -139,6 +139,7 @@ var installAgentCmd = &cobra.Command{
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
 		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
+		builderInstallOpt.DryRun = installAgentCmdOptions.dryRun
 
 		builder.Add(plugins.VenonaPluginType)
 

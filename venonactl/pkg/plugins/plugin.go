@@ -2,9 +2,12 @@ package plugins
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
+	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -242,10 +245,26 @@ func install(opt *installOptions) error {
 	if err != nil {
 		return err
 	}
+	if opt.dryRun == true {
+		err = os.Mkdir("manifests", 0755)
+		if err != nil {
+			opt.logger.Error("failed to create manifests folder", "File-Name", "Error", err)
+		}
+	}
 
 	for fileName, obj := range kubeObjects {
 		if opt.dryRun == true {
-			opt.logger.Debug(fmt.Sprintf("%v", obj), "File-Name", fileName)
+			y, err := yaml.Marshal(obj)
+			if err != nil {
+				opt.logger.Error(fmt.Sprintf("failed to marshal %v", obj), "File-Name", fileName, "Error", err)
+				continue
+
+			}
+			err = ioutil.WriteFile(fmt.Sprintf("./manifests/%s", fileName), y, 0644)
+			if err != nil {
+				opt.logger.Error(fmt.Sprintf("failed to write file %v", obj), "File-Name", fileName, "Error", err)
+				continue
+			}
 			continue
 		}
 		var createErr error
