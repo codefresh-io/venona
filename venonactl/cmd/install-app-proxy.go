@@ -86,7 +86,7 @@ var installAppProxyCmd = &cobra.Command{
 		}
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, builderInstallOpt.DryRun)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 		builder.Add(plugins.AppProxyPluginType)
 

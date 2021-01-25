@@ -137,7 +137,9 @@ var installAgentCmd = &cobra.Command{
 		s.KubernetesAPI.NodeSelector = installAgentCmdOptions.kube.nodeSelector
 
 		builderInstallOpt.ClusterName = s.KubernetesAPI.ContextName
-		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster)
+		builderInstallOpt.KubeBuilder = getKubeClientBuilder(builderInstallOpt.ClusterName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath,
+			s.KubernetesAPI.InCluster,
+			installAgentCmdOptions.dryRun)
 		builderInstallOpt.ClusterNamespace = s.KubernetesAPI.Namespace
 		builderInstallOpt.DryRun = installAgentCmdOptions.dryRun
 

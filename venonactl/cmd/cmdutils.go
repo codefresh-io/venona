@@ -165,12 +165,13 @@ func createTable() *tablewriter.Table {
 	return table
 }
 
-func getKubeClientBuilder(context string, namespace string, path string, inCluster bool) kube.Kube {
+func getKubeClientBuilder(context string, namespace string, path string, inCluster bool, dryRun bool) kube.Kube {
 	return kube.New(&kube.Options{
 		ContextName:      context,
 		Namespace:        namespace,
 		PathToKubeConfig: path,
 		InCluster:        inCluster,
+		DryRun:           dryRun,
 	})
 }
 

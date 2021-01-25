@@ -70,7 +70,7 @@ var upgradeAppProxyCmd = &cobra.Command{
 				Name:             store.AppProxyApplicationName,
 				ClusterNamespace: upgradeAppProxyCmdOptions.kube.namespace,
 				ClusterName:      upgradeAppProxyCmdOptions.kube.namespace,
-				KubeBuilder:      getKubeClientBuilder(upgradeAppProxyCmdOptions.kube.context, upgradeAppProxyCmdOptions.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster),
+				KubeBuilder:      getKubeClientBuilder(upgradeAppProxyCmdOptions.kube.context, upgradeAppProxyCmdOptions.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, false),
 			}, values)
 			if err != nil {
 				dieOnError(err)

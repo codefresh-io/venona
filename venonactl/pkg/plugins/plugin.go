@@ -7,7 +7,6 @@ import (
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	"github.com/codefresh-io/venona/venonactl/pkg/obj/kubeobj"
-	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -241,32 +240,28 @@ func build(t string, logger logger.Logger) Plugin {
 
 func install(opt *installOptions) error {
 
+	if opt.dryRun == true {
+		err := os.Mkdir("codefresh_manifests", 0755)
+		if err != nil {
+			opt.logger.Error("failed to create manifests folder", "File-Name", "Error", err)
+		}
+		parsedTemplates, err := ParseTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
+		for fileName, objStr := range parsedTemplates {
+			err = ioutil.WriteFile(fmt.Sprintf("./codefresh_manifests/%s", fileName), []byte(objStr), 0644)
+			if err != nil {
+				opt.logger.Error(fmt.Sprintf("failed to write file %v", objStr), "File-Name", fileName, "Error", err)
+			}
+		}
+		return nil
+	}
+
 	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {
 		return err
 	}
-	if opt.dryRun == true {
-		err = os.Mkdir("manifests", 0755)
-		if err != nil {
-			opt.logger.Error("failed to create manifests folder", "File-Name", "Error", err)
-		}
-	}
 
-	for fileName, obj := range kubeObjects {
-		if opt.dryRun == true {
-			y, err := yaml.Marshal(obj)
-			if err != nil {
-				opt.logger.Error(fmt.Sprintf("failed to marshal %v", obj), "File-Name", fileName, "Error", err)
-				continue
+	for _, obj := range kubeObjects {
 
-			}
-			err = ioutil.WriteFile(fmt.Sprintf("./manifests/%s", fileName), y, 0644)
-			if err != nil {
-				opt.logger.Error(fmt.Sprintf("failed to write file %v", obj), "File-Name", fileName, "Error", err)
-				continue
-			}
-			continue
-		}
 		var createErr error
 		var kind, name string
 		name, kind, createErr = kubeobj.CreateObject(opt.kubeClientSet, obj, opt.namespace)

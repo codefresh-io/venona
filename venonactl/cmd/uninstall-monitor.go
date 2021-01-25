@@ -71,6 +71,7 @@ var uninstallMonitorAgentCmd = &cobra.Command{
 		deleteOptions.KubeBuilder = getKubeClientBuilder(uninstallMonitorAgentCmdOptions.kube.context,
 			s.KubernetesAPI.Namespace,
 			uninstallMonitorAgentCmdOptions.kube.kubePath,
+			false,
 			false)
 
 		builder.Add(plugins.MonitorAgentPluginType)
