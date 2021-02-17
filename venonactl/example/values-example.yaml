@@ -56,6 +56,9 @@
 ### SkipClusterTest: only set to true if you want to skip the acceptance tests during the installation
 # SkipClusterTest: true
 
+### SkipClusterTest: if set to true, cluster integration will not be created in Codefresh
+# SkipClusterIntegration: false
+
 ### ClusterId --clusterId: used when installing the monitor component
 ### this is the name of the cluster integration in codefresh
 # ClusterId: cluster-name
