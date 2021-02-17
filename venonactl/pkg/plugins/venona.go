@@ -343,7 +343,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	}
 }
 
-func (u *venonaPlugin) Test(opt TestOptions, v Values) error {
+func (u *venonaPlugin) Test(opt *TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		cpu:        "500m",
 		momorySize: "1Gi",

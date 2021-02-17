@@ -32,7 +32,7 @@ type (
 		Delete(*DeleteOptions, Values) error
 		Upgrade(*UpgradeOptions, Values) (Values, error)
 		Migrate(*MigrateOptions, Values) error
-		Test(TestOptions, Values) error
+		Test(*TestOptions, Values) error
 		Name() string
 	}
 
@@ -57,6 +57,7 @@ type (
 		CodefreshToken        string
 		ClusterName           string
 		ClusterNamespace      string
+		ClusterHost           string
 		RegisterWithAgent     bool
 		MarkAsDefault         bool
 		StorageClass          string
@@ -114,6 +115,7 @@ type (
 	TestOptions struct {
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
+			BuildConfig() (*rest.Config, error)
 			EnsureNamespaceExists(cs *kubernetes.Clientset) error
 		}
 		ClusterNamespace string

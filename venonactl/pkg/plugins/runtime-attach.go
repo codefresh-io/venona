@@ -76,10 +76,15 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 	crt := secret.Data["ca.crt"]
 	token := secret.Data["token"]
 
+	host := config.Host
+	if opt.ClusterHost != "" {
+		host = opt.ClusterHost
+	}
+
 	rc := RuntimeConfiguration{
 		Crt:   string(crt),
 		Token: string(token),
-		Host:  config.Host,
+		Host:  host,
 		Name:  opt.RuntimeEnvironment,
 		Type:  "runtime",
 	}
@@ -110,7 +115,7 @@ func readCurrentVenonaConf(agentKubeBuilder KubeClientBuilder, clusterNamespace 
 }
 
 func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
-	if opt.DryRun == true {
+	if opt.DryRun {
 		return v, nil
 	}
 	cs, err := opt.AgentKubeBuilder.BuildClient() // on the agent cluster
@@ -310,7 +315,7 @@ func (u *runtimeAttachPlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *runtimeAttachPlugin) Test(opt TestOptions, v Values) error {
+func (u *runtimeAttachPlugin) Test(opt *TestOptions, v Values) error {
 	return nil
 }
 

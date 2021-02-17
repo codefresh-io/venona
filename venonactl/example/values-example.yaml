@@ -31,6 +31,9 @@
 ### Context: --context $KUBE_CONTEXT: which kubernetes context to use
 # Context: some-context
 
+### KubernetesHost: --kube-host: override the apiserver address that the runner will use
+# KubernetesHost: https://kubernetes.default.svc.cluster.local
+
 ### Namespace --kube-namespace $KUBE_NAMESPACE: namespace for the runner, runtime, monitor, app-proxy
 # Namespace: r1
 
