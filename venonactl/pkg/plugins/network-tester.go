@@ -46,7 +46,11 @@ const (
 )
 
 var (
-	errNetworkTestFailed = errors.New("Cluster network tests failed. If you are using a proxy, run again with the correct http proxy environment variables. For more details run again with --verbose")
+	errNetworkTestFailed = errors.New(`Cluster network tests failed.
+- If you are using a proxy, run again with the correct http proxy environment variables.
+- Make sure that cluster host address in your kubeconfig is accessible from inside the cluster,
+  or specify a different one with: --set-value KubernetesHost=<address>.
+For more details run again with --verbose`)
 )
 
 func (u *networkTesterPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
