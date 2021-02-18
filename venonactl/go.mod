@@ -9,7 +9,6 @@ require (
 	github.com/briandowns/spinner v1.11.1
 	github.com/codefresh-io/go-sdk v0.19.4
 	github.com/dustin/go-humanize v1.0.0
-	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/gophercloud/gophercloud v0.8.0 // indirect
 	github.com/huandu/xstrings v1.3.0 // indirect
 	github.com/imdario/mergo v0.3.8 // indirect
@@ -19,7 +18,6 @@ require (
 	github.com/spf13/cobra v0.0.6
 	github.com/spf13/viper v1.6.2
 	github.com/stretchr/objx v0.2.0
-	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	gopkg.in/yaml.v2 v2.2.8
 	helm.sh/helm/v3 v3.1.1
 	k8s.io/api v0.17.3
