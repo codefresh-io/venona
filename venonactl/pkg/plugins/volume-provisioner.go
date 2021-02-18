@@ -115,7 +115,7 @@ func (u *volumeProvisionerPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	}, v)
 }
 
-func (u *volumeProvisionerPlugin) Test(opt TestOptions, v Values) error {
+func (u *volumeProvisionerPlugin) Test(opt *TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		rbac: []rbacValidation{
 			{

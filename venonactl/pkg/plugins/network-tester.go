@@ -46,7 +46,11 @@ const (
 )
 
 var (
-	errNetworkTestFailed = errors.New("Cluster network tests failed. If you are using a proxy, run again with the correct http proxy environment variables. For more details run again with --verbose")
+	errNetworkTestFailed = errors.New(`Cluster network tests failed.
+- If you are using a proxy, run again with the correct http proxy environment variables.
+- Make sure that cluster host address in your kubeconfig is accessible from inside the cluster,
+  or specify a different one with: --set-value KubernetesHost=<address>.
+For more details run again with --verbose`)
 )
 
 func (u *networkTesterPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
@@ -102,7 +106,16 @@ func prepareTestDomains(v map[string]interface{}) []string {
 	return testDomains
 }
 
-func (u *networkTesterPlugin) Test(opt TestOptions, v Values) error {
+func getKubeHost(v map[string]interface{}, defaultHost string) string {
+	vObj := objx.New(v)
+	if host := vObj.Get("KubernetesHost").Str(); host != "" {
+		return host
+	}
+
+	return defaultHost
+}
+
+func (u *networkTesterPlugin) Test(opt *TestOptions, v Values) error {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -114,9 +127,15 @@ func (u *networkTesterPlugin) Test(opt TestOptions, v Values) error {
 		return err
 	}
 
+	conf, err := opt.KubeBuilder.BuildConfig()
+	if err != nil {
+		return fmt.Errorf("failed to build config: %w", err)
+	}
+
 	testDomains := prepareTestDomains(v)
 	urls := strings.Join(testDomains, ",")
 	objx.New(v["NetworkTester"]).Set("AdditionalEnvVars.URLS", urls)
+	objx.New(v["NetworkTester"]).Set("AdditionalEnvVars.KUBERNETES_HOST", getKubeHost(v, conf.Host))
 
 	err = install(&installOptions{
 		logger:         u.logger,

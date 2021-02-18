@@ -25,7 +25,7 @@
 ###          Kubernetes Context            ###
 ###                                        ###
 ##############################################
-### ConfigPath --kube-config-path $KUBECONFIG: kubeconfig path
+### ConfigPath: --kube-config-path $KUBECONFIG: kubeconfig path
 # ConfigPath: # default is $(HOME)/.kube/config
 
 ### Context: --context $KUBE_CONTEXT: which kubernetes context to use
@@ -48,8 +48,16 @@
 ### default is: runner
 # RuntimeServiceAccount: runner
 
+### KubernetesHost: --kube-host: used when attaching a runtime to a runner to override the
+### apiserver address that the runner will use to create resources on the runtime,
+### by default we use the host from your kubeconfig.
+# KubernetesHost: https://kubernetes.default.svc.cluster.local
+
 ### SkipClusterTest: only set to true if you want to skip the acceptance tests during the installation
 # SkipClusterTest: true
+
+### SkipClusterTest: if set to true, cluster integration will not be created in Codefresh
+# SkipClusterIntegration: false
 
 ### ClusterId --clusterId: used when installing the monitor component
 ### this is the name of the cluster integration in codefresh

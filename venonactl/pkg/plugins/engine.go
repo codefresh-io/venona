@@ -101,7 +101,7 @@ func (u *enginePlugin) Migrate(*MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *enginePlugin) Test(opt TestOptions, v Values) error {
+func (u *enginePlugin) Test(opt *TestOptions, v Values) error {
 	return nil
 }
 

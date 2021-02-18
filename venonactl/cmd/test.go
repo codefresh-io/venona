@@ -34,6 +34,7 @@ var allTestPluginTypes = []string{
 
 var testCommandOptions struct {
 	kube struct {
+		host      string
 		namespace string
 		context   string
 		inCluster bool
@@ -63,6 +64,7 @@ var testCommand = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Token", &cfAPIToken)
 		mergeValueStr(templateValuesMap, "Namespace", &testCommandOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &testCommandOptions.kube.context)
+		mergeValueStr(templateValuesMap, "KubernetesHost", &testCommandOptions.kube.host)
 		mergeValueBool(templateValuesMap, "InCluster", &testCommandOptions.kube.inCluster)
 		mergeValueBool(templateValuesMap, "insecure", &testCommandOptions.insecure)
 
@@ -101,7 +103,7 @@ var testCommand = &cobra.Command{
 			}
 		}
 
-		options := plugins.TestOptions{
+		options := &plugins.TestOptions{
 			KubeBuilder:      getKubeClientBuilder(s.KubernetesAPI.ContextName, s.KubernetesAPI.Namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, false),
 			ClusterNamespace: s.KubernetesAPI.Namespace,
 		}
@@ -128,6 +130,7 @@ func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 
+	testCommand.Flags().StringVar(&testCommandOptions.kube.host, "kube-host", viper.GetString("kube-host"), "overrides the address of the api-server the runner will use")
 	testCommand.Flags().StringVar(&testCommandOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which monitor should be installed [$KUBE_NAMESPACE]")
 	testCommand.Flags().StringVar(&testCommandOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which monitor should be installed (default is current-context) [$KUBE_CONTEXT]")
 	testCommand.Flags().BoolVar(&testCommandOptions.insecure, "insecure", false, "Set to true to disable certificate validation when using TLS connections")

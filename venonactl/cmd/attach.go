@@ -33,6 +33,7 @@ var attachRuntimeCmdOptions struct {
 		context        string
 		kubePath       string
 		serviceAccount string
+		host           string
 	}
 	kubeVenona struct {
 		namespace string
@@ -66,6 +67,7 @@ var attachRuntimeCmd = &cobra.Command{
 
 		mergeValueStr(templateValuesMap, "Namespace", &attachRuntimeCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &attachRuntimeCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "KubernetesHost", &attachRuntimeCmdOptions.kube.host)
 		mergeValueStr(templateValuesMap, "RuntimeEnvironmentName", &attachRuntimeCmdOptions.runtimeEnvironmentName)
 		mergeValueStr(templateValuesMap, "RuntimeServiceAccount", &attachRuntimeCmdOptions.kube.serviceAccount)
 
@@ -101,6 +103,7 @@ var attachRuntimeCmd = &cobra.Command{
 
 		builderInstallOpt := &plugins.InstallOptions{
 			ClusterNamespace:      attachRuntimeCmdOptions.kubeVenona.namespace,
+			ClusterHost:           attachRuntimeCmdOptions.kube.host,
 			RuntimeEnvironment:    attachRuntimeCmdOptions.runtimeEnvironmentName,
 			RuntimeClusterName:    attachRuntimeCmdOptions.kube.namespace,
 			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
@@ -143,6 +146,7 @@ func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 
+	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.host, "kube-host", viper.GetString("kube-host"), "overrides the address of the api-server the runner will use")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.context, "kube-context-name", viper.GetString("kube-context"), "Name of the kubernetes context on which venona should be installed (default is current-context) [$KUBE_CONTEXT]")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.kubePath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")

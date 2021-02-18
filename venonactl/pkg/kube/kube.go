@@ -58,12 +58,11 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	cs, err := kubernetes.NewForConfig(config)
-	return cs, nil
+	return kubernetes.NewForConfig(config)
 }
 
 func (k *kube) EnsureNamespaceExists(cs *kubernetes.Clientset) error {
-	if k.dryRun == true {
+	if k.dryRun {
 		return nil
 	}
 	_, err := cs.CoreV1().Namespaces().Get(k.namespace, v1.GetOptions{})
