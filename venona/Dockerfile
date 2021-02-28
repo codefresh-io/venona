@@ -7,6 +7,9 @@ WORKDIR /venona
 COPY go.mod .
 RUN go mod download
 
+RUN chgrp -R 0 /venona /root \
+  && chmod -R g+rwX /venona /root
+
 COPY . .
 
 RUN make build
