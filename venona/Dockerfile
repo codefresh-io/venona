@@ -12,14 +12,17 @@ COPY . .
 
 RUN make build
 
+RUN chgrp -R 0 /venona \
+  && chmod -R g+rwX /venona
+
+USER node
+
 FROM alpine:3.12
 
 RUN apk update && apk add --no-cache ca-certificates && apk upgrade
 
 COPY --from=build /venona/venona /usr/local/bin/venona
 
-RUN chgrp -R 0 /venona /root \
-  && chmod -R g+rwX /venona /root
 
 ENTRYPOINT [ "venona" ]
 
