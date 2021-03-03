@@ -592,6 +592,10 @@ spec:
         name: {{ .AppName }}
         resources:
 {{ toYaml .Runner.Resources | indent 10 }}
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
       restartPolicy: Always
 `
 
