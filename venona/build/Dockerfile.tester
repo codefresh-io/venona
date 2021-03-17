@@ -1,4 +1,4 @@
-FROM golang:1.14.4-alpine3.12 AS os
+FROM golang:1.15.8-alpine3.12 AS os
 
 RUN apk -U add --no-cache ca-certificates apk add git make gcc g++ bash && update-ca-certificates
 RUN go get github.com/client9/misspell/cmd/misspell && \
