@@ -33,7 +33,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
-	nr "github.com/newrelic/go-agent"
+	nr "github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -148,8 +148,11 @@ func run(options startOptions) {
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
 	if options.newrelicLicenseKey != "" {
-		conf := nr.NewConfig(options.newrelicAppname, options.newrelicLicenseKey)
-		if monitor, err = newrelic.New(conf); err != nil {
+		monitor, err = newrelic.New(
+			nr.ConfigAppName(options.newrelicAppname),
+			nr.ConfigLicense(options.newrelicLicenseKey),
+		)
+		if err != nil {
 			log.Warn("Failed to create monitor", "error", err)
 		} else {
 			log.Info("Using New Relic monitor", "app-name", options.newrelicAppname, "license-key", options.newrelicLicenseKey)
@@ -162,7 +165,7 @@ func run(options startOptions) {
 	{
 		var httpClient http.Client
 		if !options.rejectTLSUnauthorized {
-			customTransport := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
+			customTransport := http.DefaultTransport.(*http.Transport).Clone()
 			// #nosec
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -199,14 +202,9 @@ func run(options startOptions) {
 	})
 	dieOnError(err)
 
-	serverMode := server.Release
-	if options.verbose {
-		serverMode = server.Debug
-	}
 	server, err := server.New(&server.Options{
 		Port:    fmt.Sprintf(":%s", options.serverPort),
 		Logger:  log.New("module", "server"),
-		Mode:    serverMode,
 		Monitor: monitor,
 	})
 	dieOnError(err)

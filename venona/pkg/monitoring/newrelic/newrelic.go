@@ -18,20 +18,20 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	nr "github.com/newrelic/go-agent"
-	nrgin "github.com/newrelic/go-agent/_integrations/nrgin/v1"
+	gorillamux "github.com/gorilla/mux"
+	"github.com/newrelic/go-agent/v3/integrations/nrgorilla"
+	nr "github.com/newrelic/go-agent/v3/newrelic"
 
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 )
 
 type (
 	monitor struct {
-		app nr.Application
+		app *nr.Application
 	}
 
 	transaction struct {
-		t nr.Transaction
+		t *nr.Transaction
 	}
 
 	segment struct {
@@ -44,8 +44,8 @@ type (
 )
 
 // New creates a new newrelic monitor
-func New(conf nr.Config) (monitoring.Monitor, error) {
-	app, err := nr.NewApplication(conf)
+func New(conf ...nr.ConfigOption) (monitoring.Monitor, error) {
+	app, err := nr.NewApplication(conf...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +54,8 @@ func New(conf nr.Config) (monitoring.Monitor, error) {
 }
 
 // Monitor
-func (m *monitor) NewTransaction(name string, w http.ResponseWriter, r *http.Request) monitoring.Transaction {
-	return &transaction{m.app.StartTransaction(name, w, r)}
+func (m *monitor) NewTransaction(name string) monitoring.Transaction {
+	return &transaction{m.app.StartTransaction(name)}
 }
 
 func (m *monitor) NewTransactionFromContext(ctx context.Context) monitoring.Transaction {
@@ -63,11 +63,11 @@ func (m *monitor) NewTransactionFromContext(ctx context.Context) monitoring.Tran
 }
 
 func (m *monitor) NewRoundTripper(rt http.RoundTripper) http.RoundTripper {
-	return nr.NewRoundTripper(nil, rt)
+	return nr.NewRoundTripper(rt)
 }
 
-func (m *monitor) NewGinMiddleware() gin.HandlerFunc {
-	return nrgin.Middleware(m.app)
+func (m *monitor) NewGorillaMiddleware() gorillamux.MiddlewareFunc {
+	return nrgorilla.Middleware(m.app)
 }
 
 // Transaction
@@ -79,27 +79,27 @@ func (t *transaction) NewSegmentByName(name string) monitoring.Segment {
 	return &segment{nr.StartSegment(t.t, name)}
 }
 
-func (t *transaction) AddAttribute(key string, val interface{}) error {
-	return t.t.AddAttribute(key, val)
+func (t *transaction) AddAttribute(key string, val interface{}) {
+	t.t.AddAttribute(key, val)
 }
 
 func (t *transaction) NewRoundTripper(rt http.RoundTripper) http.RoundTripper {
-	return nr.NewRoundTripper(t.t, rt)
+	return t.NewRoundTripper(rt)
 }
 
-func (t *transaction) End() error {
-	return t.t.End()
+func (t *transaction) End() {
+	t.t.End()
 }
 
-func (t *transaction) NoticeError(err error) error {
-	return t.t.NoticeError(err)
+func (t *transaction) NoticeError(err error) {
+	t.t.NoticeError(err)
 }
 
 // Segment
-func (s *segment) End() error {
-	return s.s.End()
+func (s *segment) End() {
+	s.s.End()
 }
 
-func (s *externalSegment) End() error {
-	return s.s.End()
+func (s *externalSegment) End() {
+	s.s.End()
 }

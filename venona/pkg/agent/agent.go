@@ -267,9 +267,9 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 		go func(tid string) {
 			if err := executeAgentTask(&t, logger); err != nil {
 				logger.Error(err.Error())
-				noticeError(txn, err, logger)
+				txn.NoticeError(err)
 			}
-			endTransaction(txn, logger)
+			txn.End()
 			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
 		}(t.Metadata.Workflow)
 	}
@@ -282,16 +282,16 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 
 		if !ok {
 			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-			noticeError(txn, errRuntimeNotFound, logger)
-			endTransaction(txn, logger)
+			txn.NoticeError(errRuntimeNotFound)
+			txn.End()
 			continue
 		}
 		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 		if err := runtime.StartWorkflow(tasks); err != nil {
 			logger.Error(err.Error())
-			noticeError(txn, err, logger)
+			txn.NoticeError(err)
 		}
-		endTransaction(txn, logger)
+		txn.End()
 	}
 
 	// process deletion tasks
@@ -302,18 +302,18 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 
 		if !ok {
 			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-			noticeError(txn, errRuntimeNotFound, logger)
-			endTransaction(txn, logger)
+			txn.NoticeError(errRuntimeNotFound)
+			txn.End()
 			continue
 		}
 		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 		if errs := runtime.TerminateWorkflow(tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
-				noticeError(txn, err, logger)
+				txn.NoticeError(err)
 			}
 		}
-		endTransaction(txn, logger)
+		txn.End()
 	}
 }
 
@@ -417,23 +417,11 @@ func checkOptions(opt *Options) error {
 }
 
 func newTransaction(monitor monitoring.Monitor, taskType, tid, runtime string) monitoring.Transaction {
-	txn := monitor.NewTransaction("runner-tasks-execution", nil, nil)
-	_ = txn.AddAttribute("task-type", taskType)
-	_ = txn.AddAttribute("tid", tid)
-	_ = txn.AddAttribute("runtime-environment", runtime)
+	txn := monitor.NewTransaction("runner-tasks-execution")
+	txn.AddAttribute("task-type", taskType)
+	txn.AddAttribute("tid", tid)
+	txn.AddAttribute("runtime-environment", runtime)
 	return txn
-}
-
-func noticeError(txn monitoring.Transaction, error error, log logger.Logger) {
-	if err := txn.NoticeError(error); err != nil {
-		log.Error("Failed to report error to monitor", "err", err)
-	}
-}
-
-func endTransaction(txn monitoring.Transaction, log logger.Logger) {
-	if err := txn.End(); err != nil {
-		log.Error("Failed to end transaction", "err", err)
-	}
 }
 
 func init() {

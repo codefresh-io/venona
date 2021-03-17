@@ -21,7 +21,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
-	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 )
 
 var (
@@ -36,7 +36,6 @@ type (
 	Options struct {
 		Port    string
 		Logger  logger.Logger
-		Mode    string
 		Monitor monitoring.Monitor
 	}
 
@@ -48,13 +47,6 @@ type (
 	}
 )
 
-const (
-	// Release mode
-	Release = gin.ReleaseMode
-	// Debug mode (more logs)
-	Debug = gin.DebugMode
-)
-
 // New returns a new Server instance or an error
 func New(opt *Options) (*Server, error) {
 	if opt.Logger == nil {
@@ -62,14 +54,15 @@ func New(opt *Options) (*Server, error) {
 	}
 	log := opt.Logger
 
-	gin.SetMode(opt.Mode)
-	r := gin.Default()
+	r := mux.NewRouter()
 	if opt.Monitor != nil {
-		r.Use(opt.Monitor.NewGinMiddleware())
+		r.Use(opt.Monitor.NewGorillaMiddleware())
 	}
-	r.GET("/health", func(c *gin.Context) {
-		c.String(http.StatusOK, "OK")
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
 	})
+
 	srv := &http.Server{
 		Addr:    opt.Port,
 		Handler: r,

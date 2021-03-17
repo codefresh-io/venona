@@ -18,15 +18,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	gorillamux "github.com/gorilla/mux"
 )
 
 // Monitor controls monitoring for the application
 type Monitor interface {
-	NewTransaction(name string, w http.ResponseWriter, r *http.Request) Transaction
+	NewTransaction(name string) Transaction
 	NewTransactionFromContext(ctx context.Context) Transaction
 	NewRoundTripper(rt http.RoundTripper) http.RoundTripper
-	NewGinMiddleware() gin.HandlerFunc
+	NewGorillaMiddleware() gorillamux.MiddlewareFunc
 }
 
 // Transaction instruments one logical unit of work: either an inbound web request
@@ -35,14 +35,14 @@ type Transaction interface {
 	// End finishes the Transaction.  After that, subsequent calls to End or
 	// other Transaction methods have no effect.  All segments and
 	// instrumentation must be completed before End is called.
-	End() error
+	End()
 
 	// AddAttribute adds a key value pair to the transaction event, errors,
 	// and traces.
 	//
 	// The key must contain fewer than than 255 bytes.  The value must be a
 	// number, string, or boolean.
-	AddAttribute(key string, value interface{}) error
+	AddAttribute(key string, value interface{})
 
 	NewRoundTripper(rt http.RoundTripper) http.RoundTripper
 
@@ -50,12 +50,12 @@ type Transaction interface {
 
 	NewSegmentByName(name string) Segment
 
-	NoticeError(err error) error
+	NoticeError(err error)
 }
 
 // Segment is used to instrument functions, methods, and blocks of code
 type Segment interface {
-	End() error
+	End()
 }
 
 // Empty implementation
@@ -69,7 +69,7 @@ func NewEmpty() Monitor {
 }
 
 // Monitor
-func (m *monitor) NewTransaction(name string, w http.ResponseWriter, r *http.Request) Transaction {
+func (m *monitor) NewTransaction(name string) Transaction {
 	return &transaction{}
 }
 
@@ -81,9 +81,9 @@ func (m *monitor) NewRoundTripper(rt http.RoundTripper) http.RoundTripper {
 	return rt
 }
 
-func (*monitor) NewGinMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
+func (m *monitor) NewGorillaMiddleware() gorillamux.MiddlewareFunc {
+	return func(h http.Handler) http.Handler {
+		return h
 	}
 }
 
@@ -96,23 +96,15 @@ func (t *transaction) NewSegmentByName(name string) Segment {
 	return &segment{}
 }
 
-func (t *transaction) AddAttribute(key string, val interface{}) error {
-	return nil
-}
+func (t *transaction) AddAttribute(key string, val interface{}) {}
 
 func (t *transaction) NewRoundTripper(rt http.RoundTripper) http.RoundTripper {
 	return rt
 }
 
-func (t *transaction) End() error {
-	return nil
-}
+func (t *transaction) End() {}
 
-func (t *transaction) NoticeError(err error) error {
-	return nil
-}
+func (t *transaction) NoticeError(err error) {}
 
 // Segment
-func (s *segment) End() error {
-	return nil
-}
+func (s *segment) End() {}
