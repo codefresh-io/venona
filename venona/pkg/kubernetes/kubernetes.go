@@ -15,6 +15,7 @@
 package kubernetes
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 
@@ -34,8 +35,8 @@ var kubeDecode = scheme.Codecs.UniversalDeserializer().Decode
 type (
 	// Kubernetes API client
 	Kubernetes interface {
-		CreateResource(spec interface{}) error
-		DeleteResource(opt DeleteOptions) error
+		CreateResource(ctx context.Context, spec interface{}) error
+		DeleteResource(ctx context.Context, opt DeleteOptions) error
 	}
 	// Options for Kubernetes
 	Options struct {
@@ -71,7 +72,7 @@ func New(opt Options) (Kubernetes, error) {
 	}, err
 }
 
-func (k kube) CreateResource(spec interface{}) error {
+func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 
 	bytes, err := json.Marshal(spec)
 	if err != nil {
@@ -84,18 +85,18 @@ func (k kube) CreateResource(spec interface{}) error {
 	}
 
 	var namespace string
-	switch objT := obj.(type) {
+	switch obj := obj.(type) {
 	case *v1.PersistentVolumeClaim:
-		namespace = objT.ObjectMeta.Namespace
-		_, err = k.client.CoreV1().PersistentVolumeClaims(namespace).Create(obj.(*v1.PersistentVolumeClaim))
+		namespace = obj.ObjectMeta.Namespace
+		_, err = k.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
 		k.logger.Info("PersistentVolumeClaim has been created")
 
 	case *v1.Pod:
-		namespace = objT.ObjectMeta.Namespace
-		_, err = k.client.CoreV1().Pods(namespace).Create(obj.(*v1.Pod))
+		namespace = obj.ObjectMeta.Namespace
+		_, err = k.client.CoreV1().Pods(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -105,20 +106,25 @@ func (k kube) CreateResource(spec interface{}) error {
 	return err
 }
 
-func (k kube) DeleteResource(opt DeleteOptions) error {
-
-	var err error
+func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
 	switch opt.Kind {
 	case task.TypeDeletePVC:
-		err = k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
+		err := k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
 		k.logger.Info("PersistentVolumeClaim has been deleted")
 
 	case task.TypeDeletePod:
-		err = k.client.CoreV1().Pods(opt.Namespace).Delete(opt.Name, &metav1.DeleteOptions{})
+		err := k.client.CoreV1().Pods(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
+		if err != nil {
+			return err
+		}
 		k.logger.Info("Pod has been deleted")
 
 	}
-	return err
+
+	return nil
 }
 
 func buildKubeClient(host string, token string, crt string, insecure bool) (kubernetes.Interface, error) {

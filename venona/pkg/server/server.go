@@ -86,13 +86,12 @@ func (s *Server) Start() error {
 }
 
 // Stop stops the HTTP server
-func (s *Server) Stop() error {
+func (s *Server) Stop(ctx context.Context) error {
 	if !s.running {
 		return errAlreadyStopped
 	}
 	s.running = false
 	s.log.Warn("Received graceful termination request, shutting down...")
-	ctx := context.Background()
 	err := s.srv.Shutdown(ctx)
 	if err != nil {
 		s.log.Error("failed to gracefully terminate server, cause: ", err)

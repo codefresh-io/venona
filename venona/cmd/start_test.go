@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,15 +24,17 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func Test_handleSignals(t *testing.T) {
 	type args struct {
-		log        logger.Logger
-		fakeSigs   []os.Signal
-		expectExit bool
-		stopDelay  time.Duration
+		log             logger.Logger
+		fakeSigs        []os.Signal
+		expectExit      bool
+		expectForceExit bool
+		stopDelay       time.Duration
 	}
 	tests := []struct {
 		name string
@@ -42,6 +45,7 @@ func Test_handleSignals(t *testing.T) {
 			args{
 				createMockLogger(),
 				[]os.Signal{syscall.SIGTERM},
+				true,
 				false,
 				time.Duration(0),
 			},
@@ -51,6 +55,7 @@ func Test_handleSignals(t *testing.T) {
 			args{
 				createMockLogger(),
 				[]os.Signal{syscall.SIGINT},
+				true,
 				false,
 				time.Duration(0),
 			},
@@ -61,6 +66,7 @@ func Test_handleSignals(t *testing.T) {
 				createMockLogger(),
 				[]os.Signal{syscall.SIGINT, syscall.SIGINT},
 				true,
+				true,
 				time.Millisecond * 100,
 			},
 		},
@@ -69,53 +75,58 @@ func Test_handleSignals(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// prepare mocks
-			readyChan := make(chan struct{})
 			var sigChan chan<- os.Signal
-			exitChan := make(chan struct{})
+			forcedExit := false
+			serverExit := make(chan struct{}, 1)
+			agentExit := make(chan struct{}, 1)
+
 			handleSignal = func(c chan<- os.Signal, sig ...os.Signal) {
 				sigChan = c
-				readyChan <- struct{}{}
 			}
-			exit = func(code int) {
-				exitChan <- struct{}{}
-			}
-			serverStopChan := make(chan struct{})
-			serverStopFunc := func() error {
-				serverStopChan <- struct{}{}
+
+			serverStopFunc := func(ctx context.Context) error {
+				select {
+				case <-ctx.Done():
+					forcedExit = true
+				case <-time.After(tt.args.stopDelay): // delay exit
+				}
+				serverExit <- struct{}{}
 				return nil
 			}
-			agentStopChan := make(chan struct{})
 			agentStopFunc := func() error {
-				agentStopChan <- struct{}{}
 				time.Sleep(tt.args.stopDelay) // delay the termination
+
+				agentExit <- struct{}{}
 				return nil
 			}
 
-			go handleSignals(serverStopFunc, agentStopFunc, tt.args.log)
-			<-readyChan // mocks are all in place
+			ctx := context.Background()
+			ctx = withSignals(ctx, serverStopFunc, agentStopFunc, tt.args.log)
+
 			for _, sig := range tt.args.fakeSigs {
 				sigChan <- sig
 			}
 
 			if tt.args.expectExit {
-				<-exitChan
-			} else {
-				<-agentStopChan
-				<-serverStopChan
+				// wait
+				<-serverExit
+				<-agentExit
+			}
+
+			<-time.After(time.Millisecond * 1000)
+			select {
+			case <-ctx.Done():
+				assert.True(t, tt.args.expectExit)
+				assert.Equal(t, tt.args.expectForceExit, forcedExit)
+			default:
+				assert.False(t, tt.args.expectExit)
+				assert.False(t, tt.args.expectForceExit)
 			}
 		})
 	}
 
 	// cleanup
 	handleSignal = signal.Notify
-	exit = os.Exit
-}
-
-func createMockStopFunc() func() error {
-	return func() error {
-		time.Sleep(time.Millisecond * 50)
-		return nil
-	}
 }
 
 func createMockLogger() *mocks.Logger {
