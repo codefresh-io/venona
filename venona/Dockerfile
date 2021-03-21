@@ -1,6 +1,6 @@
 FROM golang:1.15.8-alpine3.12 as build
 
-RUN apk -U add --no-cache git make curl ca-certificates && update-ca-certificates
+RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 
 ENV USER=venona
 ENV UID=10001 
@@ -31,7 +31,8 @@ FROM alpine:3.12
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
-COPY --chown=venona:venona --from=build /usr/bin/curl /usr/local/bin/curl
+
+WORKDIR /home/venona
 
 # copy binary
 COPY --from=build /venona/venona /usr/local/bin/venona
