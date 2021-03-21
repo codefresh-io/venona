@@ -53,7 +53,7 @@ var upgradeCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Namespace", &uninstallAgentCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &uninstallAgentCmdOptions.kube.context)
 
-		lgr := createLogger("Upgrade", true, logFormatter)
+		lgr := createLogger("Upgrade", verbose, logFormatter)
 		builder := plugins.NewBuilder(lgr)
 		builder.Add(plugins.VenonaPluginType)
 
