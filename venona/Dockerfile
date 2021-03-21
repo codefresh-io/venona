@@ -5,8 +5,6 @@ RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 ENV USER=venona
 ENV UID=10001 
 
-RUN which curl
-
 RUN adduser \    
     --disabled-password \    
     --gecos "" \    
