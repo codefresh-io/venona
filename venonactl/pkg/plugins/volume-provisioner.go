@@ -17,6 +17,7 @@ limitations under the License.
 package plugins
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
@@ -34,12 +35,12 @@ const (
 )
 
 // Install runtimectl environment
-func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *volumeProvisionerPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v", err)
 	}
-	return v, install(&installOptions{
+	return v, install(ctx, &installOptions{
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
 		kubeClientSet:  cs,
@@ -51,7 +52,7 @@ func (u *volumeProvisionerPlugin) Install(opt *InstallOptions, v Values) (Values
 	})
 }
 
-func (u *volumeProvisionerPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *volumeProvisionerPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -66,10 +67,10 @@ func (u *volumeProvisionerPlugin) Status(statusOpt *StatusOptions, v Values) ([]
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
-	return status(opt)
+	return status(ctx, opt)
 }
 
-func (u *volumeProvisionerPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *volumeProvisionerPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -84,10 +85,10 @@ func (u *volumeProvisionerPlugin) Delete(deleteOpt *DeleteOptions, v Values) err
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
-	return uninstall(opt)
+	return uninstall(ctx, opt)
 }
 
-func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *volumeProvisionerPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
 	var err error
 	kubeClientset, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
@@ -100,7 +101,7 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 	}
 	for _, local := range kubeObjects {
 
-		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
+		_, _, err := kubeobj.ReplaceObject(ctx, kubeClientset, local, opt.ClusterNamespace)
 		if err != nil {
 			return nil, err
 		}
@@ -108,14 +109,14 @@ func (u *volumeProvisionerPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values
 	return v, nil
 
 }
-func (u *volumeProvisionerPlugin) Migrate(opt *MigrateOptions, v Values) error {
-	return u.Delete(&DeleteOptions{
+func (u *volumeProvisionerPlugin) Migrate(ctx context.Context, opt *MigrateOptions, v Values) error {
+	return u.Delete(ctx, &DeleteOptions{
 		ClusterNamespace: opt.ClusterNamespace,
 		KubeBuilder:      opt.KubeBuilder,
 	}, v)
 }
 
-func (u *volumeProvisionerPlugin) Test(opt *TestOptions, v Values) error {
+func (u *volumeProvisionerPlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		rbac: []rbacValidation{
 			{
@@ -181,7 +182,7 @@ func (u *volumeProvisionerPlugin) Test(opt *TestOptions, v Values) error {
 			},
 		},
 	}
-	return test(testOptions{
+	return test(ctx, testOptions{
 		logger:            u.logger,
 		kubeBuilder:       opt.KubeBuilder,
 		namespace:         opt.ClusterNamespace,

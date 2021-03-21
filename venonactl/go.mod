@@ -1,29 +1,28 @@
 module github.com/codefresh-io/venona/venonactl
 
-go 1.13
+go 1.15
 
 require (
-	github.com/Azure/go-autorest/autorest v0.10.0 // indirect
 	github.com/Masterminds/semver v1.5.0
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/briandowns/spinner v1.11.1
-	github.com/codefresh-io/go-sdk v0.19.4
+	github.com/briandowns/spinner v1.12.0
+	github.com/codefresh-io/go-sdk v0.24.0
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gophercloud/gophercloud v0.8.0 // indirect
-	github.com/huandu/xstrings v1.3.0 // indirect
-	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1
-	github.com/mattn/go-colorable v0.1.6 // indirect
-	github.com/olekukonko/tablewriter v0.0.4
-	github.com/spf13/cobra v0.0.6
-	github.com/spf13/viper v1.6.2
-	github.com/stretchr/objx v0.2.0
-	gopkg.in/yaml.v2 v2.2.8
-	helm.sh/helm/v3 v3.1.1
-	k8s.io/api v0.17.3
-	k8s.io/apimachinery v0.17.3
-	k8s.io/client-go v0.17.3
-	k8s.io/utils v0.0.0-20200229041039-0a110f9eb7ab // indirect
+	github.com/inconshreveable/log15 v0.0.0-20201112154412-8562bdadbbac
+	github.com/mattn/go-colorable v0.1.8 // indirect
+	github.com/olekukonko/tablewriter v0.0.5
+	github.com/spf13/cobra v1.1.3
+	github.com/spf13/viper v1.7.1
+	github.com/stretchr/objx v0.3.0
+	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
+	gopkg.in/yaml.v2 v2.4.0
+	helm.sh/helm/v3 v3.5.3
+	k8s.io/api v0.20.4
+	k8s.io/apimachinery v0.20.4
+	k8s.io/client-go v0.20.4
 )
 
-replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.2+incompatible
+replace (
+	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
+	github.com/docker/docker => github.com/moby/moby v17.12.0-ce-rc1.0.20200618181300-9dc6525e6118+incompatible
+)

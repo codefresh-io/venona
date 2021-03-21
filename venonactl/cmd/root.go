@@ -17,6 +17,8 @@ limitations under the License.
 */
 
 import (
+	"context"
+
 	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
@@ -28,8 +30,8 @@ var rootCmd = &cobra.Command{
 }
 
 // Execute - execute the root command
-func Execute() {
-	err := rootCmd.Execute()
+func Execute(ctx context.Context) {
+	err := rootCmd.ExecuteContext(ctx)
 	dieOnError(err)
 }
 

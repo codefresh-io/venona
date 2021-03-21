@@ -3,6 +3,7 @@
 package kubeobj
 
 import (
+	"context"
 	"fmt"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -23,7 +24,7 @@ import (
 )
 
 // CreateObject - creates kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
+func CreateObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
 
 	var name, kind string
 	var err error
@@ -32,117 +33,117 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 	case *appsv1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.AppsV1().DaemonSets(namespace).Create(objT)
+		_, err = clientset.AppsV1().DaemonSets(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *appsv1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.AppsV1().Deployments(namespace).Create(objT)
+		_, err = clientset.AppsV1().Deployments(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *batchv1.Job:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1().Jobs(namespace).Create(objT)
+		_, err = clientset.BatchV1().Jobs(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *batchv1beta1.CronJob:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1beta1().CronJobs(namespace).Create(objT)
+		_, err = clientset.BatchV1beta1().CronJobs(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *netV1beta1.Ingress:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Create(objT)
+		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().ClusterRoles().Create(objT)
+		_, err = clientset.RbacV1().ClusterRoles().Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().ClusterRoleBindings().Create(objT)
+		_, err = clientset.RbacV1().ClusterRoleBindings().Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().Roles(namespace).Create(objT)
+		_, err = clientset.RbacV1().Roles(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().RoleBindings(namespace).Create(objT)
+		_, err = clientset.RbacV1().RoleBindings(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1beta1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().ClusterRoles().Create(objT)
+		_, err = clientset.RbacV1beta1().ClusterRoles().Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1beta1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().ClusterRoleBindings().Create(objT)
+		_, err = clientset.RbacV1beta1().ClusterRoleBindings().Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1beta1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().Roles(namespace).Create(objT)
+		_, err = clientset.RbacV1beta1().Roles(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *rbacv1beta1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().RoleBindings(namespace).Create(objT)
+		_, err = clientset.RbacV1beta1().RoleBindings(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *storagev1.StorageClass:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.StorageV1().StorageClasses().Create(objT)
+		_, err = clientset.StorageV1().StorageClasses().Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.ConfigMap:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().ConfigMaps(namespace).Create(objT)
+		_, err = clientset.CoreV1().ConfigMaps(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.PersistentVolume:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().PersistentVolumes().Create(objT)
+		_, err = clientset.CoreV1().PersistentVolumes().Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.PersistentVolumeClaim:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Create(objT)
+		_, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.Pod:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Pods(namespace).Create(objT)
+		_, err = clientset.CoreV1().Pods(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.Secret:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Secrets(namespace).Create(objT)
+		_, err = clientset.CoreV1().Secrets(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.Service:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Services(namespace).Create(objT)
+		_, err = clientset.CoreV1().Services(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1.ServiceAccount:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().ServiceAccounts(namespace).Create(objT)
+		_, err = clientset.CoreV1().ServiceAccounts(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1beta1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Create(objT)
+		_, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	case *v1beta1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.ExtensionsV1beta1().Deployments(namespace).Create(objT)
+		_, err = clientset.ExtensionsV1beta1().Deployments(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
 	default:
 		return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
@@ -151,7 +152,7 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 }
 
 // CheckObject - checks kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
+func CheckObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
 
 	var name, kind string
 	var err error
@@ -160,117 +161,117 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
 	case *appsv1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.AppsV1().DaemonSets(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.AppsV1().DaemonSets(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *appsv1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.AppsV1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *batchv1.Job:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1().Jobs(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.BatchV1().Jobs(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *batchv1beta1.CronJob:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1beta1().CronJobs(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.BatchV1beta1().CronJobs(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *netV1beta1.Ingress:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().ClusterRoles().Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1().ClusterRoles().Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().ClusterRoleBindings().Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1().ClusterRoleBindings().Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().Roles(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1().Roles(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().RoleBindings(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1().RoleBindings(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1beta1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().ClusterRoles().Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1beta1().ClusterRoles().Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1beta1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().ClusterRoleBindings().Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1beta1().ClusterRoleBindings().Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1beta1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().Roles(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1beta1().Roles(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *rbacv1beta1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().RoleBindings(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.RbacV1beta1().RoleBindings(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *storagev1.StorageClass:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.StorageV1().StorageClasses().Get(name, metav1.GetOptions{})
+		_, err = clientset.StorageV1().StorageClasses().Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.ConfigMap:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().ConfigMaps(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.PersistentVolume:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().PersistentVolumes().Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().PersistentVolumes().Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.PersistentVolumeClaim:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.Pod:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Pods(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().Pods(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.Secret:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.Service:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Services(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().Services(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1.ServiceAccount:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().ServiceAccounts(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.CoreV1().ServiceAccounts(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1beta1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	case *v1beta1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.ExtensionsV1beta1().Deployments(namespace).Get(name, metav1.GetOptions{})
+		_, err = clientset.ExtensionsV1beta1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})
 
 	default:
 		return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
@@ -279,7 +280,7 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
 }
 
 // DeleteObject - checks kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
+func DeleteObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
 	var propagationPolicy metav1.DeletionPropagation = "Background"
 	var name, kind string
 	var err error
@@ -288,161 +289,161 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 	case *appsv1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.AppsV1().DaemonSets(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.AppsV1().DaemonSets(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *appsv1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.AppsV1().Deployments(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.AppsV1().Deployments(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *batchv1.Job:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.BatchV1().Jobs(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.BatchV1().Jobs(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *batchv1beta1.CronJob:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.BatchV1beta1().CronJobs(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.BatchV1beta1().CronJobs(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *netV1beta1.Ingress:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.NetworkingV1beta1().Ingresses(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.NetworkingV1beta1().Ingresses(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1().ClusterRoles().Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1().ClusterRoles().Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1().ClusterRoleBindings().Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1().ClusterRoleBindings().Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1().Roles(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1().Roles(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1().RoleBindings(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1().RoleBindings(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1beta1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1beta1().ClusterRoles().Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1beta1().ClusterRoles().Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1beta1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1beta1().ClusterRoleBindings().Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1beta1().ClusterRoleBindings().Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1beta1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1beta1().Roles(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1beta1().Roles(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *rbacv1beta1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.RbacV1beta1().RoleBindings(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.RbacV1beta1().RoleBindings(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *storagev1.StorageClass:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.StorageV1().StorageClasses().Delete(name, &metav1.DeleteOptions{
+		err = clientset.StorageV1().StorageClasses().Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.ConfigMap:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().ConfigMaps(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().ConfigMaps(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.PersistentVolume:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().PersistentVolumes().Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().PersistentVolumes().Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.PersistentVolumeClaim:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.Pod:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().Pods(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().Pods(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.Secret:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().Secrets(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().Secrets(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.Service:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().Services(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().Services(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1.ServiceAccount:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.CoreV1().ServiceAccounts(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.CoreV1().ServiceAccounts(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1beta1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
 	case *v1beta1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		err = clientset.ExtensionsV1beta1().Deployments(namespace).Delete(name, &metav1.DeleteOptions{
+		err = clientset.ExtensionsV1beta1().Deployments(namespace).Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
@@ -453,7 +454,7 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 }
 
 // ReplaceObject - replaces kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
+func ReplaceObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error) {
 	var name, kind string
 	var err error
 	switch objT := obj.(type) {
@@ -461,117 +462,117 @@ func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespac
 	case *appsv1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.AppsV1().DaemonSets(namespace).Update(objT)
+		_, err = clientset.AppsV1().DaemonSets(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *appsv1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.AppsV1().Deployments(namespace).Update(objT)
+		_, err = clientset.AppsV1().Deployments(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *batchv1.Job:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1().Jobs(namespace).Update(objT)
+		_, err = clientset.BatchV1().Jobs(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *batchv1beta1.CronJob:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1beta1().CronJobs(namespace).Update(objT)
+		_, err = clientset.BatchV1beta1().CronJobs(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *netV1beta1.Ingress:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Update(objT)
+		_, err = clientset.NetworkingV1beta1().Ingresses(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().ClusterRoles().Update(objT)
+		_, err = clientset.RbacV1().ClusterRoles().Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().ClusterRoleBindings().Update(objT)
+		_, err = clientset.RbacV1().ClusterRoleBindings().Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().Roles(namespace).Update(objT)
+		_, err = clientset.RbacV1().Roles(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1().RoleBindings(namespace).Update(objT)
+		_, err = clientset.RbacV1().RoleBindings(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1beta1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().ClusterRoles().Update(objT)
+		_, err = clientset.RbacV1beta1().ClusterRoles().Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1beta1.ClusterRoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().ClusterRoleBindings().Update(objT)
+		_, err = clientset.RbacV1beta1().ClusterRoleBindings().Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1beta1.Role:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().Roles(namespace).Update(objT)
+		_, err = clientset.RbacV1beta1().Roles(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *rbacv1beta1.RoleBinding:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.RbacV1beta1().RoleBindings(namespace).Update(objT)
+		_, err = clientset.RbacV1beta1().RoleBindings(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *storagev1.StorageClass:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.StorageV1().StorageClasses().Update(objT)
+		_, err = clientset.StorageV1().StorageClasses().Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.ConfigMap:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().ConfigMaps(namespace).Update(objT)
+		_, err = clientset.CoreV1().ConfigMaps(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.PersistentVolume:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().PersistentVolumes().Update(objT)
+		_, err = clientset.CoreV1().PersistentVolumes().Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.PersistentVolumeClaim:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Update(objT)
+		_, err = clientset.CoreV1().PersistentVolumeClaims(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.Pod:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Pods(namespace).Update(objT)
+		_, err = clientset.CoreV1().Pods(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.Secret:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Secrets(namespace).Update(objT)
+		_, err = clientset.CoreV1().Secrets(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.Service:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().Services(namespace).Update(objT)
+		_, err = clientset.CoreV1().Services(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1.ServiceAccount:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.CoreV1().ServiceAccounts(namespace).Update(objT)
+		_, err = clientset.CoreV1().ServiceAccounts(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1beta1.DaemonSet:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Update(objT)
+		_, err = clientset.ExtensionsV1beta1().DaemonSets(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	case *v1beta1.Deployment:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-		_, err = clientset.ExtensionsV1beta1().Deployments(namespace).Update(objT)
+		_, err = clientset.ExtensionsV1beta1().Deployments(namespace).Update(ctx, objT, metav1.UpdateOptions{})
 
 	default:
 		return "", "", fmt.Errorf("Unknown object type %T\n ", objT)

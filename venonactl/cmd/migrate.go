@@ -51,7 +51,7 @@ var migrateCmd = &cobra.Command{
 		spn.Start()
 		defer spn.Stop()
 		for _, p := range builder.Get() {
-			err := p.Migrate(&plugins.MigrateOptions{
+			err := p.Migrate(cmd.Context(), &plugins.MigrateOptions{
 				ClusterNamespace: migrateCmdOpt.kube.namespace,
 				ClusterName:      migrateCmdOpt.kube.context,
 				KubeBuilder:      getKubeClientBuilder(migrateCmdOpt.kube.context, migrateCmdOpt.kube.namespace, s.KubernetesAPI.ConfigPath, s.KubernetesAPI.InCluster, false),

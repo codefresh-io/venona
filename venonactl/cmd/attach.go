@@ -130,7 +130,7 @@ var attachRuntimeCmd = &cobra.Command{
 		spn := createSpinner("Attaching runtime to agent (might take a few seconds)", "")
 		spn.Start()
 		for _, p := range builder.Get() {
-			values, err = p.Install(builderInstallOpt, values)
+			values, err = p.Install(cmd.Context(), builderInstallOpt, values)
 			if err != nil {
 				dieOnError(err)
 			}

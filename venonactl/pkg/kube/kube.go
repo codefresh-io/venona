@@ -1,6 +1,8 @@
 package kube
 
 import (
+	"context"
+
 	v1Core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,7 +16,7 @@ type (
 	Kube interface {
 		BuildClient() (*kubernetes.Clientset, error)
 		BuildConfig() (*rest.Config, error)
-		EnsureNamespaceExists(cs *kubernetes.Clientset) error
+		EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error
 	}
 
 	kube struct {
@@ -61,14 +63,14 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-func (k *kube) EnsureNamespaceExists(cs *kubernetes.Clientset) error {
+func (k *kube) EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error {
 	if k.dryRun {
 		return nil
 	}
-	_, err := cs.CoreV1().Namespaces().Get(k.namespace, v1.GetOptions{})
+	_, err := cs.CoreV1().Namespaces().Get(ctx, k.namespace, v1.GetOptions{})
 	if err != nil {
 		nsSpec := &v1Core.Namespace{ObjectMeta: metav1.ObjectMeta{Name: k.namespace}}
-		_, err := cs.CoreV1().Namespaces().Create(nsSpec)
+		_, err := cs.CoreV1().Namespaces().Create(ctx, nsSpec, v1.CreateOptions{})
 		if err != nil {
 			return err
 		}

@@ -71,7 +71,7 @@ var upgradeCmd = &cobra.Command{
 		defer spn.Stop()
 
 		for _, p := range builder.Get() {
-			values, err = p.Upgrade(&plugins.UpgradeOptions{
+			values, err = p.Upgrade(cmd.Context(), &plugins.UpgradeOptions{
 				Name:             s.AppName,
 				ClusterNamespace: upgradeCmdOpt.kube.namespace,
 				ClusterName:      upgradeCmdOpt.kube.namespace,

@@ -18,6 +18,7 @@ package plugins
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -209,7 +210,7 @@ func getKubeObjectsFromTempalte(values map[string]interface{}, pattern string, l
 	return KubeObjectsFromTemplates(templatesMap, values, pattern, logger)
 }
 
-func ensureClusterRequirements(client *kubernetes.Clientset, req validationRequest, logger logger.Logger) (validationResult, error) {
+func ensureClusterRequirements(ctx context.Context, client *kubernetes.Clientset, req validationRequest, logger logger.Logger) (validationResult, error) {
 	result := validationResult{true, nil}
 	specs := []*authv1.SelfSubjectAccessReview{}
 	for _, rbac := range req.rbac {
@@ -229,7 +230,7 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 			})
 		}
 	}
-	rbacres := testRBAC(client, specs)
+	rbacres := testRBAC(ctx, client, specs)
 	if len(rbacres) > 0 {
 		result.isValid = false
 		for _, res := range rbacres {
@@ -251,7 +252,7 @@ func ensureClusterRequirements(client *kubernetes.Clientset, req validationReque
 		}
 	}
 
-	nodes, err := client.CoreV1().Nodes().List(metav1.ListOptions{})
+	nodes, err := client.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return result, err
 	}
@@ -341,10 +342,10 @@ func testNode(n v1.Node, req validationRequest) []string {
 	return result
 }
 
-func testRBAC(client *kubernetes.Clientset, specs []*authv1.SelfSubjectAccessReview) []string {
+func testRBAC(ctx context.Context, client *kubernetes.Clientset, specs []*authv1.SelfSubjectAccessReview) []string {
 	res := []string{}
 	for _, sar := range specs {
-		resp, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(sar)
+		resp, err := client.AuthorizationV1().SelfSubjectAccessReviews().Create(ctx, sar, metav1.CreateOptions{})
 		if err != nil {
 			res = append(res, err.Error())
 			continue

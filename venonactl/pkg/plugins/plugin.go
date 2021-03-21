@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -27,12 +28,12 @@ const (
 
 type (
 	Plugin interface {
-		Install(*InstallOptions, Values) (Values, error)
-		Status(*StatusOptions, Values) ([][]string, error)
-		Delete(*DeleteOptions, Values) error
-		Upgrade(*UpgradeOptions, Values) (Values, error)
-		Migrate(*MigrateOptions, Values) error
-		Test(*TestOptions, Values) error
+		Install(context.Context, *InstallOptions, Values) (Values, error)
+		Status(context.Context, *StatusOptions, Values) ([][]string, error)
+		Delete(context.Context, *DeleteOptions, Values) error
+		Upgrade(context.Context, *UpgradeOptions, Values) (Values, error)
+		Migrate(context.Context, *MigrateOptions, Values) error
+		Test(context.Context, *TestOptions, Values) error
 		Name() string
 	}
 
@@ -66,11 +67,11 @@ type (
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)
 			BuildConfig() (*rest.Config, error)
-			EnsureNamespaceExists(cs *kubernetes.Clientset) error
+			EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error
 		}
 		AgentKubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
-			EnsureNamespaceExists(cs *kubernetes.Clientset) error
+			EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error
 		}
 		DryRun                bool
 		BuildNodeSelector     map[string]string
@@ -116,7 +117,7 @@ type (
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 			BuildConfig() (*rest.Config, error)
-			EnsureNamespaceExists(cs *kubernetes.Clientset) error
+			EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error
 		}
 		ClusterNamespace string
 	}
@@ -240,7 +241,7 @@ func build(t string, logger logger.Logger) Plugin {
 	return nil
 }
 
-func install(opt *installOptions) error {
+func install(ctx context.Context, opt *installOptions) error {
 
 	if opt.dryRun == true {
 		err := os.Mkdir("codefresh_manifests", 0755)
@@ -266,7 +267,7 @@ func install(opt *installOptions) error {
 
 		var createErr error
 		var kind, name string
-		name, kind, createErr = kubeobj.CreateObject(opt.kubeClientSet, obj, opt.namespace)
+		name, kind, createErr = kubeobj.CreateObject(ctx, opt.kubeClientSet, obj, opt.namespace)
 
 		if createErr == nil {
 			opt.logger.Debug(fmt.Sprintf("%s \"%s\" created", kind, name))
@@ -286,7 +287,7 @@ func install(opt *installOptions) error {
 	return nil
 }
 
-func status(opt *statusOptions) ([][]string, error) {
+func status(ctx context.Context, opt *statusOptions) ([][]string, error) {
 	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {
 		return nil, err
@@ -295,7 +296,7 @@ func status(opt *statusOptions) ([][]string, error) {
 	var kind, name string
 	var rows [][]string
 	for _, obj := range kubeObjects {
-		name, kind, getErr = kubeobj.CheckObject(opt.kubeClientSet, obj, opt.namespace)
+		name, kind, getErr = kubeobj.CheckObject(ctx, opt.kubeClientSet, obj, opt.namespace)
 		if getErr == nil {
 			rows = append(rows, []string{kind, name, StatusInstalled})
 		} else if statusError, errIsStatusError := getErr.(*errors.StatusError); errIsStatusError {
@@ -308,7 +309,7 @@ func status(opt *statusOptions) ([][]string, error) {
 	return rows, nil
 }
 
-func uninstall(opt *deleteOptions) error {
+func uninstall(ctx context.Context, opt *deleteOptions) error {
 
 	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {
@@ -317,7 +318,7 @@ func uninstall(opt *deleteOptions) error {
 	var kind, name string
 	var deleteError error
 	for _, obj := range kubeObjects {
-		kind, name, deleteError = kubeobj.DeleteObject(opt.kubeClientSet, obj, opt.namespace)
+		kind, name, deleteError = kubeobj.DeleteObject(ctx, opt.kubeClientSet, obj, opt.namespace)
 		if deleteError == nil {
 			opt.logger.Debug(fmt.Sprintf("%s \"%s\" deleted", kind, name))
 		} else if statusError, errIsStatusError := deleteError.(*errors.StatusError); errIsStatusError {
@@ -337,7 +338,7 @@ func uninstall(opt *deleteOptions) error {
 	return nil
 }
 
-func test(opt testOptions) error {
+func test(ctx context.Context, opt testOptions) error {
 	lgr := opt.logger
 	cs, err := opt.kubeBuilder.BuildClient()
 	if err != nil {
@@ -345,7 +346,7 @@ func test(opt testOptions) error {
 		return err
 	}
 	lgr.Debug("Running acceptance tests")
-	res, err := ensureClusterRequirements(cs, opt.validationRequest, lgr)
+	res, err := ensureClusterRequirements(ctx, cs, opt.validationRequest, lgr)
 	if err != nil {
 		return err
 	}

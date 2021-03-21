@@ -66,7 +66,7 @@ var upgradeAppProxyCmd = &cobra.Command{
 		values = mergeMaps(values, templateValuesMap)
 
 		for _, p := range builder.Get() {
-			values, err = p.Upgrade(&plugins.UpgradeOptions{
+			values, err = p.Upgrade(cmd.Context(), &plugins.UpgradeOptions{
 				Name:             store.AppProxyApplicationName,
 				ClusterNamespace: upgradeAppProxyCmdOptions.kube.namespace,
 				ClusterName:      upgradeAppProxyCmdOptions.kube.namespace,

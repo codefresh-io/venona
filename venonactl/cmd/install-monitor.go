@@ -120,7 +120,7 @@ var installMonitorAgentCmd = &cobra.Command{
 		values = mergeMaps(values, templateValuesMap)
 
 		for _, p := range builder.Get() {
-			_, err := p.Install(builderInstallOpt, values)
+			_, err := p.Install(cmd.Context(), builderInstallOpt, values)
 			dieOnError(err)
 		}
 		lgr.Info("Monitor agent installation completed Successfully")

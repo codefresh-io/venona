@@ -115,7 +115,7 @@ var testCommand = &cobra.Command{
 		lgr.Info("Testing requirements")
 
 		for _, p := range builder.Get() {
-			err := p.Test(options, values)
+			err := p.Test(cmd.Context(), options, values)
 			if err != nil && finalerr == nil {
 				finalerr = err
 			}

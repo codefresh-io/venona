@@ -17,6 +17,7 @@ limitations under the License.
 */
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
@@ -33,19 +34,19 @@ const (
 	appProxyFilesPattern = ".*.app-proxy.yaml"
 )
 
-func (u *appProxyPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *appProxyPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
-	err = install(&installOptions{
+	err = install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -67,11 +68,11 @@ func (u *appProxyPlugin) Install(opt *InstallOptions, v Values) (Values, error) 
 	return v, nil
 }
 
-func (u *appProxyPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *appProxyPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	return [][]string{}, nil
 }
 
-func (u *appProxyPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *appProxyPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -86,17 +87,17 @@ func (u *appProxyPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		operatorType:   AppProxyPluginType,
 		logger:         u.logger,
 	}
-	return uninstall(opt)
+	return uninstall(ctx, opt)
 }
 
-func (u *appProxyPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *appProxyPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
 	kubeClientset, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
 
-	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", opt.Name)})
+	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", opt.Name)})
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Failed to list app-proxy pods: %v ", err))
 		return nil, err
@@ -109,7 +110,7 @@ func (u *appProxyPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) 
 	for _, pod := range list.Items {
 		podName := pod.ObjectMeta.Name
 		u.logger.Debug(fmt.Sprintf("Deleting app-proxy pod: %v", podName))
-		err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Delete(podName, &metav1.DeleteOptions{})
+		err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Delete(ctx, podName, metav1.DeleteOptions{})
 		if err != nil {
 			u.logger.Error(fmt.Sprintf("Cannot delete app-proxy pod: %v ", err))
 			return nil, err
@@ -118,11 +119,11 @@ func (u *appProxyPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) 
 
 	return v, nil
 }
-func (u *appProxyPlugin) Migrate(*MigrateOptions, Values) error {
+func (u *appProxyPlugin) Migrate(context.Context, *MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *appProxyPlugin) Test(opt *TestOptions, v Values) error {
+func (u *appProxyPlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	return nil
 }
 

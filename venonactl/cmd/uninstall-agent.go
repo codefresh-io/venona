@@ -68,7 +68,7 @@ var uninstallAgentCmd = &cobra.Command{
 		values := s.BuildValues()
 		values = mergeMaps(values, templateValuesMap)
 		for _, p := range builder.Get() {
-			err := p.Delete(deleteOptions, values)
+			err := p.Delete(cmd.Context(), deleteOptions, values)
 			if err != nil {
 				dieOnError(err)
 			}
