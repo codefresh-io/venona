@@ -31,6 +31,7 @@ COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 
 WORKDIR /home/venona
+RUN chown -R venona:venona /home/venona && chmod 755 /home/venona
 
 # copy binary
 COPY --from=build /venona/venona /usr/local/bin/venona
