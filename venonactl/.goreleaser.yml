@@ -3,14 +3,20 @@ before:
     - go mod tidy
 
 builds:
-- 
-  goos:
+- goos:
   - linux
   - windows
-  - darwin
   goarch:
   - amd64
   - 386
+  env:
+  - CGO_ENABLED=0
+  ldflags:
+  - -X github.com/codefresh-io/venona/venonactl/cmd.version={{.Version}} -X github.com/codefresh-io/venona/venonactl/cmd.commit={{.Commit}} -X github.com/codefresh-io/venona/venonactl/cmd.date={{.Date}}
+- goos:
+  - darwin
+  goarch:
+  - amd64
   env:
   - CGO_ENABLED=0
   ldflags:
