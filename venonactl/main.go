@@ -17,11 +17,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/codefresh-io/venona/venonactl/cmd"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/codefresh-io/venona/venonactl/cmd"
 )
 
 const (
@@ -30,31 +32,38 @@ const (
 )
 
 func main() {
-	// Waiting for debugger attach in case if waitForSignalEnv!=""
-	// For debuging venonactl spawned by `codefresh runner ...`
-	if os.Getenv(waitForSignalEnv) != "" {
-		sigs := make(chan os.Signal, 1)
-		goOn := make(chan bool, 1)
-		signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGUSR1)
+	sigs := make(chan os.Signal, 1)
+	goOn := make(chan bool, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGUSR1)
 
-		go func() {
-			sig := <-sigs
+	go func() {
+		for sig := range sigs {
 			if sig == syscall.SIGUSR1 {
 				goOn <- true
 			} else if sig == syscall.SIGTERM || sig == syscall.SIGINT {
-				fmt.Printf("Exiting ...")
-				os.Exit(0)
+				fmt.Printf("signal received, aborting: %s", sig)
+				cancel()
 			}
-		}()
+		}
+	}()
 
+	if os.Getenv(waitForSignalEnv) != "" {
+		// Waiting for debugger attach in case if waitForSignalEnv!=""
+		// For debuging venonactl spawned by `codefresh runner ...`
 		fmt.Printf("%s env is set, waiting SIGUSR1.\nYou can run remote debug in vscode and attach dlv debugger:\n\n", waitForSignalEnv)
 
 		pid := os.Getpid()
 		fmt.Printf("dlv attach --continue --accept-multiclient --headless --listen=:%s %d\n", debuggerPort, pid)
 		fmt.Printf("kill -SIGUSR1 %d\n", pid)
 
-		<-goOn
+		select {
+		case <-goOn:
+		case <-ctx.Done():
+			os.Exit(1) // abort
+		}
 		fmt.Printf("Continue ...")
 	}
-	cmd.Execute()
+
+	cmd.Execute(ctx)
 }

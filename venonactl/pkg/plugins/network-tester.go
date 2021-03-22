@@ -18,6 +18,7 @@ package plugins
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -53,23 +54,23 @@ var (
 For more details run again with --verbose`)
 )
 
-func (u *networkTesterPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *networkTesterPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	return nil, fmt.Errorf("not supported")
 }
 
-func (u *networkTesterPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *networkTesterPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	return nil, fmt.Errorf("not supported")
 }
 
-func (u *networkTesterPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *networkTesterPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *networkTesterPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *networkTesterPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
 	return v, fmt.Errorf("not supported")
 }
 
-func (u *networkTesterPlugin) Migrate(*MigrateOptions, Values) error {
+func (u *networkTesterPlugin) Migrate(context.Context, *MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
@@ -115,13 +116,13 @@ func getKubeHost(v map[string]interface{}, defaultHost string) string {
 	return defaultHost
 }
 
-func (u *networkTesterPlugin) Test(opt *TestOptions, v Values) error {
+func (u *networkTesterPlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return err
 	}
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return err
@@ -137,7 +138,7 @@ func (u *networkTesterPlugin) Test(opt *TestOptions, v Values) error {
 	objx.New(v["NetworkTester"]).Set("AdditionalEnvVars.URLS", urls)
 	objx.New(v["NetworkTester"]).Set("AdditionalEnvVars.KUBERNETES_HOST", getKubeHost(v, conf.Host))
 
-	err = install(&installOptions{
+	err = install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -152,7 +153,7 @@ func (u *networkTesterPlugin) Test(opt *TestOptions, v Values) error {
 	}
 	// defer cleanup
 	defer func() {
-		err := uninstall(&deleteOptions{
+		err := uninstall(ctx, &deleteOptions{
 			templates:      templates.TemplatesMap(),
 			templateValues: v,
 			kubeClientSet:  cs,
@@ -177,7 +178,7 @@ Loop:
 		select {
 		case <-ticker.C:
 			u.logger.Debug("Waiting for network tester to finish")
-			pod, err := cs.CoreV1().Pods(opt.ClusterNamespace).Get(store.NetworkTesterName, metav1.GetOptions{})
+			pod, err := cs.CoreV1().Pods(opt.ClusterNamespace).Get(ctx, store.NetworkTesterName, metav1.GetOptions{})
 			if err != nil {
 				if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
 					if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
@@ -207,7 +208,7 @@ Loop:
 	}
 
 	req := cs.CoreV1().Pods(opt.ClusterNamespace).GetLogs(store.NetworkTesterName, &v1.PodLogOptions{})
-	podLogs, err := req.Stream()
+	podLogs, err := req.Stream(ctx)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Failed to get network-tester pod logs: %v", err))
 		return err

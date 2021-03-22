@@ -16,6 +16,7 @@ package codefresh
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -33,8 +34,8 @@ const (
 type (
 	// Codefresh API client
 	Codefresh interface {
-		Tasks() ([]task.Task, error)
-		ReportStatus(status AgentStatus) error
+		Tasks(ctx context.Context) ([]task.Task, error)
+		ReportStatus(ctx context.Context, status AgentStatus) error
 		Host() string
 	}
 
@@ -81,9 +82,9 @@ func New(opt Options) Codefresh {
 }
 
 // Tasks get from Codefresh all latest tasks
-func (c cf) Tasks() ([]task.Task, error) {
+func (c cf) Tasks(ctx context.Context) ([]task.Task, error) {
 	c.logger.Debug("Requesting tasks")
-	res, err := c.doRequest("GET", nil, "api", "agent", c.agentID, "tasks")
+	res, err := c.doRequest(ctx, "GET", nil, "api", "agent", c.agentID, "tasks")
 	if err != nil {
 		return nil, err
 	}
@@ -100,13 +101,13 @@ func (c cf) Host() string {
 }
 
 // ReportStatus updates the agent entity with given status
-func (c cf) ReportStatus(status AgentStatus) error {
+func (c cf) ReportStatus(ctx context.Context, status AgentStatus) error {
 	c.logger.Debug("Reporting status")
 	s, err := status.Marshal()
 	if err != nil {
 		return err
 	}
-	_, err = c.doRequest("PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
+	_, err = c.doRequest(ctx, "PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
 	if err != nil {
 		return err
 	}
@@ -155,9 +156,9 @@ func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http
 	return req, nil
 }
 
-func (c cf) doRequest(method string, body io.Reader, apis ...string) ([]byte, error) {
+func (c cf) doRequest(ctx context.Context, method string, body io.Reader, apis ...string) ([]byte, error) {
 	req, err := c.prepareRequest(method, body, apis...)
-	resp, err := c.httpClient.Do(req)
+	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}

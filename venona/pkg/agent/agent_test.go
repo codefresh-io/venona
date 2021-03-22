@@ -15,6 +15,7 @@
 package agent
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
@@ -113,7 +114,7 @@ func Test_reportStatus(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			reportStatus(tt.args.client, tt.args.status, tt.args.logger)
+			reportStatus(context.Background(), tt.args.client, tt.args.status, tt.args.logger)
 		})
 	}
 }
@@ -121,7 +122,7 @@ func Test_reportStatus(t *testing.T) {
 func getCodefreshMock() codefresh.Codefresh {
 	cf := codefresh.MockCodefresh{}
 
-	cf.On("ReportStatus", mock.Anything).Return(fmt.Errorf("bad"))
+	cf.On("ReportStatus", mock.Anything, mock.Anything).Return(fmt.Errorf("bad"))
 
 	return &cf
 }

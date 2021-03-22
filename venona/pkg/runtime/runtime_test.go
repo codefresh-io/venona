@@ -15,6 +15,7 @@
 package runtime
 
 import (
+	"context"
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
@@ -25,8 +26,8 @@ import (
 
 func createKubernetesMock() *kubernetes.MockKubernetes {
 	m := &kubernetes.MockKubernetes{}
-	m.On("CreateResource", mock.Anything).Return(nil)
-	m.On("DeleteResource", mock.Anything).Return(nil)
+	m.On("CreateResource", mock.Anything, mock.Anything).Return(nil)
+	m.On("DeleteResource", mock.Anything, mock.Anything).Return(nil)
 	return m
 }
 
@@ -60,20 +61,18 @@ func Test_runtime_StartWorkflow(t *testing.T) {
 			r := tt.runtime
 			mo := r.client.(*kubernetes.MockKubernetes)
 
-			err := r.StartWorkflow(tt.args.tasks)
+			ctx := context.Background()
+			err := r.StartWorkflow(ctx, tt.args.tasks)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
 			}
-			mo.AssertCalled(t, "CreateResource", tt.args.tasks[0].Spec)
+			mo.AssertCalled(t, "CreateResource", ctx, tt.args.tasks[0].Spec)
 		})
 	}
 }
 
 func Test_runtime_TerminateWorkflow(t *testing.T) {
-	type fields struct {
-		client kubernetes.Kubernetes
-	}
 	type args struct {
 		tasks []task.Task
 	}
@@ -127,13 +126,14 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 			r := tt.runtime
 			mo := r.client.(*kubernetes.MockKubernetes)
 
-			errs := r.TerminateWorkflow(tt.args.tasks)
+			ctx := context.Background()
+			errs := r.TerminateWorkflow(ctx, tt.args.tasks)
 			if tt.wantErr {
 				assert.Equal(t, len(errs), 1)
 				return
 			}
 
-			mo.AssertCalled(t, "DeleteResource", tt.expectedOpt)
+			mo.AssertCalled(t, "DeleteResource", ctx, tt.expectedOpt)
 		})
 	}
 }

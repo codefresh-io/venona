@@ -15,6 +15,7 @@
 package kubernetes
 
 import (
+	"context"
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
@@ -162,7 +163,7 @@ func Test_kube_CreateResource(t *testing.T) {
 				logger: tt.fields.logger,
 			}
 			mo := k.logger.(*mocks.Logger)
-			err := k.CreateResource(tt.args.spec)
+			err := k.CreateResource(context.Background(), tt.args.spec)
 			mo.AssertCalled(t, "Info", tt.wantMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -224,7 +225,7 @@ func Test_kube_DeleteResource(t *testing.T) {
 				client: tt.fields.client,
 				logger: tt.fields.logger,
 			}
-			if err := k.DeleteResource(tt.args.opt); (err != nil) != tt.wantErr {
+			if err := k.DeleteResource(context.Background(), tt.args.opt); (err != nil) != tt.wantErr {
 				t.Errorf("kube.DeleteResource() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			mo := k.logger.(*mocks.Logger)

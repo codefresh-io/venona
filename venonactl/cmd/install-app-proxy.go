@@ -93,7 +93,7 @@ var installAppProxyCmd = &cobra.Command{
 		values := s.BuildValues()
 		values = mergeMaps(values, templateValuesMap)
 		for _, p := range builder.Get() {
-			values, err = p.Install(builderInstallOpt, values)
+			values, err = p.Install(cmd.Context(), builderInstallOpt, values)
 			if err != nil {
 				dieOnError(err)
 			}

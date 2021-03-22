@@ -17,6 +17,7 @@ limitations under the License.
 package plugins
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
@@ -33,19 +34,19 @@ const (
 )
 
 // Install k8sAgent agent
-func (u *monitorAgentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *monitorAgentPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
-	return v, install(&installOptions{
+	return v, install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -57,11 +58,11 @@ func (u *monitorAgentPlugin) Install(opt *InstallOptions, v Values) (Values, err
 	})
 }
 
-func (u *monitorAgentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *monitorAgentPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	return [][]string{}, nil
 }
 
-func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *monitorAgentPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -76,17 +77,17 @@ func (u *monitorAgentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		operatorType:   MonitorAgentPluginType,
 		logger:         u.logger,
 	}
-	return uninstall(opt)
+	return uninstall(ctx, opt)
 }
 
-func (u *monitorAgentPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *monitorAgentPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
 	return nil, nil
 }
-func (u *monitorAgentPlugin) Migrate(*MigrateOptions, Values) error {
+func (u *monitorAgentPlugin) Migrate(context.Context, *MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *monitorAgentPlugin) Test(opt *TestOptions, v Values) error {
+func (u *monitorAgentPlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		rbac: []rbacValidation{
 			{
@@ -113,7 +114,7 @@ func (u *monitorAgentPlugin) Test(opt *TestOptions, v Values) error {
 			},
 		},
 	}
-	return test(testOptions{
+	return test(ctx, testOptions{
 		logger:            u.logger,
 		kubeBuilder:       opt.KubeBuilder,
 		namespace:         opt.ClusterNamespace,

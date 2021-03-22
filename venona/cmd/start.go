@@ -15,12 +15,12 @@
 package cmd
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -33,7 +33,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
-	nr "github.com/newrelic/go-agent"
+	nr "github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -60,7 +60,6 @@ type startOptions struct {
 var (
 	startCmdOptions startOptions
 	handleSignal    = signal.Notify
-	exit            = os.Exit
 )
 
 var startCmd = &cobra.Command{
@@ -148,8 +147,11 @@ func run(options startOptions) {
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
 	if options.newrelicLicenseKey != "" {
-		conf := nr.NewConfig(options.newrelicAppname, options.newrelicLicenseKey)
-		if monitor, err = newrelic.New(conf); err != nil {
+		monitor, err = newrelic.New(
+			nr.ConfigAppName(options.newrelicAppname),
+			nr.ConfigLicense(options.newrelicLicenseKey),
+		)
+		if err != nil {
 			log.Warn("Failed to create monitor", "error", err)
 		} else {
 			log.Info("Using New Relic monitor", "app-name", options.newrelicAppname, "license-key", options.newrelicLicenseKey)
@@ -162,7 +164,7 @@ func run(options startOptions) {
 	{
 		var httpClient http.Client
 		if !options.rejectTLSUnauthorized {
-			customTransport := &(*http.DefaultTransport.(*http.Transport)) // make shallow copy
+			customTransport := http.DefaultTransport.(*http.Transport).Clone()
 			// #nosec
 			customTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -199,60 +201,56 @@ func run(options startOptions) {
 	})
 	dieOnError(err)
 
-	serverMode := server.Release
-	if options.verbose {
-		serverMode = server.Debug
-	}
 	server, err := server.New(&server.Options{
 		Port:    fmt.Sprintf(":%s", options.serverPort),
 		Logger:  log.New("module", "server"),
-		Mode:    serverMode,
 		Monitor: monitor,
 	})
 	dieOnError(err)
 
-	go handleSignals(server.Stop, agent.Stop, log)
-	dieOnError(agent.Start())
-	if err := server.Start(); err != nil && err != http.ErrServerClosed {
-		dieOnError(err)
-	}
+	ctx := context.Background()
+
+	ctx = withSignals(ctx, server.Stop, agent.Stop, log)
+	go func() { dieOnError(agent.Start(ctx)) }()
+	go func() { dieOnError(server.Start()) }()
+
+	<-ctx.Done()
 }
 
-func handleSignals(stopServer, stopAgent func() error, log logger.Logger) {
+func withSignals(
+	ctx context.Context,
+	stopServer func(context.Context) error,
+	stopAgent func() error,
+	log logger.Logger,
+) context.Context {
+	var terminationReq int32 = 0
+	ctx, cancel := context.WithCancel(ctx)
 	sigChan := make(chan os.Signal, 10)
-	receivedTerminationReq := false
-	receivedTerminationReqMux := sync.Mutex{}
 
 	handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT)
 
-	for {
-		switch <-sigChan {
-		case syscall.SIGTERM, syscall.SIGINT:
-			go func(stopServer, stopAgent func() error, log logger.Logger) {
-				// check if should perform force shutdown
-				shouldExit := false
-				receivedTerminationReqMux.Lock()
-				if receivedTerminationReq {
-					shouldExit = true
-				}
-				receivedTerminationReq = true
-				receivedTerminationReqMux.Unlock()
-
-				if shouldExit { // perform force shutdown
-					log.Warn("forcing termination!")
-					exit(1)
-				}
-
+	go func() {
+		for {
+			<-sigChan
+			if terminationReq++; terminationReq > 1 {
+				// signal received more than once, forcing termination
+				log.Warn("Forcing termination!")
+				cancel()
+				return
+			}
+			go func() {
 				log.Warn("Received shutdown request, stopping agent and server...")
 				// order matters, the process will exit as soon as server is stopped
 				if err := stopAgent(); err != nil {
 					log.Error(err.Error())
 				}
-				if err := stopServer(); err != nil {
+				if err := stopServer(ctx); err != nil {
 					log.Error(err.Error())
 				}
-				return
-			}(stopServer, stopAgent, log)
+				cancel() // done
+			}()
 		}
-	}
+	}()
+
+	return ctx
 }

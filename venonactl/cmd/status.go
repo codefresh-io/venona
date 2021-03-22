@@ -17,6 +17,7 @@ limitations under the License.
 */
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
@@ -67,7 +68,7 @@ var statusCmd = &cobra.Command{
 				table.Append([]string{re.Metadata.Name, message, time})
 				table.Render()
 				fmt.Println()
-				printTableWithKubernetesRelatedResources(re, statusCmdOpt.kube.context, lgr)
+				printTableWithKubernetesRelatedResources(cmd.Context(), re, statusCmdOpt.kube.context, lgr)
 			} else {
 				lgr.Debug("Runtime-Environment has not Venona's agent", "Name", name)
 			}
@@ -96,7 +97,7 @@ var statusCmd = &cobra.Command{
 	},
 }
 
-func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, context string, logger logger.Logger) {
+func printTableWithKubernetesRelatedResources(ctx context.Context, re *codefresh.RuntimeEnvironment, context string, logger logger.Logger) {
 	builder := plugins.NewBuilder(logger)
 
 	table := createTable()
@@ -117,7 +118,7 @@ func printTableWithKubernetesRelatedResources(re *codefresh.RuntimeEnvironment, 
 			ClusterNamespace: s.KubernetesAPI.Namespace,
 		}
 		for _, p := range builder.Get() {
-			rows, err := p.Status(statusOpt, s.BuildValues())
+			rows, err := p.Status(ctx, statusOpt, s.BuildValues())
 			dieOnError(err)
 			table.AppendBulk(rows)
 		}

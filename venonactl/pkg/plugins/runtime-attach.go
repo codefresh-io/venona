@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"strings"
@@ -34,7 +35,7 @@ const (
 	runtimeSecretName         = "runnerconf"
 )
 
-func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
+func buildRuntimeConfig(ctx context.Context, opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
 
 	config, err := opt.KubeBuilder.BuildConfig()
 	if err != nil {
@@ -45,14 +46,14 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to create client on runtime cluster: %v", err)
 	}
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to ensure namespace on runtime cluster: %v", err)
 	}
 
 	// get default service account for the namespace
 	var getOpt metav1.GetOptions
-	sa, err := cs.CoreV1().ServiceAccounts(opt.RuntimeClusterName).Get(opt.RuntimeServiceAccount, getOpt)
+	sa, err := cs.CoreV1().ServiceAccounts(opt.RuntimeClusterName).Get(ctx, opt.RuntimeServiceAccount, getOpt)
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to read service account runtime cluster: %v", err)
 	}
@@ -68,7 +69,7 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 	if saSecretName == "" {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret %s from service account %s", saSecretPattern, opt.RuntimeServiceAccount)
 	}
-	secret, err := cs.CoreV1().Secrets(opt.RuntimeClusterName).Get(saSecretName, getOpt)
+	secret, err := cs.CoreV1().Secrets(opt.RuntimeClusterName).Get(ctx, saSecretName, getOpt)
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret from service account on runtime cluster: %v", err)
 	}
@@ -92,13 +93,13 @@ func buildRuntimeConfig(opt *InstallOptions, v Values) (RuntimeConfiguration, er
 	return rc, nil
 }
 
-func readCurrentVenonaConf(agentKubeBuilder KubeClientBuilder, clusterNamespace string) (venonaConf, error) {
+func readCurrentVenonaConf(ctx context.Context, agentKubeBuilder KubeClientBuilder, clusterNamespace string) (venonaConf, error) {
 
 	cs, err := agentKubeBuilder.BuildClient()
 	if err != nil {
 		return venonaConf{}, fmt.Errorf("Failed to create client on venona cluster: %v", err)
 	}
-	secret, err := cs.CoreV1().Secrets(clusterNamespace).Get(runtimeSecretName, metav1.GetOptions{})
+	secret, err := cs.CoreV1().Secrets(clusterNamespace).Get(ctx, runtimeSecretName, metav1.GetOptions{})
 
 	conf := &venonaConf{
 		Runtimes: make(map[string]RuntimeConfiguration),
@@ -114,7 +115,7 @@ func readCurrentVenonaConf(agentKubeBuilder KubeClientBuilder, clusterNamespace 
 
 }
 
-func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *runtimeAttachPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	if opt.DryRun {
 		return v, nil
 	}
@@ -123,21 +124,21 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
-	err = opt.AgentKubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.AgentKubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
 
 	// read current venona conf
-	currentVenonaConf, err := readCurrentVenonaConf(opt.AgentKubeBuilder, opt.ClusterNamespace)
+	currentVenonaConf, err := readCurrentVenonaConf(ctx, opt.AgentKubeBuilder, opt.ClusterNamespace)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot read runnerconf: %v ", err))
 		return nil, err
 	}
 
 	// new runtime configuration
-	rc, err := buildRuntimeConfig(opt, v)
+	rc, err := buildRuntimeConfig(ctx, opt, v)
 	if err != nil {
 		return nil, err
 	}
@@ -163,9 +164,9 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	v["runnerConf"] = runtimes
 	v["Namespace"] = opt.ClusterNamespace
 
-	cs.CoreV1().Secrets(opt.ClusterNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
+	cs.CoreV1().Secrets(opt.ClusterNamespace).Delete(ctx, runtimeSecretName, metav1.DeleteOptions{})
 
-	err = install(&installOptions{
+	err = install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -181,13 +182,13 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 	}
 
 	if opt.RestartAgent {
-		list, err := cs.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
+		list, err := cs.CoreV1().Pods(opt.ClusterNamespace).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
 		if err != nil {
 			u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
 			return nil, err
 		}
 		podName := list.Items[0].ObjectMeta.Name
-		err = cs.CoreV1().Pods(opt.ClusterNamespace).Delete(podName, &metav1.DeleteOptions{})
+		err = cs.CoreV1().Pods(opt.ClusterNamespace).Delete(ctx, podName, metav1.DeleteOptions{})
 		if err != nil {
 			u.logger.Error(fmt.Sprintf("Cannot delete agent pod: %v ", err))
 			return nil, err
@@ -198,7 +199,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 			select {
 			case <-ticker.C:
 				u.logger.Debug("Validating old runner pod termination")
-				_, err = cs.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+				_, err = cs.CoreV1().Pods(opt.ClusterNamespace).Get(ctx, podName, metav1.GetOptions{})
 				if err != nil {
 					if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
 						if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
@@ -217,7 +218,7 @@ func (u *runtimeAttachPlugin) Install(opt *InstallOptions, v Values) (Values, er
 
 }
 
-func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *runtimeAttachPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
@@ -233,11 +234,11 @@ func (u *runtimeAttachPlugin) Status(statusOpt *StatusOptions, v Values) ([][]st
 		operatorType:   RuntimeAttachType,
 		logger:         u.logger,
 	}
-	return status(opt)
+	return status(ctx, opt)
 
 }
 
-func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *runtimeAttachPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.AgentKubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -246,7 +247,7 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 	// Delete the entry from runnerconf - if this is the only , delete the secret
 
 	// read current venona conf
-	currentVenonaConf, err := readCurrentVenonaConf(deleteOpt.AgentKubeBuilder, deleteOpt.AgentNamespace)
+	currentVenonaConf, err := readCurrentVenonaConf(ctx, deleteOpt.AgentKubeBuilder, deleteOpt.AgentNamespace)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot read runnerconf: %v ", err))
 		return err
@@ -276,9 +277,9 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		shouldDelete = false
 		v["runnerConf"] = runtimes
 
-		cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(runtimeSecretName, &metav1.DeleteOptions{})
+		cs.CoreV1().Secrets(deleteOpt.AgentNamespace).Delete(ctx, runtimeSecretName, metav1.DeleteOptions{})
 
-		err = install(&installOptions{
+		err = install(ctx, &installOptions{
 			logger:         u.logger,
 			templates:      templates.TemplatesMap(),
 			templateValues: v,
@@ -301,21 +302,21 @@ func (u *runtimeAttachPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 			operatorType:   RuntimeAttachType,
 			logger:         u.logger,
 		}
-		return uninstall(opt)
+		return uninstall(ctx, opt)
 	}
 	return nil
 
 }
 
-func (u *runtimeAttachPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+func (u *runtimeAttachPlugin) Upgrade(_ context.Context, _ *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
 }
 
-func (u *runtimeAttachPlugin) Migrate(*MigrateOptions, Values) error {
+func (u *runtimeAttachPlugin) Migrate(context.Context, *MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *runtimeAttachPlugin) Test(opt *TestOptions, v Values) error {
+func (u *runtimeAttachPlugin) Test(context.Context, *TestOptions, Values) error {
 	return nil
 }
 

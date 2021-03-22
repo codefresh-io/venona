@@ -17,6 +17,7 @@ limitations under the License.
 package plugins
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -48,7 +49,7 @@ const (
 )
 
 // Install venona agent
-func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *venonaPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	if v["AgentToken"] == "" {
 		u.logger.Debug("Generating token for agent")
 		tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
@@ -77,13 +78,13 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
 
-	return v, install(&installOptions{
+	return v, install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -96,7 +97,7 @@ func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 }
 
 // Status of runtimectl environment
-func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *venonaPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -111,10 +112,10 @@ func (u *venonaPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, e
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
-	return status(opt)
+	return status(ctx, opt)
 }
 
-func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *venonaPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -129,10 +130,10 @@ func (u *venonaPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
-	return uninstall(opt)
+	return uninstall(ctx, opt)
 }
 
-func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *venonaPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
 
 	// replace of sa creates new secert with sa creds
 	// avoid it till patch fully implemented
@@ -158,7 +159,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	// whole flow should be more like kubectl apply that build a patch
 	// based on remote object and candidate object
 
-	secret, err := kubeClientset.CoreV1().Secrets(opt.ClusterNamespace).Get(opt.Name, metav1.GetOptions{})
+	secret, err := kubeClientset.CoreV1().Secrets(opt.ClusterNamespace).Get(ctx, opt.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +170,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	if err != nil {
 		return nil, err
 	}
-	v, err = updateValuesBasedOnPreviousDeployment(opt.ClusterNamespace, kubeClientset, v)
+	v, err = updateValuesBasedOnPreviousDeployment(ctx, opt.ClusterNamespace, kubeClientset, v)
 
 	for fileName, local := range kubeObjects {
 		if _, ok := deletePriorUpgrade[fileName]; ok {
@@ -183,7 +184,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 				matchPattern:   fileName,
 				operatorType:   VenonaPluginType,
 			}
-			err := uninstall(delOpt)
+			err := uninstall(ctx, delOpt)
 			if err != nil {
 				return nil, err
 			}
@@ -196,7 +197,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 				matchPattern:   fileName,
 				operatorType:   VenonaPluginType,
 			}
-			err = install(installOpt)
+			err = install(ctx, installOpt)
 			if err != nil {
 				return nil, err
 			}
@@ -207,7 +208,7 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 			continue
 		}
 
-		_, _, err := kubeobj.ReplaceObject(kubeClientset, local, opt.ClusterNamespace)
+		_, _, err := kubeobj.ReplaceObject(ctx, kubeClientset, local, opt.ClusterNamespace)
 		if err != nil {
 			return nil, err
 		}
@@ -216,9 +217,9 @@ func (u *venonaPlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
 }
 
-func updateValuesBasedOnPreviousDeployment(ns string, kubeClientset *kubernetes.Clientset, v Values) (Values, error) {
+func updateValuesBasedOnPreviousDeployment(ctx context.Context, ns string, kubeClientset *kubernetes.Clientset, v Values) (Values, error) {
 
-	runnerDeployment, err := kubeClientset.AppsV1().Deployments(ns).Get(AppName, metav1.GetOptions{})
+	runnerDeployment, err := kubeClientset.AppsV1().Deployments(ns).Get(ctx, AppName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +269,7 @@ func getEnvVarsFromDeployment(containers []v1.Container) map[string]string {
 	return newEnvVars
 }
 
-func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
+func (u *venonaPlugin) Migrate(ctx context.Context, opt *MigrateOptions, v Values) error {
 	var deletePriorUpgrade = map[string]interface{}{
 		"deployment.venona.yaml": nil,
 		"secret.venona.yaml":     nil,
@@ -283,7 +284,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	if err != nil {
 		return err
 	}
-	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
+	list, err := kubeClientset.CoreV1().Pods(opt.ClusterNamespace).List(ctx, metav1.ListOptions{LabelSelector: fmt.Sprintf("app=%v", v["AppName"])})
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
 		return err
@@ -317,7 +318,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 				matchPattern:   fileName,
 				operatorType:   VenonaPluginType,
 			}
-			err := uninstall(delOpt)
+			err := uninstall(ctx, delOpt)
 			if err != nil {
 				return err
 			}
@@ -328,7 +329,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 		select {
 		case <-ticker.C:
 			u.logger.Debug("Validating old runner pod termination")
-			_, err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Get(podName, metav1.GetOptions{})
+			_, err = kubeClientset.CoreV1().Pods(opt.ClusterNamespace).Get(ctx, podName, metav1.GetOptions{})
 			if err != nil {
 				if statusError, errIsStatusError := err.(*kerrors.StatusError); errIsStatusError {
 					if statusError.ErrStatus.Reason == metav1.StatusReasonNotFound {
@@ -343,7 +344,7 @@ func (u *venonaPlugin) Migrate(opt *MigrateOptions, v Values) error {
 	}
 }
 
-func (u *venonaPlugin) Test(opt *TestOptions, v Values) error {
+func (u *venonaPlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		cpu:        "500m",
 		momorySize: "1Gi",
@@ -365,7 +366,7 @@ func (u *venonaPlugin) Test(opt *TestOptions, v Values) error {
 			},
 		},
 	}
-	return test(testOptions{
+	return test(ctx, testOptions{
 		logger:            u.logger,
 		kubeBuilder:       opt.KubeBuilder,
 		namespace:         opt.ClusterNamespace,

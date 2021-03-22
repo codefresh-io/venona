@@ -74,6 +74,7 @@ package kubeobj
 
 import (
 	"fmt"
+	"context"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 
@@ -93,7 +94,7 @@ import (
 )
 
 // CreateObject - creates kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
+func CreateObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
 	
 	var name, kind string
 	var err error
@@ -102,7 +103,7 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
     case *{{ $key }}:
         name = objT.ObjectMeta.Name
         kind = objT.TypeMeta.Kind
-        _, err = clientset.{{ $value }}.Create(objT)
+        _, err = clientset.{{ $value }}.Create(ctx, objT, metav1.CreateOptions{})
     {{ end }}
     default:
         return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
@@ -111,7 +112,7 @@ func CreateObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 }
 
 // CheckObject - checks kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
+func CheckObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
 	
 	var name, kind string
 	var err error
@@ -120,7 +121,7 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
     case *{{ $key }}:
         name = objT.ObjectMeta.Name
         kind = objT.TypeMeta.Kind
-        _, err = clientset.{{ $value }}.Get(name, metav1.GetOptions{})
+        _, err = clientset.{{ $value }}.Get(ctx, name, metav1.GetOptions{})
     {{ end }}
     default:
         return "", "", fmt.Errorf("Unknown object type %T\n ", objT)
@@ -129,7 +130,7 @@ func CheckObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace 
 }
 
 // DeleteObject - checks kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
+func DeleteObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
 	var propagationPolicy metav1.DeletionPropagation = "Background"
 	var name, kind string
 	var err error
@@ -138,7 +139,7 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
     case *{{ $key }}:
         name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-        err = clientset.{{ $value }}.Delete(name, &metav1.DeleteOptions{
+        err = clientset.{{ $value }}.Delete(ctx, name, metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
     {{ end }}
@@ -149,7 +150,7 @@ func DeleteObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace
 }
 
 // ReplaceObject - replaces kubernetes object from *runtime.Object. Returns object name, kind and creation error
-func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
+func ReplaceObject(ctx context.Context, clientset *kubernetes.Clientset, obj runtime.Object, namespace string) (string, string, error){
 	var name, kind string
 	var err error
 	switch objT := obj.(type) {
@@ -157,7 +158,7 @@ func ReplaceObject(clientset *kubernetes.Clientset, obj runtime.Object, namespac
     case *{{ $key }}:
         name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
-        _, err = clientset.{{ $value }}.Update(objT)
+        _, err = clientset.{{ $value }}.Update(ctx, objT, metav1.UpdateOptions{})
     {{ end }}
     default:
         return "", "", fmt.Errorf("Unknown object type %T\n ", objT)

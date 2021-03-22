@@ -16,6 +16,7 @@ package agent
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -78,7 +79,6 @@ type (
 		reportStatusTicker *time.Ticker
 		running            bool
 		lastStatus         Status
-		terminationChan    chan struct{}
 		wg                 *sync.WaitGroup
 		monitor            monitoring.Monitor
 	}
@@ -122,7 +122,6 @@ func New(opt *Options) (*Agent, error) {
 	}
 	taskPullerTicker := time.NewTicker(taskPullingInterval)
 	reportStatusTicker := time.NewTicker(statusReportingInterval)
-	terminationChan := make(chan struct{})
 	wg := &sync.WaitGroup{}
 
 	if opt.Monitor == nil {
@@ -139,24 +138,23 @@ func New(opt *Options) (*Agent, error) {
 		reportStatusTicker,
 		false,
 		Status{},
-		terminationChan,
 		wg,
 		opt.Monitor,
 	}, nil
 }
 
 // Start starting the agent process
-func (a *Agent) Start() error {
+func (a *Agent) Start(ctx context.Context) error {
 	if a.running {
 		return errAlreadyRunning
 	}
 	a.running = true
 	a.log.Info("Starting agent")
 
-	go a.startTaskPullerRoutine()
-	go a.startStatusReporterRoutine()
+	go a.startTaskPullerRoutine(ctx)
+	go a.startStatusReporterRoutine(ctx)
 
-	reportStatus(a.cf, codefresh.AgentStatus{
+	reportStatus(ctx, a.cf, codefresh.AgentStatus{
 		Message: "All good",
 	}, a.log)
 
@@ -171,9 +169,7 @@ func (a *Agent) Stop() error {
 	a.running = false
 	a.log.Warn("Received graceful termination request, stopping tasks...")
 	a.reportStatusTicker.Stop()
-	a.terminationChan <- struct{}{} // signal stop
 	a.taskPullerTicker.Stop()
-	a.terminationChan <- struct{}{} // signal stop
 	a.wg.Wait()
 	return nil
 }
@@ -183,16 +179,16 @@ func (a *Agent) Status() Status {
 	return a.lastStatus
 }
 
-func (a *Agent) startTaskPullerRoutine() {
+func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 	for {
 		select {
-		case <-a.terminationChan:
+		case <-ctx.Done():
 			return
 		case <-a.taskPullerTicker.C:
 			a.wg.Add(1)
 			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger, monitor monitoring.Monitor) {
-				tasks := pullTasks(client, logger)
-				startTasks(tasks, runtimes, logger, monitor)
+				tasks := pullTasks(ctx, client, logger)
+				startTasks(ctx, tasks, runtimes, logger, monitor)
 				time.Sleep(time.Second * 10)
 				wg.Done()
 			}(a.cf, a.runtimes, a.wg, a.log, a.monitor)
@@ -200,15 +196,15 @@ func (a *Agent) startTaskPullerRoutine() {
 	}
 }
 
-func (a *Agent) startStatusReporterRoutine() {
+func (a *Agent) startStatusReporterRoutine(ctx context.Context) {
 	for {
 		select {
-		case <-a.terminationChan:
+		case <-ctx.Done():
 			return
 		case <-a.reportStatusTicker.C:
 			a.wg.Add(1)
 			go func(cf codefresh.Codefresh, wg *sync.WaitGroup, log logger.Logger) {
-				reportStatus(cf, codefresh.AgentStatus{
+				reportStatus(ctx, cf, codefresh.AgentStatus{
 					Message: "All good",
 				}, log)
 				wg.Done()
@@ -217,16 +213,16 @@ func (a *Agent) startStatusReporterRoutine() {
 	}
 }
 
-func reportStatus(client codefresh.Codefresh, status codefresh.AgentStatus, logger logger.Logger) {
-	err := client.ReportStatus(status)
+func reportStatus(ctx context.Context, client codefresh.Codefresh, status codefresh.AgentStatus, logger logger.Logger) {
+	err := client.ReportStatus(ctx, status)
 	if err != nil {
 		logger.Error(err.Error())
 	}
 }
 
-func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
+func pullTasks(ctx context.Context, client codefresh.Codefresh, logger logger.Logger) []task.Task {
 	logger.Debug("Requesting tasks from API server")
-	tasks, err := client.Tasks()
+	tasks, err := client.Tasks(ctx)
 	if err != nil {
 		logger.Error(err.Error())
 		return []task.Task{}
@@ -239,7 +235,7 @@ func pullTasks(client codefresh.Codefresh, logger logger.Logger) []task.Task {
 	return tasks
 }
 
-func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor) {
+func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	agentTasks := []task.Task{}
@@ -267,9 +263,9 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 		go func(tid string) {
 			if err := executeAgentTask(&t, logger); err != nil {
 				logger.Error(err.Error())
-				noticeError(txn, err, logger)
+				txn.NoticeError(err)
 			}
-			endTransaction(txn, logger)
+			txn.End()
 			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
 		}(t.Metadata.Workflow)
 	}
@@ -282,16 +278,16 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 
 		if !ok {
 			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-			noticeError(txn, errRuntimeNotFound, logger)
-			endTransaction(txn, logger)
+			txn.NoticeError(errRuntimeNotFound)
+			txn.End()
 			continue
 		}
 		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-		if err := runtime.StartWorkflow(tasks); err != nil {
+		if err := runtime.StartWorkflow(ctx, tasks); err != nil {
 			logger.Error(err.Error())
-			noticeError(txn, err, logger)
+			txn.NoticeError(err)
 		}
-		endTransaction(txn, logger)
+		txn.End()
 	}
 
 	// process deletion tasks
@@ -302,18 +298,18 @@ func startTasks(tasks []task.Task, runtimes map[string]runtime.Runtime, logger l
 
 		if !ok {
 			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-			noticeError(txn, errRuntimeNotFound, logger)
-			endTransaction(txn, logger)
+			txn.NoticeError(errRuntimeNotFound)
+			txn.End()
 			continue
 		}
 		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-		if errs := runtime.TerminateWorkflow(tasks); len(errs) != 0 {
+		if errs := runtime.TerminateWorkflow(ctx, tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
-				noticeError(txn, err, logger)
+				txn.NoticeError(err)
 			}
 		}
-		endTransaction(txn, logger)
+		txn.End()
 	}
 }
 
@@ -417,23 +413,11 @@ func checkOptions(opt *Options) error {
 }
 
 func newTransaction(monitor monitoring.Monitor, taskType, tid, runtime string) monitoring.Transaction {
-	txn := monitor.NewTransaction("runner-tasks-execution", nil, nil)
-	_ = txn.AddAttribute("task-type", taskType)
-	_ = txn.AddAttribute("tid", tid)
-	_ = txn.AddAttribute("runtime-environment", runtime)
+	txn := monitor.NewTransaction("runner-tasks-execution")
+	txn.AddAttribute("task-type", taskType)
+	txn.AddAttribute("tid", tid)
+	txn.AddAttribute("runtime-environment", runtime)
 	return txn
-}
-
-func noticeError(txn monitoring.Transaction, error error, log logger.Logger) {
-	if err := txn.NoticeError(error); err != nil {
-		log.Error("Failed to report error to monitor", "err", err)
-	}
-}
-
-func endTransaction(txn monitoring.Transaction, log logger.Logger) {
-	if err := txn.End(); err != nil {
-		log.Error("Failed to end transaction", "err", err)
-	}
 }
 
 func init() {

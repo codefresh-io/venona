@@ -15,9 +15,28 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	
 	"github.com/codefresh-io/venona/venonactl/cmd"
 )
 
 func main() {
-	cmd.Execute()
+	sigs := make(chan os.Signal, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		for sig := range sigs {
+			if sig == syscall.SIGTERM || sig == syscall.SIGINT {
+				fmt.Printf("signal received, aborting: %s", sig)
+				cancel()
+			}
+		}
+	}()
+
+	cmd.Execute(ctx)
 }

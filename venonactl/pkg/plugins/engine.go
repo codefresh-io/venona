@@ -17,6 +17,7 @@ limitations under the License.
 package plugins
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
@@ -33,18 +34,18 @@ const (
 )
 
 // Install venona agent
-func (u *enginePlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *enginePlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
 		return nil, err
 	}
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
 	}
-	return v, install(&installOptions{
+	return v, install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -57,7 +58,7 @@ func (u *enginePlugin) Install(opt *InstallOptions, v Values) (Values, error) {
 }
 
 // Status of runtimectl environment
-func (u *enginePlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *enginePlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -72,10 +73,10 @@ func (u *enginePlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, e
 		matchPattern:   engineFilesPattern,
 		operatorType:   EnginePluginType,
 	}
-	return status(opt)
+	return status(ctx, opt)
 }
 
-func (u *enginePlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *enginePlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -90,18 +91,18 @@ func (u *enginePlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
 		matchPattern:   engineFilesPattern,
 		operatorType:   EnginePluginType,
 	}
-	return uninstall(opt)
+	return uninstall(ctx, opt)
 }
 
-func (u *enginePlugin) Upgrade(opt *UpgradeOptions, v Values) (Values, error) {
+func (u *enginePlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
 }
 
-func (u *enginePlugin) Migrate(*MigrateOptions, Values) error {
+func (u *enginePlugin) Migrate(context.Context, *MigrateOptions, Values) error {
 	return fmt.Errorf("not supported")
 }
 
-func (u *enginePlugin) Test(opt *TestOptions, v Values) error {
+func (u *enginePlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	return nil
 }
 

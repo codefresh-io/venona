@@ -15,6 +15,7 @@
 package runtime
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -25,8 +26,8 @@ import (
 type (
 	// Runtime API client
 	Runtime interface {
-		StartWorkflow([]task.Task) error
-		TerminateWorkflow([]task.Task) []error
+		StartWorkflow(context.Context, []task.Task) error
+		TerminateWorkflow(context.Context, []task.Task) []error
 	}
 
 	// Options for runtime
@@ -46,16 +47,16 @@ func New(opt Options) Runtime {
 	}
 }
 
-func (r runtime) StartWorkflow(tasks []task.Task) error {
+func (r runtime) StartWorkflow(ctx context.Context, tasks []task.Task) error {
 	for _, task := range tasks {
-		err := r.client.CreateResource(task.Spec)
+		err := r.client.CreateResource(ctx, task.Spec)
 		if err != nil {
 			return err // TODO: Return already executed tasks in order to terminate them
 		}
 	}
 	return nil
 }
-func (r runtime) TerminateWorkflow(tasks []task.Task) []error {
+func (r runtime) TerminateWorkflow(ctx context.Context, tasks []task.Task) []error {
 	errs := make([]error, 0, 3)
 	for _, task := range tasks {
 		opt := kubernetes.DeleteOptions{}
@@ -69,7 +70,7 @@ func (r runtime) TerminateWorkflow(tasks []task.Task) []error {
 			errs = append(errs, fmt.Errorf("failed to unmarshal task spec"))
 			continue
 		}
-		if err = r.client.DeleteResource(opt); err != nil {
+		if err = r.client.DeleteResource(ctx, opt); err != nil {
 			errs = append(errs, err)
 			continue
 		}

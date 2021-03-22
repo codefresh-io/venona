@@ -17,6 +17,7 @@ limitations under the License.
 package plugins
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 
@@ -35,13 +36,13 @@ const (
 )
 
 // Install runtimectl environment
-func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+func (u *runtimeEnvironmentPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	cs, err := opt.KubeBuilder.BuildClient()
 	if err != nil {
 		return nil, fmt.Errorf("Cannot create kubernetes clientset: %v ", err)
 	}
 
-	err = opt.KubeBuilder.EnsureNamespaceExists(cs)
+	err = opt.KubeBuilder.EnsureNamespaceExists(ctx, cs)
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot ensure namespace exists: %v", err))
 		return nil, err
@@ -84,7 +85,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	}
 
 	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
-	err = install(&installOptions{
+	err = install(ctx, &installOptions{
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -101,7 +102,7 @@ func (u *runtimeEnvironmentPlugin) Install(opt *InstallOptions, v Values) (Value
 	return v, nil
 }
 
-func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([][]string, error) {
+func (u *runtimeEnvironmentPlugin) Status(ctx context.Context, statusOpt *StatusOptions, v Values) ([][]string, error) {
 	cs, err := statusOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -116,10 +117,10 @@ func (u *runtimeEnvironmentPlugin) Status(statusOpt *StatusOptions, v Values) ([
 		operatorType:   RuntimeEnvironmentPluginType,
 		logger:         u.logger,
 	}
-	return status(opt)
+	return status(ctx, opt)
 }
 
-func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) error {
+func (u *runtimeEnvironmentPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v Values) error {
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
@@ -134,21 +135,21 @@ func (u *runtimeEnvironmentPlugin) Delete(deleteOpt *DeleteOptions, v Values) er
 		operatorType:   RuntimeEnvironmentPluginType,
 		logger:         u.logger,
 	}
-	return uninstall(opt)
+	return uninstall(ctx, opt)
 }
 
-func (u *runtimeEnvironmentPlugin) Upgrade(_ *UpgradeOptions, v Values) (Values, error) {
+func (u *runtimeEnvironmentPlugin) Upgrade(_ context.Context, _ *UpgradeOptions, v Values) (Values, error) {
 	return v, nil
 }
 
-func (u *runtimeEnvironmentPlugin) Migrate(opt *MigrateOptions, v Values) error {
-	return u.Delete(&DeleteOptions{
+func (u *runtimeEnvironmentPlugin) Migrate(ctx context.Context, opt *MigrateOptions, v Values) error {
+	return u.Delete(ctx, &DeleteOptions{
 		ClusterNamespace: opt.ClusterNamespace,
 		KubeBuilder:      opt.KubeBuilder,
 	}, v)
 }
 
-func (u *runtimeEnvironmentPlugin) Test(opt *TestOptions, v Values) error {
+func (u *runtimeEnvironmentPlugin) Test(ctx context.Context, opt *TestOptions, v Values) error {
 	validationRequest := validationRequest{
 		rbac: []rbacValidation{
 			{
@@ -190,7 +191,7 @@ func (u *runtimeEnvironmentPlugin) Test(opt *TestOptions, v Values) error {
 			},
 		},
 	}
-	return test(testOptions{
+	return test(ctx, testOptions{
 		logger:            u.logger,
 		kubeBuilder:       opt.KubeBuilder,
 		namespace:         opt.ClusterNamespace,
