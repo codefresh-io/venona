@@ -118,7 +118,6 @@ steps:
     title: Create release in Github with venona CLI
     image: goreleaser/goreleaser:v0.124.1
     stage: Release
-    fail_fast: false
     commands:
     - cd venonactl
     - goreleaser release -f .goreleaser.yml --rm-dist --skip-validate # pre-release
