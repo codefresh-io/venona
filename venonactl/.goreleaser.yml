@@ -4,6 +4,7 @@ before:
 
 builds:
 - goos:
+  - darwin
   - linux
   - windows
   goarch:
@@ -11,14 +12,9 @@ builds:
   - 386
   env:
   - CGO_ENABLED=0
-  ldflags:
-  - -X github.com/codefresh-io/venona/venonactl/cmd.version={{.Version}} -X github.com/codefresh-io/venona/venonactl/cmd.commit={{.Commit}} -X github.com/codefresh-io/venona/venonactl/cmd.date={{.Date}}
-- goos:
-  - darwin
-  goarch:
-  - amd64
-  env:
-  - CGO_ENABLED=0
+  ignore:
+  - goos: darwin
+    goarch: 386
   ldflags:
   - -X github.com/codefresh-io/venona/venonactl/cmd.version={{.Version}} -X github.com/codefresh-io/venona/venonactl/cmd.commit={{.Commit}} -X github.com/codefresh-io/venona/venonactl/cmd.date={{.Date}}
 
