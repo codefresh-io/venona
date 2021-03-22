@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -233,7 +232,7 @@ func withSignals(
 	go func() {
 		for {
 			<-sigChan
-			if atomic.AddInt32(&terminationReq, 1) > 1 {
+			if terminationReq += 1; terminationReq > 1 {
 				// signal received more than once, forcing termination
 				log.Warn("Forcing termination!")
 				cancel()
