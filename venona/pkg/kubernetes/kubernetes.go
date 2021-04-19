@@ -60,6 +60,7 @@ type (
 	}
 )
 
+// NewInCluster build Kubernetes API based on local in cluster runtime
 func NewInCluster() (Kubernetes, error) {
 	client, err := buildKubeInCluster()
 	return &kube{
