@@ -55,6 +55,7 @@ type startOptions struct {
 	serverPort                     string
 	newrelicLicenseKey             string
 	newrelicAppname                string
+	inClusterRuntime               string
 }
 
 var (
@@ -89,6 +90,7 @@ func init() {
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
+	startCmd.Flags().StringVar(&startCmdOptions.inClusterRuntime, "in-cluster-runtime", "", "Runtime name to run agent in cluster mode")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
@@ -122,30 +124,16 @@ func run(options startOptions) {
 		log.Warn("Running in insecure mode", "NODE_TLS_REJECT_UNAUTHORIZED", options.rejectTLSUnauthorized)
 	}
 
-	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
-	dieOnError(err)
-	runtimes := map[string]runtime.Runtime{}
-	{
-		for name, config := range configs {
-			k, err := kubernetes.New(kubernetes.Options{
-				Token:    config.Token,
-				Type:     config.Type,
-				Host:     config.Host,
-				Cert:     config.Cert,
-				Insecure: !options.rejectTLSUnauthorized,
-			})
-			if err != nil {
-				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
-				continue
-			}
-			re := runtime.New(runtime.Options{
-				Kubernetes: k,
-			})
-			runtimes[config.Name] = re
-		}
+	var runtimes map[string]runtime.Runtime
+	if options.inClusterRuntime != "" {
+		runtimes = inClusterRuntimeConfiguration(options)
+	} else {
+		runtimes = remoteRuntimeConfiguration(options, log)
 	}
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
+	var err error
+
 	if options.newrelicLicenseKey != "" {
 		monitor, err = newrelic.New(
 			nr.ConfigAppName(options.newrelicAppname),
@@ -215,6 +203,41 @@ func run(options startOptions) {
 	go func() { dieOnError(server.Start()) }()
 
 	<-ctx.Done()
+}
+
+func inClusterRuntimeConfiguration(options startOptions) map[string]runtime.Runtime {
+	k, err := kubernetes.NewInCluster()
+	dieOnError(err)
+	re := runtime.New(runtime.Options{
+		Kubernetes: k,
+	})
+	return map[string]runtime.Runtime{options.inClusterRuntime: re}
+}
+
+func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime {
+	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
+	dieOnError(err)
+	runtimes := map[string]runtime.Runtime{}
+	{
+		for name, config := range configs {
+			k, err := kubernetes.New(kubernetes.Options{
+				Token:    config.Token,
+				Type:     config.Type,
+				Host:     config.Host,
+				Cert:     config.Cert,
+				Insecure: !options.rejectTLSUnauthorized,
+			})
+			if err != nil {
+				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
+				continue
+			}
+			re := runtime.New(runtime.Options{
+				Kubernetes: k,
+			})
+			runtimes[config.Name] = re
+		}
+	}
+	return runtimes
 }
 
 func withSignals(
