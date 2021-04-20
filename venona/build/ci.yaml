@@ -100,8 +100,9 @@ steps:
 
   
   codecov-report:
-    title: Codecov report
     type: codecov-reporter
+    title: Upload Code Coverage
+    stage: Build Artifacts
     arguments:
       codecov_integration: argocd-agent
     when:
