@@ -104,7 +104,7 @@ steps:
     title: Upload Code Coverage
     stage: Build Artifacts
     arguments:
-      codecov_integration: argocd-agent
+      codecov_integration: venona
     when:
       steps:
       - name: test
