@@ -98,18 +98,13 @@ steps:
     commands:
       - cd venona && make gocyclo
 
-  upload-codecov:
-    <<: *common
+  
+  codecov-report:
+    type: codecov-reporter
     title: Upload Code Coverage
     stage: Build Artifacts
-    commands:
-      - cd venona && make upload-coverage
-    environment:
-    - VCS_COMMIT_ID=${{CF_COMMIT}}
-    - VCS_BRANCH_NAME=${{CF_BRANCH}}
-    - VCS_SLUG=codefresh-io/venona
-    - CI_BUILD_URL=${{CF_BUILD_URL}}
-    - CI_BUILD_ID=${{CF_BUILD_ID}}
+    arguments:
+      codecov_integration: venona
     when:
       steps:
       - name: test
