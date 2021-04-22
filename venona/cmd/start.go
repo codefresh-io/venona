@@ -75,6 +75,7 @@ var startCmd = &cobra.Command{
 func init() {
 	dieOnError(viper.BindEnv("codefresh-token", "CODEFRESH_TOKEN"))
 	dieOnError(viper.BindEnv("codefresh-host", "CODEFRESH_HOST"))
+	dieOnError(viper.BindEnv("in-cluster-runtime", "CODEFRESH_IN_CLUSTER_RUNTIME"))
 	dieOnError(viper.BindEnv("agent-id", "AGENT_ID"))
 	dieOnError(viper.BindEnv("config-dir", "VENONA_CONFIG_DIR"))
 	dieOnError(viper.BindEnv("port", "PORT"))
@@ -86,11 +87,12 @@ func init() {
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
+	viper.SetDefault("in-cluster-runtime", "")
 	viper.SetDefault("newrelic-appname", AppName)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
-	startCmd.Flags().StringVar(&startCmdOptions.inClusterRuntime, "in-cluster-runtime", "", "Runtime name to run agent in cluster mode")
+	startCmd.Flags().StringVar(&startCmdOptions.inClusterRuntime, "in-cluster-runtime", viper.GetString("in-cluster-runtime"), "Runtime name to run agent in cluster mode")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
