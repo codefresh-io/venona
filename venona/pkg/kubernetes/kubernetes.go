@@ -60,6 +60,15 @@ type (
 	}
 )
 
+// NewInCluster build Kubernetes API based on local in cluster runtime
+func NewInCluster() (Kubernetes, error) {
+	client, err := buildKubeInCluster()
+	return &kube{
+		client: client,
+		logger: logger.New(logger.Options{}),
+	}, err
+}
+
 // New build Kubernetes API
 func New(opt Options) (Kubernetes, error) {
 	if opt.Type != "runtime" {
@@ -143,4 +152,12 @@ func buildKubeClient(host string, token string, crt string, insecure bool) (kube
 		BearerToken:     token,
 		TLSClientConfig: tlsconf,
 	})
+}
+
+func buildKubeInCluster() (kubernetes.Interface, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	return kubernetes.NewForConfig(config)
 }
