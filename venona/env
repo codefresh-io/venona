@@ -1,0 +1,5 @@
+CODEFRESH_TOKEN=60801b7ba54f6e54add4de76.5025b4cbbc76fc37e3fc5522cdc11880
+CODEFRESH_HOST=http://local.codefresh.io
+AGENT_NAME=runner
+AGENT_ID=minikube_codefresh
+VENONA_CONFIG_DIR=/home/codefresh/codefresh/venona/venona/secrets

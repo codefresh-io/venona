@@ -1,0 +1,56 @@
+#todo deprecate ?
+dockerRegistry: ""
+
+#Todo refactor cloud setup to different object such as azure /aws
+newRelicLicense:
+
+venona:
+  image: docker.io/codefresh/venona:latest
+
+volumeProvisioner:
+  resources:
+  image: quay.io/codefresh/dind-volume-provisioner:1.29.1
+  mountAzureJson:
+  createDindVolDirResouces:
+    requests:
+      cpu:
+      memory:
+    limits:
+      cpu:
+      memory:
+#todo add envvars
+
+#todo restructure storage field
+storage:
+  createStorageClass: true
+  # TODO Verify we have no control over storageclass
+  storageClassName: dind-local-volumes-runner-codehelm
+  # TODO Remake volume definition for all types of storages
+  backend: local
+  volumeType:
+  availabilityZone:
+  fsType:
+  encrypted: false
+  kmsKeyId:
+  skuName:
+  cachingMode:
+  azureLocation:
+  azureResourceGroup:
+
+  localVolumeParentDir: /var/lib/codefresh/dind-volumes
+  localVolumeMonitor: # todo rename variable and it's usage
+  # END
+  googleServiceAccount:
+  awsAccessKeyId:
+  awsSecretAccessKey:
+
+  #     resources:
+  #       limits:
+  #         cpu: 400m
+  #         memory: 1200Mi
+  #       requests:
+  #         cpu: 200m
+  #         memory: 500Mi
+
+# todo tolerations
+#tolerations: [ ]
