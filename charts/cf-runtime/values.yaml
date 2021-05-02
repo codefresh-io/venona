@@ -1,11 +1,28 @@
 #todo deprecate ?
 dockerRegistry: ""
 
+appProxy:
+  enabled: false
+  image: ""
+  env: { }
+  ingress:
+    pathPrefix: ""
+    class: ""
+    host: ""
+    tlsSecret: ""
+    annotations: { }
+
 #Todo refactor cloud setup to different object such as azure /aws
 newRelicLicense:
 
+monitor:
+  clusterId: ""
+  enabled: false
+  helm3: true
+  env: { }
+
 venona:
-  image: docker.io/codefresh/venona:latest
+  image: docker.io/codefresh/venona:1.6.4
 
 volumeProvisioner:
   resources:
@@ -54,3 +71,17 @@ storage:
 
 # todo tolerations
 #tolerations: [ ]
+
+global:
+  namespace: ""
+  codefreshHost: ""
+  agentToken: ""
+  agentId: ""
+  agentName: ""
+  accountId: ""
+  runtimeName: ""
+  keys:
+    key: ""
+    csr: ""
+    ca: ""
+    serverCert: ""
