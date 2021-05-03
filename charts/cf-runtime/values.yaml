@@ -3,7 +3,7 @@ dockerRegistry: ""
 
 appProxy:
   enabled: false
-  image: ""
+  image: "quay.io/codefresh/cf-app-proxy:latest"
   env: { }
   ingress:
     pathPrefix: ""
@@ -16,17 +16,18 @@ appProxy:
 newRelicLicense:
 
 monitor:
+  image: "quay.io/codefresh/agent:stable"
   clusterId: ""
   enabled: false
   helm3: true
   env: { }
 
 venona:
-  image: docker.io/codefresh/venona:1.6.4
+  image: "docker.io/codefresh/venona:1.6.4"
 
 volumeProvisioner:
   resources:
-  image: quay.io/codefresh/dind-volume-provisioner:1.29.1
+  image: "quay.io/codefresh/dind-volume-provisioner:1.29.1"
   mountAzureJson:
   createDindVolDirResouces:
     requests:

@@ -22,7 +22,7 @@ spec:
         - name: monitor
           {{/*          resources:*/}}
           {{/*          {{ toYaml .Values.Monitor.resources | indent 10 }}*/}}
-          image: {{ include  }}
+          image: {{ .Values.monitor.image }}
           imagePullPolicy: Always
           env:
             {{- if .Values.monitor.env }}
@@ -33,10 +33,10 @@ spec:
             {{- end}}
             - name: SERVICE_NAME
               value: {{ include "cf-monitor.fullname" . }}
-            {{/*            {{- if .Values.monitor.useNamespaceWithRole /* TODO: WTF }}*/}}
-            - name: ROLE_BINDING
-              value: "true"
-            {{/*            {{- end }}*/}}
+{{/*                        {{- if .Values.monitor.useNamespaceWithRole  TODO: WTF }}*/}}
+{{/*            - name: ROLE_BINDING*/}}
+{{/*              value: "true"*/}}
+{{/*                        {{- end }}*/}}
             - name: PORT
               value: "9020"
             - name: API_TOKEN
@@ -48,7 +48,7 @@ spec:
             - name: ACCOUNT_ID
               value: user
             - name: HELM3
-              value: "{{ .Values.monitor.helm3 /* TODO: WTF */ }}"
+              value: "{{ .Values.monitor.helm3 }}"
             - name: NAMESPACE
               value: "{{ .Release.Namespace }}"
             - name: NODE_OPTIONS

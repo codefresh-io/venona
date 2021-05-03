@@ -26,7 +26,7 @@ spec:
           {{/*          resources:*/}}
           {{/*          {{ toYaml .Values.AppProxy.resources | indent 10 }}*/}}
           env:
-            {{- if .Values.appProxy. }}
+            {{- if .Values.appProxy.env }}
             {{- range $key, $value := .Values.appProxy.env }}
             - name: {{ $key }}
               value: "{{ $value}}"
