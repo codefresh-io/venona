@@ -38,6 +38,10 @@ volumeProvisioner:
       memory:
 #todo add envvars
 
+aws:
+  accessKeyId:
+  secretAccessKey:
+
 #todo restructure storage field
 storage:
   createStorageClass: true
@@ -45,22 +49,30 @@ storage:
   storageClassName: dind-local-volumes-runner-codehelm
   # TODO Remake volume definition for all types of storages
   backend: local
-  volumeType:
-  availabilityZone:
-  fsType:
-  encrypted: false
-  kmsKeyId:
-  skuName:
-  cachingMode:
-  azureLocation:
-  azureResourceGroup:
 
-  localVolumeParentDir: /var/lib/codefresh/dind-volumes
-  localVolumeMonitor: # todo rename variable and it's usage
-  # END
-  googleServiceAccount:
-  awsAccessKeyId:
-  awsSecretAccessKey:
+  local:
+    volumeParentDir: /var/lib/codefresh/dind-volumes
+
+  gce:
+    volumeType: ""
+    availabilityZone: ""
+    serviceAccountJson: ""
+
+  ebs:
+    volumeType: ""
+    availabilityZone: ""
+    encrypted: ""
+    kmsKeyId: ""
+    accessKeyId: ""
+    secretAccessKey: ""
+
+  azure:
+    resourceGroup: ""
+    location: ""
+    cachingMode: ""
+    skuName: ""
+
+  fsType: "ext4"
 
   #     resources:
   #       limits:

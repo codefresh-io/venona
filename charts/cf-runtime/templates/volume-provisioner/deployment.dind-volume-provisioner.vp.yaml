@@ -27,7 +27,7 @@ spec:
 
       containers:
         - name: dind-volume-provisioner
-{{/*          resources: {{ toYaml .Values.volumeProvisioner.resources | nindent 10 }}*/}}
+          {{/*          resources: {{ toYaml .Values.volumeProvisioner.resources | nindent 10 }}*/}}
           image: {{ .Values.volumeProvisioner.image }}
           imagePullPolicy: Always
           command:
@@ -68,21 +68,21 @@ spec:
               value: {{ .Values.volumeProvisioner.createDindVolDirResouces.requests.memory  }}
             {{- end }}
             {{- end }}
-            {{- if .Values.storage.awsAccessKeyId }}
+            {{- if .Values.storage.ebs.accessKeyId }}
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
                   name: dind-volume-provisioner
                   key: aws_access_key_id
             {{- end }}
-            {{- if .Values.storage.awsSecretAccessKey }}
+            {{- if .Values.storage.ebs.secretAccessKey }}
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: dind-volume-provisioner
                   key: aws_secret_access_key
             {{- end }}
-            {{- if .Values.storage.googleServiceAccount }}
+            {{- if .Values.storage.gce.serviceAccountJson }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /etc/dind-volume-provisioner/credentials/google-service-account.json
             {{- end }}
@@ -96,7 +96,7 @@ spec:
               readOnly: true
               mountPath: "/etc/kubernetes/azure.json"
             {{- end }}
-            {{- if .Values.storage.googleServiceAccount }}
+            {{- if .Values.storage.gce.serviceAccountJson }}
             - name: credentials
               readOnly: true
               mountPath: "/etc/dind-volume-provisioner/credentials"
@@ -108,7 +108,7 @@ spec:
             path: /etc/kubernetes/azure.json
             type: File
         {{- end }}
-        {{- if .Values.storage.googleServiceAccount }}
+        {{- if .Values.storage.gce.serviceAccountJson }}
         - name: credentials
           secret:
             secretName: dind-volume-provisioner
