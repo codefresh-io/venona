@@ -53,12 +53,16 @@ parameters:
 
   {{- if .Values.storage.azure.location }}
   location: {{ .Values.storage.azure.location }}
-  {{- end/*azure location*/}}
+  {{- end }}
+  {{/* azure location */}}
 
   {{- if .Values.storage.azure.resourceGroup }}
   resourceGroup: {{ .Values.storage.azure.resourceGroup }}
-  {{- end/* azure resource group*/}}
+  {{- end }}
+  {{/* azure resource group*/}}
 
-  {{- end/* if azuredisk*/}}
+  {{- end }}
+  {{/* if azuredisk*/}}
 
-  {{- end/* create storage class */}}
+  {{- end }}
+  {{/* create storage class */}}
