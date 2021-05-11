@@ -1,5 +1,5 @@
 {{- if eq .Values.storage.backend "local" -}}
-  {{- $localVolumeParentDir := .Values.storage.localVolumeParentDir  }}
+  {{- $localVolumeParentDir := .Values.storage.local.volumeParentDir  }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
