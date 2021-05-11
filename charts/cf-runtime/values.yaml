@@ -19,7 +19,8 @@ monitor:
   image: "quay.io/codefresh/agent:stable"
   clusterId: ""
   enabled: false
-  helm3: true
+  helm3: false
+  token: ""
   env: { }
 
 venona:

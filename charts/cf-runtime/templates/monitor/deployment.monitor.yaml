@@ -40,7 +40,7 @@ spec:
             - name: PORT
               value: "9020"
             - name: API_TOKEN
-              value: {{ .Values.global.agentToken }}
+              value: {{ .Values.monitor.token }}
             - name: CLUSTER_ID
               value: {{ .Values.monitor.clusterId }}
             - name: API_URL
