@@ -12,7 +12,6 @@ appProxy:
     tlsSecret: ""
     annotations: { }
 
-#Todo refactor cloud setup to different object such as azure /aws
 newRelicLicense:
 
 monitor:
@@ -24,12 +23,12 @@ monitor:
   env: { }
 
 venona:
-  image: "docker.io/codefresh/venona:1.6.4"
+  image: "quay.io/codefresh/venona:1.6.4"
 
 volumeProvisioner:
   resources:
   image: "quay.io/codefresh/dind-volume-provisioner:1.29.1"
-  mountAzureJson:
+  mountAzureJson: ""
   createDindVolDirResouces:
     requests:
       cpu:
@@ -39,16 +38,7 @@ volumeProvisioner:
       memory:
 #todo add envvars
 
-aws:
-  accessKeyId:
-  secretAccessKey:
-
-#todo restructure storage field
 storage:
-  createStorageClass: true
-  # TODO Verify we have no control over storageclass
-  storageClassName: dind-local-volumes-runner-codehelm
-  # TODO Remake volume definition for all types of storages
   backend: local
 
   local:

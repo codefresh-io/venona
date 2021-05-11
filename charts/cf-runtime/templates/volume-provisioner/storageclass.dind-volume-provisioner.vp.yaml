@@ -1,5 +1,3 @@
-{{- if .Values.storage.createStorageClass }}
-
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -63,6 +61,3 @@ parameters:
 
   {{- end }}
   {{/* if azuredisk*/}}
-
-  {{- end }}
-  {{/* create storage class */}}
