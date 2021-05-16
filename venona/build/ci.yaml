@@ -298,6 +298,10 @@ steps:
         - name: run_arm_build
           on:
           - success
+      condition:
+        any:
+          pushProd: steps.push_prod_image.result == 'success'
+          pushDev: steps.push_dev_image.result == 'success'
     arguments:
       image_name: ${{IMAGE_NAME}}
       tags:
