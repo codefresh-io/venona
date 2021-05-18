@@ -9,7 +9,7 @@ To install the [Codefresh Runner](https://codefresh.io/docs/docs/administration/
     ```
 
    * This will not install anything on your cluster, except for running cluster acceptance tests, which may be skipped using the `--skip-cluster-test` option).
-   * This command will also generate a `generated_values.yaml` file in your current, which you will need to provide to the `helm install` command later.
+   * This command will also generate a `generated_values.yaml` file in your current directory, which you will need to provide to the `helm install` command later.
 3. Now run the following to complete the installation: 
 
     ```
