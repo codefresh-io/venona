@@ -19,5 +19,5 @@ To install the [Codefresh Runner](https://codefresh.io/docs/docs/administration/
     ```
 4. At this point you should have a working Codefresh Runner. You can verify the installation by running: 
     ```
-    codefresh runner execute-test-pipeline
+    codefresh runner execute-test-pipeline --runtime-name <runtime-name>
     ```
