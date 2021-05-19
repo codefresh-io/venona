@@ -1,6 +1,3 @@
-#todo deprecate ?
-dockerRegistry: ""
-
 appProxy:
   enabled: false
   image: "quay.io/codefresh/cf-app-proxy:latest"
