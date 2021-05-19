@@ -9,7 +9,8 @@ appProxy:
     tlsSecret: ""
     annotations: { }
 
-newRelicLicense:
+newRelicLicense: ""
+dockerRegistry: ""
 
 monitor:
   image: "quay.io/codefresh/agent:stable"
