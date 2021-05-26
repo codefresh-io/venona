@@ -174,7 +174,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AwsAccessKeyId":       "",
 			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image":          "codefresh/dind-volume-provisioner:1.30.0",
+				"Image":          "codefresh/dind-volume-provisioner:1.31.0",
 				"NodeSelector":   s.KubernetesAPI.NodeSelector,
 				"Resources":      s.VolumeProvisioner.Resources,
 				"MountAzureJson": false,
