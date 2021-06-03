@@ -255,6 +255,8 @@
 ###         configure engine and dind pods           ###
 ########################################################
 # Runtime:
+#   NodeSelector: # dind and engine pods node-selector (--build-node-selector)
+#       foo: bar
 #   ServiceAccount: # will be used by the engine and dind pods
 #     Annotations:
 #       foo: bar
