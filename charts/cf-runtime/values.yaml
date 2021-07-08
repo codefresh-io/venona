@@ -21,11 +21,11 @@ monitor:
   env: { }
 
 venona:
-  image: "quay.io/codefresh/venona:1.6.4"
+  image: "quay.io/codefresh/venona:1.6.7"
 
 volumeProvisioner:
   resources:
-  image: "quay.io/codefresh/dind-volume-provisioner:1.31.0"
+  image: "quay.io/codefresh/dind-volume-provisioner:1.31.1"
   mountAzureJson: ""
   createDindVolDirResouces:
     requests:
