@@ -27,6 +27,10 @@ volumeProvisioner:
   resources:
   image: "quay.io/codefresh/dind-volume-provisioner:1.31.1"
   mountAzureJson: ""
+  # serviceAccount:
+  #   annotations:   # will be set on VolumeProvisioner service account
+  #     foo: bar
+  #     eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
   createDindVolDirResouces:
     requests:
       cpu:
@@ -37,7 +41,7 @@ volumeProvisioner:
 #todo add envvars
 
 storage:
-  backend: local
+  backend: local # local/ebs/gce/azure
 
   local:
     volumeParentDir: /var/lib/codefresh/dind-volumes
@@ -48,9 +52,9 @@ storage:
     serviceAccountJson: ""
 
   ebs:
-    volumeType: ""
-    availabilityZone: ""
-    encrypted: ""
+    volumeType: "" # gp2/gp3/io1
+    availabilityZone: "" # us-east-1c
+    encrypted: "" # true/false
     kmsKeyId: ""
     accessKeyId: ""
     secretAccessKey: ""
@@ -71,10 +75,10 @@ storage:
   #         cpu: 200m
   #         memory: 500Mi
 
-###NodeSelector --kube-node-selector: controls runner(venona), dind-volume-provisioner(vp-provisioner), vp-monitor pods
+###NodeSelector --kube-node-selector: controls runner(vp-venona), dind-volume-provisioner(vp-provisioner), vp-monitor pods
 #nodeSelector: {"kubernetes.io/arch": "amd64", "failure-domain.beta.kubernetes.io/zone": "us-east-1c"}
 
-### Tolerations --tolerations: controls runner(venona), dind-volume-provisioner(vp-provisioner), vp-monitor pods
+### Tolerations --tolerations: controls runner(vp-venona), dind-volume-provisioner(vp-provisioner), vp-monitor pods
 # tolerations: 
 # - key: <key>
 #   operator: Equal
