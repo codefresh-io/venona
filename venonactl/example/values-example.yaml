@@ -75,6 +75,10 @@
 ### We will check connectivity from inside the cluster to this domain.
 # DockerRegistry: docker.io
 
+### NewRelicLicense: If a license key is provided we will use newrelic monitoring in the venona agent
+### and app-proxy components
+# NewRelicLicense: XXXX
+
 # GitProviderURL: api.github.com # (optional) We will check connectivity to this URL when we run our acceptance tests.
 
 
