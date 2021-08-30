@@ -3,6 +3,7 @@ module github.com/codefresh-io/go/venona
 go 1.16
 
 require (
+	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/go-retryablehttp v0.6.7
 	github.com/inconshreveable/log15 v0.0.0-20200109203555-b30bc20e4fd1
@@ -13,7 +14,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/objx v0.2.0
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.20.4
 	k8s.io/apimachinery v0.20.4
