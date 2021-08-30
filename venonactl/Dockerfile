@@ -5,6 +5,7 @@ WORKDIR /venona
 COPY go.mod .
 RUN go mod download
 
+RUN apk -U upgrade
 RUN apk add git 
 
 COPY . .
