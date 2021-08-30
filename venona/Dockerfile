@@ -1,5 +1,5 @@
 FROM golang:1.16.3-alpine3.12 as build
-
+RUN apk -U upgrade
 RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 
 ENV USER=venona
