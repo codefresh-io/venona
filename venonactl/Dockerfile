@@ -20,6 +20,8 @@ RUN VERSION=$(cat VERSION) \
 
 FROM alpine:3.12
 
+RUN apk -U upgrade
+
 RUN apk add --update ca-certificates
 
 COPY --from=build /venona/venona /usr/local/bin/venona
