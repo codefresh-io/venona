@@ -1,11 +1,10 @@
-FROM golang:1.16.3-alpine3.12 as build
+FROM golang:1.15.8-alpine3.12 as build
 
 WORKDIR /venona
 
 COPY go.mod .
 RUN go mod download
 
-RUN apk -U upgrade
 RUN apk add git 
 
 COPY . .
@@ -20,8 +19,6 @@ RUN VERSION=$(cat VERSION) \
     -o venona
 
 FROM alpine:3.12
-
-RUN apk -U upgrade
 
 RUN apk add --update ca-certificates
 

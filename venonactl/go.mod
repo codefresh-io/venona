@@ -1,6 +1,6 @@
 module github.com/codefresh-io/venona/venonactl
 
-go 1.16
+go 1.15
 
 require (
 	github.com/Masterminds/semver v1.5.0
