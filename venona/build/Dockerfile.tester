@@ -1,6 +1,6 @@
 FROM golang:1.16.3-alpine3.12 AS os
 
-RUN apk -U add --no-cache ca-certificates apk add git make gcc g++ bash && update-ca-certificates
+RUN apk -U add --no-cache ca-certificates git make gcc g++ bash && update-ca-certificates
 RUN go get github.com/client9/misspell/cmd/misspell && \
     go get github.com/fzipp/gocyclo && \
     go get golang.org/x/lint/golint && \
