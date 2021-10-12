@@ -270,9 +270,7 @@
 #     limits:
 #       cpu: 500m
 #       memory: 1200Mi
-#     requests:
-#       cpu: 200m
-#       memory: 500Mi
+#     requests: ''
 #   userVolumeMounts: # will be set for dind pod and will be injcted for each container - https://codefresh.io/docs/docs/administration/codefresh-runner/#custom-volume-mounts
 #     my-test:
 #       name: test
