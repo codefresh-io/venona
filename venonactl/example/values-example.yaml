@@ -261,6 +261,11 @@
 # Runtime:
 #   NodeSelector: # dind and engine pods node-selector (--build-node-selector)
 #       foo: bar
+#  tolerations: # dind and engine pods tolerations
+#  - key: arch
+#    operator: Equal
+#    value: aarch64
+#    effect: NoSchedule
 #   ServiceAccount: # will be used by the engine and dind pods
 #     Annotations:
 #       foo: bar
