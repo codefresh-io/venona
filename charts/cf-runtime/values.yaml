@@ -20,6 +20,14 @@ monitor:
   token: ""
   env: { }
 
+re: { }
+  # Optionally add an AWS IAM role to your pipelines
+  # More info: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
+  # serviceAccount:
+  #   annotations:   # will be set on codefresh-engine service account
+  #     foo: bar
+  #     eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+
 venona:
   image: "quay.io/codefresh/venona:1.6.7"
 
