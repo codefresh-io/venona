@@ -7,7 +7,7 @@ func TemplatesMap() map[string]string {
 
 	templatesMap["cluster-role-binding.app-proxy.yaml"] = `{{- if .CreateRbac }}
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .AppProxy.AppName }}-cluster-reader-{{ .Namespace }}
 subjects:
@@ -23,7 +23,7 @@ roleRef:
 	templatesMap["cluster-role-binding.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   labels:
@@ -40,7 +40,7 @@ roleRef:
 
 	templatesMap["cluster-role-binding.venona.yaml"] = `{{- if .CreateRbac }}
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .AppName }}-{{ .Namespace }}
 subjects:
@@ -69,7 +69,7 @@ rules:
 
 	templatesMap["cluster-role.dind-volume-provisioner.vp.yaml"] = `{{- if .CreateRbac }}
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: volume-provisioner-{{ .AppName }}-{{ .Namespace }}
   labels:
@@ -729,7 +729,7 @@ spec:
 
 	templatesMap["role-binding.engine.yaml"] = `{{- if .CreateRbac }}
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Runtime.EngineAppName }}
   namespace: {{ .Namespace }}
@@ -745,7 +745,7 @@ roleRef:
 
 	templatesMap["role-binding.re.yaml"] = `{{- if .CreateRbac }}
 kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
@@ -761,7 +761,7 @@ roleRef:
 
 	templatesMap["role.engine.yaml"] = `{{- if .CreateRbac }}
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Runtime.EngineAppName }}
   namespace: {{ .Namespace }}
@@ -823,7 +823,7 @@ rules:
 
 	templatesMap["role.re.yaml"] = `{{- if .CreateRbac }}
 kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
