@@ -1,4 +1,4 @@
-FROM golang:1.17.6-alpine3.15 as build
+FROM golang:1.17.6-alpine3.14 as build
 
 WORKDIR /venona
 
@@ -18,7 +18,7 @@ RUN VERSION=$(cat VERSION) \
     -X github.com/codefresh-io/venona/venonactl/cmd.commit=${COMMIT} -X github.com/codefresh-io/venona/venonactl/cmd.date=${DATE}" \
     -o venona
 
-FROM alpine:3.15
+FROM alpine:3.14
 
 RUN apk add --update ca-certificates
 
