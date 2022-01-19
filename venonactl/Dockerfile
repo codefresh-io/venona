@@ -1,4 +1,4 @@
-FROM golang:1.16.3-alpine3.12 as build
+FROM golang:1.17.6-alpine3.16 as build
 
 WORKDIR /venona
 
