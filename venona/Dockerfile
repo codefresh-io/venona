@@ -23,7 +23,7 @@ RUN go mod verify
 # compile
 RUN make build
 
-FROM alpine:3.12
+FROM alpine:3.15
 
 # copy ca-certs and user details
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
