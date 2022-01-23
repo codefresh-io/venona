@@ -1,4 +1,4 @@
-FROM golang:1.16.3-alpine3.12 as build
+FROM golang:1.17.6-alpine3.15 as build
 
 RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 
@@ -23,7 +23,7 @@ RUN go mod verify
 # compile
 RUN make build
 
-FROM alpine:3.12
+FROM alpine:3.15
 
 # copy ca-certs and user details
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
