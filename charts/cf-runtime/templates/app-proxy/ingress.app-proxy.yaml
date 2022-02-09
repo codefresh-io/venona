@@ -1,5 +1,5 @@
 {{ if .Values.appProxy.enabled }}
-{{ if ne .appProxy.ingress.ingressApiVersion "" }}
+{{ if ne .Values.appProxy.ingress.ingressApiVersion "" }}
 apiVersion: networking.k8s.io/v1
 {{ else }}
 apiVersion: networking.k8s.io/v1beta1
@@ -19,7 +19,7 @@ spec:
       http:
         paths:
           - path: {{ if .Values.appProxy.ingress.pathPrefix }}{{ .Values.appProxy.ingress.pathPrefix }}{{ else }}'/'{{end}}
-            {{ if ne .appProxy.ingress.ingressApiVersion "" }}
+            {{ if ne .Values.appProxy.ingress.ingressApiVersion "" }}
             pathType: ImplementationSpecific
             backend:
               service:
