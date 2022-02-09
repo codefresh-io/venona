@@ -202,8 +202,9 @@ func (s *Values) BuildValues() map[string]interface{} {
 			},
 			"Resources": s.AppProxy.Resources,
 			"Ingress": map[string]interface{}{
-				"Host":         "",
-				"IngressClass": "",
+				"Host":              "",
+				"IngressClass":      "",
+				"IngressApiVersion": "",
 			},
 		},
 		"Runtime": map[string]interface{}{

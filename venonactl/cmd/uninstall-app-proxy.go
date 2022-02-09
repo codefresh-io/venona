@@ -16,6 +16,7 @@ var uninstallAppProxyCmdOptions struct {
 	templateValues     []string
 	templateFileValues []string
 	templateValueFiles []string
+	ingressApiVersion  string
 }
 
 var uninstallAppProxytCmd = &cobra.Command{
@@ -36,6 +37,7 @@ var uninstallAppProxytCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "CodefreshHost", &cfAPIHost)
 		mergeValueStr(templateValuesMap, "Namespace", &uninstallAppProxyCmdOptions.kube.namespace)
 		mergeValueStr(templateValuesMap, "Context", &uninstallAppProxyCmdOptions.kube.context)
+		mergeValueStr(templateValuesMap, "AppProxy.Ingress.IngressApiVersion", &uninstallAppProxyCmdOptions.ingressApiVersion)
 
 		s := store.GetStore()
 		lgr := createLogger("UninstallAppProxy", verbose, logFormatter)
@@ -88,5 +90,5 @@ func init() {
 	uninstallAppProxytCmd.Flags().StringArrayVar(&uninstallAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates --set-value agentId=12345")
 	uninstallAppProxytCmd.Flags().StringArrayVar(&uninstallAppProxyCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
 	uninstallAppProxytCmd.Flags().StringArrayVarP(&uninstallAppProxyCmdOptions.templateValueFiles, "values", "f", []string{}, "Specify values in a YAML file")
-
+	uninstallAppProxytCmd.Flags().StringVar(&uninstallAppProxyCmdOptions.ingressApiVersion, "ingress-api-version", "", "Ingress object API version")
 }

@@ -38,6 +38,7 @@ var installAppProxyCmdOptions struct {
 	host               string
 	ingressClass       string
 	dryRun             bool
+	ingressApiVersion  string
 }
 
 var installAppProxyCmd = &cobra.Command{
@@ -58,6 +59,7 @@ var installAppProxyCmd = &cobra.Command{
 		mergeValueStr(templateValuesMap, "Context", &installAppProxyCmdOptions.kube.context)
 		mergeValueStr(templateValuesMap, "AppProxy.Ingress.Host", &installAppProxyCmdOptions.host)
 		mergeValueStr(templateValuesMap, "AppProxy.Ingress.IngressClass", &installAppProxyCmdOptions.ingressClass)
+		mergeValueStr(templateValuesMap, "AppProxy.Ingress.IngressApiVersion", &installAppProxyCmdOptions.ingressApiVersion)
 		mergeValueStr(templateValuesMap, "DockerRegistry", &installAppProxyCmdOptions.dockerRegistry)
 		mergeValueMSI(templateValuesMap, "AppProxy.resources", &installAppProxyCmdOptions.resources)
 
@@ -116,4 +118,5 @@ func init() {
 	installAppProxyCmd.Flags().StringArrayVar(&installAppProxyCmdOptions.templateFileValues, "set-file", []string{}, "Set values for templates from file")
 	installAppProxyCmd.Flags().StringArrayVar(&installAppProxyCmdOptions.templateValues, "set-value", []string{}, "Set values for templates, example: --set-value LocalVolumesDir=/mnt/disks/ssd0/codefresh-volumes")
 	installAppProxyCmd.Flags().BoolVar(&installAppProxyCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
+	installAppProxyCmd.Flags().StringVar(&installAppProxyCmdOptions.ingressApiVersion, "ingress-api-version", "", "Ingress object API version")
 }
