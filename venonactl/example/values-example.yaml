@@ -240,13 +240,13 @@
 #       cpu: 200m
 #       memory: 500Mi
 #   AdditionalEnvVars:  # will be set on app-proxy deployment
-#     SOME_VAR: SOME_VALUE
+#     LOG_LEVEL: debug
 #   Ingress:
 #     Host: example.com           # The DNS hostname the ingress will use
 #     IngressClass: nginx         # If you have multiple ingress-controllers in the cluster - specify the right ingress class
 #     TLSSecret: cert-secret-name # Use this to configure the TLS certs for the ingress
 #     PathPrefix: /app-proxy      # default is '/'. Use this if you share the hostname with other services
-#     IngressApiVersion: networking.k8s.io/v1 # for k8s 1.22+ specify ingress API object version, skip otherwise
+#     IngressApiVersion: networking.k8s.io/v1 # for k8s 1.22+ specify ingress object API version, skip otherwise
 #     Annotations:                # Extra annotations that will be set on the ingress object
 #       nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
 #   ServiceAccount:

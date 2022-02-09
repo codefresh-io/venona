@@ -1,13 +1,20 @@
 appProxy:
   enabled: false
-  image: "quay.io/codefresh/cf-app-proxy:latest"
-  env: { }
+  image: "quay.io/codefresh/cf-app-proxy:latest" # default app-proxy image
+  env: { }  # add env vars to app-proxy deployment
+  ## e.g.:
+  ## env:
+  ##   LOG_LEVEL: debug
   ingress:
-    pathPrefix: ""
-    class: ""
-    host: ""
-    tlsSecret: ""
-    annotations: { }
+    pathPrefix: ""          # default is '/'. Use this if you share the hostname with other services
+    class: ""               # If you have multiple ingress-controllers in the cluster - specify the right ingress class
+    host: ""                # The DNS hostname the ingress will use
+    tlsSecret: ""           # Specify TLS certs k8s secret for the ingress
+    ingressApiVersion: ""   # for k8s 1.22+ specify 'networking.k8s.io/v1' as ingress object API version, skip otherwise
+    annotations: { }        # Extra annotations that will be set on the ingress object
+    ## e.g:
+    ## annotations:
+    ##   nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
 
 newRelicLicense: ""
 dockerRegistry: ""
