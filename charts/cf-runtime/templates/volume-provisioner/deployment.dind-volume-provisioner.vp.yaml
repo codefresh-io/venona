@@ -13,28 +13,24 @@ spec:
     metadata:
       labels: {{- include "cf-vp.provisionerLabels" . | nindent 9 }}
     spec:
-      {{/*      {{ if .Values.VolumeProvisioner.NodeSelector }}*/}}
-      {{/*      nodeSelector:*/}}
-      {{/*{{ .Storage.VolumeProvisioner.NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}*/}}
-      {{/*      {{ end }}*/}}
       serviceAccountName: {{ include "cf-vp.fullname" . }}
-      {{- if .Values.nodeSelector }}
+      {{- if .Values.volumeProvisioner.nodeSelector }}
       nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+{{ toYaml .Values.volumeProvisioner.nodeSelector | indent 8 }}
       {{- end }}
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
           operator: "Exists"
-
-      {{- if .Values.tolerations }}
-{{ toYaml .Values.tolerations | indent 8 }}
+      {{- if .Values.volumeProvisioner.tolerations }}
+{{ toYaml .Values.volumeProvisioner.tolerations | indent 8 }}
       {{- end }}      
-      {{/*      {{ toYaml .Values.tolerations | indent 8 | unescape}}*/}}
-
       containers:
         - name: dind-volume-provisioner
-          {{/*          resources: {{ toYaml .Values.volumeProvisioner.resources | nindent 10 }}*/}}
+          {{- if .Values.volumeProvisioner.resources }}
+          resources:
+{{ toYaml .Values.volumeProvisioner.resources | indent 12 }}
+          {{- end }}      
           image: {{ .Values.volumeProvisioner.image }}
           imagePullPolicy: Always
           command:
@@ -42,38 +38,17 @@ spec:
             - -v=4
             - --resync-period=50s
           env:
-            {{/*            {{- if $.EnvVars }}*/}}
-            {{/*            {{- range $key, $value := $.EnvVars }}*/}}
-            {{/*            - name: {{ $key }}*/}}
-            {{/*              value: "{{ $value}}"*/}}
-            {{/*            {{- end}}*/}}
-            {{/*            {{- end}}*/}}
+            {{- if .Values.volumeProvisioner.env }}
+            {{- range $key, $value := .Values.volumeProvisioner.env }}
+            - name: {{ $key }}
+              value: "{{ $value}}"
+            {{- end}}
+            {{- end}}
             - name: PROVISIONER_NAME
               value: {{ include "cf-vp.volumeProvisionerName" . }}
-
             {{- if ne .Values.dockerRegistry "" }}
             - name: DOCKER_REGISTRY
               value: {{ .Values.dockerRegistry }}
-            {{- end }}
-            {{- if .Values.volumeProvisioner.createDindVolDirResouces.limits }}
-            {{- if .Values.volumeProvisioner.createDindVolDirResouces.limits.cpu }}
-            - name: CREATE_DIND_LIMIT_CPU
-              value: {{ .Values.volumeProvisioner.createDindVolDirResouces.limits.cpu  }}
-            {{- end }}
-            {{- if .Values.volumeProvisioner.createDindVolDirResouces.limits.memory  }}
-            - name: CREATE_DIND_LIMIT_MEMORY
-              value: {{ .Values.volumeProvisioner.createDindVolDirResouces.limits.memory   }}
-            {{- end }}
-            {{- end }}
-            {{- if .Values.volumeProvisioner.createDindVolDirResouces.requests }}
-            {{- if .Values.volumeProvisioner.createDindVolDirResouces.requests.cpu }}
-            - name: CREATE_DIND_REQUESTS_CPU
-              value: {{ .Values.volumeProvisioner.createDindVolDirResouces.requests.cpu  }}
-            {{- end }}
-            {{- if .Values.volumeProvisioner.createDindVolDirResouces.requests.memory }}
-            - name: CREATE_DIND_REQUESTS_MEMORY
-              value: {{ .Values.volumeProvisioner.createDindVolDirResouces.requests.memory  }}
-            {{- end }}
             {{- end }}
             {{- if .Values.storage.ebs.accessKeyId }}
             - name: AWS_ACCESS_KEY_ID
