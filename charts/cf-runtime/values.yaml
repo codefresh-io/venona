@@ -29,24 +29,40 @@ re: { }
   #     eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 
 venona:
-  image: "quay.io/codefresh/venona:1.6.7"
+  image: "quay.io/codefresh/venona:1.7.1"
 
-volumeProvisioner:
-  resources:
-  image: "quay.io/codefresh/dind-volume-provisioner:1.31.1"
-  mountAzureJson: ""
+volumeProvisioner: # dind-volume-provisioner(vp-provisioner) deployment
+  image: "quay.io/codefresh/dind-volume-provisioner:1.31.2" # VP image
+  serviceAccount: {} # annotate VP service account
+  ### e.g.
   # serviceAccount:
-  #   annotations:   # will be set on VolumeProvisioner service account
-  #     foo: bar
+  #   annotations:
   #     eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
-  createDindVolDirResouces:
-    requests:
-      cpu:
-      memory:
-    limits:
-      cpu:
-      memory:
-#todo add envvars
+  nodeSelector: {}
+  ### e.g.
+  # nodeSelector:  
+  #   foo: bar
+  resources: {}
+  ### e.g.
+  # resources:
+  #   requests:
+  #     cpu: 400m
+  #     memory: 800Mi
+  #   limits:
+  #     cpu: 1000m
+  #     memory: 2048Mi
+  tolerations: []
+  ### e.g.
+  # tolerations: 
+  # - key: codefresh
+  #   operator: Equal
+  #   value: dind
+  #   effect: NoSchedule
+  env: {}
+  ### e.g.
+  # env:
+  #   PRIVILEGED_CONTAINER: true
+  #mountAzureJson: ""
 
 storage:
   backend: local # local/ebs/gce/azure
@@ -83,10 +99,10 @@ storage:
   #         cpu: 200m
   #         memory: 500Mi
 
-###NodeSelector --kube-node-selector: controls runner(vp-venona), dind-volume-provisioner(vp-provisioner), vp-monitor pods
+###NodeSelector --kube-node-selector: controls runner(vp-venona), vp-monitor pods
 #nodeSelector: {"kubernetes.io/arch": "amd64", "failure-domain.beta.kubernetes.io/zone": "us-east-1c"}
 
-### Tolerations --tolerations: controls runner(vp-venona), dind-volume-provisioner(vp-provisioner), vp-monitor pods
+### Tolerations --tolerations: controls runner(vp-venona), vp-monitor pods
 # tolerations: 
 # - key: <key>
 #   operator: Equal
