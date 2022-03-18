@@ -59,7 +59,7 @@ volumeProvisioner: # Volume-Provisioner Deployment
   resources: {}
   tolerations: []
   env: {}
-  ### e.g.
+  ## e.g:
   # env:
   #   PRIVILEGED_CONTAINER: true
 
@@ -116,7 +116,7 @@ storage: # Storage parameters for Volume-Provisioner
     volumeType: "" # pd-ssd(default) or pd-standard
     availabilityZone: "" # valid gcp zone
     serviceAccountJson: "" # (Optional) Google SA JSON key
-  ### e.g:
+  ## e.g:
   # gcedisk:
   #   volumeType: pd-ssd
   #   availabilityZone: us-central1-c
@@ -137,7 +137,7 @@ storage: # Storage parameters for Volume-Provisioner
 re: {}
   # Optionally add an AWS IAM role to your pipelines
   # More info: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
-  ### e.g:
+  ## e.g:
   # re:
   #   serviceAccount:
   #     annotations:   # will be set on codefresh-engine service account
@@ -147,7 +147,7 @@ appProxy: # App-Proxy Deployment
   enabled: false
   image: "codefresh/cf-app-proxy:latest"
   env: {}
-  ### e.g.
+  ## e.g:
   # env:
   #   LOG_LEVEL: debug
   ingress:
@@ -156,7 +156,7 @@ appProxy: # App-Proxy Deployment
     host: ""            # Specify DNS hostname the ingress will use
     tlsSecret: ""       # Specify k8s tls secret for the ingress object
     annotations: {}     # Specify extra annotations for ingress object
-  ### e.g.  
+  ## e.g:  
   # ingress:
   #   pathPrefix: "/app-proxy"         
   #   class: "nginx"                   
