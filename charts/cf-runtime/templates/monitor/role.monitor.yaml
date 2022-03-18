@@ -1,5 +1,9 @@
 {{- if and .Values.monitor.enabled }}
+{{- if .Values.monitor.useNamespaceWideRole }}
+kind: Role
+{{- else }}
 kind: ClusterRole
+{{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "cf-monitor.fullname" . }}
@@ -37,4 +41,4 @@ rules:
       - get
       - list
       - watch
-  {{- end }}
+{{- end }}

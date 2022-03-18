@@ -8,7 +8,7 @@ metadata:
     {{ if .Values.appProxy.ingress.class }}kubernetes.io/ingress.class: {{ .Values.appProxy.ingress.class }}{{ end }}
     {{ range $key, $value := .Values.appProxy.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
-  {{ end }}
+    {{ end }}
 spec:
   rules:
     - host: {{ .Values.appProxy.ingress.host }}
@@ -24,4 +24,4 @@ spec:
         - {{ .Values.appProxy.ingress.host }}
       secretName: {{ .Values.appProxy.ingress.tlsSecret }}
   {{ end }}
-  {{ end }}
+{{ end }}
