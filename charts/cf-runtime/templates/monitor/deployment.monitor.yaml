@@ -22,7 +22,7 @@ spec:
         - name: monitor
           resources:
 {{ toYaml .Values.monitor.resources | indent 12 }}
-          image: {{ .Values.monitor.image }}
+          image: {{ include "cf-monitor.docker-image" . }}
           imagePullPolicy: Always
           env:
             {{- if .Values.monitor.env }}

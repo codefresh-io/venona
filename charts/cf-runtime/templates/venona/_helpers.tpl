@@ -31,5 +31,9 @@ codefresh.io/application: venona
 {{- end }}
 
 {{- define "cf-venona.docker-image" -}}
+{{- if ne .Values.dockerRegistry ""}}
+{{- .Values.dockerRegistry }}/{{ .Values.venona.image }}
+{{- else }}
 {{- .Values.venona.image }}
+{{- end}}
 {{- end }}

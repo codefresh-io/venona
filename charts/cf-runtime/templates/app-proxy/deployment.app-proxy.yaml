@@ -21,7 +21,7 @@ spec:
       serviceAccountName: {{ include "cf-app-proxy.fullname" . }}
       containers:
         - name: app-proxy
-          image: {{ .Values.appProxy.image }}
+          image: {{ include "cf-app-proxy.docker-image" . }}
           imagePullPolicy: Always
           resources:
 {{ toYaml .Values.appProxy.resources | indent 12 }}

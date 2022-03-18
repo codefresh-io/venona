@@ -70,16 +70,16 @@ codefresh.io/application: cleanup
 {{- end }}
 
 {{- define "cf-vp.docker-image-volume-provisioner" -}}
-{{ if ne .Values .dockerRegistry ""}}
-{{- .dockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }}
+{{- if ne .Values.dockerRegistry ""}}
+{{- .Values.dockerRegistry }}/{{ .Values.volumeProvisioner.image }}
 {{- else }}
-{{- .Storage.VolumeProvisioner.Image }}
-{{- end}}
+{{- .Values.volumeProvisioner.image }}
+{{- end }}
 {{- end }}
 
 {{- define "cf-vp.docker-image-cleanup-cron" -}}
 {{- if ne .Values.dockerRegistry ""}}
-{{- .Values.dockerRegistry }}/codefresh/dind-volume-utils:1.26.0
-{{- else }}codefresh/dind-volume-utils:1.26.0
+{{- .Values.dockerRegistry }}/codefresh/dind-volume-cleanup
+{{- else }}codefresh/dind-volume-cleanup
 {{- end}}
 {{- end }}

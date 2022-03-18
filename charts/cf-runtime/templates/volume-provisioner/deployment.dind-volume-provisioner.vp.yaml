@@ -28,7 +28,7 @@ spec:
           resources:
 {{ toYaml .Values.volumeProvisioner.resources | indent 12 }}
           {{- end }}      
-          image: {{ .Values.volumeProvisioner.image }}
+          image: {{ include "cf-vp.docker-image-volume-provisioner" . }}
           imagePullPolicy: Always
           command:
             - /usr/local/bin/dind-volume-provisioner

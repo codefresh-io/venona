@@ -1,4 +1,4 @@
-# global in generated_values.yaml
+# global values are in generated_values.yaml
 # run `codefresh runner init --generate-helm-values-file` first
 global:
   namespace: ""
@@ -14,16 +14,21 @@ global:
     ca: ""
     serverCert: ""
 
+dockerRegistry: "quay.io" # Prefix for the container registry that will be used for pulling the required images (default quay.io)
+## e.g:
+# dockerRegistry: "docker.io"
+newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and venona deployments)
+
 venona: # runner(venona) deployment
-  image: "quay.io/codefresh/venona:1.7.1"
+  image: "codefresh/venona:1.7.1"
   env: {}
-  ### e.g.
+  ## e.g:
   # env:
   #   HTTP_PROXY: 10.20.0.35:8080
   #   HTTPS_PROXY: 10.20.0.35:8080
   #   NO_PROXY: 10.20.0.*
   resources: {}
-  ### e.g.
+  ## e.g:
   # resources:
   #   limits:
   #     cpu: 400m
@@ -32,11 +37,11 @@ venona: # runner(venona) deployment
   #     cpu: 200m
   #     memory: 500Mi
   nodeSelector: {}
-  ### e.g.
+  ## e.g:
   # nodeSelector:  
   #   foo: bar
   tolerations: []
-  ### e.g.
+  ## e.g:
   # tolerations: 
   # - key: codefresh
   #   operator: Equal
@@ -44,9 +49,9 @@ venona: # runner(venona) deployment
   #   effect: NoSchedule
 
 volumeProvisioner: # dind-volume-provisioner(vp-provisioner) deployment
-  image: "quay.io/codefresh/dind-volume-provisioner:1.31.2" # VP image
-  serviceAccount: {} # annotate VP service account
-  ### e.g.
+  image: "codefresh/dind-volume-provisioner:1.31.2" # volume-provisioner image
+  serviceAccount: {} # annotate volume-provisioner service account
+  ## e.g:
   # serviceAccount:
   #   annotations:
   #     eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
@@ -57,7 +62,6 @@ volumeProvisioner: # dind-volume-provisioner(vp-provisioner) deployment
   ### e.g.
   # env:
   #   PRIVILEGED_CONTAINER: true
-  #mountAzureJson: ""
 
 storage:
   backend: local    # local, ebs or gcedisk
@@ -84,7 +88,7 @@ storage:
     kmsKeyId: "" # (Optional) KMS Key ID
     accessKeyId: "" # (Optional) AWS_ACCESS_KEY_ID
     secretAccessKey: "" # (Optional) AWS_SECRET_ACCESS_KEY
-  ### e.g.
+  ## e.g:
   # ebs:
   #   volumeType: gp3
   #   availabilityZone: us-east-1c
@@ -112,8 +116,7 @@ storage:
     volumeType: "" # pd-ssd(default) or pd-standard
     availabilityZone: "" # valid gcp zone
     serviceAccountJson: "" # (Optional) Google SA JSON key
-
-  ### e.g.
+  ### e.g:
   # gcedisk:
   #   volumeType: pd-ssd
   #   availabilityZone: us-central1-c
@@ -131,11 +134,10 @@ storage:
   #           "client_x509_cert_url": "..."
   #           }
 
-
 re: {}
   # Optionally add an AWS IAM role to your pipelines
   # More info: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
-  ### e.g.
+  ### e.g:
   # re:
   #   serviceAccount:
   #     annotations:   # will be set on codefresh-engine service account
@@ -143,8 +145,8 @@ re: {}
 
 appProxy:
   enabled: false
-  image: "quay.io/codefresh/cf-app-proxy:latest"
-  env: {} # Specify additional env vars for app-proxy deployment
+  image: "codefresh/cf-app-proxy:latest"
+  env: {}
   ### e.g.
   # env:
   #   LOG_LEVEL: debug
@@ -166,12 +168,9 @@ appProxy:
   serviceAccount: 
     annotations: {}
 
-newRelicLicense: ""
-dockerRegistry: ""
-
 monitor:
   enabled: false
-  image: "quay.io/codefresh/agent:stable"
+  image: "codefresh/agent:stable"
   helm3: true
   useNamespaceWideRole: false     # Use ClusterRole(false) or Role(true)
   clusterId: ""                   # Cluster name as it registered in account
