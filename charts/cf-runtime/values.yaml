@@ -151,18 +151,18 @@ appProxy: # App-Proxy Deployment
   # env:
   #   LOG_LEVEL: debug
   ingress:
-    pathPrefix: ""
-    class: ""
-    host: ""
-    tlsSecret: ""
-    annotations: {}
+    pathPrefix: ""      # Specify path prefix for ingress (default is '/')  
+    class: ""           # Specify ingress class
+    host: ""            # Specify DNS hostname the ingress will use
+    tlsSecret: ""       # Specify k8s tls secret for the ingress object
+    annotations: {}     # Specify extra annotations for ingress object
   ### e.g.  
   # ingress:
-  #   pathPrefix: "/app-proxy"        # Specify path prefix for ingress (default is '/')   
-  #   class: "nginx"                  # Specify ingress class 
-  #   host: "mydomain.com"            # Specify DNS hostname the ingress will use
-  #   tlsSecret: "tls-cert-app-proxy" # Specify k8s tls secret for the ingress object
-  #   annotations:                    # Specify extra annotations for ingress object
+  #   pathPrefix: "/app-proxy"         
+  #   class: "nginx"                   
+  #   host: "mydomain.com"            
+  #   tlsSecret: "tls-cert-app-proxy" 
+  #   annotations:                    
   #     nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
   resources: {}
   serviceAccount: 
