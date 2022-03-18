@@ -19,7 +19,7 @@ dockerRegistry: "quay.io" # Prefix for the container registry that will be used 
 # dockerRegistry: "docker.io"
 newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and venona deployments)
 
-venona: # runner(venona) deployment
+runner: # runner deployment
   image: "codefresh/venona:1.7.1"
   env: {}
   ## e.g:

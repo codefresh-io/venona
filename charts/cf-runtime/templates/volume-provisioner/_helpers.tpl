@@ -6,15 +6,15 @@ Expand the name of the chart.
 {{- end }}
 
 {{- define "cf-vp.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "vp" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "cf-vp.provisionerName" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "vp-provisioner" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "cf-vp.monitorName" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "vp-monitor" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "lv-monitor" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "cf-vp.volumeProvisionerName" -}}
@@ -26,7 +26,7 @@ Common labels
 */}}
 {{- define "cf-vp.monitorLabels" -}}
 {{ include "cf-runtime.labels" . }}
-codefresh.io/application: volume-provisioner-monitor
+codefresh.io/application: lv-monitor
 {{- end }}
 
 {{/*
@@ -34,7 +34,7 @@ Selector labels
 */}}
 {{- define "cf-vp.monitorSelectorLabels" -}}
 {{ include "cf-runtime.selectorLabels" . }}
-codefresh.io/application: volume-provisioner-monitor
+codefresh.io/application: lv-monitor
 {{- end }}
 
 {{/*
@@ -58,7 +58,7 @@ Common labels
 */}}
 {{- define "cf-vp.cleanupLabels" -}}
 {{ include "cf-runtime.labels" . }}
-codefresh.io/application: cleanup
+codefresh.io/application: pv-cleanup
 {{- end }}
 
 
