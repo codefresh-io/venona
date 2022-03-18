@@ -14,10 +14,10 @@ global:
     ca: ""
     serverCert: ""
 
-dockerRegistry: "quay.io" # Prefix for the container registry for runtime images (default quay.io)
+dockerRegistry: "quay.io" # Registry prefix for the runtime images (default quay.io)
 ## e.g:
 # dockerRegistry: "docker.io"
-newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and venona deployments)
+newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and runner deployments)
 
 runner: # Runner Deployment
   image: "codefresh/venona:1.7.1"
@@ -65,7 +65,7 @@ volumeProvisioner: # Volume-Provisioner Deployment
 
 storage: # Storage parameters for Volume-Provisioner
   backend: local    # volume type: local(default), ebs or gcedisk
-  fsType: "ext4"    # ext4 or xfs (default to ext4)
+  fsType: "ext4"    # filesystem type: ext4(default) or xfs 
 
   # Storage example for local volumes on the K8S nodes filesystem
   # https://kubernetes.io/docs/concepts/storage/volumes/#local
