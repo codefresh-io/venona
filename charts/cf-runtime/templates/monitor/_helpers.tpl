@@ -33,3 +33,11 @@ Selector labels
 {{ include "cf-runtime.selectorLabels" . }}
 codefresh.io/application: monitor
 {{- end }}
+
+{{- define "cf-monitor.docker-image" -}}
+{{- if ne .Values.dockerRegistry ""}}
+{{- .Values.dockerRegistry }}/{{ .Values.monitor.image }}
+{{- else }}
+{{- .Values.monitor.image }}
+{{- end }}
+{{- end }}

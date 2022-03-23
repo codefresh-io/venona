@@ -20,9 +20,9 @@ spec:
       serviceAccountName: {{ include "cf-monitor.fullname" . }}
       containers:
         - name: monitor
-          {{/*          resources:*/}}
-          {{/*          {{ toYaml .Values.Monitor.resources | indent 10 }}*/}}
-          image: {{ .Values.monitor.image }}
+          resources:
+{{ toYaml .Values.monitor.resources | indent 12 }}
+          image: {{ include "cf-monitor.docker-image" . }}
           imagePullPolicy: Always
           env:
             {{- if .Values.monitor.env }}
@@ -33,10 +33,10 @@ spec:
             {{- end}}
             - name: SERVICE_NAME
               value: {{ include "cf-monitor.fullname" . }}
-{{/*                        {{- if .Values.monitor.useNamespaceWithRole  TODO: WTF }}*/}}
-{{/*            - name: ROLE_BINDING*/}}
-{{/*              value: "true"*/}}
-{{/*                        {{- end }}*/}}
+            {{- if .Values.monitor.useNamespaceWideRole  }} # not use cluster role
+            - name: ROLE_BINDING
+              value: "true"
+            {{- end }}
             - name: PORT
               value: "9020"
             - name: API_TOKEN

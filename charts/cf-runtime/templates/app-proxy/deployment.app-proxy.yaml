@@ -21,10 +21,10 @@ spec:
       serviceAccountName: {{ include "cf-app-proxy.fullname" . }}
       containers:
         - name: app-proxy
-          image: {{ .Values.appProxy.image }}
+          image: {{ include "cf-app-proxy.docker-image" . }}
           imagePullPolicy: Always
-          {{/*          resources:*/}}
-          {{/*          {{ toYaml .Values.AppProxy.resources | indent 10 }}*/}}
+          resources:
+{{ toYaml .Values.appProxy.resources | indent 12 }}
           env:
             {{- if .Values.appProxy.env }}
             {{- range $key, $value := .Values.appProxy.env }}
@@ -55,4 +55,4 @@ spec:
             timeoutSeconds: 5
             successThreshold: 1
             failureThreshold: 5
-  {{end}}
+{{end}}

@@ -29,3 +29,11 @@ Selector labels
 {{ include "cf-runtime.selectorLabels" . }}
 codefresh.io/application: app-proxy
 {{- end }}
+
+{{- define "cf-app-proxy.docker-image" -}}
+{{- if ne .Values.dockerRegistry ""}}
+{{- .Values.dockerRegistry }}/{{ .Values.appProxy.image }}
+{{- else }}
+{{- .Values.appProxy.image }}
+{{- end }}
+{{- end }}

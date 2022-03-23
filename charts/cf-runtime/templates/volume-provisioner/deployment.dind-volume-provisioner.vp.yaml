@@ -19,9 +19,6 @@ spec:
 {{ toYaml .Values.volumeProvisioner.nodeSelector | indent 8 }}
       {{- end }}
       tolerations:
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: "Exists"
       {{- if .Values.volumeProvisioner.tolerations }}
 {{ toYaml .Values.volumeProvisioner.tolerations | indent 8 }}
       {{- end }}      
@@ -31,7 +28,7 @@ spec:
           resources:
 {{ toYaml .Values.volumeProvisioner.resources | indent 12 }}
           {{- end }}      
-          image: {{ .Values.volumeProvisioner.image }}
+          image: {{ include "cf-vp.docker-image-volume-provisioner" . }}
           imagePullPolicy: Always
           command:
             - /usr/local/bin/dind-volume-provisioner
@@ -64,7 +61,7 @@ spec:
                   name: dind-volume-provisioner
                   key: aws_secret_access_key
             {{- end }}
-            {{- if .Values.storage.gce.serviceAccountJson }}
+            {{- if .Values.storage.gcedisk.serviceAccountJson }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /etc/dind-volume-provisioner/credentials/google-service-account.json
             {{- end }}
@@ -78,7 +75,7 @@ spec:
               readOnly: true
               mountPath: "/etc/kubernetes/azure.json"
             {{- end }}
-            {{- if .Values.storage.gce.serviceAccountJson }}
+            {{- if .Values.storage.gcedisk.serviceAccountJson }}
             - name: credentials
               readOnly: true
               mountPath: "/etc/dind-volume-provisioner/credentials"
@@ -90,7 +87,7 @@ spec:
             path: /etc/kubernetes/azure.json
             type: File
         {{- end }}
-        {{- if .Values.storage.gce.serviceAccountJson }}
+        {{- if .Values.storage.gcedisk.serviceAccountJson }}
         - name: credentials
           secret:
             secretName: dind-volume-provisioner
