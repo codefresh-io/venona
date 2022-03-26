@@ -36,7 +36,7 @@ parameters:
   iops: {{ .Values.storage.ebs.iops | quote }}
   {{- end }}
   {{- if .Values.storage.ebs.throughput }}
-  iops: {{ .Values.storage.ebs.throughput | quote }}
+  throughput: {{ .Values.storage.ebs.throughput | quote }}
   {{- end }}
 
 
