@@ -18,7 +18,7 @@ Expand the name of the chart.
 {{- end }}
 
 {{- define "cf-vp.volumeProvisionerName" -}}
-    codefresh.io/dind-volume-provisioner-{{ include "cf-runtime.fullname" . }}
+    codefresh.io/dind-volume-provisioner-runner-{{ .Release.Namespace }}
 {{- end }}
 
 {{/*
