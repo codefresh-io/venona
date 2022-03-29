@@ -1,5 +1,5 @@
 {{ if .Values.appProxy.enabled }}
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "cf-app-proxy.fullname" . }}
@@ -15,9 +15,12 @@ spec:
       http:
         paths:
           - path: {{ if .Values.appProxy.ingress.pathPrefix }}{{ .Values.appProxy.ingress.pathPrefix }}{{ else }}'/'{{end}}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: {{ include "cf-app-proxy.fullname" . }}
-              servicePort: 80
+              service:
+                name: app-proxy
+                port:
+                  number: 80
   {{ if .Values.appProxy.ingress.tlsSecret }}
   tls:
     - hosts:

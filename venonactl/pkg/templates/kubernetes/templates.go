@@ -655,7 +655,7 @@ spec:
 
 `
 
-	templatesMap["ingress.app-proxy.yaml"] = `apiVersion: networking.k8s.io/v1beta1
+	templatesMap["ingress.app-proxy.yaml"] = `apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -671,9 +671,12 @@ spec:
       http:
         paths:
           - path: {{ if .AppProxy.Ingress.PathPrefix }}{{ .AppProxy.Ingress.PathPrefix }}{{ else }}'/'{{end}}
+            pathType: ImplementationSpecific
             backend:
-              serviceName: app-proxy
-              servicePort: 80
+              service:
+                name: app-proxy
+                port:
+                  number: 80
   {{ if .AppProxy.Ingress.TLSSecret }}
   tls:
     - hosts:
