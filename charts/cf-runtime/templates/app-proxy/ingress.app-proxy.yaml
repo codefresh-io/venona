@@ -5,11 +5,13 @@ metadata:
   name: {{ include "cf-app-proxy.fullname" . }}
   labels: {{- include "cf-app-proxy.labels" . | nindent 4 }}
   annotations:
-    {{ if .Values.appProxy.ingress.class }}kubernetes.io/ingress.class: {{ .Values.appProxy.ingress.class }}{{ end }}
     {{ range $key, $value := .Values.appProxy.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{ end }}
 spec:
+  {{ if .Values.appProxy.ingress.class }}
+  ingressClassName: {{ .Values.appProxy.ingress.class }}
+  {{ end }}
   rules:
     - host: {{ .Values.appProxy.ingress.host }}
       http:

@@ -659,13 +659,15 @@ spec:
 kind: Ingress
 metadata:
   annotations:
-    {{ if ne .AppProxy.Ingress.IngressClass "" }}kubernetes.io/ingress.class: {{ .AppProxy.Ingress.IngressClass }}{{ end }}
     {{ range $key, $value := .AppProxy.Ingress.Annotations }}
     {{ $key }}: {{ $value | quote | unescape }}
     {{ end }}
   name: app-proxy
   namespace: {{ .Namespace }}
 spec:
+  {{ if ne .AppProxy.Ingress.IngressClass "" }}
+  ingressClassName: {{ .AppProxy.Ingress.IngressClass }}
+  {{ end }}
   rules:
     - host: {{ .AppProxy.Ingress.Host }}
       http:
