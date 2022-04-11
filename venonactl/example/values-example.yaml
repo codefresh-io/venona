@@ -146,7 +146,7 @@
 #   AwsSecretAccessKey:
 #   Encrypted:  # encrypt volume, default is false
 #   VolumeProvisioner:
-#     Image: codefresh/dind-volume-provisioner:v23
+#     Image: codefresh/dind-volume-provisioner:1.31.5
 #     NodeSelector: 
 #     Tolerations:
 #     resources:
