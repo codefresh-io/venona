@@ -62,9 +62,11 @@ volumeProvisioner: # Volume-Provisioner Deployment
   ## e.g:
   # env:
   #   PRIVILEGED_CONTAINER: true
+  ### https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
+  # mountAzureJson: true 
 
 storage: # Storage parameters for Volume-Provisioner
-  backend: local    # volume type: local(default), ebs or gcedisk
+  backend: local    # volume type: local(default), ebs, gcedisk or azuredisk
   fsType: "ext4"    # filesystem type: ext4(default) or xfs 
 
   # Storage example for local volumes on the K8S nodes filesystem
@@ -133,6 +135,17 @@ storage: # Storage parameters for Volume-Provisioner
   #           "auth_provider_x509_cert_url": "...",
   #           "client_x509_cert_url": "..."
   #           }
+
+  # Storage example for Azure Disks
+  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
+  azuredisk:
+    skuName: Premium_LRS #default
+    cachingMode: None
+    # location: westcentralus
+    # resourceGroup: 
+    # DiskIOPSReadWrite: 500
+    # DiskMBpsReadWrite: 100
+    
 
 re: {}
   # Optionally add an AWS IAM role to your pipelines

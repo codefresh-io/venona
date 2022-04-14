@@ -173,6 +173,12 @@
 ### Storage configuration examples: ###
 #######################################
 
+### Storage parameters example for Azure Disks
+# Storage:
+#   Backend: azuredisk
+#   VolumeProvisioner:
+#     MountAzureJson: true
+
 ### Storage parameters example for gke-local-ssd
 # Storage:
 #   Backend: local
