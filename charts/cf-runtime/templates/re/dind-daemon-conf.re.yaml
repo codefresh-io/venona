@@ -5,4 +5,4 @@ metadata:
   name: codefresh-dind-config
 data:
   daemon.json: |
-{{ .Values.re.daemon | toPrettyJson | indent 4 }}
+{{ .Values.re.dindDaemon | toPrettyJson | indent 4 }}
