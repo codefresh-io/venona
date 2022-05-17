@@ -40,7 +40,14 @@ spec:
             - name: PORT
               value: "9020"
             - name: API_TOKEN
-              value: {{ .Values.monitor.token }}
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.monitor.existingTokenSecret }}
+                  name: {{ .Values.monitor.existingTokenSecret }}
+                  {{- else }}
+                  name: codefresh-monitor-token
+                  {{- end }}
+                  key: token
             - name: CLUSTER_ID
               value: {{ .Values.monitor.clusterId }}
             - name: API_URL
