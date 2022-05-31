@@ -147,7 +147,7 @@ storage: # Storage parameters for Volume-Provisioner
     # DiskMBpsReadWrite: 100
     
 
-re: {}
+re: 
   # Optionally add an AWS IAM role to your pipelines
   # More info: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
   ## e.g:
@@ -155,6 +155,20 @@ re: {}
   #   serviceAccount:
   #     annotations:   # will be set on codefresh-engine service account
   #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+  dindDaemon: # dind daemon config
+    hosts:
+      - unix:///var/run/docker.sock
+      - tcp://0.0.0.0:1300
+    storage-driver: overlay2
+    tlsverify: true
+    tls: true
+    tlscacert: /etc/ssl/cf-client/ca.pem
+    tlscert: /etc/ssl/cf/server-cert.pem
+    tlskey: /etc/ssl/cf/server-key.pem
+    insecure-registries:
+      - 192.168.99.100:5000
+    metrics-addr: 0.0.0.0:9323
+    experimental: true
 
 appProxy: # App-Proxy Deployment
   enabled: false
