@@ -9,10 +9,9 @@ data:
     {
       "hosts": [ "unix:///var/run/docker.sock",
                  "tcp://0.0.0.0:1300"],
-      "storage-driver": "overlay2",
       "tlsverify": true,  
       "tls": true,
-      "tlscacert": "/etc/ssl/cf-client/ca.pem",
+      "tlscacert": "/etc/ssl/cf/ca.pem",
       "tlscert": "/etc/ssl/cf/server-cert.pem",
       "tlskey": "/etc/ssl/cf/server-key.pem",
       "insecure-registries" : ["192.168.99.100:5000"],
