@@ -41,3 +41,14 @@ codefresh.io/application: monitor
 {{- .Values.monitor.image }}
 {{- end }}
 {{- end }}
+
+{{/*
+Get the token secret.
+*/}}
+{{- define "cf-monitor.secretTokenName" -}}
+    {{- if .Values.monitor.existingMonitorToken -}}
+        {{- printf "%s" (tpl .Values.monitor.existingMonitorToken $) -}}
+    {{- else -}}
+        {{- printf "%s" (include "cf-monitor.fullname" .) -}}
+    {{- end -}}
+{{- end -}}

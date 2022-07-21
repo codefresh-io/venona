@@ -4,6 +4,7 @@ global:
   namespace: ""
   codefreshHost: ""
   agentToken: ""
+  existingAgentToken: ""  # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value for global.agentToken; secret must contain `codefresh.token` key)
   agentId: ""
   agentName: ""
   accountId: ""
@@ -20,7 +21,7 @@ dockerRegistry: "quay.io" # Registry prefix for the runtime images (default quay
 newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and runner deployments)
 
 runner: # Runner Deployment
-  image: "codefresh/venona:1.7.1"
+  image: "codefresh/venona:1.7.4"
   env: {}
   ## e.g:
   # env:
@@ -202,6 +203,7 @@ monitor: # Monitor Deployment
   useNamespaceWideRole: false     # Use ClusterRole(false) or Role(true)
   clusterId: ""                   # Cluster name as it registered in account
   token: ""                       # API token from Codefresh
+  existingMonitorToken: ""        # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value of monitor.token; secret must contain `codefresh.token` key)
   env: {}
   resources: {}
   serviceAccount: 
