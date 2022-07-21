@@ -4,11 +4,14 @@ global:
   namespace: ""
   codefreshHost: ""
   agentToken: ""
-  existingAgentToken: ""  # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value for global.agentToken; secret must contain `codefresh.token` key)
+  # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value for global.agentToken; secret must contain `codefresh.token` key)
+  existingAgentToken: ""  
   agentId: ""
   agentName: ""
   accountId: ""
   runtimeName: ""
+  # Existing secret (name has to be `codefresh-certs-server`) (supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys)
+  existingDindCertsSecret: "" 
   keys:
     key: ""
     csr: ""
