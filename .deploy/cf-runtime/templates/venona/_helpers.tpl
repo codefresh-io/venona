@@ -37,3 +37,14 @@ codefresh.io/application: runner
 {{- .Values.runner.image }}
 {{- end}}
 {{- end }}
+
+{{/*
+Get the token secret.
+*/}}
+{{- define "cf-runner.secretTokenName" -}}
+    {{- if .Values.global.existingAgentToken -}}
+        {{- printf "%s" (tpl .Values.global.existingAgentToken $) -}}
+    {{- else -}}
+        {{- printf "%s" (include "cf-runner.fullname" .) -}}
+    {{- end -}}
+{{- end -}}

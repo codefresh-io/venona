@@ -42,12 +42,8 @@ spec:
             - name: API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.monitor.existingTokenSecret }}
-                  name: {{ .Values.monitor.existingTokenSecret }}
-                  {{- else }}
-                  name: codefresh-monitor-token
-                  {{- end }}
-                  key: token
+                  name: {{ template "cf-monitor.secretTokenName" . }}
+                  key: codefresh.token
             - name: CLUSTER_ID
               value: {{ .Values.monitor.clusterId }}
             - name: API_URL
