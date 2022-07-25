@@ -7,6 +7,7 @@ global:
   agentId: ""
   agentName: ""
   accountId: ""
+  #existingRunnerSecret: ""  # Use pre-defined secret instead of plain-text values for global.keys and global.agentToken (Supersedes values set for global.keys and global.agentToken)
   runtimeName: ""
   keys:
     key: ""
@@ -201,6 +202,7 @@ monitor: # Monitor Deployment
   helm3: true
   useNamespaceWideRole: false     # Use ClusterRole(false) or Role(true)
   clusterId: ""                   # Cluster name as it registered in account
+  #existingTokenSecret: ""        # Use pre-defined secret instead of plain-text value of monitor.token (Supersedes value of monitor.token)
   token: ""                       # API token from Codefresh
   env: {}
   resources: {}

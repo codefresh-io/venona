@@ -42,7 +42,11 @@ spec:
             - name: CODEFRESH_TOKEN
               valueFrom:
                 secretKeyRef:
+                  {{- if .Values.global.existingRunnerSecret }}
+                  name: {{ .Values.global.existingRunnerSecret }}
+                  {{- else }}
                   name: {{ include "cf-runner.fullname" . }}
+                  {{- end }}
                   key: codefresh.token
             - name: CODEFRESH_IN_CLUSTER_RUNTIME
               value: {{ .Values.global.runtimeName }}
