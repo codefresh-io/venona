@@ -5,13 +5,13 @@ global:
   codefreshHost: ""
   agentToken: ""
   # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value for global.agentToken; secret must contain `codefresh.token` key)
-  existingAgentToken: ""  
+  existingAgentToken: ""
   agentId: ""
   agentName: ""
   accountId: ""
   runtimeName: ""
   # Existing secret (name has to be `codefresh-certs-server`) (supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys)
-  existingDindCertsSecret: "" 
+  existingDindCertsSecret: ""
   keys:
     key: ""
     csr: ""
@@ -24,7 +24,7 @@ dockerRegistry: "quay.io" # Registry prefix for the runtime images (default quay
 newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and runner deployments)
 
 runner: # Runner Deployment
-  image: "codefresh/venona:1.7.4"
+  image: "codefresh/venona:1.7.8"
   env: {}
   ## e.g:
   # env:
@@ -42,18 +42,18 @@ runner: # Runner Deployment
   #     memory: 500Mi
   nodeSelector: {}
   ## e.g:
-  # nodeSelector:  
+  # nodeSelector:
   #   foo: bar
   tolerations: []
   ## e.g:
-  # tolerations: 
+  # tolerations:
   # - key: codefresh
   #   operator: Equal
   #   value: dind
   #   effect: NoSchedule
 
 volumeProvisioner: # Volume-Provisioner Deployment
-  image: "codefresh/dind-volume-provisioner:1.31.7"
+  image: "codefresh/dind-volume-provisioner:1.31.8"
   serviceAccount: {} # annotate volume-provisioner service account
   ## e.g:
   # serviceAccount:
@@ -67,11 +67,11 @@ volumeProvisioner: # Volume-Provisioner Deployment
   # env:
   #   PRIVILEGED_CONTAINER: true
   ### https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
-  # mountAzureJson: true 
+  # mountAzureJson: true
 
 storage: # Storage parameters for Volume-Provisioner
   backend: local    # volume type: local(default), ebs, gcedisk or azuredisk
-  fsType: "ext4"    # filesystem type: ext4(default) or xfs 
+  fsType: "ext4"    # filesystem type: ext4(default) or xfs
 
   # Storage example for local volumes on the K8S nodes filesystem
   # https://kubernetes.io/docs/concepts/storage/volumes/#local
@@ -102,7 +102,7 @@ storage: # Storage parameters for Volume-Provisioner
   #   iops: "5000"
   #   # I/O operations per second. Only effetive when gp3 volume type is specified.
   #   # Default value - 3000.
-  #   # Max - 16,000  
+  #   # Max - 16,000
   #   throughput: "500"
   #   # Throughput in MiB/s. Only effective when gp3 volume type is specified.
   #   # Default value - 125.
@@ -146,12 +146,12 @@ storage: # Storage parameters for Volume-Provisioner
     skuName: Premium_LRS #default
     cachingMode: None
     # location: westcentralus
-    # resourceGroup: 
+    # resourceGroup:
     # DiskIOPSReadWrite: 500
     # DiskMBpsReadWrite: 100
-    
 
-re: 
+
+re:
   # Optionally add an AWS IAM role to your pipelines
   # More info: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
   ## e.g:
@@ -182,21 +182,21 @@ appProxy: # App-Proxy Deployment
   # env:
   #   LOG_LEVEL: debug
   ingress:
-    pathPrefix: ""      # Specify path prefix for ingress (default is '/')  
+    pathPrefix: ""      # Specify path prefix for ingress (default is '/')
     class: ""           # Specify ingress class
     host: ""            # Specify DNS hostname the ingress will use
     tlsSecret: ""       # Specify k8s tls secret for the ingress object
     annotations: {}     # Specify extra annotations for ingress object
-  ## e.g:  
+  ## e.g:
   # ingress:
-  #   pathPrefix: "/app-proxy"         
-  #   class: "nginx"                   
-  #   host: "mydomain.com"            
-  #   tlsSecret: "tls-cert-app-proxy" 
-  #   annotations:                    
+  #   pathPrefix: "/app-proxy"
+  #   class: "nginx"
+  #   host: "mydomain.com"
+  #   tlsSecret: "tls-cert-app-proxy"
+  #   annotations:
   #     nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
   resources: {}
-  serviceAccount: 
+  serviceAccount:
     annotations: {}
 
 monitor: # Monitor Deployment
@@ -209,6 +209,6 @@ monitor: # Monitor Deployment
   existingMonitorToken: ""        # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value of monitor.token; secret must contain `codefresh.token` key)
   env: {}
   resources: {}
-  serviceAccount: 
+  serviceAccount:
     annotations: {}
 
