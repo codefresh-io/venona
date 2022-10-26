@@ -68,6 +68,7 @@ volumeProvisioner: # Volume-Provisioner Deployment
   #   PRIVILEGED_CONTAINER: true
   ### https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
   # mountAzureJson: true
+  annotations: {} # annotate volume-provisioner pod
 
 storage: # Storage parameters for Volume-Provisioner
   backend: local    # volume type: local(default), ebs, gcedisk or azuredisk
