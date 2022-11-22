@@ -33,7 +33,7 @@ steps:
       steps:
       - name: main_clone
         on:
-        - success  
+        - success
 
   test: &common
     <<: *deps
@@ -44,7 +44,7 @@ steps:
       steps:
       - name: download_dependencies
         on:
-        - success  
+        - success
 
   export_version:
     <<: *common
@@ -60,7 +60,7 @@ steps:
       steps:
       - name: main_clone
         on:
-        - success  
+        - success
 
   gofmt:
     <<: *common
@@ -72,7 +72,7 @@ steps:
     <<: *common
     title: Check License
     commands:
-      - cd venona && make license    
+      - cd venona && make license
 
   spellcheck:
     <<: *common
@@ -98,7 +98,7 @@ steps:
     commands:
       - cd venona && make gocyclo
 
-  
+
   codecov-report:
     type: codecov-reporter
     title: Upload Code Coverage
@@ -109,7 +109,7 @@ steps:
       steps:
       - name: test
         on:
-        - success 
+        - success
 
   build_image:
     type: build
@@ -260,6 +260,7 @@ steps:
       push_gcr_enterprise_dev:
         registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
 
+
   push_prod_image:
     type: push
     title: Push candidate image with prod tags
@@ -310,7 +311,7 @@ steps:
         - ${{VERSION}}-${{CF_REVISION}}
         - ${{CF_REVISION}}
         - ${{CF_BRANCH_TAG_NORMALIZED}}
-      arch_tag_postfixes: 
+      arch_tag_postfixes:
         arm64: "${{ARM_TAG_POSTFIX}}"
       registries:
         - name: 'quay.io'
