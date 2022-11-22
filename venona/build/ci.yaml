@@ -260,7 +260,6 @@ steps:
       push_gcr_enterprise_dev:
         registry: "${{REGISTRY_INTEGRATION_ENTERPRISE}}"
 
-
   push_prod_image:
     type: push
     title: Push candidate image with prod tags
