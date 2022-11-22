@@ -271,6 +271,7 @@ steps:
     - ${{VERSION}}-${{CF_REVISION}}
     - ${{CF_REVISION}}
     - ${{CF_BRANCH_TAG_NORMALIZED}}
+    - latest
     image_name: ${{IMAGE_NAME}}
     when:
       branch:
