@@ -53,7 +53,7 @@ runner: # Runner Deployment
   #   effect: NoSchedule
 
 volumeProvisioner: # Volume-Provisioner Deployment
-  image: "codefresh/dind-volume-provisioner:1.31.8"
+  image: "codefresh/dind-volume-provisioner:1.31.9"
   serviceAccount: {} # annotate volume-provisioner service account
   ## e.g:
   # serviceAccount:
