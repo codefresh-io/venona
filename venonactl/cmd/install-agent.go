@@ -184,6 +184,9 @@ func init() {
 
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
+
+	viper.SetDefault("kube-namespace", "default")
+
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.agentToken, "agentToken", "", "Agent token created by codefresh")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.agentID, "agentId", "", "Agent id created by codefresh")
 	installAgentCmd.Flags().StringVar(&installAgentCmdOptions.venona.version, "venona-version", "", "Version of venona to install (default is the latest)")

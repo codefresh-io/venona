@@ -77,7 +77,7 @@ type (
 		BuildNodeSelector     map[string]string
 		Annotations           map[string]string
 		RuntimeEnvironment    string
-		RuntimeClusterName    string
+		RuntimeNamespace      string
 		RuntimeServiceAccount string
 		RestartAgent          bool
 		Insecure              bool

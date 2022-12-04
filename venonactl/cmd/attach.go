@@ -105,7 +105,7 @@ var attachRuntimeCmd = &cobra.Command{
 			ClusterNamespace:      attachRuntimeCmdOptions.kubeVenona.namespace,
 			ClusterHost:           attachRuntimeCmdOptions.kube.host,
 			RuntimeEnvironment:    attachRuntimeCmdOptions.runtimeEnvironmentName,
-			RuntimeClusterName:    attachRuntimeCmdOptions.kube.namespace,
+			RuntimeNamespace:      attachRuntimeCmdOptions.kube.namespace,
 			RuntimeServiceAccount: attachRuntimeCmdOptions.kube.serviceAccount,
 			RestartAgent:          attachRuntimeCmdOptions.restartAgent,
 			DryRun:                attachRuntimeCmdOptions.dryRun,
@@ -145,6 +145,8 @@ func init() {
 	rootCmd.AddCommand(attachRuntimeCmd)
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
+
+	viper.SetDefault("kube-namespace", "default")
 
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.host, "kube-host", viper.GetString("kube-host"), "overrides the address of the api-server the runner will use")
 	attachRuntimeCmd.Flags().StringVar(&attachRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
