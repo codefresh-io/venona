@@ -10,8 +10,11 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
 	templates "github.com/codefresh-io/venona/venonactl/pkg/templates/kubernetes"
 	"gopkg.in/yaml.v2"
+	v1 "k8s.io/api/core/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes"
 )
 
 type runtimeAttachPlugin struct {
@@ -35,8 +38,7 @@ const (
 	runtimeSecretName         = "runnerconf"
 )
 
-func buildRuntimeConfig(ctx context.Context, opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
-
+func (u *runtimeAttachPlugin) buildRuntimeConfig(ctx context.Context, opt *InstallOptions, v Values) (RuntimeConfiguration, error) {
 	config, err := opt.KubeBuilder.BuildConfig()
 	if err != nil {
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to get client config on runtime cluster: %v", err)
@@ -51,27 +53,10 @@ func buildRuntimeConfig(ctx context.Context, opt *InstallOptions, v Values) (Run
 		return RuntimeConfiguration{}, fmt.Errorf("Failed to ensure namespace on runtime cluster: %v", err)
 	}
 
-	// get default service account for the namespace
-	var getOpt metav1.GetOptions
-	sa, err := cs.CoreV1().ServiceAccounts(opt.RuntimeClusterName).Get(ctx, opt.RuntimeServiceAccount, getOpt)
+	secret, err := u.generateServiceAccountSecret(ctx, cs, opt.RuntimeNamespace, opt.RuntimeServiceAccount)
 	if err != nil {
-		return RuntimeConfiguration{}, fmt.Errorf("Failed to read service account runtime cluster: %v", err)
-	}
-
-	var saSecretName string
-	saSecretPattern := fmt.Sprintf("%s-token-", opt.RuntimeServiceAccount)
-	for _, secretRef := range sa.Secrets {
-		if strings.Contains(secretRef.Name, saSecretPattern) {
-			saSecretName = secretRef.Name
-			break
-		}
-	}
-	if saSecretName == "" {
-		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret %s from service account %s", saSecretPattern, opt.RuntimeServiceAccount)
-	}
-	secret, err := cs.CoreV1().Secrets(opt.RuntimeClusterName).Get(ctx, saSecretName, getOpt)
-	if err != nil {
-		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret from service account on runtime cluster: %v", err)
+		return RuntimeConfiguration{}, fmt.Errorf("Failed to get secret from service account %s on runtime cluster: %v",
+			opt.RuntimeServiceAccount, err)
 	}
 
 	crt := secret.Data["ca.crt"]
@@ -93,6 +78,67 @@ func buildRuntimeConfig(ctx context.Context, opt *InstallOptions, v Values) (Run
 	return rc, nil
 }
 
+func (u *runtimeAttachPlugin) generateServiceAccountSecret(ctx context.Context, client kubernetes.Interface, namespace, saName string) (*v1.Secret, error) {
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-token-", saName),
+			Annotations: map[string]string{
+				"kubernetes.io/service-account.name": saName,
+			},
+		},
+		Type: v1.SecretTypeServiceAccountToken,
+	}
+
+	u.logger.Debug("Creating secret for service-account token", "service-account", saName)
+
+	secret, err := client.CoreV1().Secrets(namespace).Create(ctx, secret, metav1.CreateOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create service-account token secret: %w", err)
+	}
+	secretName := secret.Name
+
+	u.logger.Debug("Created secret for service-account token", "service-account", saName, "secret", secret.Name)
+
+	patch := []byte(fmt.Sprintf("{\"secrets\": [{\"name\": \"%s\"}]}", secretName))
+	_, err = client.CoreV1().ServiceAccounts(namespace).Patch(ctx, saName, types.StrategicMergePatchType, patch, metav1.PatchOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to patch service-account with new secret: %w", err)
+	}
+
+	u.logger.Debug("Added secret to service-account secrets", "service-account", saName, "secret", secret.Name)
+
+	// try to read the token from the secret
+	ticker := time.NewTicker(time.Second)
+	retries := 15
+	defer ticker.Stop()
+
+	for try := 0; try < retries; try++ {
+		select {
+		case <-ticker.C:
+			secret, err = client.CoreV1().Secrets(namespace).Get(ctx, secretName, metav1.GetOptions{})
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		}
+
+		u.logger.Debug("Checking secret for service-account token", "service-account", saName, "secret", secret.Name)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to get service-account secret: %w", err)
+		}
+
+		if secret.Data == nil || len(secret.Data["token"]) == 0 {
+			u.logger.Debug("Secret is missing service-account token", "service-account", saName, "secret", secret.Name)
+			continue
+		}
+
+		u.logger.Debug("Got service-account token from secret", "service-account", saName, "secret", secret.Name)
+
+		return secret, nil
+	}
+
+	return nil, fmt.Errorf("timed out waiting for secret to contain token")
+}
+
 func readCurrentVenonaConf(ctx context.Context, agentKubeBuilder KubeClientBuilder, clusterNamespace string) (venonaConf, error) {
 
 	cs, err := agentKubeBuilder.BuildClient()
@@ -100,6 +146,9 @@ func readCurrentVenonaConf(ctx context.Context, agentKubeBuilder KubeClientBuild
 		return venonaConf{}, fmt.Errorf("Failed to create client on venona cluster: %v", err)
 	}
 	secret, err := cs.CoreV1().Secrets(clusterNamespace).Get(ctx, runtimeSecretName, metav1.GetOptions{})
+	if err != nil {
+		return venonaConf{}, fmt.Errorf("Failed to get %s secret: %v", runtimeSecretName, err)
+	}
 
 	conf := &venonaConf{
 		Runtimes: make(map[string]RuntimeConfiguration),
@@ -138,7 +187,7 @@ func (u *runtimeAttachPlugin) Install(ctx context.Context, opt *InstallOptions, 
 	}
 
 	// new runtime configuration
-	rc, err := buildRuntimeConfig(ctx, opt, v)
+	rc, err := u.buildRuntimeConfig(ctx, opt, v)
 	if err != nil {
 		return nil, err
 	}

@@ -176,6 +176,8 @@ func init() {
 	viper.BindEnv("kube-namespace", "KUBE_NAMESPACE")
 	viper.BindEnv("kube-context", "KUBE_CONTEXT")
 
+	viper.SetDefault("kube-namespace", "default")
+
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.codefreshToken, "codefreshToken", "", "Codefresh token")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.runtimeEnvironmentName, "runtimeName", viper.GetString("runtimeName"), "Name of the runtime as in codefresh")
 	installRuntimeCmd.Flags().StringVar(&installRuntimeCmdOptions.kube.namespace, "kube-namespace", viper.GetString("kube-namespace"), "Name of the namespace on which venona should be installed [$KUBE_NAMESPACE]")
