@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -66,6 +67,7 @@ func New(opt *Options) (*Server, error) {
 	srv := &http.Server{
 		Addr:    opt.Port,
 		Handler: r,
+		ReadHeaderTimeout: 60 * time.Second,
 	}
 
 	return &Server{
