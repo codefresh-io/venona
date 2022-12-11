@@ -65,8 +65,8 @@ func New(opt *Options) (*Server, error) {
 	})
 
 	srv := &http.Server{
-		Addr:    opt.Port,
-		Handler: r,
+		Addr:              opt.Port,
+		Handler:           r,
 		ReadHeaderTimeout: 60 * time.Second,
 	}
 
