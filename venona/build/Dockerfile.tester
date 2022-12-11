@@ -4,7 +4,7 @@ RUN apk -U add --no-cache ca-certificates git make gcc g++ bash && update-ca-cer
 RUN go install github.com/client9/misspell/cmd/misspell@latest && \
     go install github.com/fzipp/gocyclo/cmd/gocyclo@latest && \
     go install golang.org/x/lint/golint@latest && \
-    go install github.com/securego/gosec/cmd/gosec@latest && \
+    go install github.com/securego/gosec/v2/cmd/gosec@latest && \
     go install github.com/google/addlicense@latest && \
     go install github.com/github/hub@latest
 
