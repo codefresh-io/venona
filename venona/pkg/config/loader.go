@@ -15,7 +15,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -25,7 +24,7 @@ import (
 )
 
 var (
-	readfile     = ioutil.ReadFile
+	readfile     = os.ReadFile
 	walkFilePath = filepath.Walk
 )
 

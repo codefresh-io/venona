@@ -20,7 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
@@ -300,7 +300,7 @@ func (u *venonaPlugin) Migrate(ctx context.Context, opt *MigrateOptions, v Value
 	}
 	var jsonData []byte
 	jsonData, err = json.Marshal(migrationData)
-	err = ioutil.WriteFile("migration.json", jsonData, 0644)
+	err = os.WriteFile("migration.json", jsonData, 0644)
 	if err != nil {
 		u.logger.Error("Cannot write migration json")
 	}

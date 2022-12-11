@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -194,7 +193,7 @@ func createSpinner(prefix, suffix string) *spinner.Spinner {
 }
 
 func loadTolerationsFromFile(filename string) string {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		dieOnError(err)
 	}
