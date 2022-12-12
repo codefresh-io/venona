@@ -2,6 +2,8 @@ package kube
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	v1Core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,7 +62,16 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	return kubernetes.NewForConfig(config)
+	cs, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		if strings.Contains(err.Error(), "exec plugin: invalid apiVersion") {
+			return nil, errors.New("Kubeconfig user entry is using an invalid API version client.authentication.k8s.io/v1alpha1.\nSee details at https://support.codefresh.io/hc/en-us/articles/6947789386652-Failure-to-perform-actions-on-your-selected-Kubernetes-context")
+		}
+
+		return nil, err
+	}
+
+	return cs, nil
 }
 
 func (k *kube) EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error {

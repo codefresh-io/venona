@@ -15,7 +15,7 @@
 package config
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -119,7 +119,7 @@ func TestLoad(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
-				readfile = ioutil.ReadFile
+				readfile = os.ReadFile
 				walkFilePath = filepath.Walk
 			}()
 			readfile = tt.fileReadFunc

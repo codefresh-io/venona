@@ -3,7 +3,6 @@ package plugins
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/codefresh-io/venona/venonactl/pkg/logger"
@@ -250,7 +249,7 @@ func install(ctx context.Context, opt *installOptions) error {
 		}
 		parsedTemplates, err := ParseTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 		for fileName, objStr := range parsedTemplates {
-			err = ioutil.WriteFile(fmt.Sprintf("./codefresh_manifests/%s", fileName), []byte(objStr), 0644)
+			err = os.WriteFile(fmt.Sprintf("./codefresh_manifests/%s", fileName), []byte(objStr), 0644)
 			if err != nil {
 				opt.logger.Error(fmt.Sprintf("failed to write file %v", objStr), "File-Name", fileName, "Error", err)
 			}

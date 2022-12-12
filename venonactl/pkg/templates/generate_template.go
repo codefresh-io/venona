@@ -24,9 +24,6 @@ import (
 	"runtime"
 	"strings"
 	"text/template"
-
-	//"time"
-	"io/ioutil"
 )
 
 /*
@@ -79,7 +76,7 @@ func main() {
 	templateFilesMap := make(map[string]string)
 	filepath.Walk(folderName, func(name string, info os.FileInfo, err error) error {
 		if !info.IsDir() && path.Base(name) != outfileBaseName {
-			b, _ := ioutil.ReadFile(name)
+			b, _ := os.ReadFile(name)
 			templateFilesMap[filepath.Base(name)] = string(b)
 		}
 		return nil
