@@ -14,7 +14,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/objx v0.4.0
 	gopkg.in/yaml.v2 v2.4.0
-	helm.sh/helm/v3 v3.10.2
+	helm.sh/helm/v3 v3.10.3
 	k8s.io/api v0.26.0
 	k8s.io/apimachinery v0.26.0
 	k8s.io/client-go v0.26.0
