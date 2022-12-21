@@ -22,6 +22,10 @@ spec:
 {{ .Storage.VolumeProvisioner.NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape}}
       {{ end }}
       serviceAccount: volume-provisioner-{{ .AppName }}
+      securityContext:
+        runAsUser: 3000
+        runAsGroup: 3000
+        fsGroup: 3000
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/master
