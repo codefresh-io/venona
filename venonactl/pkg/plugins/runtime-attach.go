@@ -236,6 +236,10 @@ func (u *runtimeAttachPlugin) Install(ctx context.Context, opt *InstallOptions, 
 			u.logger.Error(fmt.Sprintf("Cannot find agent pod: %v ", err))
 			return nil, err
 		}
+		if (len(list.Items) == 0) {
+			u.logger.Debug("Agent pod not created yet. skipping restart...")
+			return v, nil
+		}
 		podName := list.Items[0].ObjectMeta.Name
 		err = cs.CoreV1().Pods(opt.ClusterNamespace).Delete(ctx, podName, metav1.DeleteOptions{})
 		if err != nil {
