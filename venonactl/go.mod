@@ -24,12 +24,12 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
-	github.com/Microsoft/go-winio v0.5.1 // indirect
-	github.com/Microsoft/hcsshim v0.9.3 // indirect
+	github.com/Microsoft/go-winio v0.5.2 // indirect
+	github.com/Microsoft/hcsshim v0.9.6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/containerd/containerd v1.6.6 // indirect
-	github.com/containerd/continuity v0.2.2 // indirect
+	github.com/containerd/containerd v1.6.18 // indirect
+	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/cli v20.10.17+incompatible // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
@@ -71,7 +71,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
@@ -84,7 +84,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 // indirect
 	github.com/opencontainers/runc v1.1.2 // indirect
-	github.com/pelletier/go-toml v1.9.3 // indirect
+	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
