@@ -99,6 +99,9 @@ rules:
   - apiGroups: [""]
     resources: ["endpoints"]
     verbs: ["get", "list", "watch", "create", "update", "delete"]
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "create", "update"]
 {{- end }}`
 
 	templatesMap["codefresh-certs-server-secret.re.yaml"] = `apiVersion: v1
@@ -219,7 +222,8 @@ spec:
       - name: dind-volume-dir
         hostPath:
           path: {{ $localVolumeParentDir }}
-{{- end -}}`
+{{- end -}}
+`
 
 	templatesMap["deployment.app-proxy.yaml"] = `apiVersion: apps/v1
 kind: Deployment
