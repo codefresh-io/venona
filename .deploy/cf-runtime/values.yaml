@@ -24,7 +24,7 @@ dockerRegistry: "quay.io" # Registry prefix for the runtime images (default quay
 newRelicLicense: "" # NEWRELIC_LICENSE_KEY (for app-proxy and runner deployments)
 
 runner: # Runner Deployment
-  image: "codefresh/venona:1.9.9"
+  image: "codefresh/venona:1.9.10"
   env: {}
   ## e.g:
   # env:
@@ -53,7 +53,7 @@ runner: # Runner Deployment
   #   effect: NoSchedule
 
 volumeProvisioner: # Volume-Provisioner Deployment
-  image: "codefresh/dind-volume-provisioner:1.33.0"
+  image: "codefresh/dind-volume-provisioner:1.33.1"
   serviceAccount: {} # annotate volume-provisioner service account
   ## e.g:
   # serviceAccount:
