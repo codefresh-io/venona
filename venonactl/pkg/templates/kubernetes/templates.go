@@ -181,18 +181,22 @@ spec:
         - key: 'codefresh/dind'
           operator: 'Exists'
           effect: 'NoSchedule'
+      securityContext:
+        runAsUser: 3000
+        runAsGroup: 3000
+        fsGroup: 3000
 
 {{ toYaml .Tolerations | indent 8 | unescape}}
 
 
       containers:
-        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:1.29.2 {{- else }}codefresh/dind-volume-utils:1.29.2{{- end}}
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:CR-16611-2 {{- else }}codefresh/dind-volume-utils:CR-16611-2{{- end}}
           name: lv-cleaner
           resources:
 {{ toYaml .Storage.LocalVolumeMonitor | indent 10 }}
           imagePullPolicy: Always
           command:
-          - /bin/local-volumes-agent
+          - ./bin/local-volumes-agent
           env:
             {{- if $.EnvVars }}
             {{- range $key, $value := $.EnvVars }}
