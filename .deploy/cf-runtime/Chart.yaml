@@ -2,5 +2,5 @@ apiVersion: v2
 name: cf-runtime
 description: A Helm chart for Codefresh Runner
 type: application
-version: 1.9.10
-appVersion: "1.9.10"
+version: 1.9.11
+appVersion: "1.9.11"
