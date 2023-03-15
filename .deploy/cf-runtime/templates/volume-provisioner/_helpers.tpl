@@ -83,7 +83,7 @@ codefresh.io/application: pv-cleanup
 
 {{- define "cf-vp.docker-image-cleanup-cron" -}}
 {{- if ne .Values.dockerRegistry ""}}
-{{- .Values.dockerRegistry }}/codefresh/dind-volume-cleanup
-{{- else }}codefresh/dind-volume-cleanup
+{{- .Values.dockerRegistry }}/codefresh/dind-volume-cleanup:1.1.3
+{{- else }}codefresh/dind-volume-cleanup:1.1.3
 {{- end}}
 {{- end }}
