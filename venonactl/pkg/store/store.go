@@ -183,7 +183,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"VolumeCleaner": map[string]interface{}{
 				"Image": map[string]string{
 					"Name": "codefresh/dind-volume-cleanup",
-					"Tag":  "1.1.3",
+					"Tag":  "1.2.0",
 				},
 			},
 		},
