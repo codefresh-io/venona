@@ -180,6 +180,12 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"MountAzureJson": false,
 			},
 			"LocalVolumeMonitor": s.LocalVolumeMonitor.Resources,
+			"VolumeCleaner": map[string]interface{}{
+				"Image": map[string]string{
+					"Name": "codefresh/dind-volume-cleanup",
+					"Tag":  "1.2.0",
+				},
+			},
 		},
 		"Monitor": map[string]interface{}{
 			"Enabled":              true,

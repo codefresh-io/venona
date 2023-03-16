@@ -80,7 +80,7 @@ rules:
     verbs: ["get", "list", "watch", "create", "delete", "patch"]
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
-    verbs: ["get", "list", "watch", "update"]
+    verbs: ["get", "list", "watch", "update", "delete"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
     verbs: ["get", "list", "watch"]
@@ -141,10 +141,14 @@ spec:
           restartPolicy: Never
           containers:
             - name: dind-volume-cleanup
-              image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-cleanup {{- else }}codefresh/dind-volume-cleanup {{- end}}
+              image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeCleaner.Image.Name }}:{{ .Storage.VolumeCleaner.Image.Tag }} {{- else }}{{- .Storage.VolumeCleaner.Image.Name }}:{{ .Storage.VolumeCleaner.Image.Tag }} {{- end}}
               env:
               - name: PROVISIONED_BY
                 value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+          securityContext:
+            fsGroup: 3000
+            runAsGroup: 3000
+            runAsUser: 3000
 {{- end }}`
 
 	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `{{- if eq .Storage.Backend "local" -}}
