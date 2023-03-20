@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 1.0.0
+version: 1.0.1
 home: https://github.com/codefresh-io/venona
 keywords:
   - codefresh

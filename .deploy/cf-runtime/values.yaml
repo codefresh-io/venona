@@ -152,7 +152,7 @@ storage: # Storage parameters for Volume-Provisioner
   # Storage example for Azure Disks
   # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
   azuredisk:
-    skuName: Premium_LRS #default
+    skuName: Premium_LRS # default
     cachingMode: None
     # location: westcentralus
     # resourceGroup:

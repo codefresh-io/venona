@@ -1,8 +1,8 @@
 # See https://github.com/helm/chart-testing#configuration
 remote: origin
 target-branch: release-1.0
-charts:
-  - .deploy/cf-runtime
+chart-dirs:
+  - .deploy/
 validate-chart-schema: false
 validate-maintainers: true
 validate-yaml: true
