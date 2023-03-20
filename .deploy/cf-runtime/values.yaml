@@ -72,6 +72,11 @@ volumeProvisioner: # Volume-Provisioner Deployment
   ### https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
   # mountAzureJson: true
   annotations: {} # annotate volume-provisioner pod
+  lv-monitor:
+    image: codefresh/dind-volume-utils:1.29.2
+  volume-cleanup:
+    image: codefresh/dind-volume-cleanup:1.2.0
+
 
 storage: # Storage parameters for Volume-Provisioner
   backend: local # volume type: local(default), ebs, gcedisk or azuredisk
