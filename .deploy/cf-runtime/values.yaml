@@ -131,18 +131,18 @@ storage:
   # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aws
   # @default -- See below
   ebs:
-    # -- (required) Set EBS volume type (`gp2`/`gp3`/`io1`)
+    # -- Set EBS volume type (`gp2`/`gp3`/`io1`) (required)
     volumeType: "gp2"
-    # -- (required) Set EBS volumes availability zone
+    # -- Set EBS volumes availability zone (required)
     availabilityZone: "us-east-1a"
-    # -- (optional) Enable encryption
+    # -- Enable encryption (optional)
     encrypted: "false"
-    # -- (optional) Set KMS encryption key ID
+    # -- Set KMS encryption key ID (optional)
     kmsKeyId: ""
-    # -- (optional) Set AWS_ACCESS_KEY_ID for volume-provisioner
+    # -- Set AWS_ACCESS_KEY_ID for volume-provisioner (optional)
     # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions
     accessKeyId: ""
-    # -- (optional) Set AWS_SECRET_ACCESS_KEY for volume-provisioner
+    # -- Set AWS_SECRET_ACCESS_KEY for volume-provisioner (optional)
     # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions
     secretAccessKey: ""
   # E.g:
@@ -175,7 +175,7 @@ storage:
     volumeType: "pd-ssd"
     # -- Set GCP volume availability zone
     availabilityZone: "us-west1-a"
-    # -- (optional) Set Google SA JSON key for volume-provisioner
+    # -- Set Google SA JSON key for volume-provisioner (optional)
     serviceAccountJson: ""
   ## e.g:
   # gcedisk:
