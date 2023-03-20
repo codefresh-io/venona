@@ -123,9 +123,10 @@ storage:
     tolerations: []
     env: {}
 
-  # -- Storage parameters example for aws ebs disks (i.e. `storage.backend=ebs`/`storage.backend=ebs-csi`)
+  # Storage parameters example for aws ebs disks (i.e. `storage.backend=ebs`/`storage.backend=ebs-csi`)
   # https://aws.amazon.com/ebs/
   # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aws
+  # @default -- See below
   ebs:
     # -- (required) Set EBS volume type (`gp2`/`gp3`/`io1`)
     volumeType: "gp2"
@@ -162,9 +163,10 @@ storage:
   #   accessKeyId: "MYKEYID"
   #   secretAccessKey: "MYACCESSKEY"
 
-  # -- Storage parameters example for gce disks
+  # Storage parameters example for gce disks
   # https://cloud.google.com/compute/docs/disks#pdspecs
   # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-google-kubernetes-engine
+  # @default -- See below
   gcedisk:
     # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
     volumeType: "pd-ssd"
@@ -190,8 +192,9 @@ storage:
   #           "client_x509_cert_url": "..."
   #           }
 
-  # -- Storage parameters example for Azure Disks
+  # Storage parameters example for Azure Disks
   # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
+  # @default -- See below
   azuredisk:
     # -- Set storage type (`Premium_LRS`)
     skuName: Premium_LRS
