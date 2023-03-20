@@ -1,7 +1,7 @@
 # global values are in generated_values.yaml
 # run `codefresh runner init --generate-helm-values-file` first
 global:
-  namespace: ""
+  namespace: "codefresh"
   codefreshHost: ""
   agentToken: ""
   # Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value for global.agentToken; secret must contain `codefresh.token` key)
