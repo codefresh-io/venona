@@ -99,10 +99,9 @@ Kubernetes: `>=1.19.0-0`
 | runner.nodeSelector | object | `{}` | Set runner node selector |
 | runner.resources | object | `{}` | Set runner requests and limits |
 | runner.tolerations | list | `[]` | Set runner tolerations |
-| storage.azuredisk | object | `{"cachingMode":"None","skuName":"Premium_LRS"}` | Storage parameters example for Azure Disks https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks |
+| storage.azuredisk.cachingMode | string | `"None"` |  |
 | storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |
 | storage.backend | string | `"local"` | Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`) |
-| storage.ebs | object | `{"accessKeyId":"","availabilityZone":"us-east-1a","encrypted":"false","kmsKeyId":"","secretAccessKey":"","volumeType":"gp2"}` | Storage parameters example for aws ebs disks (i.e. `storage.backend=ebs`/`storage.backend=ebs-csi`) https://aws.amazon.com/ebs/ https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aws |
 | storage.ebs.accessKeyId | string | `""` | (optional) Set AWS_ACCESS_KEY_ID for volume-provisioner Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions |
 | storage.ebs.availabilityZone | string | `"us-east-1a"` | (required) Set EBS volumes availability zone |
 | storage.ebs.encrypted | string | `"false"` | (optional) Enable encryption |
@@ -110,14 +109,15 @@ Kubernetes: `>=1.19.0-0`
 | storage.ebs.secretAccessKey | string | `""` | (optional) Set AWS_SECRET_ACCESS_KEY for volume-provisioner Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions |
 | storage.ebs.volumeType | string | `"gp2"` | (required) Set EBS volume type (`gp2`/`gp3`/`io1`) |
 | storage.fsType | string | `"ext4"` | Set filesystem type (`ext4`/`xfs`) |
-| storage.gcedisk | object | `{"availabilityZone":"us-west1-a","serviceAccountJson":"","volumeType":"pd-ssd"}` | Storage parameters example for gce disks https://cloud.google.com/compute/docs/disks#pdspecs https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-google-kubernetes-engine |
 | storage.gcedisk.availabilityZone | string | `"us-west1-a"` | Set GCP volume availability zone |
 | storage.gcedisk.serviceAccountJson | string | `""` | (optional) Set Google SA JSON key for volume-provisioner |
 | storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
-| storage.local | object | `{"volumeParentDir":"/var/lib/codefresh/dind-volumes"}` | Storage parametrs example for local volumes on the K8S nodes filesystem (i.e. `storage.backend=local`) https://kubernetes.io/docs/concepts/storage/volumes/#local |
 | storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
-| storage.localVolumeMonitor | object | `{"env":{},"image":"codefresh/dind-volume-utils:1.29.2","nodeSelector":{},"resources":{},"tolerations":[]}` | `dind-lv-monitor` DaemonSet parametes (deployed only when `storage.backend=local`) |
+| storage.localVolumeMonitor.env | object | `{}` |  |
 | storage.localVolumeMonitor.image | string | `"codefresh/dind-volume-utils:1.29.2"` | Set `dind-lv-monitor` image |
+| storage.localVolumeMonitor.nodeSelector | object | `{}` |  |
+| storage.localVolumeMonitor.resources | object | `{}` |  |
+| storage.localVolumeMonitor.tolerations | list | `[]` |  |
 | volumeProvisioner.annotations | object | `{}` |  |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
 | volumeProvisioner.image | string | `"codefresh/dind-volume-provisioner:1.33.1"` | Set volume-provisioner image |

@@ -108,13 +108,15 @@ storage:
   # -- Set filesystem type (`ext4`/`xfs`)
   fsType: "ext4"
 
-  # -- Storage parametrs example for local volumes on the K8S nodes filesystem (i.e. `storage.backend=local`)
+  # Storage parametrs example for local volumes on the K8S nodes filesystem (i.e. `storage.backend=local`)
   # https://kubernetes.io/docs/concepts/storage/volumes/#local
+  # @default -- See below
   local:
     # -- Set volume path on the host filesystem
     volumeParentDir: /var/lib/codefresh/dind-volumes
 
-  # -- `dind-lv-monitor` DaemonSet parametes (deployed only when `storage.backend=local`)
+  # `dind-lv-monitor` DaemonSet parametes (deployed only when `storage.backend=local`)
+  # @default -- See below
   localVolumeMonitor:
     # -- Set `dind-lv-monitor` image
     image: codefresh/dind-volume-utils:1.29.2
@@ -217,11 +219,13 @@ re:
   #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 
   # DinD daemon config
-  # @default -- See below
+  # @ignored
   dindDaemon:
+    # @ignored
     hosts:
       - unix:///var/run/docker.sock
       - tcp://0.0.0.0:1300
+    # @ignored
     storage-driver: overlay2
     tlsverify: true
     tls: true
