@@ -117,6 +117,7 @@ Kubernetes: `>=1.19.0-0`
 | storage.localVolumeMonitor.nodeSelector | object | `{}` |  |
 | storage.localVolumeMonitor.resources | object | `{}` |  |
 | storage.localVolumeMonitor.tolerations | list | `[]` |  |
+| test | string | `"value"` |  |
 | volumeProvisioner.annotations | object | `{}` |  |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
 | volumeProvisioner.image | string | `"codefresh/dind-volume-provisioner:1.33.1"` | Set volume-provisioner image |
