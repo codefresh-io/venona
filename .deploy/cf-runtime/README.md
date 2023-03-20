@@ -126,7 +126,6 @@ Kubernetes: `>=1.19.0-0`
 | volumeProvisioner.securityContext | object | `{"enabled":true}` | Enable volume-provisioner pod's security context (running as non root user) |
 | volumeProvisioner.serviceAccount | object | `{}` | Set annotation on volume-provisioner Service Account |
 | volumeProvisioner.tolerations | list | `[]` | Set volume-provisioner tolerations |
-| volumeProvisioner.volume-cleanup | object | `{"image":"codefresh/dind-volume-cleanup:1.2.0"}` | `dind-volume-cleanup` CronJob parameters |
 | volumeProvisioner.volume-cleanup.image | string | `"codefresh/dind-volume-cleanup:1.2.0"` | Set `dind-volume-cleanup` image |
 
 ----------------------------------------------

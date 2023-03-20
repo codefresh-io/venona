@@ -95,7 +95,8 @@ volumeProvisioner:
 
   annotations: {} # annotate volume-provisioner pod
 
-  # -- `dind-volume-cleanup` CronJob parameters
+  # `dind-volume-cleanup` CronJob parameters
+  # @default -- See below
   volume-cleanup:
     # -- Set `dind-volume-cleanup` image
     image: codefresh/dind-volume-cleanup:1.2.0
@@ -218,14 +219,12 @@ re:
   #     annotations:
   #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 
-  # DinD daemon config
-  # @ignored
+  # DinD pod daemon config
+  # @default -- See below
   dindDaemon:
-    # @ignored
     hosts:
       - unix:///var/run/docker.sock
       - tcp://0.0.0.0:1300
-    # @ignored
     storage-driver: overlay2
     tlsverify: true
     tls: true
