@@ -68,9 +68,9 @@ codefresh.io/application: pv-cleanup
 
 {{- define "cf-vp.docker-image-volume-utils" -}}
 {{- if ne .Values.dockerRegistry ""}}
-{{- .Values.dockerRegistry }}/{{ index .Values "volumeProvisioner" "lv-monitor" "image" }}
+{{- .Values.dockerRegistry }}/{{ .Values.storage.localVolumeMonitor.image }}
 {{- else }}
-{{- index .Values "volumeProvisioner" "lv-monitor" "image" }}
+{{- index .Values.storage.localVolumeMonitor.image }}
 {{- end}}
 {{- end }}
 
