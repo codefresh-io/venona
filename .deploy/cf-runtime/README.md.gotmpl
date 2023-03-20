@@ -6,7 +6,6 @@
 
 - Kubernetes 1.19+
 - Helm 3.8.0+
-- PV provisioner support in the underlying infrastructure
 
 ## Get Repo Info
 
@@ -20,7 +19,7 @@ helm repo update
 **Important:** only helm3 is supported
 
 1. Download the Codefresh CLI and authenticate it with your Codefresh account. Click [here](https://codefresh-io.github.io/cli/getting-started/) for more detailed instructions.
-2. Run the following command to create all of the necessary enitites in Codefresh:
+2. Run the following command to create mandatory values for Codefresh Runner:
 
     ```console
     codefresh runner init --generate-helm-values-file
