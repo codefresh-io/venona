@@ -15,7 +15,6 @@ global:
   existingDindCertsSecret: ""
   keys:
     key: ""
-    csr: ""
     ca: ""
     serverCert: ""
 

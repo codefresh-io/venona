@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -66,7 +66,6 @@ Kubernetes: `>=1.19.0-0`
 | global.existingAgentToken | string | `""` | Existing secret (name-of-existing-secret) with API token from Codefresh (supersedes value for global.agentToken; secret must contain `codefresh.token` key) |
 | global.existingDindCertsSecret | string | `""` | Existing secret (name has to be `codefresh-certs-server`) (supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys) |
 | global.keys.ca | string | `""` |  |
-| global.keys.csr | string | `""` |  |
 | global.keys.key | string | `""` |  |
 | global.keys.serverCert | string | `""` |  |
 | global.namespace | string | `"codefresh"` |  |
