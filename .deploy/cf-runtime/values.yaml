@@ -293,5 +293,3 @@ monitor:
   resources: {}
   serviceAccount:
     annotations: {}
-
-test: value
