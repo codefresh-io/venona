@@ -7,4 +7,5 @@ validate-chart-schema: false
 validate-maintainers: true
 validate-yaml: true
 check-version-increment: true
-excluded-charts: []
+excluded-charts:
+  - .ci/
