@@ -173,30 +173,38 @@ spec:
         prometheus_scrape: "true"
     spec:
       serviceAccountName: volume-provisioner-{{ .AppName }}
-      # Debug:
-      # hostNetwork: true
-      # nodeSelector:
-      #   kubernetes.io/role: "node"
       tolerations:
         - key: 'codefresh/dind'
           operator: 'Exists'
           effect: 'NoSchedule'
       securityContext:
-        runAsUser: 3000
-        runAsGroup: 3000
-        fsGroup: 3000
+        fsGroup: 1000
 
 {{ toYaml .Tolerations | indent 8 | unescape}}
 
-
+      initContainers:
+      - command:
+        - chown
+        - -R
+        - 1000:1000
+        - /var/lib/codefresh/dind-volumes
+        image: alpine
+        imagePullPolicy: Always
+        name: fs-change-owner
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/codefresh/dind-volumes
+          name: dind-volume-dir
       containers:
-        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/codefresh/dind-volume-utils:CR-16611-2 {{- else }}codefresh/dind-volume-utils:CR-16611-2{{- end}}
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.LocalVolumeMonitor.Image.Name }}:{{ .Storage.LocalVolumeMonitor.Image.Tag }} {{- else }}{{- .Storage.LocalVolumeMonitor.Image.Name }}:{{ .Storage.LocalVolumeMonitor.Image.Tag }} {{- end}}
           name: lv-cleaner
           resources:
-{{ toYaml .Storage.LocalVolumeMonitor | indent 10 }}
+{{ toYaml .Storage.LocalVolumeMonitor.Resources | indent 10 }}
           imagePullPolicy: Always
           command:
-          - ./bin/local-volumes-agent
+          - /home/dind-volume-utils/bin/local-volumes-agent
           env:
             {{- if $.EnvVars }}
             {{- range $key, $value := $.EnvVars }}
@@ -637,7 +645,6 @@ data:
     {
       "hosts": [ "unix:///var/run/docker.sock",
                  "tcp://0.0.0.0:1300"],
-      "storage-driver": "overlay2",
       "tlsverify": true,  
       "tls": true,
       "tlscacert": "/etc/ssl/cf-client/ca.pem",
