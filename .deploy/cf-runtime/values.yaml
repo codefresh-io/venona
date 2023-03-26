@@ -27,7 +27,7 @@ dockerRegistry: "quay.io"
 # @default -- See below
 runner:
   # -- Set runner image
-  image: "codefresh/venona:1.9.12"
+  image: "codefresh/venona:1.9.13"
   # -- Add additional env vars
   env: {}
   # E.g
@@ -66,7 +66,7 @@ runner:
 # @default -- See below
 volumeProvisioner:
   # -- Set volume-provisioner image
-  image: "codefresh/dind-volume-provisioner:1.33.1"
+  image: "codefresh/dind-volume-provisioner:1.33.2"
   # -- Set annotation on volume-provisioner Service Account
   serviceAccount: {}
   # E.g
@@ -119,7 +119,7 @@ storage:
   # @default -- See below
   localVolumeMonitor:
     # -- Set `dind-lv-monitor` image
-    image: codefresh/dind-volume-utils:1.29.2
+    image: codefresh/dind-volume-utils:1.29.3
     nodeSelector: {}
     resources: {}
     tolerations: []
@@ -224,7 +224,6 @@ re:
     hosts:
       - unix:///var/run/docker.sock
       - tcp://0.0.0.0:1300
-    storage-driver: overlay2
     tlsverify: true
     tls: true
     tlscacert: /etc/ssl/cf-client/ca.pem
