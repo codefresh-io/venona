@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square)
+![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -85,7 +85,6 @@ Kubernetes: `>=1.19.0-0`
 | re.dindDaemon.hosts[1] | string | `"tcp://0.0.0.0:1300"` |  |
 | re.dindDaemon.insecure-registries[0] | string | `"192.168.99.100:5000"` |  |
 | re.dindDaemon.metrics-addr | string | `"0.0.0.0:9323"` |  |
-| re.dindDaemon.storage-driver | string | `"overlay2"` |  |
 | re.dindDaemon.tls | bool | `true` |  |
 | re.dindDaemon.tlscacert | string | `"/etc/ssl/cf-client/ca.pem"` |  |
 | re.dindDaemon.tlscert | string | `"/etc/ssl/cf/server-cert.pem"` |  |
@@ -93,7 +92,7 @@ Kubernetes: `>=1.19.0-0`
 | re.dindDaemon.tlsverify | bool | `true` |  |
 | re.serviceAccount | object | `{"annotations":{}}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | string | `"codefresh/venona:1.9.12"` | Set runner image |
+| runner.image | string | `"codefresh/venona:1.9.13"` | Set runner image |
 | runner.nodeSelector | object | `{}` | Set runner node selector |
 | runner.resources | object | `{}` | Set runner requests and limits |
 | runner.tolerations | list | `[]` | Set runner tolerations |
@@ -112,13 +111,13 @@ Kubernetes: `>=1.19.0-0`
 | storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
 | storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
 | storage.localVolumeMonitor.env | object | `{}` |  |
-| storage.localVolumeMonitor.image | string | `"codefresh/dind-volume-utils:1.29.2"` | Set `dind-lv-monitor` image |
+| storage.localVolumeMonitor.image | string | `"codefresh/dind-volume-utils:1.29.3"` | Set `dind-lv-monitor` image |
 | storage.localVolumeMonitor.nodeSelector | object | `{}` |  |
 | storage.localVolumeMonitor.resources | object | `{}` |  |
 | storage.localVolumeMonitor.tolerations | list | `[]` |  |
 | volumeProvisioner.annotations | object | `{}` |  |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | string | `"codefresh/dind-volume-provisioner:1.33.1"` | Set volume-provisioner image |
+| volumeProvisioner.image | string | `"codefresh/dind-volume-provisioner:1.33.2"` | Set volume-provisioner image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set volume-provisioner node selector |
 | volumeProvisioner.resources | object | `{}` | Set volume-provisioner requests and limits |
 | volumeProvisioner.securityContext | object | `{"enabled":true}` | Enable volume-provisioner pod's security context (running as non root user) |
