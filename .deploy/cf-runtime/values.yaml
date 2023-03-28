@@ -291,4 +291,3 @@ monitor:
   resources: {}
   serviceAccount:
     annotations: {}
-
