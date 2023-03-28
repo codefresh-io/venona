@@ -1,0 +1,7 @@
+# Values used in `helm-chart-ci` pipeline
+appProxy:
+  enabled: true
+monitor:
+  enabled: true
+  useNamespaceWideRole: true
+runner: {}
