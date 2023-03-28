@@ -27,7 +27,7 @@ dockerRegistry: "quay.io"
 # @default -- See below
 runner:
   # -- Set runner image
-  image: "codefresh/venona:1.9.13"
+  image: "codefresh/venona:1.9.14"
   # -- Add additional env vars
   env: {}
   # E.g
@@ -66,7 +66,7 @@ runner:
 # @default -- See below
 volumeProvisioner:
   # -- Set volume-provisioner image
-  image: "codefresh/dind-volume-provisioner:1.33.2"
+  image: "codefresh/dind-volume-provisioner:1.33.3"
   # -- Set annotation on volume-provisioner Service Account
   serviceAccount: {}
   # E.g
