@@ -119,7 +119,7 @@ storage:
   # @default -- See below
   localVolumeMonitor:
     # -- Set `dind-lv-monitor` image
-    image: codefresh/dind-volume-utils:1.29.3
+    image: codefresh/dind-volume-utils:1.29.4
     initContainer:
       image: alpine
     nodeSelector: {}

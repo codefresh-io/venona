@@ -183,7 +183,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Resources": s.LocalVolumeMonitor.Resources,
 				"Image": map[string]string{
 					"Name": "codefresh/dind-volume-utils",
-					"Tag":  "1.29.3",
+					"Tag":  "1.29.4",
 				},
 			},
 			"VolumeCleaner": map[string]interface{}{

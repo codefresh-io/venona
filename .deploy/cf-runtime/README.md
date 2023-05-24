@@ -111,7 +111,7 @@ Kubernetes: `>=1.19.0-0`
 | storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
 | storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
 | storage.localVolumeMonitor.env | object | `{}` |  |
-| storage.localVolumeMonitor.image | string | `"codefresh/dind-volume-utils:1.29.3"` | Set `dind-lv-monitor` image |
+| storage.localVolumeMonitor.image | string | `"codefresh/dind-volume-utils:1.29.4"` | Set `dind-lv-monitor` image |
 | storage.localVolumeMonitor.initContainer.image | string | `"alpine"` |  |
 | storage.localVolumeMonitor.nodeSelector | object | `{}` |  |
 | storage.localVolumeMonitor.resources | object | `{}` |  |
