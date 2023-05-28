@@ -115,7 +115,7 @@ steps:
 
   release_binaries:
     title: Create release in Github with venona CLI
-    image: goreleaser/goreleaser:v1.13.1
+    image: goreleaser/goreleaser:v1.18.2
     stage: Release
     commands:
     - cd venonactl
