@@ -125,8 +125,8 @@ func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
 		k.logger.Info("PersistentVolumeClaim has been deleted", "name", opt.Name)
 
 	case task.TypeDeletePod:
-		if opt.Name == "engine-6486c49fc689908603736508-retry-7" {
-			k.logger.Info("Skip deleting engine-6486c49fc689908603736508-retry-7")
+		if opt.Name == "engine-6486b886dc5dca47ac1f9d1f-retry-11" {
+			k.logger.Info("Skip deleting engine-6486b886dc5dca47ac1f9d1f-retry-11")
 			return nil
 		}
 		err := k.client.CoreV1().Pods(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
