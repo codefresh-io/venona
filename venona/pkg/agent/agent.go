@@ -291,6 +291,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 			logger.Error(err.Error())
 			txn.NoticeError(err)
 		}
+		time.Sleep(time.Second * 10)
 		txn.End()
 	}
 
