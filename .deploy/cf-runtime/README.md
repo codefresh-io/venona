@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 1.0.8](https://img.shields.io/badge/Version-1.0.8-informational?style=flat-square)
+![Version: 1.0.9](https://img.shields.io/badge/Version-1.0.9-informational?style=flat-square)
 
 ## Prerequisites
 
