@@ -187,8 +187,13 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 		case <-a.taskPullerTicker.C:
 			a.wg.Add(1)
 			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger, monitor monitoring.Monitor) {
+				handlingStartTime := time.Now()
 				tasks := pullTasks(ctx, client, logger)
-				startTasks(ctx, tasks, runtimes, logger, monitor)
+				startTasks(ctx, tasks, runtimes, logger, monitor, handlingStartTime)
+				handlingEndTime := time.Now()
+				if len(tasks) > 0 {
+					logger.Info("done pulling tasks", "startTime", handlingStartTime, "total", handlingEndTime.Sub(handlingStartTime).String())
+				}
 				time.Sleep(time.Second * 10)
 				wg.Done()
 			}(a.cf, a.runtimes, a.wg, a.log, a.monitor)
@@ -235,7 +240,7 @@ func pullTasks(ctx context.Context, client codefresh.Codefresh, logger logger.Lo
 	return tasks
 }
 
-func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor) {
+func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor, pullId time.Time) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	agentTasks := []task.Task{}
@@ -258,7 +263,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 	// process agent tasks
 	for i := range agentTasks {
 		t := agentTasks[i]
-		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
+		logger.Info("executing agent task", "tid", t.Metadata.Workflow, "pullId", pullId)
 		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
 		go func(tid string) {
 			if err := executeAgentTask(&t, logger); err != nil {
@@ -266,7 +271,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 				txn.NoticeError(err)
 			}
 			txn.End()
-			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
+			logger.Info("finished agent task", "tid", t.Metadata.Workflow, "pullId", pullId)
 		}(t.Metadata.Workflow)
 	}
 
@@ -277,16 +282,17 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
 
 		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
 			txn.NoticeError(errRuntimeNotFound)
 			txn.End()
 			continue
 		}
-		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
 		if err := runtime.StartWorkflow(ctx, tasks); err != nil {
 			logger.Error(err.Error())
 			txn.NoticeError(err)
 		}
+		logger.Info("Done starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
 		txn.End()
 	}
 
@@ -297,18 +303,19 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
 
 		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
 			txn.NoticeError(errRuntimeNotFound)
 			txn.End()
 			continue
 		}
-		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
 		if errs := runtime.TerminateWorkflow(ctx, tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
 				txn.NoticeError(err)
 			}
 		}
+		logger.Info("Done terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
 		txn.End()
 	}
 }

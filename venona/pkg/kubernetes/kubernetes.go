@@ -101,7 +101,7 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		if err != nil {
 			return err
 		}
-		k.logger.Info("PersistentVolumeClaim has been created")
+		k.logger.Info("PersistentVolumeClaim has been created", "namespace", namespace, "name", obj.Name)
 
 	case *v1.Pod:
 		namespace = obj.ObjectMeta.Namespace
@@ -109,7 +109,7 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		if err != nil {
 			return err
 		}
-		k.logger.Info("Pod has been created")
+		k.logger.Info("Pod has been created", "namespace", namespace, "name", obj.Name)
 
 	}
 	return err
@@ -122,14 +122,14 @@ func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
 		if err != nil {
 			return err
 		}
-		k.logger.Info("PersistentVolumeClaim has been deleted")
+		k.logger.Info("PersistentVolumeClaim has been deleted", "namespace", opt.Namespace, "name", opt.Name)
 
 	case task.TypeDeletePod:
 		err := k.client.CoreV1().Pods(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return err
 		}
-		k.logger.Info("Pod has been deleted")
+		k.logger.Info("Pod has been deleted", "namespace", opt.Namespace, "name", opt.Name)
 
 	}
 
