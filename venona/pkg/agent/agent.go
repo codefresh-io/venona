@@ -240,7 +240,7 @@ func pullTasks(ctx context.Context, client codefresh.Codefresh, logger logger.Lo
 	return tasks
 }
 
-func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor, pullId time.Time) {
+func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor, pullID time.Time) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	agentTasks := []task.Task{}
@@ -263,7 +263,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 	// process agent tasks
 	for i := range agentTasks {
 		t := agentTasks[i]
-		logger.Info("executing agent task", "tid", t.Metadata.Workflow, "pullId", pullId)
+		logger.Info("executing agent task", "tid", t.Metadata.Workflow, "pullId", pullID)
 		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
 		go func(tid string) {
 			if err := executeAgentTask(&t, logger); err != nil {
@@ -271,7 +271,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 				txn.NoticeError(err)
 			}
 			txn.End()
-			logger.Info("finished agent task", "tid", t.Metadata.Workflow, "pullId", pullId)
+			logger.Info("finished agent task", "tid", t.Metadata.Workflow, "pullId", pullID)
 		}(t.Metadata.Workflow)
 	}
 
@@ -282,17 +282,17 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
 
 		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
+			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
 			txn.NoticeError(errRuntimeNotFound)
 			txn.End()
 			continue
 		}
-		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
+		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
 		if err := runtime.StartWorkflow(ctx, tasks); err != nil {
 			logger.Error(err.Error())
 			txn.NoticeError(err)
 		}
-		logger.Info("Done starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
+		logger.Info("Done starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
 		txn.End()
 	}
 
@@ -303,19 +303,19 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
 
 		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
+			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
 			txn.NoticeError(errRuntimeNotFound)
 			txn.End()
 			continue
 		}
-		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
+		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
 		if errs := runtime.TerminateWorkflow(ctx, tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
 				txn.NoticeError(err)
 			}
 		}
-		logger.Info("Done terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullId)
+		logger.Info("Done terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
 		txn.End()
 	}
 }
