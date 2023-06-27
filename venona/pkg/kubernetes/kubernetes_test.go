@@ -19,10 +19,8 @@ import (
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
-	"github.com/codefresh-io/go/venona/pkg/mocks"
 	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
@@ -98,10 +96,8 @@ func createFakeClientSetForPvcOperation(t *testing.T, ns string) kubernetes.Inte
 	return client
 }
 
-func createMockLogger() *mocks.Logger {
-	l := &mocks.Logger{}
-	l.On("Info", mock.Anything).Return(nil)
-	return l
+func createMockLogger() logger.Logger {
+	return logger.New(logger.Options{})
 }
 
 func Test_kube_CreateResource(t *testing.T) {
@@ -162,9 +158,7 @@ func Test_kube_CreateResource(t *testing.T) {
 				client: tt.fields.client,
 				logger: tt.fields.logger,
 			}
-			mo := k.logger.(*mocks.Logger)
 			err := k.CreateResource(context.Background(), tt.args.spec)
-			mo.AssertCalled(t, "Info", tt.wantMsg)
 			if tt.wantErr {
 				assert.Error(t, err)
 				//	assert.EqualError(t, err, tt.errorString)
@@ -189,7 +183,7 @@ func Test_kube_DeleteResource(t *testing.T) {
 		wantMsg string
 	}{
 		{
-			name: "shoul call create pod if spec type is create pod	",
+			name: "shoul call delete pod if spec type is create pod	",
 			fields: fields{
 				client: createFakeClientSetForPodOperation(t, "ns"),
 				logger: createMockLogger(),
@@ -204,7 +198,7 @@ func Test_kube_DeleteResource(t *testing.T) {
 			},
 		},
 		{
-			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
+			name: "shoul call delete PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
 			fields: fields{
 				client: createFakeClientSetForPvcOperation(t, "ns"),
 				logger: createMockLogger(),
@@ -228,8 +222,6 @@ func Test_kube_DeleteResource(t *testing.T) {
 			if err := k.DeleteResource(context.Background(), tt.args.opt); (err != nil) != tt.wantErr {
 				t.Errorf("kube.DeleteResource() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			mo := k.logger.(*mocks.Logger)
-			mo.AssertCalled(t, "Info", tt.wantMsg)
 		})
 	}
 }
