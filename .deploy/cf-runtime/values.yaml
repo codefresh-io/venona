@@ -18,6 +18,8 @@ global:
     ca: ""
     serverCert: ""
 
+key: value
+
 # -- Set docker registry prefix for the runtime images
 dockerRegistry: "quay.io"
 # E.g.
@@ -61,7 +63,7 @@ runner:
   #   operator: Equal
   #   value: dind
   #   effect: NoSchedule
-  
+
   # -- Add annotations to runner pod
   annotations: {}
 
