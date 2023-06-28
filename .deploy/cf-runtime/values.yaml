@@ -19,6 +19,7 @@ global:
     serverCert: ""
 
 key: value
+foo: bar
 
 # -- Set docker registry prefix for the runtime images
 dockerRegistry: "quay.io"
