@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -37,7 +38,7 @@ type (
 	}
 )
 
-const defaultWfTaskBufferSize = 10
+const defaultWfTaskBufferSize = 20
 
 var (
 	errRuntimeNotFound = errors.New("Runtime environment not found")
@@ -68,7 +69,12 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 		go tq.handleChannel(ctx, c, workflow)
 	}
 
-	c <- t
+	select {
+	case c <- t:
+		// sent task to queue
+	case <- time.After(5 * time.Second):
+		tq.log.Error("Send operation timed out", "workflow", workflow)
+	}
 }
 
 func (tq *TaskQueue) handleChannel(ctx context.Context, c chan *task.Task, workflow string) {
