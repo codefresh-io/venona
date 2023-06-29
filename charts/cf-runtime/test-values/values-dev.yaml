@@ -1,6 +1,0 @@
-runner:
-  nodeSelector:
-    alice: bob
-
-storage:
-  backend: ebs

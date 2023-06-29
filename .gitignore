@@ -32,3 +32,5 @@ venona/venona
 # lock files
 *.lock
 
+# test values
+**/test-values/**
