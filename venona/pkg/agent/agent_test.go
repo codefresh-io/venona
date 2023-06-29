@@ -92,29 +92,22 @@ func Test_groupTasks(t *testing.T) {
 }
 
 func Test_reportStatus(t *testing.T) {
-	type args struct {
-		client codefresh.Codefresh
+	tests := map[string]struct {
 		status codefresh.AgentStatus
-		logger logger.Logger
-	}
-	tests := []struct {
-		name string
-		args args
 	}{
-		{
-			name: "should report status",
-			args: args{
-				client: getCodefreshMock(),
-				logger: getLoggerMock(),
-				status: codefresh.AgentStatus{
-					Message: "OK",
-				},
+		"should report status": {
+			status: codefresh.AgentStatus{
+				Message: "OK",
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			reportStatus(context.Background(), tt.args.client, tt.args.status, tt.args.logger)
+	for name, tt := range tests {
+		t.Run(name, func(_ *testing.T) {
+			a := &Agent{
+				cf:  getCodefreshMock(),
+				log: getLoggerMock(),
+			}
+			a.reportStatus(context.Background(), tt.status)
 		})
 	}
 }
@@ -227,12 +220,12 @@ func TestNew(t *testing.T) {
 
 func Test_executeAgentTask(t *testing.T) {
 	executorCalled := false
-	okExecutor := func(t *task.AgentTask, log logger.Logger) error {
+	okExecutor := func(_ *task.AgentTask, _ logger.Logger) error {
 		executorCalled = true
 		return nil
 	}
 
-	badExecutor := func(t *task.AgentTask, log logger.Logger) error {
+	badExecutor := func(_ *task.AgentTask, _ logger.Logger) error {
 		executorCalled = true
 		return errProxyTaskWithoutURL
 	}
@@ -284,7 +277,7 @@ func Test_executeAgentTask(t *testing.T) {
 			name: "should pass the agent task spec to the executor",
 			args: &args{
 				executorName: "test",
-				executorFunc: func(t *task.AgentTask, l logger.Logger) error {
+				executorFunc: func(t *task.AgentTask, _ logger.Logger) error {
 					executorCalled = true
 					data, ok := t.Params["data"].(float64)
 					if !ok {
