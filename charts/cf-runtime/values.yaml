@@ -1,0 +1,506 @@
+# -- Global parameters
+# Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`!
+# @default -- See below
+global:
+
+  # -- Global Docker image registry
+  imageRegistry: ""
+  # -- Global Docker registry secret names as array
+  imagePullSecrets: []
+
+  # The following values are generated from `codefresh runner init --generate-helm-values-file` output
+  namespace: ""
+  codefreshHost: ""
+  agentToken: ""
+  # -- Existing secret (name-of-existing-secret) with API token from Codefresh
+  # supersedes value for global.agentToken; secret must contain `codefresh.token` key
+  existingAgentToken: ""
+  agentId: ""
+  agentName: ""
+  accountId: ""
+  runtimeName: ""
+  # -- Existing secret (name has to be `codefresh-certs-server`)
+  # supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys
+  existingDindCertsSecret: ""
+  keys:
+    key: ""
+    ca: ""
+    serverCert: ""
+
+# DEPRECATED -- Use `.Values.global.imageRegistry` instead
+dockerRegistry: ""
+
+# DEPRECATED -- Use `.Values.runtime` instead
+re: {}
+
+# -- Runner parameters
+# @default -- See below
+runner:
+  # -- Set number of pods
+  replicasCount: 1
+  # -- Upgrade strategy
+  updateStrategy:
+    type: RollingUpdate
+  # -- Set pod annotations
+  podAnnotations: {}
+
+  # -- Set image
+  image:
+    registry: quay.io
+    repository: codefresh/venona
+    tag: 1.9.16
+  # -- Add additional env vars
+  env: {}
+
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: ""
+    # -- Additional service account annotations
+    annotations: {}
+
+  # -- RBAC parameters
+  rbac:
+    # -- Create RBAC resources
+    create: true
+    # -- Add custom rule to the role
+    rules: []
+
+  # -- Set security context for the pod
+  # @default -- See below
+  podSecurityContext:
+    enabled: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+
+  # -- Readiness probe configuration
+  # @default -- See below
+  readinessProbe:
+    failureThreshold: 5
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # -- Set requests and limits
+  resources: {}
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set tolerations
+  tolerations: []
+  # -- Set affinity
+  affinity: {}
+
+# -- Volume Provisioner parameters
+# @default -- See below
+volumeProvisioner:
+  # -- Set number of pods
+  replicasCount: 1
+  # -- Upgrade strategy
+  updateStrategy:
+    type: Recreate
+  # -- Set pod annotations
+  podAnnotations: {}
+
+  # -- Set image
+  image:
+    registry: quay.io
+    repository: codefresh/dind-volume-provisioner
+    tag: 1.33.3
+  # -- Add additional env vars
+  env: {}
+
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: ""
+    # -- Additional service account annotations
+    annotations: {}
+    # E.g.
+    #   serviceAccount:
+    #     annotations:
+    #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+
+  # -- RBAC parameters
+  rbac:
+    # -- Create RBAC resources
+    create: true
+    # -- Add custom rule to the role
+    rules: []
+
+  # -- Set security context for the pod
+  # @default -- See below
+  podSecurityContext:
+    enabled: true
+    runAsUser: 3000
+    runAsGroup: 3000
+    fsGroup: 3000
+
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set resources
+  resources: {}
+  # -- Set tolerations
+  tolerations: []
+  # -- Set affinity
+  affinity: {}
+
+  # -- `dind-lv-monitor` DaemonSet parameters
+  # (local volumes cleaner)
+  # @default -- See below
+  dind-lv-monitor:
+    image:
+      registry: quay.io
+      repository: codefresh/dind-volume-utils
+      tag: 1.29.4
+    podAnnotations: {}
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1000
+    env: {}
+    resources: {}
+    nodeSelector: {}
+    tolerations:
+    - key: 'codefresh/dind'
+      operator: 'Exists'
+      effect: 'NoSchedule'
+    volumePermissions:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: alpine
+        tag: 3.18
+      resources: {}
+
+  # `dind-volume-cleanup` CronJob parameters
+  # (external volumes cleaner)
+  # @default -- See below
+  dind-volume-cleanup:
+    image:
+      registry: quay.io
+      repository: codefresh/dind-volume-cleanup
+      tag: 1.2.0
+    env: {}
+    concurrencyPolicy: Forbid
+    schedule: "*/10 * * * *"
+    successfulJobsHistory: 3
+    failedJobsHistory: 1
+    suspend: false
+    podAnnotations: {}
+    podSecurityContext:
+      enabled: true
+      fsGroup: 3000
+      runAsGroup: 3000
+      runAsUser: 3000
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+
+# Storage parameters for volume-provisioner
+# @default -- See below
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: local
+  # -- Set filesystem type (`ext4`/`xfs`)
+  fsType: "ext4"
+
+  # Storage parametrs example for local volumes on the K8S nodes filesystem (i.e. `storage.backend=local`)
+  # https://kubernetes.io/docs/concepts/storage/volumes/#local
+  # @default -- See below
+  local:
+    # -- Set volume path on the host filesystem
+    volumeParentDir: /var/lib/codefresh/dind-volumes
+
+  # Storage parameters example for aws ebs disks (i.e. `storage.backend=ebs`/`storage.backend=ebs-csi`)
+  # https://aws.amazon.com/ebs/
+  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aws
+  # @default -- See below
+  ebs:
+    # -- Set EBS volume type (`gp2`/`gp3`/`io1`) (required)
+    volumeType: "gp3"
+    # -- Set EBS volumes availability zone (required)
+    availabilityZone: "us-east-1a"
+    # -- Enable encryption (optional)
+    encrypted: "false"
+    # -- Set KMS encryption key ID (optional)
+    kmsKeyId: ""
+
+    # -- Set AWS_ACCESS_KEY_ID for volume-provisioner (optional)
+    # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions
+    accessKeyId: ""
+    # -- Existing secret containing AWS_ACCESS_KEY_ID.
+    accessKeyIdSecretKeyRef: {}
+    # E.g.
+    # accessKeyIdSecretKeyRef:
+    #   name:
+    #   key:
+
+    # -- Set AWS_SECRET_ACCESS_KEY for volume-provisioner (optional)
+    # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions
+    secretAccessKey: ""
+    # -- Existing secret containing AWS_SECRET_ACCESS_KEY
+    secretAccessKeySecretKeyRef: {}
+    # E.g.
+    # secretAccessKeySecretKeyRef:
+    #   name:
+    #   key:
+
+    # E.g.
+    # ebs:
+    #   volumeType: gp3
+    #   availabilityZone: us-east-1c
+    #   encrypted: false
+    #   iops: "5000"
+    #   # I/O operations per second. Only effetive when gp3 volume type is specified.
+    #   # Default value - 3000.
+    #   # Max - 16,000
+    #   throughput: "500"
+    #   # Throughput in MiB/s. Only effective when gp3 volume type is specified.
+    #   # Default value - 125.
+    #   # Max - 1000.
+    # ebs:
+    #   volumeType: gp2
+    #   availabilityZone: us-east-1c
+    #   encrypted: true
+    #   kmsKeyId: "1234abcd-12ab-34cd-56ef-1234567890ab"
+    #   accessKeyId: "MYKEYID"
+    #   secretAccessKey: "MYACCESSKEY"
+
+  # Storage parameters example for gce disks
+  # https://cloud.google.com/compute/docs/disks#pdspecs
+  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-google-kubernetes-engine
+  # @default -- See below
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "pd-ssd"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-west1-a"
+    # -- Set Google SA JSON key for volume-provisioner (optional)
+    serviceAccountJson: ""
+    # -- Existing secret containing containing Google SA JSON key for volume-provisioner (optional)
+    serviceAccountJsonSecretKeyRef: {}
+    # E.g.
+    # gcedisk:
+    #   volumeType: pd-ssd
+    #   availabilityZone: us-central1-c
+    #   serviceAccountJson: |-
+    #          {
+    #           "type": "service_account",
+    #           "project_id": "...",
+    #           "private_key_id": "...",
+    #           "private_key": "...",
+    #           "client_email": "...",
+    #           "client_id": "...",
+    #           "auth_uri": "...",
+    #           "token_uri": "...",
+    #           "auth_provider_x509_cert_url": "...",
+    #           "client_x509_cert_url": "..."
+    #           }
+
+  # Storage parameters example for Azure Disks
+  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
+  # @default -- See below
+  azuredisk:
+    # -- Set storage type (`Premium_LRS`)
+    skuName: Premium_LRS
+    cachingMode: None
+    # location: westcentralus
+    # resourceGroup:
+    # DiskIOPSReadWrite: 500
+    # DiskMBpsReadWrite: 100
+
+# -- Set runtime parameters
+# @default -- See below
+
+runtime:
+  # -- Set annotation on engine Service Account
+  # Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
+  serviceAccount:
+    create: true
+    annotations: {}
+    # E.g.
+    #   serviceAccount:
+    #     annotations:
+    #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+
+  # -- RBAC parameters
+  rbac:
+    # -- Create RBAC resources
+    create: true
+    # -- Add custom rule to the engine role
+    rules: []
+
+  # DinD pod daemon config
+  # @default -- See below
+  dindDaemon:
+    hosts:
+      - unix:///var/run/docker.sock
+      - tcp://0.0.0.0:1300
+    tlsverify: true
+    tls: true
+    tlscacert: /etc/ssl/cf-client/ca.pem
+    tlscert: /etc/ssl/cf/server-cert.pem
+    tlskey: /etc/ssl/cf/server-key.pem
+    insecure-registries:
+      - 192.168.99.100:5000
+    metrics-addr: 0.0.0.0:9323
+    experimental: true
+
+# App-Proxy parameters
+# Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#app-proxy-installation
+# @default -- See below
+appProxy:
+  # -- Enable app-proxy
+  enabled: false
+  # -- Set number of pods
+  replicasCount: 1
+  # -- Upgrade strategy
+  updateStrategy:
+    type: RollingUpdate
+  # -- Set pod annotations
+  podAnnotations: {}
+
+  # -- Set image
+  image:
+    registry: quay.io
+    repository: codefresh/cf-app-proxy
+    tag: latest
+  # -- Add additional env vars
+  env: {}
+
+  # Set app-proxy ingress parameters
+  # @default -- See below
+  ingress:
+    # -- Set path prefix for ingress
+    pathPrefix: "/"
+    # -- Set ingress class
+    class: ""
+    # -- Set DNS hostname the ingress will use
+    host: ""
+    # -- Set k8s tls secret for the ingress object
+    tlsSecret: ""
+    # -- Set extra annotations for ingress object
+    annotations: {}
+    # E.g.
+    # ingress:
+    #   pathPrefix: "/app-proxy"
+    #   class: "nginx"
+    #   host: "mydomain.com"
+    #   tlsSecret: "tls-cert-app-proxy"
+    #   annotations:
+    #     nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: ""
+    # -- Additional service account annotations
+    annotations: {}
+
+  # -- RBAC parameters
+  rbac:
+    # -- Create RBAC resources
+    create: true
+    # -- Add custom rule to the role
+    rules: []
+
+  # -- Set security context for the pod
+  podSecurityContext: {}
+
+  # -- Readiness probe configuration
+  # @default -- See below
+  readinessProbe:
+    failureThreshold: 5
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  # -- Set requests and limits
+  resources: {}
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set tolerations
+  tolerations: []
+  # -- Set affinity
+  affinity: {}
+
+# Monitor parameters
+# @default -- See below
+monitor:
+  # -- Enable monitor
+  # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component
+  enabled: false
+
+  # -- Cluster name as it registered in account
+  # Generated from `codefresh runner init --generate-helm-values-file` output
+  clusterId: ""
+  # -- API token from Codefresh
+  # Generated from `codefresh runner init --generate-helm-values-file` output
+  token: ""
+  # -- Set Existing secret (name-of-existing-secret) with API token from Codefresh
+  # supersedes value of monitor.token; secret must contain `codefresh.token` key
+  existingMonitorToken: ""
+
+  # -- Set number of pods
+  replicasCount: 1
+  # -- Upgrade strategy
+  updateStrategy:
+    type: RollingUpdate
+  # -- Set pod annotations
+  podAnnotations: {}
+
+  # -- Set image
+  image:
+    registry: quay.io
+    repository: codefresh/agent
+    tag: stable
+  # -- Add additional env vars
+  env: {}
+
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: ""
+    # -- Additional service account annotations
+    annotations: {}
+
+  # -- RBAC parameters
+  rbac:
+    # -- Create RBAC resources
+    create: true
+    # -- Use Role(true)/ClusterRole(true)
+    namespaced: true
+    # -- Add custom rule to the role
+    rules: []
+
+  # -- Readiness probe configuration
+  # @default -- See below
+  readinessProbe:
+    failureThreshold: 5
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    successThreshold: 1
+    timeoutSeconds: 5
+
+  podSecurityContext: {}
+
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set resources
+  resources: {}
+  # -- Set tolerations
+  tolerations: []
+  # -- Set affinity
+  affinity: {}
+
+
