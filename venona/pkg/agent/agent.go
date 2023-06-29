@@ -317,6 +317,13 @@ func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 	return tasks
 }
 
+func sortTasks(tasks task.Tasks) {
+	sort.SliceStable(tasks, func(i, j int) bool {
+		task1, task2 := tasks[i], tasks[j]
+		return task.Less(task1, task2)
+	})
+}
+
 func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, task.Tasks) {
 	agentTasks := task.Tasks{}
 	wfTasks := task.Tasks{}
@@ -335,13 +342,6 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, task.Tasks) {
 	}
 
 	return agentTasks, wfTasks
-}
-
-func sortTasks(tasks task.Tasks) {
-	sort.SliceStable(tasks, func(i, j int) bool {
-		task1, task2 := tasks[i], tasks[j]
-		return task.Less(task1, task2)
-	})
 }
 
 func (a *Agent) handleAgentTask(t *task.Task) {

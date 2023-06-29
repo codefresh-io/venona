@@ -156,10 +156,10 @@ func TestNew(t *testing.T) {
 			opt: &Options{
 				ID:        "",
 				Codefresh: getCodefreshMock(),
-				Runtimes:  map[string]runtime.Runtime{
+				Runtimes: map[string]runtime.Runtime{
 					"x": runtime.New(runtime.Options{}),
 				},
-				Logger:    &mocks.Logger{},
+				Logger: &mocks.Logger{},
 			},
 			want:    nil,
 			wantErr: errIDRequired.Error(),
@@ -178,10 +178,10 @@ func TestNew(t *testing.T) {
 			opt: &Options{
 				ID:        "foobar",
 				Codefresh: getCodefreshMock(),
-				Runtimes:  map[string]runtime.Runtime{
+				Runtimes: map[string]runtime.Runtime{
 					"x": runtime.New(runtime.Options{}),
 				},
-				Logger:    nil,
+				Logger: nil,
 			},
 			want:    nil,
 			wantErr: errLoggerRequired.Error(),
@@ -308,17 +308,4 @@ func Test_executeAgentTask(t *testing.T) {
 		})
 		delete(agentTaskExecutors, tt.args.executorName)
 	}
-}
-
-func createMockAgent() *Agent {
-	runtimes := make(map[string]runtime.Runtime)
-	runtimes["x"] = runtime.New(runtime.Options{})
-	a, _ := New(&Options{
-		ID:        "foobar",
-		Codefresh: &codefresh.MockCodefresh{},
-		Logger:    &mocks.Logger{},
-		Runtimes:  runtimes,
-	})
-
-	return a
 }
