@@ -22,6 +22,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
+
 	"github.com/gorilla/mux"
 )
 
@@ -59,7 +60,8 @@ func New(opt *Options) (*Server, error) {
 	if opt.Monitor != nil {
 		r.Use(opt.Monitor.NewGorillaMiddleware())
 	}
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+
+	r.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
 	})
@@ -82,6 +84,7 @@ func (s *Server) Start() error {
 	if s.running {
 		return errAlreadyRunning
 	}
+
 	s.running = true
 	s.log.Info("Starting HTTP server", "addr", s.srv.Addr)
 	return s.srv.ListenAndServe()
@@ -92,11 +95,13 @@ func (s *Server) Stop(ctx context.Context) error {
 	if !s.running {
 		return errAlreadyStopped
 	}
+
 	s.running = false
 	s.log.Warn("Received graceful termination request, shutting down...")
 	err := s.srv.Shutdown(ctx)
 	if err != nil {
 		s.log.Error("failed to gracefully terminate server, cause: ", err)
 	}
+
 	return nil
 }

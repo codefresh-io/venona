@@ -14,9 +14,7 @@
 
 package task
 
-import (
-	"encoding/json"
-)
+import "encoding/json"
 
 // Const for task types
 const (

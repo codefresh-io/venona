@@ -33,6 +33,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
+
 	nr "github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -64,12 +65,11 @@ var (
 )
 
 var startCmd = &cobra.Command{
-	Use: "start",
-
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:  "start",
+	Long: "Start venona process",
+	Run: func(_ *cobra.Command, _ []string) {
 		run(startCmdOptions)
 	},
-	Long: "Start venona process",
 }
 
 func init() {
@@ -233,12 +233,14 @@ func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[str
 				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
 				continue
 			}
+
 			re := runtime.New(runtime.Options{
 				Kubernetes: k,
 			})
 			runtimes[config.Name] = re
 		}
 	}
+
 	return runtimes
 }
 
@@ -263,15 +265,18 @@ func withSignals(
 				cancel()
 				return
 			}
+
 			go func() {
 				log.Warn("Received shutdown request, stopping agent and server...")
 				// order matters, the process will exit as soon as server is stopped
 				if err := stopAgent(); err != nil {
 					log.Error(err.Error())
 				}
+
 				if err := stopServer(ctx); err != nil {
 					log.Error(err.Error())
 				}
+
 				cancel() // done
 			}()
 		}
