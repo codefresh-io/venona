@@ -262,7 +262,8 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 	wfMap := map[string]*workflow.Workflow{}
 
 	// divide tasks by types
-	for _, t := range tasks {
+	for i := range tasks {
+		t := tasks[i]
 		switch t.Type {
 		case task.TypeAgentTask:
 			agentTasks = append(agentTasks, t)
