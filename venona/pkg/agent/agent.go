@@ -277,6 +277,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 
 	// process creation tasks
 	for _, tasks := range groupTasks(creationTasks) {
+		start := time.Now()
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
 		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
@@ -292,12 +293,25 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 			logger.Error(err.Error())
 			txn.NoticeError(err)
 		}
-		logger.Info("Done starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
+		end := time.Now()
+		created, err := time.Parse(time.RFC3339, tasks[0].Metadata.CreatedAt)
+		if err != nil {
+			logger.Error("failed parsing CreatedAt", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID, "createdAt", tasks[0].Metadata.CreatedAt)
+		}
+		logger.Info("Done starting workflow",
+			"workflow", tasks[0].Metadata.Workflow,
+			"runtime", reName,
+			"pullId", pullID,
+			"time in runner", end.Sub(pullID),
+			"processing time", end.Sub(start),
+			"time since creation", end.Sub(created),
+		)
 		txn.End()
 	}
 
 	// process deletion tasks
 	for _, tasks := range groupTasks(deletionTasks) {
+		start := time.Now()
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
 		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
@@ -315,7 +329,19 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 				txn.NoticeError(err)
 			}
 		}
-		logger.Info("Done terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID)
+		end := time.Now()
+		created, err := time.Parse(time.RFC3339, tasks[0].Metadata.CreatedAt)
+		if err != nil {
+			logger.Error("failed parsing CreatedAt", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "pullId", pullID, "createdAt", tasks[0].Metadata.CreatedAt)
+		}
+		logger.Info("Done terminating workflow",
+			"workflow", tasks[0].Metadata.Workflow,
+			"runtime", reName,
+			"pullId", pullID,
+			"time in runner", end.Sub(pullID),
+			"processing time", end.Sub(start),
+			"time since creation", end.Sub(created),
+		)
 		txn.End()
 	}
 }
