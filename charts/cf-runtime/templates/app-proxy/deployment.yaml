@@ -46,7 +46,7 @@ spec:
           failureThreshold: {{ $values.readinessProbe.failureThreshold }}
           httpGet:
             path: /health
-            port: 3000
+            port: http
         resources:
           {{- toYaml $values.resources | nindent 12  }}
         volumeMounts:
