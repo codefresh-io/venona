@@ -30,3 +30,14 @@ Selector labels
 codefresh.io/application: app-proxy
 {{- end }}
 
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "app-proxy.serviceAccountName" -}}
+{{- if .Values.appProxy.serviceAccount.create }}
+{{- default (include "app-proxy.fullname" .) .Values.appProxy.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.appProxy.serviceAccount.name }}
+{{- end }}
+{{- end }}
