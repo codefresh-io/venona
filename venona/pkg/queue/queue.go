@@ -58,6 +58,7 @@ func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGr
 	}
 }
 
+// Start creates the workflow handlers that will handle the incoming Workflows
 func (wfq *WorkflowQueue) Start(ctx context.Context) {
 	for i := 0; i < wfq.concurrency; i++ {
 		stopChan := make(chan bool, 1)
@@ -68,6 +69,7 @@ func (wfq *WorkflowQueue) Start(ctx context.Context) {
 	}
 }
 
+// Stop sends a signal to each of the handler to notify it to stop once the queue is empty
 func (wfq *WorkflowQueue) Stop() {
 	for i := 0; i < wfq.concurrency; i++ {
 		wfq.stop[i] <- true
