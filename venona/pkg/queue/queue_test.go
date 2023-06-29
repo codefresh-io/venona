@@ -18,7 +18,7 @@ import (
 	"context"
 	"sync"
 	"testing"
-	// "time"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
@@ -75,87 +75,87 @@ func checkPodInFakeClientset(client *fake.Clientset, name string) bool {
 	return true
 }
 
-// func TestTaskQueue_Enqueue(t *testing.T) {
-// 	type taskOrSleep struct {
-// 		t     *task.Task
-// 		sleep time.Duration
-// 	}
-// 	tests := map[string]struct {
-// 		tasks   []taskOrSleep
-// 		afterFn func(t *testing.T, client *fake.Clientset)
-// 	}{
-// 		"should create a single pod for a single task": {
-// 			tasks: []taskOrSleep{
-// 				{t: makePodCreationTask("wf1", "pod1")},
-// 			},
-// 			afterFn: func(t *testing.T, client *fake.Clientset) {
-// 				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1"))
-// 			},
-// 		},
-// 		"should create and delete the pod": {
-// 			tasks: []taskOrSleep{
-// 				{t: makePodCreationTask("wf1", "pod1")},
-// 				{t: makePodDeletionTask("wf1", "pod1")},
-// 			},
-// 			afterFn: func(t *testing.T, client *fake.Clientset) {
-// 				assert.False(t, checkPodInFakeClientset(client, "pod-wf1"))
-// 			},
-// 		},
-// 		"should create and delete the pod after a sleep": {
-// 			tasks: []taskOrSleep{
-// 				{t: makePodCreationTask("wf1", "pod1")},
-// 				{sleep: time.Millisecond * 100},
-// 				{t: makePodDeletionTask("wf1", "pod1")},
-// 			},
-// 			afterFn: func(t *testing.T, client *fake.Clientset) {
-// 				assert.False(t, checkPodInFakeClientset(client, "pod-wf1"))
-// 			},
-// 		},
-// 		"should create multiple pods, sleep, delete some of them, create new ones": {
-// 			tasks: []taskOrSleep{
-// 				{t: makePodCreationTask("wf1", "pod1")},
-// 				{t: makePodCreationTask("wf1", "pod2")},
-// 				{t: makePodCreationTask("wf2", "pod1")},
-// 				{sleep: time.Millisecond * 100},
-// 				{t: makePodCreationTask("wf1", "pod1-retry-1")},
-// 				{t: makePodCreationTask("wf1", "pod2-retry-1")},
-// 				{t: makePodDeletionTask("wf1", "pod1")},
-// 				{t: makePodDeletionTask("wf1", "pod2")},
-// 				{t: makePodDeletionTask("wf2", "pod1")},
-// 			},
-// 			afterFn: func(t *testing.T, client *fake.Clientset) {
-// 				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1-retry-1"))
-// 				assert.True(t, checkPodInFakeClientset(client, "wf1-pod2-retry-1"))
-// 				assert.False(t, checkPodInFakeClientset(client, "wf1-pod"))
-// 				assert.False(t, checkPodInFakeClientset(client, "wf1-pod2"))
-// 				assert.False(t, checkPodInFakeClientset(client, "wf2-pod1"))
-// 			},
-// 		},
-// 	}
-// 	for name, tt := range tests {
-// 		t.Run(name, func(t *testing.T) {
-// 			client := fake.NewSimpleClientset()
-// 			runtimes := map[string]runtime.Runtime{
-// 				"some-rt": runtime.New(runtime.Options{
-// 					Kubernetes: kubernetes.NewWithClient(client),
-// 				}),
-// 			}
-// 			log := logger.New(logger.Options{})
-// 			wg := &sync.WaitGroup{}
-// 			tq := New(runtimes, log, wg, monitoring.NewEmpty())
-// 			for _, tOrS := range tt.tasks {
-// 				if tOrS.t != nil {
-// 					tq.Enqueue(context.Background(), tOrS.t)
-// 				} else {
-// 					time.Sleep(tOrS.sleep)
-// 				}
-// 			}
+func TestTaskQueue_Enqueue(t *testing.T) {
+	type taskOrSleep struct {
+		t     *task.Task
+		sleep time.Duration
+	}
+	tests := map[string]struct {
+		tasks   []taskOrSleep
+		afterFn func(t *testing.T, client *fake.Clientset)
+	}{
+		"should create a single pod for a single task": {
+			tasks: []taskOrSleep{
+				{t: makePodCreationTask("wf1", "pod1")},
+			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1"))
+			},
+		},
+		"should create and delete the pod": {
+			tasks: []taskOrSleep{
+				{t: makePodCreationTask("wf1", "pod1")},
+				{t: makePodDeletionTask("wf1", "pod1")},
+			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				assert.False(t, checkPodInFakeClientset(client, "pod-wf1"))
+			},
+		},
+		"should create and delete the pod after a sleep": {
+			tasks: []taskOrSleep{
+				{t: makePodCreationTask("wf1", "pod1")},
+				{sleep: time.Millisecond * 100},
+				{t: makePodDeletionTask("wf1", "pod1")},
+			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				assert.False(t, checkPodInFakeClientset(client, "pod-wf1"))
+			},
+		},
+		"should create multiple pods, sleep, delete some of them, create new ones": {
+			tasks: []taskOrSleep{
+				{t: makePodCreationTask("wf1", "pod1")},
+				{t: makePodCreationTask("wf1", "pod2")},
+				{t: makePodCreationTask("wf2", "pod1")},
+				{sleep: time.Millisecond * 100},
+				{t: makePodDeletionTask("wf1", "pod1")},
+				{t: makePodCreationTask("wf1", "pod1-retry-1")},
+				{t: makePodDeletionTask("wf1", "pod2")},
+				{t: makePodCreationTask("wf1", "pod2-retry-1")},
+				{t: makePodDeletionTask("wf2", "pod1")},
+			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1-retry-1"))
+				assert.True(t, checkPodInFakeClientset(client, "wf1-pod2-retry-1"))
+				assert.False(t, checkPodInFakeClientset(client, "wf1-pod"))
+				assert.False(t, checkPodInFakeClientset(client, "wf1-pod2"))
+				assert.False(t, checkPodInFakeClientset(client, "wf2-pod1"))
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			client := fake.NewSimpleClientset()
+			runtimes := map[string]runtime.Runtime{
+				"some-rt": runtime.New(runtime.Options{
+					Kubernetes: kubernetes.NewWithClient(client),
+				}),
+			}
+			log := logger.New(logger.Options{})
+			wg := &sync.WaitGroup{}
+			tq := New(runtimes, log, wg, monitoring.NewEmpty())
+			for _, tOrS := range tt.tasks {
+				if tOrS.t != nil {
+					tq.Enqueue(context.Background(), tOrS.t)
+				} else {
+					time.Sleep(tOrS.sleep)
+				}
+			}
 
-// 			wg.Wait()
-// 			tt.afterFn(t, client)
-// 		})
-// 	}
-// }
+			wg.Wait()
+			tt.afterFn(t, client)
+		})
+	}
+}
 
 func TestTaskQueue_NoDeadlock(t *testing.T) {
 	type dummySpec struct {
