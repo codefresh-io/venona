@@ -54,8 +54,8 @@ func Test_runtime_HandleTask(t *testing.T) {
 			task: &task.Task{
 				Type: task.TypeDeletePVC,
 				Spec: map[string]string{
-					"Name":      "some-name",
 					"Namespace": "some-namespace",
+					"Name":      "some-name",
 				},
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
@@ -70,8 +70,8 @@ func Test_runtime_HandleTask(t *testing.T) {
 			task: &task.Task{
 				Type: task.TypeDeletePod,
 				Spec: map[string]string{
-					"Name":      "some-name",
 					"Namespace": "some-namespace",
+					"Name":      "some-name",
 				},
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
@@ -109,8 +109,8 @@ func Test_runtime_HandleTask(t *testing.T) {
 			task: &task.Task{
 				Type: task.TypeDeletePod,
 				Spec: map[string]string{
-					"Name":      "some-name",
 					"Namespace": "some-namespace",
+					"Name":      "some-name",
 				},
 			},
 			wantErr: "failed deleting resource: some error",
