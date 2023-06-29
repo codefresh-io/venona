@@ -22,8 +22,6 @@ configdir
 venona/venona
 .runnerconf
 
-**/values-*.yaml
-
 # helm template
 **/dry-run/**
 
