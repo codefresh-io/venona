@@ -8,8 +8,9 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - protocol: TCP
+  - name: http
     port: 80
+    protocol: TCP
     targetPort: 3000
   selector:
     {{- include "app-proxy.selectorLabels" . | nindent 4 }}
