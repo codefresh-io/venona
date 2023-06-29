@@ -102,7 +102,13 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 				wfq.log.Error("failed parsing CreatedAt", "handlerId", id, "workflow", wf.Metadata.Workflow, "createdAt", wf.Metadata.CreatedAt)
 			}
 
-			wfq.log.Info("done handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow, "time in queue", end.Sub(start), "time since creation", end.Sub(created))
+			wfq.log.Info("Done handling workflow",
+				"workflow", wf.Metadata.Workflow,
+				"runtime", wf.Metadata.ReName,
+				"time in runner", end.Sub(wf.Metadata.Pulled),
+				"processing time", end.Sub(start),
+				"time since creation", end.Sub(created),
+			)
 		default:
 			if ctxCancelled {
 				wfq.log.Info("stopped workflow handler", "handlerId", id)
