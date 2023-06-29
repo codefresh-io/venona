@@ -206,8 +206,8 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			agentTasks, wfTasks := a.getTasks(ctx)
 
 			// perform all agentTasks (in goroutine)
-			for _, agentTask := range agentTasks {
-				a.handleAgentTask(&agentTask)
+			for i := range agentTasks {
+				a.handleAgentTask(&agentTasks[i])
 			}
 
 			// send all wfTasks to tasksChannel
@@ -240,16 +240,16 @@ func (a *Agent) startWfTaskHandlerRoutine(ctx context.Context) {
 func (a *Agent) handleTasks(ctx context.Context, tasks task.Tasks) {
 	reName := tasks[0].Metadata.ReName
 	runtime, ok := a.runtimes[reName]
-	wfId := tasks[0].Metadata.Workflow
-	txn := newTransaction(a.monitor, "workflow-tasks", wfId, reName)
+	workflow := tasks[0].Metadata.Workflow
+	txn := newTransaction(a.monitor, "workflow-tasks", workflow, reName)
 	defer txn.End()
 	if !ok {
-		a.log.Error("Runtime not found", "runtime", reName, "workflow", wfId)
+		a.log.Error("Runtime not found", "runtime", reName, "workflow", workflow)
 		txn.NoticeError(errRuntimeNotFound)
 		return
 	}
 
-	a.log.Info("Handling workflow tasks", "runtime", reName, "workflow", wfId)
+	a.log.Info("Handling workflow tasks", "runtime", reName, "workflow", workflow)
 	for _, t := range tasks {
 		if err := runtime.HandleTask(ctx, t); err != nil {
 			a.log.Error(err.Error())
