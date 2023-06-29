@@ -32,6 +32,40 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
+func makePodCreationTask(workflow, pod string) *task.Task {
+	return &task.Task{
+		Type: task.TypeCreatePod,
+		Metadata: task.Metadata{
+			ReName:   "some-rt",
+			Workflow: "wf1",
+		},
+		Spec: &v1.Pod{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: v1.SchemeGroupVersion.String(),
+				Kind:       "Pod",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: "some-namespace",
+				Name:      workflow + "-" + pod,
+			},
+		},
+	}
+}
+
+func makePodDeletionTask(workflow, pod string) *task.Task {
+	return &task.Task{
+		Type: task.TypeDeletePod,
+		Metadata: task.Metadata{
+			ReName:   "some-rt",
+			Workflow: workflow,
+		},
+		Spec: map[string]string{
+			"Namespace": "some-namespace",
+			"Name":      workflow + "-" + pod,
+		},
+	}
+}
+
 func checkPodInFakeClientset(client *fake.Clientset, name string) bool {
 	r, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", name)
 	if err != nil || r == nil {
@@ -53,62 +87,20 @@ func TestTaskQueue_Enqueue(t *testing.T) {
 		"should create a single pod for a single task": {
 			tasks: []taskOrSleep{
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod-wf1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod1"),
 				},
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
-				assert.True(t, checkPodInFakeClientset(client, "pod-wf1"))
+				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1"))
 			},
 		},
 		"should create and delete the pod": {
 			tasks: []taskOrSleep{
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod-wf1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod1"),
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeDeletePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: map[string]string{
-							"Namespace": "some-namespace",
-							"Name":      "pod-wf1",
-						},
-					},
+					t: makePodDeletionTask("wf1", "pod1"),
 				},
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
@@ -118,39 +110,13 @@ func TestTaskQueue_Enqueue(t *testing.T) {
 		"should create and delete the pod after a sleep": {
 			tasks: []taskOrSleep{
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod-wf1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod1"),
 				},
 				{
 					sleep: time.Millisecond * 100,
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeDeletePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: map[string]string{
-							"Namespace": "some-namespace",
-							"Name":      "pod-wf1",
-						},
-					},
+					t: makePodDeletionTask("wf1", "pod1"),
 				},
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
@@ -160,136 +126,39 @@ func TestTaskQueue_Enqueue(t *testing.T) {
 		"should create multiple pods, sleep, delete some of them, create new ones": {
 			tasks: []taskOrSleep{
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod1-wf1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod1"),
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod2-wf1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod2"),
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-2",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod-wf2",
-							},
-						},
-					},
+					t: makePodCreationTask("wf2", "pod1"),
 				},
 				{
 					sleep: time.Millisecond * 100,
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod1-wf1-retry-1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod1-retry-1"),
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeCreatePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: &v1.Pod{
-							TypeMeta: metav1.TypeMeta{
-								APIVersion: v1.SchemeGroupVersion.String(),
-								Kind:       "Pod",
-							},
-							ObjectMeta: metav1.ObjectMeta{
-								Namespace: "some-namespace",
-								Name:      "pod2-wf1-retry-1",
-							},
-						},
-					},
+					t: makePodCreationTask("wf1", "pod2-retry-1"),
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeDeletePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-1",
-						},
-						Spec: map[string]string{
-							"Namespace": "some-namespace",
-							"Name":      "pod1-wf1",
-						},
-					},
+					t: makePodDeletionTask("wf1", "pod1"),
 				},
 				{
-					t: &task.Task{
-						Type: task.TypeDeletePod,
-						Metadata: task.Metadata{
-							ReName:   "some-rt",
-							Workflow: "wf-2",
-						},
-						Spec: map[string]string{
-							"Namespace": "some-namespace",
-							"Name":      "pod2-wf1",
-						},
-					},
+					t: makePodDeletionTask("wf1", "pod2"),
+				},
+				{
+					t: makePodDeletionTask("wf2", "pod1"),
 				},
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
-				assert.True(t, checkPodInFakeClientset(client, "pod1-wf1-retry-1"))
-				assert.True(t, checkPodInFakeClientset(client, "pod2-wf1-retry-1"))
-				assert.False(t, checkPodInFakeClientset(client, "pod1-wf1"))
-				assert.False(t, checkPodInFakeClientset(client, "pod2-wf1"))
-				assert.False(t, checkPodInFakeClientset(client, "pod1-wf2"))
+				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1-retry-1"))
+				assert.True(t, checkPodInFakeClientset(client, "wf1-pod2-retry-1"))
+				assert.False(t, checkPodInFakeClientset(client, "wf1-pod"))
+				assert.False(t, checkPodInFakeClientset(client, "wf1-pod2"))
+				assert.False(t, checkPodInFakeClientset(client, "wf2-pod1"))
 			},
 		},
 	}
