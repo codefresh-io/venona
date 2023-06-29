@@ -103,11 +103,12 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 			}
 
 			wfq.log.Info("Done handling workflow",
+				"handlerId", id,
 				"workflow", wf.Metadata.Workflow,
 				"runtime", wf.Metadata.ReName,
+				"time since creation", end.Sub(created),
 				"time in runner", end.Sub(wf.Metadata.Pulled),
 				"processing time", end.Sub(start),
-				"time since creation", end.Sub(created),
 			)
 		default:
 			if ctxCancelled {
