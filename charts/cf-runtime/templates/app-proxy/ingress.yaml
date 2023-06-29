@@ -21,7 +21,7 @@ spec:
       secretName: {{ $values.tlsSecret }}
   {{- end }}
   rules:
-    - host: {{ $values.appProxy.ingress.host }}
+    - host: {{ $values.ingress.host }}
       http:
         paths:
           - path: {{ $values.ingress.pathPrefix }}
