@@ -18,16 +18,43 @@ import "encoding/json"
 
 // Const for task types
 const (
-	TypeCreatePod = "CreatePod"
-	TypeCreatePVC = "CreatePvc"
-	TypeDeletePod = "DeletePod"
-	TypeDeletePVC = "DeletePvc"
-	TypeAgentTask = "AgentTask"
+	TypeCreatePod Type = "CreatePod"
+	TypeCreatePVC Type = "CreatePvc"
+	TypeDeletePod Type = "DeletePod"
+	TypeDeletePVC Type = "DeletePvc"
+	TypeAgentTask Type = "AgentTask"
+)
+
+type (
+	// Tasks array
+	Tasks []Task
+
+	Type string
+
+	// Task options
+	Task struct {
+		Type     Type        `json:"type"`
+		Spec     interface{} `json:"spec"`
+		Metadata Metadata    `json:"metadata"`
+	}
+
+	// Metadata options
+	Metadata struct {
+		CreatedAt string `json:"createdAt"`
+		ReName    string `json:"reName"`
+		Workflow  string `json:"workflow"`
+	}
+
+	// AgentTask describes a task of type "AgentTask"
+	AgentTask struct {
+		Type   string                 `json:"type"`
+		Params map[string]interface{} `json:"params"`
+	}
 )
 
 // UnmarshalTasks with json
-func UnmarshalTasks(data []byte) ([]Task, error) {
-	var r []Task
+func UnmarshalTasks(data []byte) (Tasks, error) {
+	var r Tasks
 	err := json.Unmarshal(data, &r)
 	return r, err
 }
@@ -37,26 +64,6 @@ func (r *Tasks) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-// Tasks array
-type Tasks []Task
-
-// Task options
-type Task struct {
-	Type     string      `json:"type"`
-	Spec     interface{} `json:"spec"`
-	Metadata Metadata    `json:"metadata"`
-}
-
-// Metadata options
-type Metadata struct {
-	CreatedAt string `json:"createdAt"`
-	Account   string `json:"account"`
-	ReName    string `json:"reName"`
-	Workflow  string `json:"workflow"`
-}
-
-// AgentTask describes a task of type "AgentTask"
-type AgentTask struct {
-	Type   string                 `json:"type"`
-	Params map[string]interface{} `json:"params"`
+func Less(task1 Task, task2 Task) bool {
+	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
 }

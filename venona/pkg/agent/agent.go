@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 	"time"
 
@@ -91,7 +92,7 @@ type (
 	}
 
 	workflowCandidate struct {
-		tasks   []task.Task
+		tasks   task.Tasks
 		runtime string
 	}
 )
@@ -192,10 +193,10 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 		case <-a.taskPullerTicker.C:
 			a.wg.Add(1)
 			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, log logger.Logger, monitor monitoring.Monitor) {
+				defer wg.Done()
 				tasks := pullTasks(ctx, client, log)
-				startTasks(ctx, tasks, runtimes, log, monitor)
-				time.Sleep(time.Second * 10)
-				wg.Done()
+				sortTasks(tasks)
+				startTasks(ctx, tasks, runtimes, wg, log, monitor)
 			}(a.cf, a.runtimes, a.wg, a.log, a.monitor)
 		}
 	}
@@ -209,10 +210,10 @@ func (a *Agent) startStatusReporterRoutine(ctx context.Context) {
 		case <-a.reportStatusTicker.C:
 			a.wg.Add(1)
 			go func(cf codefresh.Codefresh, wg *sync.WaitGroup, log logger.Logger) {
+				defer wg.Done()
 				reportStatus(ctx, cf, codefresh.AgentStatus{
 					Message: "All good",
 				}, log)
-				wg.Done()
 			}(a.cf, a.wg, a.log)
 		}
 	}
@@ -225,27 +226,34 @@ func reportStatus(ctx context.Context, client codefresh.Codefresh, status codefr
 	}
 }
 
-func pullTasks(ctx context.Context, client codefresh.Codefresh, log logger.Logger) []task.Task {
+func pullTasks(ctx context.Context, client codefresh.Codefresh, log logger.Logger) task.Tasks {
 	log.Debug("Requesting tasks from API server")
 	tasks, err := client.Tasks(ctx)
 	if err != nil {
 		log.Error(err.Error())
-		return []task.Task{}
+		return task.Tasks{}
 	}
 
 	if len(tasks) == 0 {
 		log.Debug("No new tasks received")
-		return []task.Task{}
+		return task.Tasks{}
 	}
 
 	log.Info("Received new tasks", "len", len(tasks))
 	return tasks
 }
 
-func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, log logger.Logger, monitor monitoring.Monitor) {
-	creationTasks := []task.Task{}
-	deletionTasks := []task.Task{}
-	agentTasks := []task.Task{}
+func sortTasks(tasks task.Tasks) {
+	sort.SliceStable(tasks, func(i, j int) bool {
+		task1, task2 := tasks[i], tasks[j]
+		return task.Less(task1, task2)
+	})
+}
+
+func startTasks(ctx context.Context, tasks task.Tasks, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, log logger.Logger, monitor monitoring.Monitor) {
+	creationTasks := task.Tasks{}
+	deletionTasks := task.Tasks{}
+	agentTasks := task.Tasks{}
 
 	// divide tasks by types
 	for _, t := range tasks {
@@ -271,7 +279,9 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		t := agentTasks[i]
 		log.Info("executing agent task", "tid", t.Metadata.Workflow)
 		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
-		go func(t task.Task, log logger.Logger) {
+		wg.Add(1)
+		go func(t task.Task, wg *sync.WaitGroup, log logger.Logger) {
+			defer wg.Done()
 			if err := executeAgentTask(&t, log); err != nil {
 				log.Error(err.Error())
 				txn.NoticeError(err)
@@ -279,11 +289,12 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 
 			txn.End()
 			log.Info("finished agent task", "tid", t.Metadata.Workflow)
-		}(t, log)
+		}(t, wg, log)
 	}
 
 	// process creation tasks
-	for _, tasks := range groupTasks(creationTasks) {
+	grouped := groupTasks(creationTasks)
+	for _, tasks := range grouped {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
 		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
@@ -306,7 +317,8 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 	}
 
 	// process deletion tasks
-	for _, tasks := range groupTasks(deletionTasks) {
+	grouped = groupTasks(deletionTasks)
+	for _, tasks := range grouped {
 		reName := tasks[0].Metadata.ReName
 		runtime, ok := runtimes[reName]
 		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
@@ -397,8 +409,8 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	return nil
 }
 
-func groupTasks(tasks []task.Task) map[string][]task.Task {
-	candidates := map[string][]task.Task{}
+func groupTasks(tasks task.Tasks) map[string]task.Tasks {
+	candidates := map[string]task.Tasks{}
 	for _, task := range tasks {
 		name := task.Metadata.Workflow
 		if name == "" {
@@ -433,7 +445,7 @@ func checkOptions(opt *Options) error {
 	return nil
 }
 
-func newTransaction(monitor monitoring.Monitor, taskType, tid, runtime string) monitoring.Transaction {
+func newTransaction(monitor monitoring.Monitor, taskType task.Type, tid, runtime string) monitoring.Transaction {
 	txn := monitor.NewTransaction("runner-tasks-execution")
 	txn.AddAttribute("task-type", taskType)
 	txn.AddAttribute("tid", tid)

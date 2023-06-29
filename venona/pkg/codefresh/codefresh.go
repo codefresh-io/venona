@@ -34,7 +34,7 @@ const (
 type (
 	// Codefresh API client
 	Codefresh interface {
-		Tasks(ctx context.Context) ([]task.Task, error)
+		Tasks(ctx context.Context) (task.Tasks, error)
 		ReportStatus(ctx context.Context, status AgentStatus) error
 		Host() string
 	}
@@ -82,7 +82,7 @@ func New(opt Options) Codefresh {
 }
 
 // Tasks get from Codefresh all latest tasks
-func (c cf) Tasks(ctx context.Context) ([]task.Task, error) {
+func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
 	c.logger.Debug("Requesting tasks")
 	res, err := c.doRequest(ctx, "GET", nil, "api", "agent", c.agentID, "tasks")
 	if err != nil {

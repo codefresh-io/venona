@@ -26,8 +26,8 @@ import (
 type (
 	// Runtime API client
 	Runtime interface {
-		StartWorkflow(context.Context, []task.Task) error
-		TerminateWorkflow(context.Context, []task.Task) []error
+		StartWorkflow(context.Context, task.Tasks) error
+		TerminateWorkflow(context.Context, task.Tasks) []error
 	}
 
 	// Options for runtime
@@ -47,7 +47,7 @@ func New(opt Options) Runtime {
 	}
 }
 
-func (r runtime) StartWorkflow(ctx context.Context, tasks []task.Task) error {
+func (r runtime) StartWorkflow(ctx context.Context, tasks task.Tasks) error {
 	for _, task := range tasks {
 		err := r.client.CreateResource(ctx, task.Spec)
 		if err != nil {
@@ -57,7 +57,7 @@ func (r runtime) StartWorkflow(ctx context.Context, tasks []task.Task) error {
 
 	return nil
 }
-func (r runtime) TerminateWorkflow(ctx context.Context, tasks []task.Task) []error {
+func (r runtime) TerminateWorkflow(ctx context.Context, tasks task.Tasks) []error {
 	errs := make([]error, 0, 3)
 	for _, task := range tasks {
 		opt := kubernetes.DeleteOptions{}
