@@ -77,6 +77,10 @@ func (wfq *WorkflowQueue) Stop() {
 	}
 }
 
+func (wfq *WorkflowQueue) Size() int {
+	return len(wfq.queue)
+}
+
 // Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
 func (wfq *WorkflowQueue) Enqueue(wf *workflow.Workflow) {
 	wfq.queue <- wf
