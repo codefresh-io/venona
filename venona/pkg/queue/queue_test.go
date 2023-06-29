@@ -182,17 +182,14 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 		assert.Equal(t, doneTask+1, s.order, "workflow %s", s.workflow)
 		if s.workflow == "wf1" && s.order == 3 {
 			// wait for a signal before continuing with the 3rd wf1 task
-			log.Info("sleeping task", "workflow", s.workflow, "order", s.order)
 			<-wf1Chan
 		}
 
 		if s.workflow == "wf2" && s.order == 3 {
 			// notify the last wf2 task is done
-			log.Info("done last task", "workflow", s.workflow, "order", s.order)
 			wf2Chan <- true
 		}
 
-		log.Info("done task", "workflow", s.workflow, "order", s.order)
 		doneTasks[s.workflow] = s.order
 		return nil
 	})
@@ -200,7 +197,6 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 	ctx := context.Background()
 	// queue 11 more tasks after it, to fill up wf1 channel
 	for i := 1; i < 21; i++ {
-		log.Info("enquing task", "workflow", "wf1", "order", i)
 		tq.Enqueue(ctx, &task.Task{
 			Type: task.TypeCreatePod,
 			Metadata: task.Metadata{
@@ -216,7 +212,6 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 
 	// and also run 4 more tasks on a different wf
 	for i := 1; i < 4; i++ {
-		log.Info("enquing task", "workflow", "wf2", "order", i)
 		tq.Enqueue(ctx, &task.Task{
 			Type: task.TypeCreatePod,
 			Metadata: task.Metadata{
