@@ -14,7 +14,11 @@
 
 package task
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/codefresh-io/go/venona/pkg/monitoring"
+)
 
 // Const for task types
 const (
@@ -68,4 +72,12 @@ func (r *Tasks) Marshal() ([]byte, error) {
 // Less compares two tasks by their CreatedAt values
 func Less(task1 Task, task2 Task) bool {
 	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
+}
+
+func NewTaskTransaction(monitor monitoring.Monitor, t *Task) monitoring.Transaction {
+	txn := monitor.NewTransaction("runner-tasks-execution")
+	txn.AddAttribute("task-type", t.Type)
+	txn.AddAttribute("tid", t.Metadata.Workflow)
+	txn.AddAttribute("runtime-environment", t.Metadata.ReName)
+	return txn
 }

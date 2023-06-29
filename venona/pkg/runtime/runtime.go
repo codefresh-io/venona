@@ -26,7 +26,7 @@ import (
 type (
 	// Runtime API client
 	Runtime interface {
-		HandleTask(ctx context.Context, t task.Task) error
+		HandleTask(ctx context.Context, t *task.Task) error
 	}
 
 	// Options for runtime
@@ -46,7 +46,7 @@ func New(opts Options) Runtime {
 	}
 }
 
-func (r runtime) HandleTask(ctx context.Context, t task.Task) error {
+func (r runtime) HandleTask(ctx context.Context, t *task.Task) error {
 	var err error
 
 	switch t.Type {
