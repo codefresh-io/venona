@@ -26,6 +26,7 @@ import (
 )
 
 type (
+	// TaskQueue manages a map of workflow (id) -> tasks
 	TaskQueue struct {
 		runtimes map[string]runtime.Runtime
 		log      logger.Logger
@@ -42,6 +43,7 @@ var (
 	errRuntimeNotFound = errors.New("Runtime environment not found")
 )
 
+// New creates a new TaskQueue instance
 func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor) *TaskQueue {
 	return &TaskQueue{
 		runtimes: runtimes,
@@ -52,6 +54,7 @@ func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGr
 	}
 }
 
+// Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
 func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 	workflow := t.Metadata.Workflow
 	tq.mutex.Lock()
