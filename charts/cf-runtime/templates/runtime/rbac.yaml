@@ -18,7 +18,7 @@ metadata:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "runner.fullname" . }}
+  name: codefresh-engine
   labels:
     {{- include "runner.labels" . | nindent 4 }}
 rules:
@@ -34,7 +34,7 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ include "runner.fullname" . }}
+  name: codefresh-engine
   labels:
     {{- include "runner.labels" . | nindent 4 }}
 subjects:

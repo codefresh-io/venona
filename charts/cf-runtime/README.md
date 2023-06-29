@@ -145,8 +145,6 @@ volumeProvisioner:
 
 ## Requirements
 
-Kubernetes: `>=1.19.0-0`
-
 | Repository | Name | Version |
 |------------|------|---------|
 | https://chartmuseum.codefresh.io/cf-common | cf-common | 0.9.3 |
