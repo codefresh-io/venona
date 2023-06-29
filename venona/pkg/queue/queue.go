@@ -36,6 +36,8 @@ type (
 	}
 )
 
+const defaultWfTaskBufferSize = 10
+
 var (
 	errRuntimeNotFound = errors.New("Runtime environment not found")
 )
@@ -57,7 +59,7 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 	tq.mutex.Unlock()
 	if !ok {
 		tq.log.Info("Creating new queue", "workflow", workflow)
-		c = make(chan *task.Task, 10)
+		c = make(chan *task.Task, defaultWfTaskBufferSize)
 		tq.tasks[workflow] = c
 		tq.wg.Add(1)
 		go tq.handleChannel(ctx, c, workflow)
