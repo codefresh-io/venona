@@ -108,6 +108,7 @@ func New(opt *Options) (*Agent, error) {
 	if err := checkOptions(opt); err != nil {
 		return nil, err
 	}
+
 	id := opt.ID
 	cf := opt.Codefresh
 	runtimes := opt.Runtimes
@@ -451,7 +452,7 @@ func checkOptions(opt *Options) error {
 		return errIDRequired
 	}
 
-	if opt.Runtimes == nil || len(opt.Runtimes) == 0 {
+	if len(opt.Runtimes) == 0 {
 		return errRuntimesRequired
 	}
 
