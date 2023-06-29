@@ -241,7 +241,23 @@ func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 	}
 
 	a.log.Info("Received new tasks", "len", len(tasks))
+	a.log.Debug("List of workflow ids", "ids", tasksToIds(tasks))
+
 	return tasks
+}
+
+func tasksToIds(tasks task.Tasks) []string {
+	keys := make(map[string]bool, len(tasks)/3)
+	res := make([]string, len(tasks)/3)
+	for i := range tasks {
+		workflow := tasks[i].Metadata.Workflow
+		if _, ok := keys[workflow]; !ok {
+			res[i] = tasks[i].Metadata.Workflow
+			keys[workflow] = true
+		}
+	}
+
+	return res
 }
 
 func sortTasks(tasks task.Tasks) {
