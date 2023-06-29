@@ -186,10 +186,11 @@ Affected values:
 | appProxy.readinessProbe | object | See below | Readiness probe configuration |
 | appProxy.replicasCount | int | `1` | Set number of pods |
 | appProxy.resources | object | `{}` | Set requests and limits |
-| appProxy.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Service Account parameters |
+| appProxy.serviceAccount | object | `{"annotations":{},"create":true,"name":"","namespaced":true}` | Service Account parameters |
 | appProxy.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | appProxy.serviceAccount.create | bool | `true` | Create service account |
 | appProxy.serviceAccount.name | string | `""` | Override service account name |
+| appProxy.serviceAccount.namespaced | bool | `true` | Use Role(true)/ClusterRole(true) |
 | appProxy.tolerations | list | `[]` | Set tolerations |
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
