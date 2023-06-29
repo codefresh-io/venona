@@ -34,9 +34,9 @@ type (
 	}
 )
 
-func mockLogger(opt ...mockLoggerOpts) *mocks.Logger {
+func mockLogger(opts ...mockLoggerOpts) *mocks.Logger {
 	m := &mocks.Logger{}
-	if len(opt) == 0 {
+	if len(opts) == 0 {
 		m.On(mock.Anything, mock.Anything).Return(nil)
 		m.On(mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -45,7 +45,7 @@ func mockLogger(opt ...mockLoggerOpts) *mocks.Logger {
 		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	}
-	for _, o := range opt {
+	for _, o := range opts {
 		m.On(o.method, o.args...).Return(o.returns...)
 	}
 	return m

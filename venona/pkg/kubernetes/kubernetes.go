@@ -37,7 +37,7 @@ type (
 	// Kubernetes API client
 	Kubernetes interface {
 		CreateResource(ctx context.Context, spec interface{}) error
-		DeleteResource(ctx context.Context, opt DeleteOptions) error
+		DeleteResource(ctx context.Context, opts DeleteOptions) error
 	}
 	// Options for Kubernetes
 	Options struct {
@@ -71,12 +71,12 @@ func NewInCluster() (Kubernetes, error) {
 }
 
 // New build Kubernetes API
-func New(opt Options) (Kubernetes, error) {
-	if opt.Type != "runtime" {
+func New(opts Options) (Kubernetes, error) {
+	if opts.Type != "runtime" {
 		return nil, errNotValidType
 	}
 
-	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert, opt.Insecure)
+	client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure)
 	return &kube{
 		client: client,
 		logger: logger.New(logger.Options{}),

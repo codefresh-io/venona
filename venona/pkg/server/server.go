@@ -50,15 +50,15 @@ type (
 )
 
 // New returns a new Server instance or an error
-func New(opt *Options) (*Server, error) {
-	if opt.Logger == nil {
+func New(opts *Options) (*Server, error) {
+	if opts.Logger == nil {
 		return nil, errLoggerRequired
 	}
-	log := opt.Logger
+	log := opts.Logger
 
 	r := mux.NewRouter()
-	if opt.Monitor != nil {
-		r.Use(opt.Monitor.NewGorillaMiddleware())
+	if opts.Monitor != nil {
+		r.Use(opts.Monitor.NewGorillaMiddleware())
 	}
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
@@ -67,7 +67,7 @@ func New(opt *Options) (*Server, error) {
 	})
 
 	srv := &http.Server{
-		Addr:              opt.Port,
+		Addr:              opts.Port,
 		Handler:           r,
 		ReadHeaderTimeout: 60 * time.Second,
 	}
