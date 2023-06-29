@@ -180,8 +180,9 @@ Affected values:
 | appProxy.nodeSelector | object | `{}` | Set node selector |
 | appProxy.podAnnotations | object | `{}` | Set pod annotations |
 | appProxy.podSecurityContext | object | `{}` | Set security context for the pod |
-| appProxy.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
+| appProxy.rbac | object | `{"create":true,"namespaced":true,"rules":[]}` | RBAC parameters |
 | appProxy.rbac.create | bool | `true` | Create RBAC resources |
+| appProxy.rbac.namespaced | bool | `true` | Use Role(true)/ClusterRole(true) |
 | appProxy.rbac.rules | list | `[]` | Add custom rule to the role |
 | appProxy.readinessProbe | object | See below | Readiness probe configuration |
 | appProxy.replicasCount | int | `1` | Set number of pods |
