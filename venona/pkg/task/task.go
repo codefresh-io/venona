@@ -16,6 +16,7 @@ package task
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 )
@@ -35,6 +36,11 @@ type (
 
 	// Type of the task
 	Type string
+
+	Workflow struct {
+		Metadata Metadata
+		Tasks    Tasks
+	}
 
 	// Task options
 	Task struct {
@@ -70,15 +76,41 @@ func (r *Tasks) Marshal() ([]byte, error) {
 }
 
 // Less compares two tasks by their CreatedAt values
-func Less(task1 Task, task2 Task) bool {
+func TaskLess(task1 Task, task2 Task) bool {
 	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
 }
 
 // NewTaskTransaction creates a new transaction with task-specific attributes
-func NewTaskTransaction(monitor monitoring.Monitor, t *Task) monitoring.Transaction {
+func NewTaskTransaction(monitor monitoring.Monitor, m Metadata) monitoring.Transaction {
 	txn := monitor.NewTransaction("runner-tasks-execution")
-	txn.AddAttribute("task-type", t.Type)
-	txn.AddAttribute("tid", t.Metadata.Workflow)
-	txn.AddAttribute("runtime-environment", t.Metadata.ReName)
+	txn.AddAttribute("tid", m.Workflow)
+	txn.AddAttribute("runtime-environment", m.ReName)
 	return txn
+}
+
+func NewWorkflow(t Task) *Workflow {
+	return &Workflow{
+		Metadata: t.Metadata,
+		Tasks: Tasks{
+			t,
+		},
+	}
+}
+
+func (wf *Workflow) AddTask(t Task) error {
+	if wf.Metadata.ReName != t.Metadata.ReName || wf.Metadata.Workflow != t.Metadata.Workflow {
+		return fmt.Errorf("mismatch runtime or workflow id, %s/%s is different from %s/%s", wf.Metadata.ReName, wf.Metadata.Workflow, t.Metadata.ReName, t.Metadata.Workflow)
+	}
+
+	if wf.Metadata.CreatedAt > t.Metadata.CreatedAt {
+		wf.Metadata = t.Metadata
+	}
+
+	wf.Tasks = append(wf.Tasks, t)
+	return nil
+}
+
+// Less compares two workflows by their CreatedAt values
+func WorkflowLess(task1 Workflow, task2 Workflow) bool {
+	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
 }

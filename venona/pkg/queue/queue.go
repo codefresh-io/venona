@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -27,15 +26,15 @@ import (
 )
 
 type (
-	// TaskQueue manages a map of workflow (id) -> tasks
-	TaskQueue struct {
-		runtimes  map[string]runtime.Runtime
-		log       logger.Logger
-		wg        *sync.WaitGroup
-		mutex     sync.Mutex
-		monitor   monitoring.Monitor
-		syncTimer *time.Ticker
-		tasks     map[string]chan *task.Task
+	// WorkflowQueue manages a map of workflow (id) -> tasks
+	WorkflowQueue struct {
+		runtimes    map[string]runtime.Runtime
+		log         logger.Logger
+		wg          *sync.WaitGroup
+		monitor     monitoring.Monitor
+		queue       chan *task.Workflow
+		concurrency int
+		stop        []chan bool
 	}
 )
 
@@ -46,90 +45,79 @@ var (
 )
 
 // New creates a new TaskQueue instance
-func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor) *TaskQueue {
-	return &TaskQueue{
-		runtimes:  runtimes,
-		log:       log,
-		wg:        wg,
-		monitor:   monitor,
-		syncTimer: time.NewTicker(1 * time.Second),
-		tasks:     make(map[string]chan *task.Task),
+func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor, concurrency int) *WorkflowQueue {
+	return &WorkflowQueue{
+		runtimes:    runtimes,
+		log:         log,
+		wg:          wg,
+		monitor:     monitor,
+		queue:       make(chan *task.Workflow),
+		concurrency: concurrency,
+		stop:        make([]chan bool, concurrency),
+	}
+}
+
+func (wfq *WorkflowQueue) Start(ctx context.Context) {
+	for i := 0; i < wfq.concurrency; i++ {
+		stopChan := make(chan bool, 1)
+		wfq.stop[i] = stopChan
+		handlerId := i
+		wfq.wg.Add(1)
+		go wfq.handleChannel(ctx, stopChan, handlerId)
+	}
+}
+
+func (wfq *WorkflowQueue) Stop() {
+	for i := 0; i < wfq.concurrency; i++ {
+		wfq.stop[i] <- true
 	}
 }
 
 // Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
-func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
-	workflow := t.Metadata.Workflow
-	tq.mutex.Lock()
-	c, ok := tq.tasks[workflow]
-	if !ok {
-		tq.log.Info("Creating new queue", "workflow", workflow)
-		c = make(chan *task.Task, defaultWfTaskBufferSize)
-		tq.tasks[workflow] = c
-		tq.wg.Add(1)
-		go tq.handleChannel(ctx, c, workflow)
-	}
-
-	tq.mutex.Unlock()
-	select {
-	case c <- t:
-		// sent task to queue
-	case <-time.After(5 * time.Second):
-		tq.log.Error("Send operation timed out", "workflow", workflow)
-	}
+func (wfq *WorkflowQueue) Enqueue(wf *task.Workflow) {
+	wfq.queue <- wf
 }
 
-func (tq *TaskQueue) handleChannel(ctx context.Context, c chan *task.Task, workflow string) {
-	var txn monitoring.Transaction
+func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool, id int) {
+	wfq.log.Info("starting workflow handler", "handlerId", id)
+	ctxCancelled := false
 
-	defer tq.wg.Done()
-	tq.log.Info("running goroutine before sync timer", "workflow", workflow)
-	<-tq.syncTimer.C
-	tq.log.Info("running goroutine after sync timer", "workflow", workflow)
+	defer wfq.wg.Done()
 	for {
 		select {
-		case <-ctx.Done():
-			tq.log.Info("stopping wf task handler routine", "workflow", workflow)
-			return
-		case t := <-c:
-			if txn == nil {
-				txn = task.NewTaskTransaction(tq.monitor, t)
-				defer txn.End()
-			}
-
-			err := tq.handleTask(ctx, t)
-			if err != nil {
-				tq.log.Error("failed handling task", "error", err, "workflow", workflow)
-				txn.NoticeError(err)
-			}
+		case <-stopChan:
+			wfq.log.Info("stopping workflow handler", "handlerId", id)
+			ctxCancelled = true
+		case wf := <-wfq.queue:
+			wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow)
+			wfq.handleWorkflow(ctx, wf)
 		default:
-			if txn == nil {
-				// if there is no transaction yet, it means we haven't handled any tasks yet
-				continue
+			if ctxCancelled {
+				wfq.log.Info("stopped workflow handler", "handlerId", id)
+				return
 			}
-
-			tq.mutex.Lock()
-			{
-				// making sure the channel is still empty after the lock
-				if len(c) == 0 {
-					tq.log.Info("workflow tasks channel empty, stopping task handler", "workflow", workflow)
-					delete(tq.tasks, workflow)
-					close(c)
-					tq.mutex.Unlock()
-					return
-				}
-			}
-			tq.mutex.Unlock()
 		}
 	}
 }
 
-func (tq *TaskQueue) handleTask(ctx context.Context, t *task.Task) error {
-	reName := t.Metadata.ReName
-	runtime, ok := tq.runtimes[reName]
+func (wfq *WorkflowQueue) handleWorkflow(ctx context.Context, wf *task.Workflow) {
+	txn := task.NewTaskTransaction(wfq.monitor, wf.Metadata)
+	defer txn.End()
+
+	workflow := wf.Metadata.Workflow
+	reName := wf.Metadata.ReName
+	runtime, ok := wfq.runtimes[reName]
 	if !ok {
-		return errRuntimeNotFound
+		wfq.log.Error("failed handling task", "error", errRuntimeNotFound, "workflow", workflow)
+		txn.NoticeError(errRuntimeNotFound)
+		return
 	}
 
-	return runtime.HandleTask(ctx, t)
+	for _, t := range wf.Tasks {
+		err := runtime.HandleTask(ctx, &t)
+		if err != nil {
+			wfq.log.Error("failed handling task", "error", err, "workflow", workflow)
+			txn.NoticeError(errRuntimeNotFound)
+		}
+	}
 }
