@@ -18,7 +18,7 @@ helm repo update
 
 **Important:** only helm3 is supported
 
-1. Download the Codefresh CLI and authenticate it with your Codefresh account. Click [here](https://codefresh-io.github.io/cli/getting-started/) for more detailed instructions.
+1. Download the Codefresh CLI and authenticate it with your Codefresh account. Follow [here](https://codefresh-io.github.io/cli/getting-started/) for more detailed instructions.
 2. Run the following command to create mandatory values for Codefresh Runner:
 
     ```console
@@ -26,8 +26,8 @@ helm repo update
     ```
 
    * This will not install anything on your cluster, except for running cluster acceptance tests, which may be skipped using the `--skip-cluster-test` option.
-   * This command will also generate a `generated_values.yaml` file in your current directory, which you will need to provide to the `helm install` command later.
-3. Now run the following to complete the installation:
+   * This command will also generate a `generated_values.yaml` file in your current directory, which you will need to provide to the `helm upgrade` command later.
+3. Run the following to complete the installation:
 
     ```console
     helm repo add cf-runtime https://chartmuseum.codefresh.io/cf-runtime
@@ -81,7 +81,7 @@ Minimal IAM policy for `dind-volume-provisioner`
 
 There are three options:
 
-1. Run dind-volume-provisioner pod on the node/node-group with IAM role
+1. Run `dind-volume-provisioner` pod on the node/node-group with IAM role
 
 ```yaml
 storage:
@@ -96,7 +96,7 @@ volumeProvisioner:
   tolerations: []
 ```
 
-2. Pass `.Values.storage.ebs.accessKeyId/accessKeyIdSecretKeyRef` and `.Values.storage.ebs.secretAccessKey/secretAccessKeySecretKeyRef`
+2. Pass static credentials in `.Values.storage.ebs.accessKeyId/accessKeyIdSecretKeyRef` and `.Values.storage.ebs.secretAccessKey/secretAccessKeySecretKeyRef`
 
 ```yaml
 storage:
