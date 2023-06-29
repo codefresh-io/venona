@@ -149,7 +149,14 @@ volumeProvisioner:
 
 ### To 2.0.0
 
-This major release renames and deprecated several values in the chart.
+This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
+
+Affected values:
+- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
+- `re` is renamed to `runtime`
+- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
+- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
+- `image` values structure has been updated. Split to `image.registry/repository/tag`
 
 {{ template "chart.valuesSection" . }}
 
