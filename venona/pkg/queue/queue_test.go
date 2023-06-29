@@ -38,12 +38,11 @@ func makeWorkflow(wfID string, numOfTasks int) *workflow.Workflow {
 	}
 	wf := workflow.New(metadata)
 	for i := 0; i < numOfTasks; i++ {
-		t := task.Task{
+		wf.AddTask(&task.Task{
 			Type:     task.TypeCreatePod,
 			Metadata: metadata,
 			Spec:     fmt.Sprintf("%s-%d", wfID, i),
-		}
-		wf.AddTask(t)
+		})
 	}
 
 	return wf

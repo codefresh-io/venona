@@ -273,7 +273,10 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 				wfMap[t.Metadata.Workflow] = wf
 			}
 
-			wf.AddTask(t)
+			err := wf.AddTask(&t)
+			if err != nil {
+				a.log.Error("failed adding task to workflow", "error", err)
+			}
 		default:
 			a.log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		}

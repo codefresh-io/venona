@@ -63,9 +63,9 @@ func (wfq *WorkflowQueue) Start(ctx context.Context) {
 	for i := 0; i < wfq.concurrency; i++ {
 		stopChan := make(chan bool, 1)
 		wfq.stop[i] = stopChan
-		handlerId := i
+		handlerID := i
 		wfq.wg.Add(1)
-		go wfq.handleChannel(ctx, stopChan, handlerId)
+		go wfq.handleChannel(ctx, stopChan, handlerID)
 	}
 }
 
@@ -116,8 +116,8 @@ func (wfq *WorkflowQueue) handleWorkflow(ctx context.Context, wf *workflow.Workf
 		return
 	}
 
-	for _, t := range wf.Tasks {
-		err := runtime.HandleTask(ctx, &t)
+	for i := range wf.Tasks {
+		err := runtime.HandleTask(ctx, wf.Tasks[i])
 		if err != nil {
 			wfq.log.Error("failed handling task", "error", err, "workflow", workflow)
 			txn.NoticeError(errRuntimeNotFound)
