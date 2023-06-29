@@ -15,6 +15,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: Major templates refactor
+    - kind: added
+      description: Initial helm unit tests
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common

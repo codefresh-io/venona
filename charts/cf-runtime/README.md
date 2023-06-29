@@ -151,6 +151,19 @@ Kubernetes: `>=1.19.0-0`
 |------------|------|---------|
 | https://chartmuseum.codefresh.io/cf-common | cf-common | 0.9.3 |
 
+## Upgrading
+
+### To 2.0.0
+
+This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
+
+Affected values:
+- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
+- `re` is renamed to `runtime`
+- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
+- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
+- `image` values structure has been updated. Split to `image.registry/repository/tag`
+
 ## Values
 
 | Key | Type | Default | Description |
