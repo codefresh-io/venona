@@ -17,6 +17,7 @@ package codefresh
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -104,11 +105,11 @@ func (c cf) ReportStatus(ctx context.Context, status AgentStatus) error {
 	c.logger.Debug("Reporting status")
 	s, err := status.Marshal()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed marshalling when reporting status: %w", err)
 	}
 	_, err = c.doRequest(ctx, "PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending request when reporting status: %w", err)
 	}
 	return nil
 }

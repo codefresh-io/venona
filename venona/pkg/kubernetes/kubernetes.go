@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -85,12 +86,12 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 
 	bytes, err := json.Marshal(spec)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed marshalling when creating resource: %w", err)
 	}
 
 	obj, _, err := kubeDecode(bytes, nil, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed decoding when creating resource: %w", err)
 	}
 
 	var namespace string
@@ -99,7 +100,7 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		namespace = obj.Namespace
 		_, err = k.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed creating persistent volume claims: %w", err)
 		}
 		k.logger.Info("PersistentVolumeClaim has been created", "name", obj.Name)
 
@@ -107,7 +108,7 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		namespace = obj.Namespace
 		_, err = k.client.CoreV1().Pods(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed creating pod: %w", err)
 		}
 		k.logger.Info("Pod has been created", "name", obj.Name)
 
@@ -120,18 +121,14 @@ func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
 	case task.TypeDeletePVC:
 		err := k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed deleting persistent volume claim: %w", err)
 		}
 		k.logger.Info("PersistentVolumeClaim has been deleted", "name", opt.Name)
 
 	case task.TypeDeletePod:
-		if opt.Name == "engine-6486c49fc689908603736508-retry-9" {
-			k.logger.Info("Skip deleting engine-6486c49fc689908603736508-retry-9")
-			return nil
-		}
 		err := k.client.CoreV1().Pods(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
 		if err != nil {
-			return err
+			return fmt.Errorf("failed deleting pod: %w", err)
 		}
 		k.logger.Info("Pod has been deleted", "name", opt.Name)
 
