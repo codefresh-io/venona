@@ -410,6 +410,8 @@ appProxy:
   rbac:
     # -- Create RBAC resources
     create: true
+    # -- Use Role(true)/ClusterRole(true)
+    namespaced: true
     # -- Add custom rule to the role
     rules: []
 
