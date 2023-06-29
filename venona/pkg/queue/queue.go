@@ -107,7 +107,7 @@ func (tq *TaskQueue) handleChannel(ctx context.Context, c chan *task.Task, workf
 			{
 				// making sure the channel is still empty after the lock
 				if len(c) == 0 {
-					tq.log.Info("Wofkrlow tasks channel empty, stopping task handler", "workflow", workflow)
+					tq.log.Info("workflow tasks channel empty, stopping task handler", "workflow", workflow)
 					delete(tq.tasks, workflow)
 					close(c)
 					tq.mutex.Unlock()
