@@ -1,6 +1,6 @@
 MYDIR=$(dirname $0)
-CHARTDIR="${MYDIR}/../cf-runtime"
-VALUESFILE="../cf-runtime/.ci/values-ci.yaml"
+CHARTDIR="${MYDIR}/charts/cf-runtime"
+VALUESFILE="charts/cf-runtime/.ci/values-ci.yaml"
 OUTPUTFILE=$1
 ALL_VALUES_TEMPLATE=$(cat <<-END
 {{ .Values | toYaml }}
