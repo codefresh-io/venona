@@ -72,7 +72,7 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 	select {
 	case c <- t:
 		// sent task to queue
-	case <- time.After(5 * time.Second):
+	case <-time.After(5 * time.Second):
 		tq.log.Error("Send operation timed out", "workflow", workflow)
 	}
 }
