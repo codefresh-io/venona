@@ -269,3 +269,4 @@ Kubernetes: `>=1.19.0-0`
 | volumeProvisioner.serviceAccount.name | string | `""` | Override service account name |
 | volumeProvisioner.tolerations | list | `[]` | Set tolerations |
 | volumeProvisioner.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
+

@@ -26,7 +26,7 @@ If release name contains chart name it will be used as a full name.
 Provisioner name for storage class
 */}}
 {{- define "dind-volume-provisioner.volumeProvisionerName" }}
-    {{ printf "codefresh.io/dind-volume-provisioner-runner-%s" .Release.Namespace }}
+    {{- printf "codefresh.io/dind-volume-provisioner-runner-%s" .Release.Namespace }}
 {{- end }}
 
 {{/*
@@ -66,6 +66,14 @@ Common labels for dind-volume-cleanup
 */}}
 {{- define "dind-volume-cleanup.labels" -}}
 {{ include "cf-runtime.labels" . }}
+codefresh.io/application: pv-cleanup
+{{- end }}
+
+{{/*
+Common labels for dind-volume-cleanup
+*/}}
+{{- define "dind-volume-cleanup.selectorLabels" -}}
+{{ include "cf-runtime.selectorLabels" . }}
 codefresh.io/application: pv-cleanup
 {{- end }}
 

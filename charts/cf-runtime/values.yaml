@@ -502,5 +502,3 @@ monitor:
   tolerations: []
   # -- Set affinity
   affinity: {}
-
-

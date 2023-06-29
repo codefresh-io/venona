@@ -42,7 +42,7 @@ spec:
             - name: PROVISIONED_BY
               value: {{ include "dind-volume-provisioner.volumeProvisionerName" . }}
             resources:
-            {{- toYaml $values.resources | nindent 12 }}
+            {{- toYaml $values.resources | nindent 14 }}
           {{- with $values.nodeSelector }}
           nodeSelector:
             {{- toYaml . | nindent 12 }}
