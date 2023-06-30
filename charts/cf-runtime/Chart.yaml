@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 2.0.0
+version: 2.0.1
 keywords:
   - codefresh
   - runner
@@ -13,11 +13,10 @@ maintainers:
   - name: codefresh
     url: https://codefresh-io.github.io/
 annotations:
-  artifacthub.io/alternativeName: "runner"
   artifacthub.io/changes: |
-    - kind: changed
-      description: Major templates refactor
     - kind: added
+      description: Major templates refactor
+    - kind: fixed
       description: Initial helm unit tests
 dependencies:
   - name: cf-common
