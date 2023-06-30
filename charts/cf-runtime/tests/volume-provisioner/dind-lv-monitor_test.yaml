@@ -33,7 +33,7 @@ tests:
             codefresh.io/application: lv-monitor
       - equal:
           path: metadata.name
-          value: cf-runtime-dind-lv-monitor
+          value: cf-runtime-lv-monitor
 
   - it: Test no dind-lv-monitor is storage no local
     template: templates/volume-provisioner/daemonset.yaml

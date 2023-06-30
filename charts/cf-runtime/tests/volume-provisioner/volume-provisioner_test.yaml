@@ -33,7 +33,7 @@ tests:
             codefresh.io/application: volume-provisioner
       - equal:
           path: metadata.name
-          value: cf-runtime-dind-volume-provisioner
+          value: cf-runtime-volume-provisioner
 
   - it: Test volume-provisioner podAnnotations
     template: templates/volume-provisioner/deployment.yaml
@@ -79,11 +79,11 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
-          value: cf-runtime-dind-volume-provisioner
+          value: cf-runtime-volume-provisioner
         template: templates/volume-provisioner/deployment.yaml
       - equal:
           path: metadata.name
-          value: cf-runtime-dind-volume-provisioner
+          value: cf-runtime-volume-provisioner
         template: templates/volume-provisioner/rbac.yaml
         documentIndex: 0
 
