@@ -3,7 +3,7 @@ appProxy:
   enabled: true
   ingress:
     class: nginx
-    host: runner-helm-ci-test.cf-op.com
+    host: placeholder
     pathPrefix: /app-proxy
 monitor:
   enabled: true
