@@ -13,7 +13,6 @@ maintainers:
   - name: codefresh
     url: https://codefresh-io.github.io/
 annotations:
-  artifacthub.io/alternativeName: "runner"
   artifacthub.io/changes: |
     - kind: changed
       description: Major templates refactor
