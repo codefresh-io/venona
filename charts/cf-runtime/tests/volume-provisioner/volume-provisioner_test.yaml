@@ -4,6 +4,7 @@ templates:
   - templates/volume-provisioner/deployment.yaml
   - templates/volume-provisioner/rbac.yaml
   - templates/volume-provisioner/secret.yaml
+  - templates/volume-provisioner/storageclass.yaml
 release:
   name: cf-runtime
   namespace: codefresh
@@ -199,3 +200,89 @@ tests:
           content:
             name: ALICE
             value: BOB
+
+  - it: Test volume-provisioner with ebs volumes (static creds)
+    set:
+      storage.backend: ebs
+      storage.ebs.accessKeyId: "MYKEYID"
+      storage.ebs.secretAccessKey: "MYACCESSKEY"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cf-runtime-volume-provisioner
+                key: aws_access_key_id
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cf-runtime-volume-provisioner
+                key: aws_secret_access_key
+        template: templates/volume-provisioner/deployment.yaml
+      - equal:
+          path: data.aws_access_key_id
+          value: TVlLRVlJRA==
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: data.aws_secret_access_key
+          value: TVlBQ0NFU1NLRVk=
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: parameters.volumeBackend
+          value: ebs
+        template: templates/volume-provisioner/storageclass.yaml
+
+  - it: Test volume-provisioner with ebs volumes (secret key ref)
+    set:
+      storage.backend: ebs-csi
+      storage.ebs.availabilityZone: "us-east-1b"
+      storage.ebs.accessKeyIdSecretKeyRef:
+        name: mysecret
+        key: aws_access_key_id
+      storage.ebs.secretAccessKeySecretKeyRef:
+        name: mysecret
+        key: aws_secret_access_key
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: aws_access_key_id
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: aws_secret_access_key
+        template: templates/volume-provisioner/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: parameters.volumeBackend
+          value: ebs-csi
+        template: templates/volume-provisioner/storageclass.yaml
+      - equal:
+          path: parameters.AvailabilityZone
+          value: us-east-1b
+        template: templates/volume-provisioner/storageclass.yaml
