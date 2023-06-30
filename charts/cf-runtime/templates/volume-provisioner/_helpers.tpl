@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "dind-volume-provisioner.name" -}}
-    {{- printf "%s-%s" (include "cf-runtime.name" .) "dind-volume-provisioner" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.name" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -11,15 +11,15 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "dind-volume-provisioner.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "dind-volume-provisioner" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "dind-volume-cleanup.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "dind-volume-cleanup" | trunc 52 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-cleanup" | trunc 52 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "dind-lv-monitor.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "dind-lv-monitor" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "lv-monitor" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
