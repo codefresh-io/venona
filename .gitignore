@@ -21,3 +21,16 @@ venonalog.json
 configdir
 venona/venona
 .runnerconf
+
+# helm template
+**/dry-run/**
+
+# dependency charts
+**/charts/*.tgz
+*.tgz
+
+# lock files
+*.lock
+
+# test values
+**/test-values/**

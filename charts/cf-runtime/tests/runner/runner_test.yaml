@@ -1,0 +1,190 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: runner test
+templates:
+  - templates/venona/deployment.yaml
+  - templates/venona/rbac.yaml
+  - templates/venona/secret.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test runner default metadata
+    template: templates/venona/deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Deployment
+      - isNull:
+          path: metadata.annotations
+      - equal:
+          path: metadata.labels
+          value:
+            app.kubernetes.io/instance: cf-runtime
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: cf-runtime
+            app.kubernetes.io/version: 1.0.0
+            helm.sh/chart: cf-runtime-1.0.0
+            codefresh.io/application: runner
+      - equal:
+          path: metadata.name
+          value: cf-runtime-runner
+
+  - it: Test runner podAnnotations
+    template: templates/venona/deployment.yaml
+    set:
+      runner.podAnnotations.alice: "bob"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations
+          value:
+            alice: bob
+
+  - it: Test runner selector labels
+    template: templates/venona/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/instance: cf-runtime
+            app.kubernetes.io/name: cf-runtime
+            codefresh.io/application: runner
+      - equal:
+          path: spec.template.metadata.labels
+          value:
+            app.kubernetes.io/instance: cf-runtime
+            app.kubernetes.io/name: cf-runtime
+            codefresh.io/application: runner
+
+  - it: Test runner selector labels
+    template: templates/venona/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: Test runner strategy
+    template: templates/venona/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: RollingUpdate
+
+  - it: Test runner default service account name
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: cf-runtime-runner
+        template: templates/venona/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: cf-runtime-runner
+        template: templates/venona/rbac.yaml
+        documentIndex: 0
+
+  - it: Test runner custom service account name
+    set:
+      runner.serviceAccount.name: alice
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: alice
+        template: templates/venona/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: alice
+        template: templates/venona/rbac.yaml
+        documentIndex: 0
+
+  - it: Test runner with service account disabled
+    set:
+      runner.serviceAccount.create: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: default
+        template: templates/venona/deployment.yaml
+      - isKind:
+          of: ServiceAccount
+        not: true
+        documentIndex: 0
+        template: templates/venona/rbac.yaml
+
+  - it: Test runner podSecurityContext
+    template: templates/venona/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext
+          value:
+            runAsUser: 10001
+            runAsGroup: 10001
+            fsGroup: 10001
+
+  - it: Test runner image with global registy prefix
+    set:
+      global.imageRegistry: "myregistry.io"
+    template: templates/venona/deployment.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^myregistry.io/codefresh/.*$
+
+  - it: Test runner nodeSelector
+    set:
+      runner.nodeSelector.alice: bob
+    template: templates/venona/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            alice: bob
+
+  - it: Test runner tolerations
+    set:
+      runner.tolerations:
+      - key: arch
+        operator: Equal
+        value: arm64
+        effect: NoSchedule
+    template: templates/venona/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: arch
+            operator: Equal
+            value: arm64
+            effect: NoSchedule
+
+  - it: Test runner resources
+    set:
+      runner.resources.requests:
+        cpu: 100m
+        memory: 128Mi
+    template: templates/venona/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+  - it: Test runner env vars
+    set:
+      runner.env:
+        ALICE: BOB
+    template: templates/venona/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: ALICE
+            value: BOB

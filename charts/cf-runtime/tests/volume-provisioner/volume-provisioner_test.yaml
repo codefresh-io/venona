@@ -1,0 +1,335 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: volume-provisioner test
+templates:
+  - templates/volume-provisioner/deployment.yaml
+  - templates/volume-provisioner/rbac.yaml
+  - templates/volume-provisioner/secret.yaml
+  - templates/volume-provisioner/storageclass.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test volume-provisioner default metadata
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Deployment
+      - isNull:
+          path: metadata.annotations
+      - equal:
+          path: metadata.labels
+          value:
+            app.kubernetes.io/instance: cf-runtime
+            app.kubernetes.io/managed-by: Helm
+            app.kubernetes.io/name: cf-runtime
+            app.kubernetes.io/version: 1.0.0
+            helm.sh/chart: cf-runtime-1.0.0
+            codefresh.io/application: volume-provisioner
+      - equal:
+          path: metadata.name
+          value: cf-runtime-volume-provisioner
+
+  - it: Test volume-provisioner podAnnotations
+    template: templates/volume-provisioner/deployment.yaml
+    set:
+      volumeProvisioner.podAnnotations.alice: "bob"
+    asserts:
+      - equal:
+          path: spec.template.metadata.annotations
+          value:
+            alice: bob
+
+  - it: Test volume-provisioner selector labels
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/instance: cf-runtime
+            app.kubernetes.io/name: cf-runtime
+            codefresh.io/application: volume-provisioner
+      - equal:
+          path: spec.template.metadata.labels
+          value:
+            app.kubernetes.io/instance: cf-runtime
+            app.kubernetes.io/name: cf-runtime
+            codefresh.io/application: volume-provisioner
+
+  - it: Test volume-provisioner selector labels
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: Test volume-provisioner strategy
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+
+  - it: Test volume-provisioner default service account name
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: cf-runtime-volume-provisioner
+        template: templates/volume-provisioner/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: cf-runtime-volume-provisioner
+        template: templates/volume-provisioner/rbac.yaml
+        documentIndex: 0
+
+  - it: Test volume-provisioner custom service account name
+    set:
+      volumeProvisioner.serviceAccount.name: alice
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: alice
+        template: templates/volume-provisioner/deployment.yaml
+      - equal:
+          path: metadata.name
+          value: alice
+        template: templates/volume-provisioner/rbac.yaml
+        documentIndex: 0
+
+  - it: Test volume-provisioner with service account disabled
+    set:
+      volumeProvisioner.serviceAccount.create: false
+    asserts:
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: default
+        template: templates/volume-provisioner/deployment.yaml
+      - isKind:
+          of: ServiceAccount
+        not: true
+        documentIndex: 0
+        template: templates/volume-provisioner/rbac.yaml
+
+  - it: Test volume-provisioner service account annotations
+    set:
+      volumeProvisioner.serviceAccount.annotations.alice: bob
+    asserts:
+      - equal:
+          path: metadata.annotations
+          value:
+            alice: bob
+        documentIndex: 0
+        template: templates/volume-provisioner/rbac.yaml
+
+  - it: Test volume-provisioner podSecurityContext
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext
+          value:
+            runAsUser: 3000
+            runAsGroup: 3000
+            fsGroup: 3000
+
+  - it: Test volume-provisioner image with global registy prefix
+    set:
+      global.imageRegistry: "myregistry.io"
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^myregistry.io/codefresh/.*$
+
+  - it: Test volume-provisioner nodeSelector
+    set:
+      volumeProvisioner.nodeSelector.alice: bob
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value:
+            alice: bob
+
+  - it: Test volume-provisioner tolerations
+    set:
+      volumeProvisioner.tolerations:
+      - key: arch
+        operator: Equal
+        value: arm64
+        effect: NoSchedule
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: arch
+            operator: Equal
+            value: arm64
+            effect: NoSchedule
+
+  - it: Test volume-provisioner resources
+    set:
+      volumeProvisioner.resources.requests:
+        cpu: 100m
+        memory: 128Mi
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+
+  - it: Test volume-provisioner env vars
+    set:
+      volumeProvisioner.env:
+        ALICE: BOB
+    template: templates/volume-provisioner/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: ALICE
+            value: BOB
+
+  - it: Test volume-provisioner with ebs volumes (static creds)
+    set:
+      storage.backend: ebs
+      storage.ebs.accessKeyId: "MYKEYID"
+      storage.ebs.secretAccessKey: "MYACCESSKEY"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cf-runtime-volume-provisioner
+                key: aws_access_key_id
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cf-runtime-volume-provisioner
+                key: aws_secret_access_key
+        template: templates/volume-provisioner/deployment.yaml
+      - equal:
+          path: data.aws_access_key_id
+          value: TVlLRVlJRA==
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: data.aws_secret_access_key
+          value: TVlBQ0NFU1NLRVk=
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: parameters.volumeBackend
+          value: ebs
+        template: templates/volume-provisioner/storageclass.yaml
+
+  - it: Test volume-provisioner with ebs volumes (secret key ref)
+    set:
+      storage.backend: ebs-csi
+      storage.ebs.availabilityZone: "us-east-1b"
+      storage.ebs.accessKeyIdSecretKeyRef:
+        name: mysecret
+        key: aws_access_key_id
+      storage.ebs.secretAccessKeySecretKeyRef:
+        name: mysecret
+        key: aws_secret_access_key
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: aws_access_key_id
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: mysecret
+                key: aws_secret_access_key
+        template: templates/volume-provisioner/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: parameters.volumeBackend
+          value: ebs-csi
+        template: templates/volume-provisioner/storageclass.yaml
+      - equal:
+          path: parameters.AvailabilityZone
+          value: us-east-1b
+        template: templates/volume-provisioner/storageclass.yaml
+
+  - it: Test volume-provisioner with ebs volumes (service account annotation)
+    set:
+      storage.backend: ebs-csi
+      storage.ebs.availabilityZone: "us-east-1c"
+      volumeProvisioner.serviceAccount.annotations:
+        eks.amazonaws.com/role-arn: "arn:aws:iam::123:role/ebs-role"
+    asserts:
+      - equal:
+          path: metadata.annotations
+          value:
+            eks.amazonaws.com/role-arn: "arn:aws:iam::123:role/ebs-role"
+        template: templates/volume-provisioner/rbac.yaml
+        documentIndex: 0
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: cf-runtime-volume-provisioner
+                key: aws_access_key_id
+        template: templates/volume-provisioner/deployment.yaml
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cf-runtime-volume-provisioner
+                key: aws_secret_access_key
+        template: templates/volume-provisioner/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: parameters.volumeBackend
+          value: ebs-csi
+        template: templates/volume-provisioner/storageclass.yaml
+      - equal:
+          path: parameters.AvailabilityZone
+          value: us-east-1c
+        template: templates/volume-provisioner/storageclass.yaml

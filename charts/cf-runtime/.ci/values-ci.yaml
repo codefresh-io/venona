@@ -1,0 +1,12 @@
+# Values used in `helm-chart-ci` pipeline
+appProxy:
+  enabled: true
+  ingress:
+    class: nginx
+    host: placeholder
+    pathPrefix: /app-proxy
+monitor:
+  enabled: true
+  rbac:
+    namespaced: true
+runner: {}
