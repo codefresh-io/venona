@@ -218,11 +218,11 @@ storage:
 
   # Storage parameters example for aws ebs disks (i.e. `storage.backend=ebs`/`storage.backend=ebs-csi`)
   # https://aws.amazon.com/ebs/
-  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aws
+  # https://codefresh.io/docs/docs/installation/codefresh-runner/#aws-backend-volume-configuration
   # @default -- See below
   ebs:
     # -- Set EBS volume type (`gp2`/`gp3`/`io1`) (required)
-    volumeType: "gp3"
+    volumeType: "gp2"
     # -- Set EBS volumes availability zone (required)
     availabilityZone: "us-east-1a"
     # -- Enable encryption (optional)
@@ -273,7 +273,7 @@ storage:
 
   # Storage parameters example for gce disks
   # https://cloud.google.com/compute/docs/disks#pdspecs
-  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-google-kubernetes-engine
+  # https://codefresh.io/docs/docs/installation/codefresh-runner/#gke-google-kubernetes-engine-backend-volume-configuration
   # @default -- See below
   gcedisk:
     # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
@@ -303,7 +303,7 @@ storage:
     #           }
 
   # Storage parameters example for Azure Disks
-  # https://codefresh.io/docs/docs/administration/codefresh-runner/#installing-on-aks
+  # https://codefresh.io/docs/docs/installation/codefresh-runner/#install-codefresh-runner-on-azure-kubernetes-service-aks
   # @default -- See below
   azuredisk:
     # -- Set storage type (`Premium_LRS`)
@@ -313,6 +313,8 @@ storage:
     # resourceGroup:
     # DiskIOPSReadWrite: 500
     # DiskMBpsReadWrite: 100
+
+  mountAzureJson:  false
 
 # -- Set runtime parameters
 # @default -- See below

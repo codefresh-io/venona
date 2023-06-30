@@ -87,7 +87,9 @@ There are three options:
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: ebs-csi
-  availabilityZone: "us-east-1a"
+
+  ebs:
+    availabilityZone: "us-east-1a"
 
 volumeProvisioner:
   # -- Set node selector
@@ -102,9 +104,10 @@ volumeProvisioner:
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: ebs-csi
-  availabilityZone: "us-east-1a"
 
   ebs:
+    availabilityZone: "us-east-1a"
+
     # -- Set AWS_ACCESS_KEY_ID for volume-provisioner (optional)
     accessKeyId: ""
     # -- Existing secret containing AWS_ACCESS_KEY_ID.
@@ -130,7 +133,9 @@ storage:
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: ebs-csi
-  availabilityZone: "us-east-1a"
+
+  ebs:
+    availabilityZone: "us-east-1a"
 
 volumeProvisioner:
   # -- Service Account parameters
@@ -156,7 +161,8 @@ Affected values:
 - `re` is renamed to `runtime`
 - `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
 - `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
-- `image` values structure has been updated. Split to `image.registry/repository/tag`
+- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
+- pod's `annotations` is renamed to `podAnnotations`
 
 {{ template "chart.valuesSection" . }}
 

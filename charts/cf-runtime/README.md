@@ -87,7 +87,9 @@ There are three options:
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: ebs-csi
-  availabilityZone: "us-east-1a"
+
+  ebs:
+    availabilityZone: "us-east-1a"
 
 volumeProvisioner:
   # -- Set node selector
@@ -102,9 +104,10 @@ volumeProvisioner:
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: ebs-csi
-  availabilityZone: "us-east-1a"
 
   ebs:
+    availabilityZone: "us-east-1a"
+
     # -- Set AWS_ACCESS_KEY_ID for volume-provisioner (optional)
     accessKeyId: ""
     # -- Existing secret containing AWS_ACCESS_KEY_ID.
@@ -130,7 +133,9 @@ storage:
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: ebs-csi
-  availabilityZone: "us-east-1a"
+
+  ebs:
+    availabilityZone: "us-east-1a"
 
 volumeProvisioner:
   # -- Service Account parameters
@@ -160,7 +165,8 @@ Affected values:
 - `re` is renamed to `runtime`
 - `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
 - `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
-- `image` values structure has been updated. Split to `image.registry/repository/tag`
+- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
+- pod's `annotations` is renamed to `podAnnotations`
 
 ## Values
 
@@ -256,13 +262,14 @@ Affected values:
 | storage.ebs.kmsKeyId | string | `""` | Set KMS encryption key ID (optional) |
 | storage.ebs.secretAccessKey | string | `""` | Set AWS_SECRET_ACCESS_KEY for volume-provisioner (optional) Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions |
 | storage.ebs.secretAccessKeySecretKeyRef | object | `{}` | Existing secret containing AWS_SECRET_ACCESS_KEY |
-| storage.ebs.volumeType | string | `"gp3"` | Set EBS volume type (`gp2`/`gp3`/`io1`) (required) |
+| storage.ebs.volumeType | string | `"gp2"` | Set EBS volume type (`gp2`/`gp3`/`io1`) (required) |
 | storage.fsType | string | `"ext4"` | Set filesystem type (`ext4`/`xfs`) |
 | storage.gcedisk.availabilityZone | string | `"us-west1-a"` | Set GCP volume availability zone |
 | storage.gcedisk.serviceAccountJson | string | `""` | Set Google SA JSON key for volume-provisioner (optional) |
 | storage.gcedisk.serviceAccountJsonSecretKeyRef | object | `{}` | Existing secret containing containing Google SA JSON key for volume-provisioner (optional) |
 | storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
 | storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
+| storage.mountAzureJson | bool | `false` |  |
 | volumeProvisioner | object | See below | Volume Provisioner parameters |
 | volumeProvisioner.affinity | object | `{}` | Set affinity |
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
