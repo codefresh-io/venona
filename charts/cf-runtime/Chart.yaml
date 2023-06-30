@@ -14,9 +14,9 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: changed
-      description: Major templates refactor
     - kind: added
+      description: Major templates refactor
+    - kind: fixed
       description: Initial helm unit tests
 dependencies:
   - name: cf-common
