@@ -42,7 +42,7 @@ subjects:
     name: codefresh-engine
 roleRef:
   kind: Role
-  name: {{ include "runner.fullname" . }}
+  name: codefresh-engine
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
 
