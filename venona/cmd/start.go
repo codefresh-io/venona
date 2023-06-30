@@ -50,6 +50,7 @@ type startOptions struct {
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
 	concurrency                    int
+	bufferSize                     int
 	configDir                      string
 	serverPort                     string
 	newrelicLicenseKey             string
@@ -63,7 +64,10 @@ const (
 	defaultCodefreshHost           = "https://g.codefresh.io"
 	defaultTaskPullingInterval     = 3
 	defaultStatusReportingInterval = 10
-	defaultWorkflowConcurrency     = 10
+	defaultWorkflowConcurrency     = 50
+	defaultWorkflowBufferSize      = 1000
+	defaultK8sClientQps            = 50
+	defaultK8sClientBurst          = 100
 )
 
 var (
@@ -87,6 +91,18 @@ var startCmd = &cobra.Command{
 			return errors.New("--workflow-concurrency must be a positive number")
 		}
 
+		if startCmdOptions.bufferSize <= 0 {
+			return errors.New("--workflow-buffer-size must be a positive number")
+		}
+
+		if startCmdOptions.qps <= 0 {
+			return errors.New("--k8s-client-qps must be a positive number")
+		}
+
+		if startCmdOptions.burst <= 0 {
+			return errors.New("--k8s-client-burst must be a positive number")
+		}
+
 		return nil
 	},
 	Run: func(_ *cobra.Command, _ []string) {
@@ -108,6 +124,7 @@ func init() {
 	dieOnError(viper.BindEnv("task-pulling-interval", "TASK_PULLING_INTERVAL"))
 	dieOnError(viper.BindEnv("status-reporting-interval", "STATUS_REPORTING_INTERVAL"))
 	dieOnError(viper.BindEnv("workflow-concurrency", "WORKFLOW_CONCURRENCY"))
+	dieOnError(viper.BindEnv("workflow-buffer-size", "WORKFLOW_BUFFER_SIZE"))
 	dieOnError(viper.BindEnv("k8s-client-qps", "K8S_CLIENT_QPS"))
 	dieOnError(viper.BindEnv("k8s-client-burst", "K8S_CLIENT_BURST"))
 
@@ -119,6 +136,9 @@ func init() {
 	viper.SetDefault("task-pulling-interval", defaultTaskPullingInterval)
 	viper.SetDefault("status-reporting-interval", defaultStatusReportingInterval)
 	viper.SetDefault("workflow-concurrency", defaultWorkflowConcurrency)
+	viper.SetDefault("workflow-buffer-size", defaultWorkflowBufferSize)
+	viper.SetDefault("k8s-client-qps", defaultK8sClientQps)
+	viper.SetDefault("k8s-client-burst", defaultK8sClientBurst)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
@@ -131,6 +151,7 @@ func init() {
 	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", viper.GetInt64("task-pulling-interval"), "The interval (seconds) to pull new tasks from Codefresh [$TASK_PULLING_INTERVAL]")
 	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", viper.GetInt64("status-reporting-interval"), "The interval (seconds) to report status back to Codefresh [$STATUS_REPORTING_INTERVAL]")
 	startCmd.Flags().IntVar(&startCmdOptions.concurrency, "workflow-concurrency", viper.GetInt("workflow-concurrency"), "How many workflow tasks to handle concurrently [$WORKFLOW_CONCURRENCY]")
+	startCmd.Flags().IntVar(&startCmdOptions.bufferSize, "workflow-buffer-size", viper.GetInt("workflow-cbuffer-sizeoncurrency"), "The size of the workflow channel buffer [$WORKFLOW_BUFFER_SIZE]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 	startCmd.Flags().Float32Var(&startCmdOptions.qps, "k8s-client-qps", float32(viper.GetFloat64("k8s-client-qps")), "the maximum QPS to the master from this client [$K8S_CLIENT_QPS]")
@@ -222,6 +243,7 @@ func run(options startOptions) {
 		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
 		Monitor:                        monitor,
 		Concurrency:                    options.concurrency,
+		BufferSize:                     options.bufferSize,
 	})
 	dieOnError(err)
 

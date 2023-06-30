@@ -48,6 +48,7 @@ type (
 		StatusReportingSecondsInterval time.Duration
 		Monitor                        monitoring.Monitor
 		Concurrency                    int
+		BufferSize                     int
 	}
 
 	// Agent holds all the references from Codefresh
@@ -125,7 +126,7 @@ func New(opts *Options) (*Agent, error) {
 		log:                log,
 		taskPullerTicker:   taskPullerTicker,
 		reportStatusTicker: reportStatusTicker,
-		wfQueue:            queue.New(runtimes, log, wg, opts.Monitor, opts.Concurrency),
+		wfQueue:            queue.New(runtimes, log, wg, opts.Monitor, opts.Concurrency, opts.BufferSize),
 		running:            false,
 		lastStatus:         Status{},
 		wg:                 wg,
