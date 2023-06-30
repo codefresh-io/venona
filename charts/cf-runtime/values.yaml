@@ -314,7 +314,7 @@ storage:
     # DiskIOPSReadWrite: 500
     # DiskMBpsReadWrite: 100
 
-  mountAzureJson:  false
+  mountAzureJson: false
 
 # -- Set runtime parameters
 # @default -- See below
