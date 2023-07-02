@@ -30,13 +30,15 @@ import (
 type (
 	// WorkflowQueue manages a map of workflow (id) -> workflow
 	WorkflowQueue struct {
-		runtimes    map[string]runtime.Runtime
-		log         logger.Logger
-		wg          *sync.WaitGroup
-		monitor     monitoring.Monitor
-		queue       chan *workflow.Workflow
-		concurrency int
-		stop        []chan bool
+		runtimes        map[string]runtime.Runtime
+		log             logger.Logger
+		wg              *sync.WaitGroup
+		monitor         monitoring.Monitor
+		queue           chan *workflow.Workflow
+		concurrency     int
+		stop            []chan bool
+		activeWorkflows map[string]struct{}
+		mutex           sync.Mutex
 	}
 )
 
@@ -47,13 +49,14 @@ var (
 // New creates a new TaskQueue instance
 func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor, concurrency, bufferSize int) *WorkflowQueue {
 	return &WorkflowQueue{
-		runtimes:    runtimes,
-		log:         log,
-		wg:          wg,
-		monitor:     monitor,
-		queue:       make(chan *workflow.Workflow, bufferSize),
-		concurrency: concurrency,
-		stop:        make([]chan bool, concurrency),
+		runtimes:        runtimes,
+		log:             log,
+		wg:              wg,
+		monitor:         monitor,
+		queue:           make(chan *workflow.Workflow, bufferSize),
+		concurrency:     concurrency,
+		stop:            make([]chan bool, concurrency),
+		activeWorkflows: make(map[string]struct{}),
 	}
 }
 
@@ -96,6 +99,19 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 			wfq.log.Info("stopping workflow handler", "handlerId", id)
 			ctxCancelled = true
 		case wf := <-wfq.queue:
+			wfq.mutex.Lock()
+			if _, ok := wfq.activeWorkflows[wf.Metadata.Workflow]; ok {
+				// Workflow is already being handled, enqueue it again and skip processing
+				wfq.mutex.Unlock()
+				wfq.log.Info("Workflow", wf.Metadata.Workflow, " is already being handled, enqueue it again and skip processing")
+				time.Sleep(100 * time.Millisecond)
+				wfq.Enqueue(wf)
+				continue
+			}
+			// Mark the workflow as active
+			wfq.activeWorkflows[wf.Metadata.Workflow] = struct{}{}
+			wfq.mutex.Unlock()
+
 			wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow)
 			start := time.Now()
 			wfq.handleWorkflow(ctx, wf)
@@ -113,11 +129,16 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 				"time in runner", end.Sub(wf.Metadata.Pulled),
 				"processing time", end.Sub(start),
 			)
+
+			wfq.mutex.Lock()
+			delete(wfq.activeWorkflows, wf.Metadata.Workflow)
+			wfq.mutex.Unlock()
 		default:
 			if ctxCancelled {
 				wfq.log.Info("stopped workflow handler", "handlerId", id)
 				return
 			}
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 }
