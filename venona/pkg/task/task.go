@@ -16,6 +16,7 @@ package task
 
 import (
 	"encoding/json"
+	"sort"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -82,4 +83,17 @@ func NewTaskTransaction(monitor monitoring.Monitor, m Metadata) monitoring.Trans
 	txn.AddAttribute("tid", m.Workflow)
 	txn.AddAttribute("runtime-environment", m.ReName)
 	return txn
+}
+
+// SortByType sorts the tasks in the specified order: TypeCreatePVC, TypeCreatePod, TypeDeletePod, TypeDeletePVC
+func SortByType(tasks []*Task) {
+	sort.SliceStable(tasks, func(i, j int) bool {
+		order := map[Type]int{
+			TypeCreatePVC: 1,
+			TypeCreatePod: 2,
+			TypeDeletePod: 3,
+			TypeDeletePVC: 4,
+		}
+		return order[tasks[i].Type] < order[tasks[j].Type]
+	})
 }

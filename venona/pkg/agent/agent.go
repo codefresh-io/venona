@@ -288,6 +288,8 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 	ids := []string{}
 	for id, wf := range wfMap {
 		wf.Metadata.Pulled = pullTime
+
+		task.SortByType(wf.Tasks)
 		workflows = append(workflows, wf)
 		ids = append(ids, id)
 	}

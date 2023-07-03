@@ -301,3 +301,47 @@ func Test_executeAgentTask(t *testing.T) {
 		delete(agentTaskExecutors, tt.args.executorName)
 	}
 }
+
+func Test_splitTasks(t *testing.T) {
+	tests := map[string]struct {
+		tasks task.Tasks
+		want  []*task.Task
+	}{
+		"should split tasks to correct order": {
+			tasks: task.Tasks{
+				{
+					Type: task.TypeDeletePod,
+				},
+				{
+					Type: task.TypeCreatePod,
+				},
+				{
+					Type: task.TypeCreatePVC,
+				},
+			},
+			want: []*task.Task{
+				{
+					Type: task.TypeCreatePVC,
+				},
+				{
+					Type: task.TypeCreatePod,
+				},
+				{
+					Type: task.TypeDeletePod,
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			cf := &codefresh.MockCodefresh{}
+			log := logger.New(logger.Options{})
+			a := &Agent{
+				cf:  cf,
+				log: log,
+			}
+			_, workflows := a.splitTasks(tt.tasks)
+			assert.Equal(t, tt.want, workflows[0].Tasks)
+		})
+	}
+}
