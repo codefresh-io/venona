@@ -248,9 +248,38 @@ Affected values:
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
+| runtime.dind | object | `{"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind.env | object | `{}` | Set additional env vars. |
+| runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"}` | Set dind image. |
+| runtime.dind.nodeSelector | object | `{}` | Set node selector. |
+| runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
+| runtime.dind.pvcs | list | `[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}]` | PV claim spec parametes. |
+| runtime.dind.pvcs[0] | object | `{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}` | PVC name prefix. Keep `dind` as default! Don't change! |
+| runtime.dind.pvcs[0].reuseVolumeSelector | string | `"codefresh-app,io.codefresh.accountName"` | PV reuse selector. Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy |
+| runtime.dind.pvcs[0].storageClassName | string | `"{{ include \"dind-volume-provisioner.storageClassName\" . }}"` | PVC storage class name. Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner |
+| runtime.dind.pvcs[0].volumeSize | string | `"16Gi"` | PVC size. |
+| runtime.dind.resources | object | `{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}}` | Set dind resources. |
+| runtime.dind.schedulerName | string | `""` | Set scheduler name. |
+| runtime.dind.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
+| runtime.dind.tolerations | list | `[]` | Set tolerations. |
+| runtime.dind.userAccess | bool | `true` | Keep `true` as default! |
+| runtime.dindDaemon | object | See below | DinD pod daemon config |
+| runtime.engine | object | `{"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.7"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.9","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.12","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.19","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
+| runtime.engine.env | object | `{}` | Set additional env vars. |
+| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.7"}` | Set image. |
+| runtime.engine.nodeSelector | object | `{}` | Set node selector. |
+| runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
+| runtime.engine.resources | object | `{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Set resources. |
+| runtime.engine.runtimeImages | object | See below. | Set system(base) runtime images. |
+| runtime.engine.schedulerName | string | `""` | Set scheduler name. |
+| runtime.engine.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
+| runtime.engine.tolerations | list | `[]` | Set tolerations. |
+| runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
+| runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
 | storage.azuredisk.cachingMode | string | `"None"` |  |
 | storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |
