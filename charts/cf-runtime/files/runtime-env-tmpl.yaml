@@ -40,8 +40,8 @@ runtimeScheduler:
     {{- with $engineContext.nodeSelector }}
     nodeSelector: {{ toYaml . | nindent 6 }}
     {{- end }}
-  {{- if $engineContext.tolerations }}
-  tolerations:  {{ toYaml $engineContext.tolerations | nindent 4 }}
+  {{- with $engineContext.tolerations }}
+  tolerations:  {{ toYaml . | nindent 4 }}
   {{- end }}
   {{- with $engineContext.podAnnotations }}
   annotations: {{ toYaml . | nindent 4 }}
@@ -70,7 +70,7 @@ dockerDaemonScheduler:
     {{- with $dindContext.nodeSelector }}
     nodeSelector: {{ toYaml . | nindent 6 }}
     {{- end }}
-  {{- if $dindContext.tolerations }}
+  {{- with $dindContext.tolerations }}
   tolerations: {{ toYaml . | nindent 4 }}
   {{- end }}
   {{- with $dindContext.podAnnotations }}
