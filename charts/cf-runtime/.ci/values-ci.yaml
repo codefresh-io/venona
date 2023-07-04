@@ -1,4 +1,8 @@
 # Values used in `helm-chart-ci` pipeline
+codefresh:
+  userToken:
+    token: placeholder
+    secretKeyRef: {}
 appProxy:
   enabled: true
   ingress:

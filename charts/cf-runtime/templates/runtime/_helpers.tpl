@@ -29,3 +29,37 @@ Selector labels
 {{ include "cf-runtime.selectorLabels" . }}
 codefresh.io/application: runtime
 {{- end }}
+
+{{/*
+Return runtime image (classic runtime) with private registry prefix
+*/}}
+{{- define "runtime.runtimeImageName" -}}
+  {{- if .registry -}}
+    {{- $imageName :=  (trimPrefix "quay.io/" .imageFullName) -}}
+    {{- printf "%s/%s" .registry $imageName -}}
+  {{- else -}}
+    {{- printf "%s" .imageFullName -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Environment variable value of Codefresh installation token
+*/}}
+{{- define "runtime.installation-token-env-var-value" -}}
+  {{- if .Values.global.codefresh.userToken.token }}
+valueFrom:
+  secretKeyRef:
+    name: {{ include "runtime.installation-token-secret-name" . }}
+    key: codefresh-api-token
+  {{- else if .Values.global.codefresh.userToken.secretKeyRef  }}
+valueFrom:
+  secretKeyRef:
+  {{- .Values.global.codefresh.userToken.secretKeyRef | toYaml | nindent 4 }}
+  {{- else }}
+    {{- fail "global.codefresh.userToken is mandatory. Set token or secretKeyRef!" }}
+  {{- end }}
+{{- end }}
+
+{{- define "runtime.installation-token-secret-name" }}
+{{- print "codefresh-user-token" }}
+{{- end }}
