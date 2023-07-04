@@ -4,7 +4,7 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   {{/* has to be exactly that */}}
-  name: {{ printf "dind-local-volumes-runner-%s" .Release.Namespace }}
+  name: {{ include "dind-volume-provisioner.storageClassName" . }}
   labels:
     {{- include "dind-volume-provisioner.labels" . | nindent 4 }}
 provisioner: {{ include "dind-volume-provisioner.volumeProvisionerName" . }}

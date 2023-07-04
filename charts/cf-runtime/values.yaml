@@ -359,6 +359,12 @@ runtime:
       limits:
         cpu: 400m
         memory: 800Mi
+    pvcs:
+      - name: dind
+        storageClassName: '{{ include "dind-volume-provisioner.storageClassName" . }}'
+        volumeSize: 16Gi
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
     podAnnotations: {}
     nodeSelector: {}
     tolerations: []
