@@ -156,7 +156,7 @@ volumeProvisioner:
 
 ## Upgrading
 
-### To 2.0.0
+### To 2.x
 
 This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
 
@@ -167,6 +167,17 @@ Affected values:
 - `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
 - `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
 - pod's `annotations` is renamed to `podAnnotations`
+
+### To 3.x
+
+⚠️⚠️⚠️ This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
+That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
+
+**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) ), you MUST add them into chart's [values.yaml](./values.yaml)**
+
+Affected values:
+- `runtime.engine` is added
+- `runtime.dind` is added
 
 ## Values
 
