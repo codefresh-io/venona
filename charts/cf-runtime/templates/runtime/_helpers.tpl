@@ -55,8 +55,6 @@ valueFrom:
 valueFrom:
   secretKeyRef:
   {{- .Values.global.codefresh.userToken.secretKeyRef | toYaml | nindent 4 }}
-  {{- else }}
-    {{- fail "global.codefresh.userToken is mandatory. Set token or secretKeyRef!" }}
   {{- end }}
 {{- end }}
 
