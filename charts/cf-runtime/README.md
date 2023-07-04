@@ -39,6 +39,32 @@ helm repo update
     codefresh runner execute-test-pipeline --runtime-name <runtime-name>
     ```
 
+## Upgrading chart
+
+### To 2.x
+
+This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
+
+Affected values:
+- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
+- `re` is renamed to `runtime`
+- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
+- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
+- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
+- pod's `annotations` is renamed to `podAnnotations`
+
+### To 3.x
+
+⚠️⚠️⚠️ This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
+That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
+
+**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/)), you MUST add these into chart's [values.yaml](./values.yaml)**
+
+Affected values:
+- **`global.codefresh.userToken` is now mandatory. You must specify it before the upgrade!**
+- `runtime.engine` is added
+- `runtime.dind` is added
+
 ## Configuration
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
@@ -153,31 +179,6 @@ volumeProvisioner:
 | Repository | Name | Version |
 |------------|------|---------|
 | https://chartmuseum.codefresh.io/cf-common | cf-common | 0.9.3 |
-
-## Upgrading
-
-### To 2.x
-
-This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
-
-Affected values:
-- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
-- `re` is renamed to `runtime`
-- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
-- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
-- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
-- pod's `annotations` is renamed to `podAnnotations`
-
-### To 3.x
-
-⚠️⚠️⚠️ This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
-That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
-
-**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) ), you MUST add them into chart's [values.yaml](./values.yaml)**
-
-Affected values:
-- `runtime.engine` is added
-- `runtime.dind` is added
 
 ## Values
 

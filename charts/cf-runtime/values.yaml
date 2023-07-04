@@ -8,23 +8,11 @@ global:
   # -- Global Docker registry secret names as array
   imagePullSecrets: []
 
-  # -- Codefresh platform and account-related settings
-  codefresh:
-    # -- User token. Used for runtime registration against the patform. One of token (for plain text value) or secretKeyRef must be provided.
-    # You can generate a tokne from the user settings page at https://g.codefresh.io/user/settings
-    userToken:
-      # -- User token in plain text. The chart creates and manages the secret for this token.
-      token:
-      # -- User token that references an existing secret containing the token.
-      secretKeyRef: {}
-      # E.g.
-      # secretKeyRef:
-      #   name: my-secret
-      #   key: codefresh-api-token
-
   # The following values are generated from `codefresh runner init --generate-helm-values-file` output
   namespace: ""
   codefreshHost: ""
+  codefreshToken: ""
+  codefreshTokenSecretKeyRef: {}
   agentToken: ""
   # -- Existing secret (name-of-existing-secret) with API token from Codefresh
   # supersedes value for global.agentToken; secret must contain `codefresh.token` key

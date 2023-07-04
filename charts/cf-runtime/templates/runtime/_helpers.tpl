@@ -46,15 +46,15 @@ Return runtime image (classic runtime) with private registry prefix
 Environment variable value of Codefresh installation token
 */}}
 {{- define "runtime.installation-token-env-var-value" -}}
-  {{- if .Values.global.codefresh.userToken.token }}
+  {{- if .Values.global.codefreshToken }}
 valueFrom:
   secretKeyRef:
     name: {{ include "runtime.installation-token-secret-name" . }}
     key: codefresh-api-token
-  {{- else if .Values.global.codefresh.userToken.secretKeyRef  }}
+  {{- else if .Values.global.codefresh.codefreshTokenSecretKeyRef  }}
 valueFrom:
   secretKeyRef:
-  {{- .Values.global.codefresh.userToken.secretKeyRef | toYaml | nindent 4 }}
+  {{- .Values.global.codefresh.codefreshTokenSecretKeyRef | toYaml | nindent 4 }}
   {{- end }}
 {{- end }}
 
