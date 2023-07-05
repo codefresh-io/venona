@@ -122,7 +122,7 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 			}
 			log := logger.New(logger.Options{})
 			wg := &sync.WaitGroup{}
-			tq := New(runtimes, log, wg, monitoring.NewEmpty(), tt.concurrency)
+			tq := New(runtimes, log, wg, monitoring.NewEmpty(), tt.concurrency, 100)
 			tq.Start(context.Background())
 			for _, tOrS := range tt.workflows {
 				if tOrS.wf != nil {
