@@ -83,6 +83,14 @@ func New(opts Options) (Kubernetes, error) {
 	}, err
 }
 
+// NewWithClient builds a kubernetes API using the given k8s client interface
+func NewWithClient(client kubernetes.Interface) Kubernetes {
+	return &kube{
+		client: client,
+		logger: logger.New(logger.Options{}),
+	}
+}
+
 func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 	bytes, err := json.Marshal(spec)
 	if err != nil {
