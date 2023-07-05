@@ -65,19 +65,19 @@ type (
 )
 
 // New build Codefresh client from options
-func New(opt Options) Codefresh {
-	host := opt.Host
+func New(opts Options) Codefresh {
+	host := opts.Host
 	if host == "" {
 		host = defaultHost
 	}
 
 	return &cf{
-		agentID:    opt.AgentID,
-		httpClient: opt.HTTPClient,
+		agentID:    opts.AgentID,
+		httpClient: opts.HTTPClient,
 		host:       host,
-		logger:     opt.Logger,
-		token:      opt.Token,
-		headers:    opt.Headers,
+		logger:     opts.Logger,
+		token:      opts.Token,
+		headers:    opts.Headers,
 	}
 }
 
@@ -178,6 +178,6 @@ func (c cf) doRequest(ctx context.Context, method string, body io.Reader, apis .
 	if resp.StatusCode >= 400 {
 		return nil, c.buildErrorFromResponse(resp.StatusCode, data)
 	}
-	
+
 	return data, nil
 }
