@@ -21,6 +21,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
+
 	"github.com/stretchr/testify/assert"
 )
 

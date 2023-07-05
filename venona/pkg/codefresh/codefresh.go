@@ -107,10 +107,12 @@ func (c cf) ReportStatus(ctx context.Context, status AgentStatus) error {
 	if err != nil {
 		return fmt.Errorf("failed marshalling when reporting status: %w", err)
 	}
+
 	_, err = c.doRequest(ctx, "PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
 	if err != nil {
 		return fmt.Errorf("failed sending request when reporting status: %w", err)
 	}
+
 	return nil
 }
 
@@ -126,6 +128,7 @@ func (c cf) prepareURL(paths ...string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	accPath := []string{}
 	accRawPath := []string{}
 
@@ -133,6 +136,7 @@ func (c cf) prepareURL(paths ...string) (*url.URL, error) {
 		accRawPath = append(accRawPath, url.PathEscape(p))
 		accPath = append(accPath, p)
 	}
+
 	u.Path = path.Join(accPath...)
 	u.RawPath = path.Join(accRawPath...)
 	return u, nil
@@ -148,10 +152,12 @@ func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http
 	if err != nil {
 		return nil, err
 	}
+
 	req.Header = c.headers.Clone()
 	if c.token != "" {
 		req.Header.Add("Authorization", c.token)
 	}
+
 	req.Header.Add("Content-Type", "application/json")
 	return req, nil
 }
@@ -162,13 +168,16 @@ func (c cf) doRequest(ctx context.Context, method string, body io.Reader, apis .
 	if err != nil {
 		return nil, err
 	}
+
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	if resp.StatusCode >= 400 {
 		return nil, c.buildErrorFromResponse(resp.StatusCode, data)
 	}
+	
 	return data, nil
 }

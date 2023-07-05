@@ -54,6 +54,7 @@ func (r runtime) StartWorkflow(ctx context.Context, tasks []task.Task) error {
 			return fmt.Errorf("failed creating resource: %w", err) // TODO: Return already executed tasks in order to terminate them
 		}
 	}
+
 	return nil
 }
 func (r runtime) TerminateWorkflow(ctx context.Context, tasks []task.Task) []error {
@@ -66,14 +67,17 @@ func (r runtime) TerminateWorkflow(ctx context.Context, tasks []task.Task) []err
 			errs = append(errs, fmt.Errorf("failed to marshal task spec"))
 			continue
 		}
+
 		if err := json.Unmarshal(b, &opt); err != nil {
 			errs = append(errs, fmt.Errorf("failed to unmarshal task spec"))
 			continue
 		}
+
 		if err = r.client.DeleteResource(ctx, opt); err != nil {
 			errs = append(errs, err)
 			continue
 		}
 	}
+
 	return errs
 }

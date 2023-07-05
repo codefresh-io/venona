@@ -29,6 +29,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/stretchr/objx"
 )
@@ -116,10 +117,12 @@ func New(opt *Options) (*Agent, error) {
 	if opt.TaskPullingSecondsInterval != time.Duration(0) {
 		taskPullingInterval = opt.TaskPullingSecondsInterval
 	}
+
 	statusReportingInterval := defaultStatusReportingInterval
 	if opt.StatusReportingSecondsInterval != time.Duration(0) {
 		statusReportingInterval = opt.StatusReportingSecondsInterval
 	}
+
 	taskPullerTicker := time.NewTicker(taskPullingInterval)
 	reportStatusTicker := time.NewTicker(statusReportingInterval)
 	wg := &sync.WaitGroup{}
@@ -127,8 +130,8 @@ func New(opt *Options) (*Agent, error) {
 	if opt.Monitor == nil {
 		opt.Monitor = monitoring.NewEmpty()
 	}
-	httpClient.HTTPClient.Transport = opt.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
 
+	httpClient.HTTPClient.Transport = opt.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
 	return &Agent{
 		id,
 		cf,
@@ -148,6 +151,7 @@ func (a *Agent) Start(ctx context.Context) error {
 	if a.running {
 		return errAlreadyRunning
 	}
+
 	a.running = true
 	a.log.Info("Starting agent")
 
@@ -166,6 +170,7 @@ func (a *Agent) Stop() error {
 	if !a.running {
 		return errAlreadyStopped
 	}
+
 	a.running = false
 	a.log.Warn("Received graceful termination request, stopping tasks...")
 	a.reportStatusTicker.Stop()
@@ -186,9 +191,9 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			return
 		case <-a.taskPullerTicker.C:
 			a.wg.Add(1)
-			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger, monitor monitoring.Monitor) {
-				tasks := pullTasks(ctx, client, logger)
-				startTasks(ctx, tasks, runtimes, logger, monitor)
+			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, log logger.Logger, monitor monitoring.Monitor) {
+				tasks := pullTasks(ctx, client, log)
+				startTasks(ctx, tasks, runtimes, log, monitor)
 				time.Sleep(time.Second * 10)
 				wg.Done()
 			}(a.cf, a.runtimes, a.wg, a.log, a.monitor)
@@ -213,36 +218,38 @@ func (a *Agent) startStatusReporterRoutine(ctx context.Context) {
 	}
 }
 
-func reportStatus(ctx context.Context, client codefresh.Codefresh, status codefresh.AgentStatus, logger logger.Logger) {
+func reportStatus(ctx context.Context, client codefresh.Codefresh, status codefresh.AgentStatus, log logger.Logger) {
 	err := client.ReportStatus(ctx, status)
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 	}
 }
 
-func pullTasks(ctx context.Context, client codefresh.Codefresh, logger logger.Logger) []task.Task {
-	logger.Debug("Requesting tasks from API server")
+func pullTasks(ctx context.Context, client codefresh.Codefresh, log logger.Logger) []task.Task {
+	log.Debug("Requesting tasks from API server")
 	tasks, err := client.Tasks(ctx)
 	if err != nil {
-		logger.Error(err.Error())
+		log.Error(err.Error())
 		return []task.Task{}
 	}
+
 	if len(tasks) == 0 {
-		logger.Debug("No new tasks received")
+		log.Debug("No new tasks received")
 		return []task.Task{}
 	}
-	logger.Info("Received new tasks", "len", len(tasks))
+
+	log.Info("Received new tasks", "len", len(tasks))
 	return tasks
 }
 
-func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor) {
+func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, log logger.Logger, monitor monitoring.Monitor) {
 	creationTasks := []task.Task{}
 	deletionTasks := []task.Task{}
 	agentTasks := []task.Task{}
 
 	// divide tasks by types
 	for _, t := range tasks {
-		logger.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+		log.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		switch t.Type {
 		case task.TypeCreatePod, task.TypeCreatePVC:
 			creationTasks = append(creationTasks, t)
@@ -251,27 +258,28 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		case task.TypeAgentTask:
 			agentTasks = append(agentTasks, t)
 		default:
-			logger.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+			log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		}
 	}
 
 	if len(creationTasks) > 0 || len(deletionTasks) > 0 || len(agentTasks) > 0 {
-		logger.Info("starting tasks", "creation", len(creationTasks), "deletion", len(deletionTasks), "agent", len(agentTasks))
+		log.Info("starting tasks", "creation", len(creationTasks), "deletion", len(deletionTasks), "agent", len(agentTasks))
 	}
 
 	// process agent tasks
 	for i := range agentTasks {
 		t := agentTasks[i]
-		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
+		log.Info("executing agent task", "tid", t.Metadata.Workflow)
 		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
-		go func(tid string) {
-			if err := executeAgentTask(&t, logger); err != nil {
-				logger.Error(err.Error())
+		go func(t task.Task, log logger.Logger) {
+			if err := executeAgentTask(&t, log); err != nil {
+				log.Error(err.Error())
 				txn.NoticeError(err)
 			}
+
 			txn.End()
-			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
-		}(t.Metadata.Workflow)
+			log.Info("finished agent task", "tid", t.Metadata.Workflow)
+		}(t, log)
 	}
 
 	// process creation tasks
@@ -281,16 +289,18 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
 
 		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			log.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 			txn.NoticeError(errRuntimeNotFound)
 			txn.End()
 			continue
 		}
-		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
+
+		log.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
 		if err := runtime.StartWorkflow(ctx, tasks); err != nil {
-			logger.Error(err.Error())
+			log.Error(err.Error())
 			txn.NoticeError(err)
 		}
+
 		time.Sleep(time.Second * 10)
 		txn.End()
 	}
@@ -302,18 +312,20 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
 
 		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+			log.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
 			txn.NoticeError(errRuntimeNotFound)
 			txn.End()
 			continue
 		}
-		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
+
+		log.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
 		if errs := runtime.TerminateWorkflow(ctx, tasks); len(errs) != 0 {
 			for _, err := range errs {
-				logger.Error(err.Error())
+				log.Error(err.Error())
 				txn.NoticeError(err)
 			}
 		}
+
 		txn.End()
 	}
 }
@@ -356,6 +368,7 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	if err != nil {
 		return errAgentTaskMalformedParams
 	}
+
 	if json == nil {
 		json = []byte{}
 	}
@@ -376,8 +389,9 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	if err != nil {
 		return fmt.Errorf("failed sending request: %w", err)
 	}
-	body, _ := io.ReadAll(resp.Body)
 
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
 	log.Info("finished proxy task", "url", url, "method", method, "status", resp.Status, "body", string(body))
 
 	return nil
@@ -392,8 +406,10 @@ func groupTasks(tasks []task.Task) map[string][]task.Task {
 			// Might heppen in older versions on Codefresh
 			name = "_"
 		}
+
 		candidates[name] = append(candidates[name], task)
 	}
+
 	return candidates
 }
 

@@ -75,6 +75,7 @@ func New(opt Options) (Kubernetes, error) {
 	if opt.Type != "runtime" {
 		return nil, errNotValidType
 	}
+
 	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert, opt.Insecure)
 	return &kube{
 		client: client,
@@ -83,7 +84,6 @@ func New(opt Options) (Kubernetes, error) {
 }
 
 func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
-
 	bytes, err := json.Marshal(spec)
 	if err != nil {
 		return fmt.Errorf("failed marshalling when creating resource: %w", err)
@@ -123,6 +123,7 @@ func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
 		if err != nil {
 			return fmt.Errorf("failed deleting persistent volume claim: %w", err)
 		}
+
 		k.logger.Info("PersistentVolumeClaim has been deleted", "name", opt.Name)
 
 	case task.TypeDeletePod:
@@ -130,8 +131,8 @@ func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
 		if err != nil {
 			return fmt.Errorf("failed deleting pod: %w", err)
 		}
-		k.logger.Info("Pod has been deleted", "name", opt.Name)
 
+		k.logger.Info("Pod has been deleted", "name", opt.Name)
 	}
 
 	return nil
@@ -148,6 +149,7 @@ func buildKubeClient(host string, token string, crt string, insecure bool) (kube
 			CAData: []byte(crt),
 		}
 	}
+
 	return kubernetes.NewForConfig(&rest.Config{
 		Host:            host,
 		BearerToken:     token,
@@ -160,5 +162,6 @@ func buildKubeInCluster() (kubernetes.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return kubernetes.NewForConfig(config)
 }
