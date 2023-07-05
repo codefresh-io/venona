@@ -11,7 +11,8 @@ metadata:
     {{- with $values.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
-data: |
-  {{- range $key, $val := $values }}
-  image: {{ $val }}
-  {{- end }}
+data:
+  images: |
+    {{- range $key, $val := $values }}
+    image: {{ $val }}
+    {{- end }}
