@@ -16,6 +16,7 @@ package agent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"testing"
@@ -30,39 +31,31 @@ import (
 )
 
 func Test_groupTasks(t *testing.T) {
-	type args struct {
+	tests := map[string]struct {
 		tasks task.Tasks
-	}
-	tests := []struct {
-		name string
-		args args
-		want map[string]task.Tasks
+		want  map[string]task.Tasks
 	}{
-		{
-			name: "should group by workflow name",
-			args: args{
-				tasks: task.Tasks{
-					{
-						Metadata: task.Metadata{
-							Workflow: "1",
-						},
+		"should group by workflow name": {
+			tasks: task.Tasks{
+				{
+					Metadata: task.Metadata{
+						Workflow: "1",
 					},
-					{
-						Metadata: task.Metadata{
-							Workflow: "2",
-						},
+				},
+				{
+					Metadata: task.Metadata{
+						Workflow: "2",
 					},
-					{
-						Metadata: task.Metadata{
-							Workflow: "1",
-						},
+				},
+				{
+					Metadata: task.Metadata{
+						Workflow: "1",
 					},
 				},
 			},
 			want: map[string]task.Tasks{
 				"1": {
 					{
-
 						Metadata: task.Metadata{
 							Workflow: "1",
 						},
@@ -83,9 +76,9 @@ func Test_groupTasks(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			groupedTasks := groupTasks(tt.args.tasks)
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			groupedTasks := groupTasks(tt.tasks)
 			assert.Equal(t, tt.want, groupedTasks)
 		})
 	}
@@ -93,19 +86,39 @@ func Test_groupTasks(t *testing.T) {
 
 func Test_reportStatus(t *testing.T) {
 	tests := map[string]struct {
-		status codefresh.AgentStatus
+		status   codefresh.AgentStatus
+		beforeFn func(cf *codefresh.MockCodefresh, log *mocks.Logger)
 	}{
 		"should report status": {
 			status: codefresh.AgentStatus{
 				Message: "OK",
 			},
+			beforeFn: func(cf *codefresh.MockCodefresh, _ *mocks.Logger) {
+				cf.On("ReportStatus", mock.Anything, codefresh.AgentStatus{
+					Message: "OK",
+				}).Return(nil)
+			},
+		},
+		"should log error": {
+			status: codefresh.AgentStatus{
+				Message: "OK",
+			},
+			beforeFn: func(cf *codefresh.MockCodefresh, log *mocks.Logger) {
+				cf.On("ReportStatus", mock.Anything, codefresh.AgentStatus{
+					Message: "OK",
+				}).Return(errors.New("some error"))
+				log.On("Error", "some error")
+			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(_ *testing.T) {
+			cf := &codefresh.MockCodefresh{}
+			log := &mocks.Logger{}
+			tt.beforeFn(cf, log)
 			a := &Agent{
-				cf:  getCodefreshMock(),
-				log: getLoggerMock(),
+				cf:  cf,
+				log: log,
 			}
 			a.reportStatus(context.Background(), tt.status)
 		})
@@ -115,7 +128,7 @@ func Test_reportStatus(t *testing.T) {
 func getCodefreshMock() codefresh.Codefresh {
 	cf := codefresh.MockCodefresh{}
 
-	cf.On("ReportStatus", mock.Anything, mock.Anything).Return(fmt.Errorf("bad"))
+	// cf.On("ReportStatus", mock.Anything, mock.Anything).Return(fmt.Errorf("bad"))
 
 	return &cf
 }

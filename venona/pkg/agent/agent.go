@@ -161,6 +161,7 @@ func (a *Agent) Start(ctx context.Context) error {
 	a.running = true
 	a.log.Info("Starting agent")
 
+	// only 1 for the wfTaskHandlerRoutine, the other 2 don't need to be waited on
 	a.wg.Add(1)
 	go a.startTaskPullerRoutine(ctx)
 	go a.startWfTaskHandlerRoutine(ctx)
@@ -209,14 +210,7 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			a.wg.Add(1)
 			go func() {
 				defer a.wg.Done()
-				tasks := a.pullTasks(ctx)
-				if len(tasks) == 0 {
-					return
-				}
-
-				// sort tasks by creationDate
-				sortTasks(tasks)
-				agentTasks, wfTasks := a.splitTasks(tasks)
+				agentTasks, wfTasks := a.getTasks(ctx)
 
 				// perform all agentTasks (in goroutine)
 				for _, agentTask := range agentTasks {
@@ -297,6 +291,14 @@ func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) 
 	}
 }
 
+func (a *Agent) getTasks(ctx context.Context) (task.Tasks, task.Tasks) {
+	tasks := a.pullTasks(ctx)
+
+	// sort tasks by creationDate
+	sortTasks(tasks)
+	return a.splitTasks(tasks)
+}
+
 func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 	a.log.Debug("Requesting tasks from API server")
 	tasks, err := a.cf.Tasks(ctx)
@@ -343,18 +345,18 @@ func sortTasks(tasks task.Tasks) {
 
 func (a *Agent) handleAgentTask(t *task.Task) {
 	a.log.Info("executing agent task", "tid", t.Metadata.Workflow)
-	txn := newTransaction(a.monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
 	a.wg.Add(1)
-	go func(t *task.Task, wg *sync.WaitGroup, log logger.Logger) {
-		defer wg.Done()
-		if err := executeAgentTask(t, log); err != nil {
-			log.Error(err.Error())
+	go func() {
+		defer a.wg.Done()
+		txn := newTransaction(a.monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
+		defer txn.End()
+		if err := executeAgentTask(t, a.log); err != nil {
+			a.log.Error(err.Error())
 			txn.NoticeError(err)
 		}
 
-		txn.End()
-		log.Info("finished agent task", "tid", t.Metadata.Workflow)
-	}(t, a.wg, a.log)
+		a.log.Info("finished agent task", "tid", t.Metadata.Workflow)
+	}()
 }
 
 func executeAgentTask(t *task.Task, log logger.Logger) error {
