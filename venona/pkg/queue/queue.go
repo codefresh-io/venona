@@ -23,16 +23,17 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+	"github.com/codefresh-io/go/venona/pkg/workflow"
 )
 
 type (
-	// WorkflowQueue manages a map of workflow (id) -> tasks
+	// WorkflowQueue manages a map of workflow (id) -> workflow
 	WorkflowQueue struct {
 		runtimes    map[string]runtime.Runtime
 		log         logger.Logger
 		wg          *sync.WaitGroup
 		monitor     monitoring.Monitor
-		queue       chan *task.Workflow
+		queue       chan *workflow.Workflow
 		concurrency int
 		stop        []chan bool
 	}
@@ -51,7 +52,7 @@ func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGr
 		log:         log,
 		wg:          wg,
 		monitor:     monitor,
-		queue:       make(chan *task.Workflow),
+		queue:       make(chan *workflow.Workflow),
 		concurrency: concurrency,
 		stop:        make([]chan bool, concurrency),
 	}
@@ -74,7 +75,7 @@ func (wfq *WorkflowQueue) Stop() {
 }
 
 // Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
-func (wfq *WorkflowQueue) Enqueue(wf *task.Workflow) {
+func (wfq *WorkflowQueue) Enqueue(wf *workflow.Workflow) {
 	wfq.queue <- wf
 }
 
@@ -100,7 +101,7 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 	}
 }
 
-func (wfq *WorkflowQueue) handleWorkflow(ctx context.Context, wf *task.Workflow) {
+func (wfq *WorkflowQueue) handleWorkflow(ctx context.Context, wf *workflow.Workflow) {
 	txn := task.NewTaskTransaction(wfq.monitor, wf.Metadata)
 	defer txn.End()
 

@@ -31,6 +31,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/queue"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+	"github.com/codefresh-io/go/venona/pkg/workflow"
 
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/stretchr/objx"
@@ -220,7 +221,7 @@ func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) 
 	}
 }
 
-func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*task.Workflow) {
+func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow) {
 	tasks := a.pullTasks(ctx)
 	return a.splitTasks(tasks)
 }
@@ -256,9 +257,9 @@ func tasksToIds(tasks task.Tasks) []string {
 	return res
 }
 
-func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*task.Workflow) {
+func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) {
 	agentTasks := task.Tasks{}
-	wfMap := map[string]*task.Workflow{}
+	wfMap := map[string]*workflow.Workflow{}
 
 	// divide tasks by types
 	for _, t := range tasks {
@@ -268,11 +269,11 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*task.Workflow) {
 		case task.TypeCreatePod, task.TypeCreatePVC, task.TypeDeletePod, task.TypeDeletePVC:
 			wf, ok := wfMap[t.Metadata.Workflow]
 			if !ok {
-				wf = task.NewWorkflow(t)
+				wf = workflow.New(t.Metadata)
 				wfMap[t.Metadata.Workflow] = wf
-			} else {
-				wf.AddTask(t)
 			}
+
+			wf.AddTask(t)
 		default:
 			a.log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		}
@@ -281,10 +282,10 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*task.Workflow) {
 	// sort agentTasks by creationDate
 	sort.SliceStable(agentTasks, func(i, j int) bool {
 		task1, task2 := agentTasks[i], tasks[j]
-		return task.TaskLess(task1, task2)
+		return task.Less(task1, task2)
 	})
 
-	workflows := []*task.Workflow{}
+	workflows := []*workflow.Workflow{}
 	ids := []string{}
 	for id, wf := range wfMap {
 		workflows = append(workflows, wf)
@@ -296,7 +297,7 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*task.Workflow) {
 	// sort workflows by creationDate
 	sort.SliceStable(workflows, func(i, j int) bool {
 		wf1, wf2 := workflows[i], workflows[j]
-		return task.WorkflowLess(*wf1, *wf2)
+		return workflow.Less(*wf1, *wf2)
 	})
 	return agentTasks, workflows
 }
