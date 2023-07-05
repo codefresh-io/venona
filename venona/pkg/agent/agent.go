@@ -140,8 +140,6 @@ func (a *Agent) Start(ctx context.Context) error {
 	a.running = true
 	a.log.Info("Starting agent")
 
-	// only 1 for the wfTaskHandlerRoutine, the other 2 don't need to be waited on
-	a.wg.Add(1)
 	go a.startTaskPullerRoutine(ctx)
 	go a.startStatusReporterRoutine(ctx)
 
