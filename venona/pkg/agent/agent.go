@@ -193,11 +193,13 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 				a.wfQueue.Enqueue(workflows[i])
 			}
 
-			a.log.Info("done pulling tasks",
-				"agentTasks", len(agentTasks),
-				"workflows", len(workflows),
-				"quaueSize", a.wfQueue.Size(),
-			)
+			if a.wfQueue.Size() > 0 {
+				a.log.Info("done pulling tasks",
+					"agentTasks", len(agentTasks),
+					"workflows", len(workflows),
+					"quaueSize", a.wfQueue.Size(),
+				)
+			}
 		}
 	}
 }
