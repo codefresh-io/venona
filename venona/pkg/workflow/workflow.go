@@ -28,7 +28,6 @@ type (
 	}
 )
 
-
 // New creates a new empty Workflow instance
 func New(metadata task.Metadata) *Workflow {
 	return &Workflow{
