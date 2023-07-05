@@ -104,7 +104,7 @@ func Test_kube_CreateResource(t *testing.T) {
 			},
 		},
 		"Should fail creating a Deployment": {
-			client:  fake.NewSimpleClientset(),
+			client: fake.NewSimpleClientset(),
 			spec: map[string]interface{}{
 				"kind":       "Deployment",
 				"apiVersion": "apps/v1",
