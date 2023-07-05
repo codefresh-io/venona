@@ -161,7 +161,7 @@ func (a *Agent) Start(ctx context.Context) error {
 	a.running = true
 	a.log.Info("Starting agent")
 
-	a.wg.Add(3)
+	a.wg.Add(1)
 	go a.startTaskPullerRoutine(ctx)
 	go a.startWfTaskHandlerRoutine(ctx)
 	go a.startStatusReporterRoutine(ctx)
@@ -195,10 +195,6 @@ func (a *Agent) Status() Status {
 }
 
 func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
-	defer func() {
-		a.log.Info("done in startTaskPullerRoutine")
-		a.wg.Done()
-	}()
 	for {
 		select {
 		case <-ctx.Done():
@@ -238,10 +234,7 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 }
 
 func (a *Agent) startWfTaskHandlerRoutine(ctx context.Context) {
-	defer func() {
-		a.log.Info("done in startWfTaskHandlerRoutine")
-		a.wg.Done()
-	}()
+	defer a.wg.Done()
 	for {
 		select {
 		case <-ctx.Done():
@@ -280,10 +273,6 @@ func (a *Agent) handleTasks(ctx context.Context, tasks task.Tasks) {
 }
 
 func (a *Agent) startStatusReporterRoutine(ctx context.Context) {
-	defer func() {
-		a.log.Info("done in startStatusReporterRoutine")
-		a.wg.Done()
-	}()
 	for {
 		select {
 		case <-ctx.Done():
