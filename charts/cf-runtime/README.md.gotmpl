@@ -65,6 +65,7 @@ Affected values:
 - `runtime.engine` is added
 - `runtime.dind` is added
 - `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
+- `global.existingDindCertsSecret` is replaced with `global.dindCertsSecretRef`
 
 ## Configuration
 
