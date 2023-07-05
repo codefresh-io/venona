@@ -247,6 +247,7 @@ func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 }
 
 func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) {
+	pullTime := time.Now()
 	agentTasks := task.Tasks{}
 	wfMap := map[string]*workflow.Workflow{}
 
@@ -281,6 +282,7 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 	workflows := []*workflow.Workflow{}
 	ids := []string{}
 	for id, wf := range wfMap {
+		wf.Metadata.Pulled = pullTime
 		workflows = append(workflows, wf)
 		ids = append(ids, id)
 	}

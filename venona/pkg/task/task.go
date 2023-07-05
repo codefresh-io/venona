@@ -16,6 +16,7 @@ package task
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 )
@@ -48,6 +49,7 @@ type (
 		CreatedAt string `json:"createdAt"`
 		ReName    string `json:"reName"`
 		Workflow  string `json:"workflow"`
+		Pulled    time.Time
 	}
 
 	// AgentTask describes a task of type "AgentTask"
