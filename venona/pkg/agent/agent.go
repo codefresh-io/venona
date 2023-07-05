@@ -183,6 +183,10 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 		case <-a.taskPullerTicker.C:
 			agentTasks, workflows := a.getTasks(ctx)
 
+			if len(agentTasks) > 0 || len(workflows) > 0 {
+				a.log.Info("received tasks", "agentTasks", len(agentTasks), "workflows", len(workflows))
+			}
+
 			// perform all agentTasks (in goroutine)
 			for i := range agentTasks {
 				a.handleAgentTask(&agentTasks[i])
@@ -239,22 +243,7 @@ func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 		return task.Tasks{}
 	}
 
-	a.log.Info("Received new tasks", "len", len(tasks))
 	return tasks
-}
-
-func tasksToIds(tasks task.Tasks) []string {
-	keys := make(map[string]bool)
-	res := []string{}
-	for _, t := range tasks {
-		workflow := t.Metadata.Workflow
-		if _, ok := keys[workflow]; !ok {
-			res = append(res, workflow)
-			keys[workflow] = true
-		}
-	}
-
-	return res
 }
 
 func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) {
