@@ -81,6 +81,10 @@ var startCmd = &cobra.Command{
 			return errors.New("--status-reporting-interval must be a positive number")
 		}
 
+		if startCmdOptions.concurrency <= 0 {
+			return errors.New("--workflow-concurrency must be a positive number")
+		}
+
 		return nil
 	},
 	Run: func(_ *cobra.Command, _ []string) {
