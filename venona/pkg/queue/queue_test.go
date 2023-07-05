@@ -188,26 +188,3 @@ func TestTaskQueue_Enqueue(t *testing.T) {
 		})
 	}
 }
-
-func TestNew(t *testing.T) {
-	type args struct {
-		runtimes map[string]runtime.Runtime
-		log      logger.Logger
-		wg       *sync.WaitGroup
-		monitor  monitoring.Monitor
-	}
-	tests := []struct {
-		name string
-		args args
-		want *TaskQueue
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := New(tt.args.runtimes, tt.args.log, tt.args.wg, tt.args.monitor); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("New() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
