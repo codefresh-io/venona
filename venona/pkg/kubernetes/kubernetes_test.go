@@ -70,7 +70,7 @@ func Test_kube_CreateResource(t *testing.T) {
 		spec    interface{}
 		wantErr string
 	}{
-		"Should succesfully create a pod": {
+		"Should successfully create a pod": {
 			client: fake.NewSimpleClientset(),
 			spec: map[string]interface{}{
 				"kind":       "Pod",
@@ -81,7 +81,7 @@ func Test_kube_CreateResource(t *testing.T) {
 				},
 			},
 		},
-		"Should succesfully create a PCV": {
+		"Should successfully create a PCV": {
 			client: fake.NewSimpleClientset(),
 			spec: map[string]interface{}{
 				"kind":       "PersistentVolumeClaim",

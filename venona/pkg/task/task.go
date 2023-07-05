@@ -29,7 +29,7 @@ type (
 	// Tasks array
 	Tasks []Task
 
-	// Task Type
+	// Type of the task
 	Type string
 
 	// Task options
@@ -65,6 +65,7 @@ func (r *Tasks) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
+// Less compares two tasks by their CreatedAt values
 func Less(task1 Task, task2 Task) bool {
 	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
 }
