@@ -29,12 +29,13 @@ import (
 type (
 	// TaskQueue manages a map of workflow (id) -> tasks
 	TaskQueue struct {
-		runtimes map[string]runtime.Runtime
-		log      logger.Logger
-		wg       *sync.WaitGroup
-		mutex    sync.Mutex
-		monitor  monitoring.Monitor
-		tasks    map[string]chan *task.Task
+		runtimes  map[string]runtime.Runtime
+		log       logger.Logger
+		wg        *sync.WaitGroup
+		mutex     sync.Mutex
+		monitor   monitoring.Monitor
+		syncTimer *time.Ticker
+		tasks     map[string]chan *task.Task
 	}
 )
 
@@ -47,11 +48,12 @@ var (
 // New creates a new TaskQueue instance
 func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor) *TaskQueue {
 	return &TaskQueue{
-		runtimes: runtimes,
-		log:      log,
-		wg:       wg,
-		monitor:  monitor,
-		tasks:    make(map[string]chan *task.Task),
+		runtimes:  runtimes,
+		log:       log,
+		wg:        wg,
+		monitor:   monitor,
+		syncTimer: time.NewTicker(1 * time.Second),
+		tasks:     make(map[string]chan *task.Task),
 	}
 }
 
@@ -81,6 +83,9 @@ func (tq *TaskQueue) handleChannel(ctx context.Context, c chan *task.Task, workf
 	var txn monitoring.Transaction
 
 	defer tq.wg.Done()
+	tq.log.Info("running goroutine before sync timer", "workflow", workflow)
+	<-tq.syncTimer.C
+	tq.log.Info("running goroutine after sync timer", "workflow", workflow)
 	for {
 		select {
 		case <-ctx.Done():
