@@ -51,7 +51,7 @@ func (r runtime) StartWorkflow(ctx context.Context, tasks []task.Task) error {
 	for _, task := range tasks {
 		err := r.client.CreateResource(ctx, task.Spec)
 		if err != nil {
-			return err // TODO: Return already executed tasks in order to terminate them
+			return fmt.Errorf("failed creating resource: %w", err) // TODO: Return already executed tasks in order to terminate them
 		}
 	}
 	return nil

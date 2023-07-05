@@ -361,7 +361,7 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 
 	req, err := retryablehttp.NewRequest(method, url, bytes.NewReader(json))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed creating new request: %w", err)
 	}
 
 	req.Header.Add("x-req-type", "workflow-request")
@@ -373,7 +373,7 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending request: %w", err)
 	}
 	body, _ := io.ReadAll(resp.Body)
 
