@@ -200,7 +200,8 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	// queue 11 more tasks after it, to fill up wf1 channel
+	// queue 20 tasks for wf1, to fill up wf1 channel (but not overflow it)
+	// the 3rd will hang until later
 	for i := 1; i < 21; i++ {
 		tq.Enqueue(ctx, &task.Task{
 			Type: task.TypeCreatePod,
@@ -230,8 +231,11 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 		})
 	}
 
+	// wait for wf2 to finish all 3 tasks
 	<-wf2Chan
+	// signal 3rd task of wf1 to stop hanging
 	wf1Chan <- true
+	// wait until all task queues are empty
 	tq.wg.Wait()
 	assert.Equal(t, doneTasks["wf1"], 20, "wf1 was not completed")
 	assert.Equal(t, doneTasks["wf2"], 3, "wf2 was not completed")
