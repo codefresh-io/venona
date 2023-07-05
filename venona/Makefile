@@ -63,8 +63,7 @@ fmt:
 mock:
 	@sh ./scripts/mock.sh $(PKG) $(NAME)
 
-# Generate mock struct from interface
-# example: make mock PKG=./pkg/runtime NAME=Runtime
+# Runs cript to upload codecov coverage data
 .PHONY: upload-coverage
 upload-coverage:
 	@./scripts/codecov.sh -t $(CODECOV_TOKEN)

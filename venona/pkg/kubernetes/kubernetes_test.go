@@ -18,219 +18,177 @@ import (
 	"context"
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"k8s.io/apimachinery/pkg/runtime"
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
-	k8stesting "k8s.io/client-go/testing"
 )
 
 func TestNew(t *testing.T) {
-	type args struct {
-		opt Options
-	}
-	tests := []struct {
-		name        string
-		args        args
-		want        kube
-		wantErr     bool
-		errorString string
+	tests := map[string]struct {
+		opts    Options
+		want    kube
+		wantErr string
 	}{
-		{
-			name: "on valid input retun kube",
-			args: args{
-				opt: Options{
-					Type: "runtime",
-				},
+		"should succeed with a valid type": {
+			opts: Options{
+				Type: "runtime",
 			},
-			want:    kube{},
-			wantErr: false,
+			want: kube{},
 		},
-		{
-			name: "on non valid type return errNotValidType",
-			args: args{
-				opt: Options{
-					Type: "secret",
-				},
+		"should fail with an invalid type": {
+			opts: Options{
+				Type: "secret",
 			},
-			wantErr:     true,
-			errorString: "not a valid type",
+			wantErr: "not a valid type",
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := New(tt.args.opt)
-			if tt.wantErr {
-				assert.Error(t, err)
-				assert.EqualError(t, err, tt.errorString)
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := New(tt.opts)
+			if err != nil || tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func createFakeClientSetForPodOperation(t *testing.T, ns string) kubernetes.Interface {
-	client := fake.NewSimpleClientset()
-	client.Fake.PrependReactor("create", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		assert.Equal(t, ns, action.GetNamespace())
-		return true, nil, nil
-	})
-	client.Fake.PrependReactor("delete", "pods", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		assert.Equal(t, ns, action.GetNamespace())
-		return true, nil, nil
-	})
-	return client
-}
-
-func createFakeClientSetForPvcOperation(t *testing.T, ns string) kubernetes.Interface {
-	client := fake.NewSimpleClientset()
-	client.Fake.PrependReactor("create", "persistentvolumeclaims", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		assert.Equal(t, ns, action.GetNamespace())
-		return true, nil, nil
-	})
-	client.Fake.PrependReactor("delete", "persistentvolumeclaims", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		assert.Equal(t, ns, action.GetNamespace())
-		return true, nil, nil
-	})
-	return client
-}
-
 func createMockLogger() *mocks.Logger {
 	l := &mocks.Logger{}
-	l.On("Info", mock.Anything).Return(nil)
+	l.On("Info", mock.Anything, "namespace", mock.AnythingOfType("string"), "name", mock.AnythingOfType("string")).Return(nil)
 	return l
 }
 
 func Test_kube_CreateResource(t *testing.T) {
-	type fields struct {
-		client kubernetes.Interface
-		logger logger.Logger
-	}
-	type args struct {
-		spec interface{}
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-		wantMsg string
+	tests := map[string]struct {
+		client  kubernetes.Interface
+		spec    interface{}
+		wantErr string
 	}{
-		{
-			name: "shoul call create pod if spec type is create pod	",
-			fields: fields{
-				client: createFakeClientSetForPodOperation(t, "ns"),
-				logger: createMockLogger(),
-			},
-			wantMsg: "Pod has been created",
-			args: args{
-				spec: map[string]interface{}{
-					"kind":       "Pod",
-					"apiVersion": "v1",
-					"metadata": map[string]interface{}{
-						"name":      "dind",
-						"namespace": "ns",
-					},
+		"Should succesfully create a pod": {
+			client: fake.NewSimpleClientset(),
+			spec: map[string]interface{}{
+				"kind":       "Pod",
+				"apiVersion": "v1",
+				"metadata": map[string]interface{}{
+					"name":      "some-pod",
+					"namespace": "some-namespace",
 				},
 			},
 		},
-		{
-			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
-			fields: fields{
-				client: createFakeClientSetForPvcOperation(t, "ns"),
-				logger: createMockLogger(),
+		"Should succesfully create a PCV": {
+			client: fake.NewSimpleClientset(),
+			spec: map[string]interface{}{
+				"kind":       "PersistentVolumeClaim",
+				"apiVersion": "v1",
+				"metadata": map[string]interface{}{
+					"name":      "some-pvc",
+					"namespace": "some-namespace",
+				},
 			},
-			wantMsg: "PersistentVolumeClaim has been created",
-			args: args{
-				spec: map[string]interface{}{
-					"kind":       "PersistentVolumeClaim",
-					"apiVersion": "v1",
-					"metadata": map[string]interface{}{
-						"name":      "dind",
-						"namespace": "ns",
-					},
+		},
+		"Should fail creating a Deployment": {
+			client:  fake.NewSimpleClientset(),
+			wantErr: "failed creating resource of type apps/v1, Kind=Deployment",
+			spec: map[string]interface{}{
+				"kind":       "Deployment",
+				"apiVersion": "apps/v1",
+				"metadata": map[string]interface{}{
+					"name":      "some-deployment",
+					"namespace": "some-namespace",
 				},
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			k := kube{
-				client: tt.fields.client,
-				logger: tt.fields.logger,
+				client: tt.client,
+				logger: createMockLogger(),
 			}
-			mo := k.logger.(*mocks.Logger)
-			err := k.CreateResource(context.Background(), tt.args.spec)
-			mo.AssertCalled(t, "Info", tt.wantMsg)
-			if tt.wantErr {
-				assert.Error(t, err)
-				//	assert.EqualError(t, err, tt.errorString)
+			err := k.CreateResource(context.Background(), tt.spec)
+			if err != nil || tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
 			}
 		})
 	}
 }
 
 func Test_kube_DeleteResource(t *testing.T) {
-	type fields struct {
-		client kubernetes.Interface
-		logger logger.Logger
-	}
-	type args struct {
-		opt DeleteOptions
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
-		wantMsg string
+	tests := map[string]struct {
+		client  kubernetes.Interface
+		opts    DeleteOptions
+		wantErr string
 	}{
-		{
-			name: "shoul call create pod if spec type is create pod	",
-			fields: fields{
-				client: createFakeClientSetForPodOperation(t, "ns"),
-				logger: createMockLogger(),
-			},
-			wantMsg: "Pod has been deleted",
-			args: args{
-				DeleteOptions{
-					Kind:      task.TypeDeletePod,
-					Namespace: "ns",
-					Name:      "name",
+		"Should successfully delete an existing Pod": {
+			client: fake.NewSimpleClientset(&v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "some-namespace",
+					Name:      "some-pod",
 				},
+			}),
+			opts: DeleteOptions{
+				Kind:      task.TypeDeletePod,
+				Namespace: "some-namespace",
+				Name:      "some-pod",
 			},
 		},
-		{
-			name: "shoul call create PersistentVolumeClaim if spec type is create PersistentVolumeClaim	",
-			fields: fields{
-				client: createFakeClientSetForPvcOperation(t, "ns"),
-				logger: createMockLogger(),
-			},
-			wantMsg: "PersistentVolumeClaim has been deleted",
-			args: args{
-				DeleteOptions{
-					Kind:      task.TypeDeletePVC,
-					Namespace: "ns",
-					Name:      "name",
+		"Should successfully delete an existing PVC": {
+			client: fake.NewSimpleClientset(&v1.PersistentVolumeClaim{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "some-namespace",
+					Name:      "some-pvc",
 				},
+			}),
+			opts: DeleteOptions{
+				Kind:      task.TypeDeletePVC,
+				Namespace: "some-namespace",
+				Name:      "some-pvc",
 			},
+		},
+		"Should fail deleting an unexisting Pod": {
+			client: fake.NewSimpleClientset(),
+			opts: DeleteOptions{
+				Kind:      task.TypeDeletePod,
+				Namespace: "some-namespace",
+				Name:      "some-pod",
+			},
+			wantErr: "failed deleting pod \"some-namespace\\some-pod\": pods \"some-pod\" not found",
+		},
+		"Should fail deleting an unexisting PVC": {
+			client: fake.NewSimpleClientset(),
+			opts: DeleteOptions{
+				Kind:      task.TypeDeletePod,
+				Namespace: "some-namespace",
+				Name:      "some-pvc",
+			},
+			wantErr: "failed deleting pod \"some-namespace\\some-pvc\": pods \"some-pvc\" not found",
+		},
+		"Should fail deleting an unknown type": {
+			client: fake.NewSimpleClientset(),
+			opts: DeleteOptions{
+				Kind:      "unknown-type",
+				Namespace: "some-namespace",
+				Name:      "some-pvc",
+			},
+			wantErr: "failed deleting resource of type unknown-type",
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			k := kube{
-				client: tt.fields.client,
-				logger: tt.fields.logger,
+				client: tt.client,
+				logger: createMockLogger(),
 			}
-			if err := k.DeleteResource(context.Background(), tt.args.opt); (err != nil) != tt.wantErr {
-				t.Errorf("kube.DeleteResource() error = %v, wantErr %v", err, tt.wantErr)
+			err := k.DeleteResource(context.Background(), tt.opts)
+			if err != nil || tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
 			}
-			mo := k.logger.(*mocks.Logger)
-			mo.AssertCalled(t, "Info", tt.wantMsg)
 		})
 	}
 }
