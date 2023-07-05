@@ -88,7 +88,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 			},
 			wantErr: "unknown task type \"some-type\"",
 		},
-		"should fail creating if k8s client fails":{
+		"should fail creating if k8s client fails": {
 			task: task.Task{
 				Type: task.TypeCreatePod,
 				Spec: "some spec",
