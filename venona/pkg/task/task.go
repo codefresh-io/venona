@@ -74,6 +74,7 @@ func Less(task1 Task, task2 Task) bool {
 	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
 }
 
+// NewTaskTransaction creates a new transaction with task-specific attributes
 func NewTaskTransaction(monitor monitoring.Monitor, t *Task) monitoring.Transaction {
 	txn := monitor.NewTransaction("runner-tasks-execution")
 	txn.AddAttribute("task-type", t.Type)
