@@ -247,12 +247,12 @@ func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 }
 
 func tasksToIds(tasks task.Tasks) []string {
-	keys := make(map[string]bool, len(tasks)/3)
-	res := make([]string, len(tasks)/3)
-	for i := range tasks {
-		workflow := tasks[i].Metadata.Workflow
+	keys := make(map[string]bool)
+	res := []string{}
+	for _, t := range tasks {
+		workflow := t.Metadata.Workflow
 		if _, ok := keys[workflow]; !ok {
-			res[i] = tasks[i].Metadata.Workflow
+			res = append(res, workflow)
 			keys[workflow] = true
 		}
 	}

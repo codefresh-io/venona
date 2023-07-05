@@ -60,7 +60,6 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 	workflow := t.Metadata.Workflow
 	tq.mutex.Lock()
 	c, ok := tq.tasks[workflow]
-	tq.mutex.Unlock()
 	if !ok {
 		tq.log.Info("Creating new queue", "workflow", workflow)
 		c = make(chan *task.Task, defaultWfTaskBufferSize)
@@ -69,6 +68,7 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 		go tq.handleChannel(ctx, c, workflow)
 	}
 
+	tq.mutex.Unlock()
 	select {
 	case c <- t:
 		// sent task to queue
