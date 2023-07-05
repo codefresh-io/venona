@@ -16,7 +16,6 @@ package queue
 
 import (
 	"context"
-	"reflect"
 	"sync"
 	"testing"
 	"time"
