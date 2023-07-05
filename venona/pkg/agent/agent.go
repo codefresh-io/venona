@@ -183,10 +183,6 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 		case <-a.taskPullerTicker.C:
 			agentTasks, workflows := a.getTasks(ctx)
 
-			if len(agentTasks) > 0 || len(workflows) > 0 {
-				a.log.Info("received tasks", "agentTasks", len(agentTasks), "workflows", len(workflows))
-			}
-
 			// perform all agentTasks (in goroutine)
 			for i := range agentTasks {
 				a.handleAgentTask(&agentTasks[i])
@@ -196,6 +192,12 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			for i := range workflows {
 				a.wfQueue.Enqueue(workflows[i])
 			}
+
+			a.log.Info("done pulling tasks",
+				"agentTasks", len(agentTasks),
+				"workflows", len(workflows),
+				"quaueSize", a.wfQueue.Size(),
+			)
 		}
 	}
 }
