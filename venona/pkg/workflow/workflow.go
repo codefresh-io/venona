@@ -31,7 +31,7 @@ type (
 func New(metadata task.Metadata) *Workflow {
 	return &Workflow{
 		Metadata: metadata,
-		Tasks: task.Tasks{},
+		Tasks:    task.Tasks{},
 	}
 }
 
