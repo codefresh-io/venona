@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -102,6 +103,7 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		return fmt.Errorf("failed decoding when creating resource: %w", err)
 	}
 
+	start := time.Now()
 	switch obj := obj.(type) {
 	case *v1.PersistentVolumeClaim:
 		_, err = k.client.CoreV1().PersistentVolumeClaims(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
@@ -109,7 +111,11 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 			return fmt.Errorf("failed creating persistent volume claims \"%s\\%s\": %w", obj.Namespace, obj.Name, err)
 		}
 
-		k.logger.Info("PersistentVolumeClaim has been created", "namespace", obj.Namespace, "name", obj.Name)
+		k.logger.Info("PersistentVolumeClaim has been created",
+			"namespace", obj.Namespace,
+			"name", obj.Name,
+			"duration", time.Now().Sub(start),
+		)
 
 	case *v1.Pod:
 		_, err = k.client.CoreV1().Pods(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
@@ -117,7 +123,11 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 			return fmt.Errorf("failed creating pod \"%s\\%s\": %w", obj.Namespace, obj.Name, err)
 		}
 
-		k.logger.Info("Pod has been created", "namespace", obj.Namespace, "name", obj.Name)
+		k.logger.Info("Pod has been created",
+			"namespace", obj.Namespace,
+			"name", obj.Name,
+			"duration", time.Now().Sub(start),
+		)
 
 	default:
 		return fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind())
@@ -127,6 +137,7 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 }
 
 func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
+	start := time.Now()
 	switch opts.Kind {
 	case task.TypeDeletePVC:
 		err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
@@ -134,7 +145,11 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 			return fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 		}
 
-		k.logger.Info("PersistentVolumeClaim has been deleted", "namespace", opts.Namespace, "name", opts.Name)
+		k.logger.Info("PersistentVolumeClaim has been deleted",
+			"namespace", opts.Namespace,
+			"name", opts.Name,
+			"duration", time.Now().Sub(start),
+		)
 
 	case task.TypeDeletePod:
 		err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
@@ -142,7 +157,11 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 			return fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 		}
 
-		k.logger.Info("Pod has been deleted", "namespace", opts.Namespace, "name", opts.Name)
+		k.logger.Info("Pod has been deleted",
+			"namespace", opts.Namespace,
+			"name", opts.Name,
+			"duration", time.Now().Sub(start),
+		)
 
 	default:
 		return fmt.Errorf("failed deleting resource of type %s", opts.Kind)
