@@ -142,88 +142,59 @@ func getLoggerMock() *mocks.Logger {
 }
 
 func TestNew(t *testing.T) {
-	runtimes := make(map[string]runtime.Runtime)
-	runtimes["x"] = runtime.New(runtime.Options{})
-	type args struct {
-		opt *Options
-	}
-	tests := []struct {
-		name    string
-		args    args
+	tests := map[string]struct {
+		opt     *Options
 		want    *Agent
-		wantErr error
+		wantErr string
 	}{
-		{
-			"should throw error if options is nil",
-			args{
-				nil,
-			},
-			nil,
-			errOptionsRequired,
+		"should throw error if options is nil": {
+			opt:     nil,
+			want:    nil,
+			wantErr: errOptionsRequired.Error(),
 		},
-		{
-			"should throw error if ID is not provided",
-			args{
-				&Options{
-					ID:        "",
-					Codefresh: getCodefreshMock(),
-					Runtimes:  runtimes,
-					Logger:    &mocks.Logger{},
+		"should throw error if ID is not provided": {
+			opt: &Options{
+				ID:        "",
+				Codefresh: getCodefreshMock(),
+				Runtimes:  map[string]runtime.Runtime{
+					"x": runtime.New(runtime.Options{}),
 				},
+				Logger:    &mocks.Logger{},
 			},
-			nil,
-			errIDRequired,
+			want:    nil,
+			wantErr: errIDRequired.Error(),
 		},
-		{
-			"should throw error if runtimes is not provided",
-			args{
-				&Options{
-					ID:        "foobar",
-					Codefresh: getCodefreshMock(),
-					Runtimes:  nil,
-					Logger:    &mocks.Logger{},
-				},
+		"should throw error if runtimes are not provided": {
+			opt: &Options{
+				ID:        "foobar",
+				Codefresh: getCodefreshMock(),
+				Runtimes:  nil,
+				Logger:    &mocks.Logger{},
 			},
-			nil,
-			errRuntimesRequired,
+			want:    nil,
+			wantErr: errRuntimesRequired.Error(),
 		},
-		{
-			"should throw error if runtimes is empty",
-			args{
-				&Options{
-					ID:        "foobar",
-					Codefresh: getCodefreshMock(),
-					Runtimes:  make(map[string]runtime.Runtime),
-					Logger:    &mocks.Logger{},
+		"should throw error if logger is nil": {
+			opt: &Options{
+				ID:        "foobar",
+				Codefresh: getCodefreshMock(),
+				Runtimes:  map[string]runtime.Runtime{
+					"x": runtime.New(runtime.Options{}),
 				},
+				Logger:    nil,
 			},
-			nil,
-			errRuntimesRequired,
-		},
-		{
-			"should throw error if logger is nil",
-			args{
-				&Options{
-					ID:        "foobar",
-					Codefresh: getCodefreshMock(),
-					Runtimes:  runtimes,
-					Logger:    nil,
-				},
-			},
-			nil,
-			errLoggerRequired,
+			want:    nil,
+			wantErr: errLoggerRequired.Error(),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := New(tt.args.opt)
-			if tt.wantErr != nil {
-				if err == nil {
-					t.Errorf("expected error \"%v\" but got no error", tt.wantErr)
-				} else if err != tt.wantErr {
-					t.Errorf("expected error \"%v\" but got error \"%v\"", tt.wantErr, err)
-				}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := New(tt.opt)
+			if err != nil || tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
+				return
 			}
+
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("New() = %v, want %v", got, tt.want)
 			}
