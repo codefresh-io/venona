@@ -255,7 +255,9 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		}
 	}
 
-	logger.Info("starting tasks", "creation", len(creationTasks), "deletion", len(deletionTasks), "agent", len(agentTasks))
+	if len(creationTasks) > 0 || len(deletionTasks) > 0 || len(agentTasks) > 0 {
+		logger.Info("starting tasks", "creation", len(creationTasks), "deletion", len(deletionTasks), "agent", len(agentTasks))
+	}
 
 	// process agent tasks
 	for i := range agentTasks {
