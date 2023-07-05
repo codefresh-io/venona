@@ -64,6 +64,7 @@ Affected values:
 - added **mandatory** `global.codefresh.codefreshToken`/`global.codefresh.codefreshTokenSecretKeyRef` **You must specify it before the upgrade!**
 - `runtime.engine` is added
 - `runtime.dind` is added
+- `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
 
 ## Configuration
 
@@ -212,8 +213,6 @@ volumeProvisioner:
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
 | global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
-| global.existingAgentToken | string | `""` | Existing secret (name-of-existing-secret) with API token from Codefresh supersedes value for global.agentToken; secret must contain `codefresh.token` key |
-| global.existingDindCertsSecret | string | `""` | Existing secret (name has to be `codefresh-certs-server`) supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
 | monitor.affinity | object | `{}` | Set affinity |
