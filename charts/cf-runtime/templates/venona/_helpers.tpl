@@ -34,12 +34,22 @@ codefresh.io/application: runner
 Get the token secret.
 */}}
 {{- define "runner.secretTokenName" -}}
-    {{- if .Values.global.existingAgentToken -}}
-        {{- printf "%s" (tpl .Values.global.existingAgentToken $) -}}
-    {{- else -}}
-        {{- printf "%s" (include "runner.fullname" .) -}}
-    {{- end -}}
-{{- end -}}
+  {{- if .Values.global.agentToken }}
+valueFrom:
+  secretKeyRef:
+    name: {{ include "runner.fullname" . }}
+    key: codefresh-agent-token
+  {{- else if .Values.global.agentTokenSecretKeyRef  }}
+valueFrom:
+  secretKeyRef:
+  {{- .Values.global.agentTokenSecretKeyRef | toYaml | nindent 4 }}
+  {{- else if .Values.global.existingAgentToken }}
+valueFrom:
+  secretKeyRef:
+    name: {{ printf "%s" (tpl .Values.global.existingAgentToken .) }}
+    key: codefresh.token
+  {{- end }}
+{{- end }}
 
 {{/*
 Create the name of the service account to use

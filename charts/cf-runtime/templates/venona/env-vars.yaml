@@ -8,11 +8,7 @@ SELF_DEPLOYMENT_NAME:
 
 {{- define "runner.environment-variables.calculated" }}
 AGENT_ID: {{ .Values.global.agentName }}
-CODEFRESH_TOKEN:
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "runner.secretTokenName" . }}
-      key: codefresh.token
+CODEFRESH_TOKEN: {{ include "runner.secretTokenName" . | nindent 2 }}
 CODEFRESH_IN_CLUSTER_RUNTIME: {{ .Values.global.runtimeName }}
 CODEFRESH_HOST: {{ .Values.global.codefreshHost }}
 DOCKER_REGISTRY: {{ .Values.global.imageRegistry }}

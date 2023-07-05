@@ -14,8 +14,10 @@ global:
   codefreshToken: ""
   codefreshTokenSecretKeyRef: {}
   agentToken: ""
+  agentTokenSecretKeyRef: {}
   # -- Existing secret (name-of-existing-secret) with API token from Codefresh
   # supersedes value for global.agentToken; secret must contain `codefresh.token` key
+# DEPRECATED -- Use `.Values.global.agentTokenSecretKeyRef` instead
   existingAgentToken: ""
   agentId: ""
   agentName: ""
