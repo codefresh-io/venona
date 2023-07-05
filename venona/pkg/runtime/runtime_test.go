@@ -16,6 +16,7 @@ package runtime
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
@@ -25,116 +26,117 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func createKubernetesMock() *kubernetes.MockKubernetes {
-	m := &kubernetes.MockKubernetes{}
-	m.On("CreateResource", mock.Anything, mock.Anything).Return(nil)
-	m.On("DeleteResource", mock.Anything, mock.Anything).Return(nil)
-	return m
-}
-
-func Test_runtime_StartWorkflow(t *testing.T) {
-	type args struct {
-		tasks task.Tasks
-	}
-	tests := []struct {
-		name    string
-		runtime runtime
-		args    args
-		wantErr bool
+func Test_runtime_HandleTask(t *testing.T) {
+	tests := map[string]struct {
+		task     task.Task
+		wantErr  string
+		beforeFn func(k *kubernetes.MockKubernetes)
 	}{
-		{
-			name: "should call kube create resouce",
-			runtime: runtime{
-				client: createKubernetesMock(),
+		"should successfully create a resource on TypeCreatePVC task": {
+			task: task.Task{
+				Type: task.TypeCreatePVC,
+				Spec: "some spec",
 			},
-			args: args{
-				tasks: task.Tasks{
-					{
-						Type: "runtime",
-						Spec: "spec",
-					},
+			beforeFn: func(k *kubernetes.MockKubernetes) {
+				k.On("CreateResource", mock.Anything, "some spec").Return(nil)
+			},
+		},
+		"should successfully create a resource on TypeCreatePod task": {
+			task: task.Task{
+				Type: task.TypeCreatePod,
+				Spec: "some spec",
+			},
+			beforeFn: func(k *kubernetes.MockKubernetes) {
+				k.On("CreateResource", mock.Anything, "some spec").Return(nil)
+			},
+		},
+		"should successfully delete a resource on TypeDeletePVC task": {
+			task: task.Task{
+				Type: task.TypeDeletePVC,
+				Spec: map[string]string{
+					"Name":      "some-name",
+					"Namespace": "some-namespace",
 				},
+			},
+			beforeFn: func(k *kubernetes.MockKubernetes) {
+				k.On("DeleteResource", mock.Anything, kubernetes.DeleteOptions{
+					Kind:      task.TypeDeletePVC,
+					Name:      "some-name",
+					Namespace: "some-namespace",
+				}).Return(nil)
+			},
+		},
+		"should successfully delete a resource on TypeDeletePod task": {
+			task: task.Task{
+				Type: task.TypeDeletePod,
+				Spec: map[string]string{
+					"Name":      "some-name",
+					"Namespace": "some-namespace",
+				},
+			},
+			beforeFn: func(k *kubernetes.MockKubernetes) {
+				k.On("DeleteResource", mock.Anything, kubernetes.DeleteOptions{
+					Kind:      task.TypeDeletePod,
+					Name:      "some-name",
+					Namespace: "some-namespace",
+				}).Return(nil)
+			},
+		},
+		"should fail for unknown type": {
+			task: task.Task{
+				Type: "some-type",
+			},
+			wantErr: "unknown task type \"some-type\"",
+		},
+		"should fail creating if k8s client fails":{
+			task: task.Task{
+				Type: task.TypeCreatePod,
+				Spec: "some spec",
+			},
+			beforeFn: func(k *kubernetes.MockKubernetes) {
+				k.On("CreateResource", mock.Anything, "some spec").Return(errors.New("some error"))
+			},
+			wantErr: "failed creating resource: some error",
+		},
+		"should fail deleting if json.unmarshal fails": {
+			task: task.Task{
+				Type: task.TypeDeletePod,
+				Spec: "bad spec",
+			},
+			wantErr: "failed to unmarshal task spec: json: cannot unmarshal string into Go value of type kubernetes.DeleteOptions",
+		},
+		"should fail deleting if client fails": {
+			task: task.Task{
+				Type: task.TypeDeletePod,
+				Spec: map[string]string{
+					"Name":      "some-name",
+					"Namespace": "some-namespace",
+				},
+			},
+			wantErr: "failed deleting resource: some error",
+			beforeFn: func(k *kubernetes.MockKubernetes) {
+				k.On("DeleteResource", mock.Anything, kubernetes.DeleteOptions{
+					Kind:      task.TypeDeletePod,
+					Name:      "some-name",
+					Namespace: "some-namespace",
+				}).Return(errors.New("some error"))
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := tt.runtime
-			mo := r.client.(*kubernetes.MockKubernetes)
-
-			ctx := context.Background()
-			err := r.StartWorkflow(ctx, tt.args.tasks)
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			}
-			mo.AssertCalled(t, "CreateResource", ctx, tt.args.tasks[0].Spec)
-		})
-	}
-}
-
-func Test_runtime_TerminateWorkflow(t *testing.T) {
-	type args struct {
-		tasks task.Tasks
-	}
-	tests := []struct {
-		name        string
-		runtime     runtime
-		args        args
-		wantErr     bool
-		expectedOpt kubernetes.DeleteOptions
-	}{
-		{
-			name: "should call kube delete resouce",
-			runtime: runtime{
-				client: createKubernetesMock(),
-			},
-			args: args{
-				tasks: task.Tasks{
-					{
-						Type: "runtime",
-						Spec: map[string]interface{}{
-							"name":      "name",
-							"namespace": "ns",
-						},
-					},
-				},
-			},
-			expectedOpt: kubernetes.DeleteOptions{
-				Kind:      "runtime",
-				Name:      "name",
-				Namespace: "ns",
-			},
-		},
-		{
-			name: "should fail if spec is not string",
-			runtime: runtime{
-				client: createKubernetesMock(),
-			},
-			args: args{
-				tasks: task.Tasks{
-					{
-						Type: "runtime",
-						Spec: 123,
-					},
-				},
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			r := tt.runtime
-			mo := r.client.(*kubernetes.MockKubernetes)
-
-			ctx := context.Background()
-			errs := r.TerminateWorkflow(ctx, tt.args.tasks)
-			if tt.wantErr {
-				assert.Equal(t, len(errs), 1)
-				return
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			k := &kubernetes.MockKubernetes{}
+			if tt.beforeFn != nil {
+				tt.beforeFn(k)
 			}
 
-			mo.AssertCalled(t, "DeleteResource", ctx, tt.expectedOpt)
+			r := runtime{
+				client: k,
+			}
+			err := r.HandleTask(context.Background(), tt.task)
+			if err != nil || tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
+			}
 		})
 	}
 }
