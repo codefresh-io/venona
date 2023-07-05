@@ -52,6 +52,7 @@ type startOptions struct {
 	agentID                        string
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
+	wfTaskBufferSize               int
 	configDir                      string
 	serverPort                     string
 	newrelicLicenseKey             string
@@ -100,6 +101,7 @@ func init() {
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
 	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval (seconds) to pull new tasks from Codefresh")
 	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval (seconds) to report status back to Codefresh")
+	startCmd.Flags().IntVar(&startCmdOptions.wfTaskBufferSize, "task-buffer-size", 10, "The size of the workflow tasks channel buffer")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 
@@ -187,6 +189,7 @@ func run(options startOptions) {
 		ID:                             options.agentID,
 		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
 		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
+		WfTaskBufferSize:               options.wfTaskBufferSize,
 		Monitor:                        monitor,
 	})
 	dieOnError(err)

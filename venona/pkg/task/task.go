@@ -29,13 +29,14 @@ type (
 	// Tasks array
 	Tasks []Task
 
+	// Task Type
 	Type string
 
 	// Task options
 	Task struct {
 		Type     Type        `json:"type"`
-		Spec     interface{} `json:"spec"`
 		Metadata Metadata    `json:"metadata"`
+		Spec     interface{} `json:"spec"`
 	}
 
 	// Metadata options
