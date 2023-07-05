@@ -51,10 +51,10 @@ valueFrom:
   secretKeyRef:
     name: {{ include "runtime.installation-token-secret-name" . }}
     key: codefresh-api-token
-  {{- else if .Values.global.codefresh.codefreshTokenSecretKeyRef  }}
+  {{- else if .Values.global.codefreshTokenSecretKeyRef  }}
 valueFrom:
   secretKeyRef:
-  {{- .Values.global.codefresh.codefreshTokenSecretKeyRef | toYaml | nindent 4 }}
+  {{- .Values.global.codefreshTokenSecretKeyRef | toYaml | nindent 4 }}
   {{- end }}
 {{- end }}
 

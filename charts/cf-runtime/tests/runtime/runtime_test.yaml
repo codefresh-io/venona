@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: runtime test
+templates:
+  - templates/runtime/update-runtime-job.yaml
+  - templates/runtime/update-runtime-job.yaml
+  - templates/runtime/secret.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test default runtime spec metadata
+    template: templates/runtime/update-runtime-cm.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - isNotNull:
+          path: data["runtime.yaml"]

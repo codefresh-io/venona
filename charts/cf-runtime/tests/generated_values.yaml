@@ -1,0 +1,23 @@
+{
+    "appProxy": {
+        "enabled": false,
+    },
+    "monitor": {
+        "enabled": false
+    },
+    "global": {
+        "namespace": "cf-runtime",
+        "codefreshHost": "https://g.codefresh.io",
+        "agentToken": "123",
+        "agentId": "456",
+        "agentName": "my-context_cf-runtime",
+        "accountId": "7890",
+        "runtimeName": "my-context/cf-runtime",
+        "keys": {
+            "key": "key",
+            "csr": "csr",
+            "ca": "ca",
+            "serverCert": "server"
+        }
+    }
+}
