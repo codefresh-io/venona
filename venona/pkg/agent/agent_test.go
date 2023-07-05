@@ -31,17 +31,17 @@ import (
 
 func Test_groupTasks(t *testing.T) {
 	type args struct {
-		tasks []task.Task
+		tasks task.Tasks
 	}
 	tests := []struct {
 		name string
 		args args
-		want map[string][]task.Task
+		want map[string]task.Tasks
 	}{
 		{
 			name: "should group by workflow name",
 			args: args{
-				tasks: []task.Task{
+				tasks: task.Tasks{
 					{
 						Metadata: task.Metadata{
 							Workflow: "1",
@@ -59,7 +59,7 @@ func Test_groupTasks(t *testing.T) {
 					},
 				},
 			},
-			want: map[string][]task.Task{
+			want: map[string]task.Tasks{
 				"1": {
 					{
 

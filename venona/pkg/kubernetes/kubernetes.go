@@ -52,7 +52,7 @@ type (
 	DeleteOptions struct {
 		Name      string
 		Namespace string
-		Kind      string
+		Kind      task.Type
 	}
 
 	kube struct {
@@ -94,25 +94,24 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		return fmt.Errorf("failed decoding when creating resource: %w", err)
 	}
 
-	var namespace string
 	switch obj := obj.(type) {
 	case *v1.PersistentVolumeClaim:
-		namespace = obj.Namespace
-		_, err = k.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, obj, metav1.CreateOptions{})
+		_, err = k.client.CoreV1().PersistentVolumeClaims(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
 			return fmt.Errorf("failed creating persistent volume claims: %w", err)
 		}
+
 		k.logger.Info("PersistentVolumeClaim has been created", "name", obj.Name)
 
 	case *v1.Pod:
-		namespace = obj.Namespace
-		_, err = k.client.CoreV1().Pods(namespace).Create(ctx, obj, metav1.CreateOptions{})
+		_, err = k.client.CoreV1().Pods(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
 			return fmt.Errorf("failed creating pod: %w", err)
 		}
-		k.logger.Info("Pod has been created", "name", obj.Name)
 
+		k.logger.Info("Pod has been created", "name", obj.Name)
 	}
+
 	return err
 }
 
