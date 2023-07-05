@@ -28,6 +28,8 @@ type (
 	}
 )
 
+
+// New creates a new empty Workflow instance
 func New(metadata task.Metadata) *Workflow {
 	return &Workflow{
 		Metadata: metadata,
@@ -35,6 +37,7 @@ func New(metadata task.Metadata) *Workflow {
 	}
 }
 
+// AddTask adds a specific task to its matching parent worklow
 func (wf *Workflow) AddTask(t task.Task) error {
 	if wf.Metadata.ReName != t.Metadata.ReName || wf.Metadata.Workflow != t.Metadata.Workflow {
 		return fmt.Errorf("mismatch runtime or workflow id, %s/%s is different from %s/%s", wf.Metadata.ReName, wf.Metadata.Workflow, t.Metadata.ReName, t.Metadata.Workflow)

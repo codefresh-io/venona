@@ -292,7 +292,7 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 		ids = append(ids, id)
 	}
 
-	a.log.Debug("recieved workflows", "ids", ids)
+	a.log.Debug("received workflows", "ids", ids)
 
 	// sort workflows by creationDate
 	sort.SliceStable(workflows, func(i, j int) bool {
