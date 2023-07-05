@@ -45,7 +45,6 @@ type (
 		Logger                         logger.Logger
 		TaskPullingSecondsInterval     time.Duration
 		StatusReportingSecondsInterval time.Duration
-		WfTaskBufferSize               int
 		Monitor                        monitoring.Monitor
 	}
 
