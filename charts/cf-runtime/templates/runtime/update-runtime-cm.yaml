@@ -16,4 +16,4 @@ metadata:
     {{- end }}
 data:
   runtime.yaml: |-
-  {{ tpl ( .Files.Get "files/runtime-env-tmpl.yaml" ) . | nindent 4 }}
+    {{ tpl ( .Files.Get "files/runtime-env-tmpl.yaml" ) . | nindent 4 | trim }}
