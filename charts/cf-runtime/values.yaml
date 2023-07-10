@@ -441,6 +441,7 @@ runtime:
   # -- Parameters for `runtime-patch` post-upgrade/install hook
   # @default -- See below
   patch:
+    enabled: true
     image:
       registry: quay.io
       repository: codefresh/cli

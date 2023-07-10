@@ -1,5 +1,6 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{ $values := .Values.runtime.patch }}
+{{- if $values.enabled }}
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -17,3 +18,4 @@ metadata:
 data:
   runtime.yaml: |-
     {{ tpl ( .Files.Get "files/runtime-env-tmpl.yaml" ) . | nindent 4 | trim }}
+{{- end }}

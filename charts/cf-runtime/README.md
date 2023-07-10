@@ -60,6 +60,8 @@ That means it is possible to set parametes for `dind` and `engine` pods via [val
 
 **If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/)), you MUST add these into chart's [values.yaml](./values.yaml)**
 
+**For backward compatibility, you can disable updating runtime-environment spec via `.Values.runtime.patch.enabled=false`**
+
 Affected values:
 - added **mandatory** `global.codefresh.codefreshToken`/`global.codefresh.codefreshTokenSecretKeyRef` **You must specify it before the upgrade!**
 - `runtime.engine` is added
