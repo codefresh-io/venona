@@ -17,5 +17,5 @@ metadata:
     {{- end }}
 data:
   runtime.yaml: |-
-    {{ tpl ( .Files.Get "files/runtime-env-tmpl.yaml" ) . | nindent 4 | trim }}
+    {{ include "runtime.runtime-environment-spec-template" . | nindent 4 }}
 {{- end }}

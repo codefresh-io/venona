@@ -3,16 +3,17 @@
         "enabled": false,
     },
     "monitor": {
-        "enabled": false
+        "enabled": false,
+        "clusterId": "my-context"
     },
     "global": {
-        "namespace": "cf-runtime",
+        "namespace": "codefresh",
         "codefreshHost": "https://g.codefresh.io",
         "agentToken": "123",
         "agentId": "456",
-        "agentName": "my-context_cf-runtime",
+        "agentName": "my-context_codefresh",
         "accountId": "7890",
-        "runtimeName": "my-context/cf-runtime",
+        "runtimeName": "my-context/codefresh",
         "keys": {
             "key": "key",
             "csr": "csr",

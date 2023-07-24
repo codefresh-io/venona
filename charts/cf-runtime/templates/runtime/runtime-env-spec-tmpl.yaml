@@ -1,19 +1,23 @@
+{{- define "runtime.runtime-environment-spec-template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
 metadata:
   name: {{ .Values.global.runtimeName }}
   agent: true
-extends: {{ toYaml .Values.runtime.runtimeExtends | nindent 2 }}
+extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
 runtimeScheduler:
   type: KubernetesPod
   {{- if $engineContext.image }}
   image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) }}
   {{- end }}
   {{- with $engineContext.command }}
-  command: {{ toYaml . | nindent 6 }}
+  command: {{- toYaml . | nindent 4 }}
   {{- end }}
   envVars:
+  {{- with $engineContext.env }}
+   {{- toYaml . | nindent 4 }}
+  {{- end }}
     COMPOSE_IMAGE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.COMPOSE_IMAGE) }}'
     CONTAINER_LOGGER_IMAGE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.CONTAINER_LOGGER_IMAGE) }}'
     DOCKER_BUILDER_IMAGE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.DOCKER_BUILDER_IMAGE) }}'
@@ -25,9 +29,6 @@ runtimeScheduler:
     KUBE_DEPLOY: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.KUBE_DEPLOY) }}'
     PIPELINE_DEBUGGER_IMAGE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.PIPELINE_DEBUGGER_IMAGE) }}'
     TEMPLATE_ENGINE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.TEMPLATE_ENGINE) }}'
-  {{- with $engineContext.env }}
-   {{ toYaml . | nindent 4 }}
-  {{- end }}
   {{- with $engineContext.workflowLimits }}
   workflowLimits: {{ toYaml . | nindent 4 }}
   {{- end }}
@@ -38,16 +39,16 @@ runtimeScheduler:
       accountId: {{ .Values.global.accountId }}
       selector: {{ .Values.monitor.clusterId }}
     {{- with $engineContext.nodeSelector }}
-    nodeSelector: {{ toYaml . | nindent 6 }}
+    nodeSelector: {{- toYaml . | nindent 6 }}
     {{- end }}
   {{- with $engineContext.affinity }}
-  affinity:  {{ toYaml . | nindent 4 }}
+  affinity:  {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $engineContext.tolerations }}
-  tolerations:  {{ toYaml . | nindent 4 }}
+  tolerations:  {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $engineContext.podAnnotations }}
-  annotations: {{ toYaml . | nindent 4 }}
+  annotations: {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- if $engineContext.schedulerName }}
   schedulerName: {{ $engineContext.schedulerName }}
@@ -65,7 +66,7 @@ dockerDaemonScheduler:
   userAccess: {{ . }}
   {{- end }}
   {{- with $dindContext.env }}
-   {{ toYaml . | nindent 4 }}
+  env: {{- toYaml . | nindent 4 }}
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
@@ -74,22 +75,22 @@ dockerDaemonScheduler:
       accountId: {{ .Values.global.accountId }}
       selector: {{ .Values.monitor.clusterId }}
     {{- with $dindContext.nodeSelector }}
-    nodeSelector: {{ toYaml . | nindent 6 }}
+    nodeSelector: {{- toYaml . | nindent 6 }}
     {{- end }}
   {{- with $dindContext.affinity }}
-  affinity:  {{ toYaml . | nindent 4 }}
+  affinity:  {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $dindContext.tolerations }}
-  tolerations: {{ toYaml . | nindent 4 }}
+  tolerations: {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $dindContext.podAnnotations }}
-  annotations: {{ toYaml . | nindent 4 }}
+  annotations: {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- if $dindContext.schedulerName }}
   schedulerName: {{ $dindContext.schedulerName }}
   {{- end }}
   {{- if $dindContext.pvcs }}
-  pvcs: {{ include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" $dindContext.pvcs "context" .) | nindent 4 }}
+  pvcs: {{- include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" $dindContext.pvcs "context" .) | nindent 4 }}
   {{- end }}
   defaultDindResources:
   {{- with $dindContext.resources }}
@@ -98,3 +99,4 @@ dockerDaemonScheduler:
   {{- with $dindContext.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
   {{- end }}
+{{- end }}

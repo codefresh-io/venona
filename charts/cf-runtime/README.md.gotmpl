@@ -12,6 +12,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Upgrade Chart](#upgrade-chart)
   - [To 2.x](#to-2x)
   - [To 3.x](#to-3x)
+- [Architecture](#architecture)
 - [Configuration](#configuration)
 
 ## Prerequisites
@@ -82,6 +83,10 @@ Affected values:
 - `runtime.dind` is added
 - `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
 - `global.existingDindCertsSecret` is replaced with `global.dindCertsSecretRef`
+
+## Architecture
+
+[Codefresh Runner architecture](https://codefresh.io/docs/docs/installation/codefresh-runner/#codefresh-runner-architecture)
 
 ## Configuration
 
@@ -191,6 +196,7 @@ volumeProvisioner:
       annotations:
         eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
+
 
 {{ template "chart.requirementsSection" . }}
 

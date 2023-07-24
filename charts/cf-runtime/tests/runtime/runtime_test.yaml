@@ -22,3 +22,113 @@ tests:
           of: ConfigMap
       - isNotEmpty:
           path: data["runtime.yaml"]
+
+  - it: Test runtime spec override
+    template: templates/runtime/update-runtime-cm.yaml
+    values:
+      - ../generated_values.yaml
+      - ./runtime_values.yaml
+    asserts:
+      - equal:
+          path: data["runtime.yaml"]
+          value: |-
+            metadata:
+              name: my-context/codefresh
+              agent: true
+            extends:
+              - system/default/hybrid/k8s_low_limits
+            runtimeScheduler:
+              type: KubernetesPod
+              image: quay.io/codefresh/engine:tagoverride
+              command:
+                - one
+                - two
+                - three
+              envVars:
+                FOO: BAR
+                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
+                CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'quay.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-pusher:tagoverride'
+                DOCKER_TAG_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-tag-pusher:tagoverride'
+                FS_OPS_IMAGE: 'quay.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'quay.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
+              cluster:
+                namespace: codefresh
+                serviceAccount: service-account-override
+                clusterProvider:
+                  accountId: 7890
+                  selector: my-context
+                nodeSelector:
+                  topology.kubernetes.io/zone: us-east-1a
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                        - engine
+              tolerations:
+                - effect: NoSchedule
+                  key: codefresh.io
+                  operator: Equal
+                  value: engine
+              annotations:
+                karpenter.sh/do-not-evict: "true"
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+                requests:
+                  cpu: 200m
+                  memory: 256Mi
+            dockerDaemonScheduler:
+              type: DindKubernetesPod
+              dindImage: quay.io/codefresh/dind:tagoverride
+              userAccess: true
+              env:
+                ALICE: BOB
+              cluster:
+                namespace: codefresh
+                serviceAccount: service-account-override
+                clusterProvider:
+                  accountId: 7890
+                  selector: my-context
+                nodeSelector:
+                  topology.kubernetes.io/zone: us-east-1a
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                        - dind
+              tolerations:
+                - effect: NoSchedule
+                  key: codefresh.io
+                  operator: Equal
+                  value: dinds
+              annotations:
+                karpenter.sh/do-not-evict: "true"
+              pvcs:
+                - name: dind
+                  reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+                  reuseVolumeSortOrder: pipeline_id
+                  storageClassName: my-custom-storage-class
+                  volumeSize: 8Gi
+              defaultDindResources:
+                limits:
+                  cpu: 1000m
+                  memory: 2048Mi
+                requests:
+                  cpu: 1000m
+                  memory: 2048Mi
+
