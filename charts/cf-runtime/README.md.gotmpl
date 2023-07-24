@@ -72,7 +72,7 @@ Affected values:
 This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
 That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
 
-**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/)), you MUST add these into chart's [values.yaml](./values.yaml) for `.Values.dind` or(and) .`Values.engine`**
+**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (for example, you did use [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands to modify the runtime-environment), you MUST add these into chart's [values.yaml](./values.yaml) for `.Values.runtime.dind` or(and) .`Values.runtime.engine`**
 
 **For backward compatibility, you can disable updating runtime-environment spec via** `.Values.runtime.patch.enabled=false`
 
