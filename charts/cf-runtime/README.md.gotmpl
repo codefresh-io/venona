@@ -47,6 +47,11 @@ helm repo update
 
     helm upgrade --install cf-runtime cf-runtime/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
     ```
+
+    *Install from OCI-based registry*
+    ```
+    helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
+    ```
 4. At this point you should have a working Codefresh Runner. You can verify the installation by running:
     ```console
     codefresh runner execute-test-pipeline --runtime-name <runtime-name>
