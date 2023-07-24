@@ -384,6 +384,8 @@ runtime:
     podAnnotations: {}
     # -- Set node selector.
     nodeSelector: {}
+    # -- Set affinity
+    affinity: {}
     # -- Set tolerations.
     tolerations: []
     # -- Set scheduler name.
@@ -433,6 +435,8 @@ runtime:
     podAnnotations: {}
     # -- Set node selector.
     nodeSelector: {}
+    # -- Set affinity
+    affinity: {}
     # -- Set tolerations.
     tolerations: []
     # -- Set scheduler name.
