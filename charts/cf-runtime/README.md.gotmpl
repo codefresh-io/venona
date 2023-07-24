@@ -2,6 +2,18 @@
 
 {{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
 
+Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
+
+## Table of Content
+
+- [Prerequisites](#prerequisites)
+- [Get Repo Info](#get-repo-info)
+- [Install Chart](#install-chart)
+- [Upgrade Chart](#upgrade-chart)
+  - [To 2.x](#to-2x)
+  - [To 3.x](#to-3x)
+- [Configuration](#configuration)
+
 ## Prerequisites
 
 - Kubernetes **1.19+**
@@ -39,7 +51,7 @@ helm repo update
     codefresh runner execute-test-pipeline --runtime-name <runtime-name>
     ```
 
-## Upgrading chart
+## Upgrade chart
 
 ### To 2.x
 
@@ -55,10 +67,12 @@ Affected values:
 
 ### To 3.x
 
-⚠️⚠️⚠️ This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
+⚠️⚠️⚠️
+
+This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
 That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
 
-**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/)), you MUST add these into chart's [values.yaml](./values.yaml)**
+**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (i.e. [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/)), you MUST add these into chart's [values.yaml](./values.yaml) for `.Values.dind` or(and) .`Values.engine`**
 
 **For backward compatibility, you can disable updating runtime-environment spec via** `.Values.runtime.patch.enabled=false`
 
