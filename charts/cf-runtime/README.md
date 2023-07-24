@@ -316,6 +316,7 @@ volumeProvisioner:
 | volumeProvisioner | object | See below | Volume Provisioner parameters |
 | volumeProvisioner.affinity | object | `{}` | Set affinity |
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
+| volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
 | volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.33.3"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
