@@ -1,7 +1,8 @@
+{{- if .Values.volumeProvisioner.enabled }}
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{ $values := index .Values.volumeProvisioner "dind-lv-monitor" }}
 {{ $localVolumeParentDir := .Values.storage.local.volumeParentDir  }}
-{{- if eq .Values.storage.backend "local" -}}
+{{- if eq .Values.storage.backend "local" }}
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -86,4 +87,5 @@ spec:
       {{- with $values.extraVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
-{{- end -}}
+{{- end }}
+{{- end }}

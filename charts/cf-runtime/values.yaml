@@ -107,6 +107,8 @@ runner:
 # -- Volume Provisioner parameters
 # @default -- See below
 volumeProvisioner:
+  # -- Enable volume-provisioner
+  enabled: true
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy

@@ -1,3 +1,4 @@
+{{- if .Values.volumeProvisioner.enabled }}
 {{ $values := .Values.volumeProvisioner }}
 ---
 {{- if $values.serviceAccount.create }}
@@ -69,4 +70,4 @@ roleRef:
   name: {{ include "dind-volume-provisioner.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-
+{{- end }}
