@@ -293,7 +293,7 @@ To improve performance by using Docker cache, Codefresh `volume-provisioner` can
 
 Docker images and volumes must be cleaned on a regular basis.
 
-* [IN-DIND cleaner](https://github.com/codefresh-io/dind/tree/master/cleaner): Deletes extra Docker containers, volumes, and images in **dind pod**.
+* [IN-DIND cleaner](https://github.com/codefresh-io/dind/tree/master/cleaner): Deletes extra Docker containers, volumes, and images in **DIND pod**.
 * [External volume cleaner](https://github.com/codefresh-io/dind-volume-cleanup): Deletes unused **external** PVs (EBS, GCE/Azure disks).
 * [Local volume cleaner](https://github.com/codefresh-io/dind-volume-utils/blob/master/local-volumes/lv-cleaner.sh): Deletes **local** volumes if node disk space is close to the threshold.
 
@@ -303,9 +303,9 @@ Docker images and volumes must be cleaned on a regular basis.
 
 **How it runs:** Inside each DIND pod as script
 
-**Triggered by:** SIGTERM and also during the run when disk usage (cleaner-agent ) > 90% (configurable)
+**Triggered by:** SIGTERM and also during the run when disk usage > 90% (configurable)
 
-**Configured by:**  Environment Variables which can be set in Runtime Environment configuration
+**Configured by:**  Environment Variables which can be set in Runtime Environment spec
 
 **Configuration/Logic:** [README.md](https://github.com/codefresh-io/dind/tree/master/cleaner#readme)
 
@@ -327,7 +327,7 @@ runtime:
 
 **Purpose:** Removes unused *kubernetes volumes and related backend volumes*
 
-**How it runs:** Runs as `dind-volume-cleanup` CronJob. Installed in case the Runner uses non-local volumes (`.Values.storage.backend != local`)
+**How it runs:** Runs as `dind-volume-cleanup` CronJob. Installed in case the Runner uses non-local volumes `.Values.storage.backend != local`
 
 **Triggered by:** CronJob every 10min (configurable)
 
@@ -358,9 +358,9 @@ volumeProvisioner:
 
 **Purpose:** Deletes local volumes when node disk space is close to the threshold
 
-**How it runs:** Runs as `dind-lv-monitor` DaemonSet. Installed in case the Runner uses local volumes (`.Values.storage.backend == local`)
+**How it runs:** Runs as `dind-lv-monitor` DaemonSet. Installed in case the Runner uses local volumes `.Values.storage.backend == local`
 
-**Triggered by:** Disk space usage or node usage that exceeds thresholds (configurable)
+**Triggered by:** Disk space usage or inode usage that exceeds thresholds (configurable)
 
 **Configuration:**
 
