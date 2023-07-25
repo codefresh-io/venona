@@ -99,4 +99,10 @@ dockerDaemonScheduler:
   {{- with $dindContext.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
   {{- end }}
+  {{- with $dindContext.extraVolumeMounts }}
+  userVolumeMounts: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $dindContext.extraVolumes }}
+  userVolumes: {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}

@@ -131,4 +131,13 @@ tests:
                 requests:
                   cpu: 1000m
                   memory: 2048Mi
-
+              userVolumeMounts:
+                my-cert:
+                  mountPath: /etc/ssl/cert
+                  name: cert
+                  readOnly: true
+              userVolumes:
+                my-cert:
+                  name: cert
+                  secret:
+                    secretName: tls-secret

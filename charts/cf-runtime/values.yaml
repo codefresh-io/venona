@@ -394,6 +394,25 @@ runtime:
     serviceAccount: codefresh-engine
     # -- Keep `true` as default!
     userAccess: true
+    # -- Add extra volumes
+    extraVolumes: {}
+    # E.g.:
+    # regctl-docker-registry:
+    #   name: regctl-docker-registry
+    #   secret:
+    #     items:
+    #       - key: .dockerconfigjson
+    #         path: config.json
+    #     secretName: regctl-docker-registry
+    #     optional: true
+    # -- Add extra volume mounts
+    extraVolumeMounts: {}
+    # E.g.:
+    # extraVolumeMounts:
+    #   regctl-docker-registry:
+    #     name: regctl-docker-registry
+    #     mountPath: /home/appuser/.docker/
+    #     readOnly: true
 
   # -- Parameters for Engine pod (aka "pipeline" orchestrator).
   engine:

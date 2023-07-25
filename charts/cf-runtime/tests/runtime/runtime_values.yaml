@@ -36,6 +36,16 @@ runtime:
         operator: Equal
         value: dinds
     serviceAccount: service-account-override
+    extraVolumeMounts:
+      my-cert:
+        name: cert
+        mountPath: /etc/ssl/cert
+        readOnly: true
+    extraVolumes:
+      my-cert:
+        name: cert
+        secret:
+          secretName: tls-secret
 
   engine:
     image:

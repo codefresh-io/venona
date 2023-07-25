@@ -286,9 +286,11 @@ volumeProvisioner:
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
-| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{},"extraVolumeMounts":{},"extraVolumes":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{}` | Set additional env vars. |
+| runtime.dind.extraVolumeMounts | object | `{}` | Add extra volume mounts |
+| runtime.dind.extraVolumes | object | `{}` | Add extra volumes |
 | runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
