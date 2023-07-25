@@ -299,9 +299,9 @@ Docker images and volumes must be cleaned on a regular basis.
 
 #### IN-DIND cleaner
 
-**Purpose:** Removes unneeded *docker containers, images, volumes* inside Kubernetes volume mounted on the dind pod
+**Purpose:** Removes unneeded *docker containers, images, volumes* inside Kubernetes volume mounted on the DIND pod
 
-**Where it runs:** Inside each dind pod as script
+**How it runs:** Inside each DIND pod as script
 
 **Triggered by:** SIGTERM and also during the run when disk usage (cleaner-agent ) > 90% (configurable)
 
@@ -327,7 +327,7 @@ runtime:
 
 **Purpose:** Removes unused *kubernetes volumes and related backend volumes*
 
-**Where it runs:** On Runtime Cluster as CronJob
+**How it runs:** Runs as CronJob
 (`kubectl get cronjobs -n codefresh -l app=dind-volume-cleanup`). Installed in case the Runner uses non-local volumes (`.Values.storage.backend != local`)
 
 **Triggered by:** CronJob every 10min (configurable)
@@ -359,7 +359,7 @@ volumeProvisioner:
 
 **Purpose:** Deletes local volumes when node disk space is close to the threshold
 
-**Where it runs:** On each node on runtime cluster as DaemonSet `dind-lv-monitor`. Installed in case the Runner uses local volumes (`.Values.storage.backend == local`)
+**How it runs:** On each node on runtime cluster as DaemonSet `dind-lv-monitor`. Installed in case the Runner uses local volumes (`.Values.storage.backend == local`)
 
 **Triggered by:** Disk space usage or node usage that exceeds thresholds (configurable)
 
