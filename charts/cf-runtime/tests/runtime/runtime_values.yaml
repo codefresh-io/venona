@@ -3,9 +3,7 @@ runtime:
     image:
       tag: tagoverride
     resources:
-      requests:
-        cpu: 1000m
-        memory: 2048Mi
+      requests: null
       limits:
         cpu: 1000m
         memory: 2048Mi

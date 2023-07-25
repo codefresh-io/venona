@@ -128,9 +128,7 @@ tests:
                 limits:
                   cpu: 1000m
                   memory: 2048Mi
-                requests:
-                  cpu: 1000m
-                  memory: 2048Mi
+                requests: null
               userVolumeMounts:
                 my-cert:
                   mountPath: /etc/ssl/cert

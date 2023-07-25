@@ -94,7 +94,12 @@ dockerDaemonScheduler:
   {{- end }}
   defaultDindResources:
   {{- with $dindContext.resources }}
+  {{- if not .requests }}
+    limits: {{- toYaml .limits | nindent 6 }}
+    requests: null
+  {{- else }}
   {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- end }}
   {{- with $dindContext.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}

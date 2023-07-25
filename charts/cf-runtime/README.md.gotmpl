@@ -18,6 +18,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [Custom volume mounts](#custom-volume-mounts)
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
+  - [Volume cleaners](#volume-cleaners)
 
 ## Prerequisites
 
@@ -61,7 +62,7 @@ helm repo update
     codefresh runner execute-test-pipeline --runtime-name <runtime-name>
     ```
 
-## Upgrade chart
+## Upgrade Chart
 
 ### To 2.x
 
@@ -275,6 +276,105 @@ Downside: More PVs to maintain and therefore higher costs.
 
 - `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'` - PV can be used only by single pipeline AND single trigger.
 
+## Volume cleaners
+
+Codefresh pipelines require disk space for:
+  * [Pipeline Shared Volume](https://codefresh.io/docs/docs/pipelines/introduction-to-codefresh-pipelines/#sharing-the-workspace-between-build-steps) (`/codefresh/volume`, implemented as [docker volume](https://docs.docker.com/storage/volumes/))
+  * Docker containers, both running and stopped
+  * Docker images and cached layers
+
+Codefresh offers two options to manage disk space and prevent out-of-space errors:
+* Use runtime cleaners on Docker images and volumes
+* [Set the minimum disk space per pipeline build volume](https://codefresh.io/docs/docs/pipelines/pipelines/#set-minimum-disk-space-for-a-pipeline-build)
+
+To improve performance by using Docker cache, Codefresh `volume-provisioner` can provision previously used disks with Docker images and pipeline volumes from previously run builds.
+
+### Types of runtime volume cleaners
+
+Docker images and volumes must be cleaned on a regular basis.
+
+* [IN-DIND cleaner](https://github.com/codefresh-io/dind/tree/master/cleaner): Deletes extra Docker containers, volumes, and images in **dind pod**.
+* [External volume cleaner](https://github.com/codefresh-io/dind-volume-cleanup): Deletes unused **external** PVs (EBS, GCE/Azure disks).
+* [Local volume cleaner](https://github.com/codefresh-io/dind-volume-utils/blob/master/local-volumes/lv-cleaner.sh): Deletes **local** volumes if node disk space is close to the threshold.
+
+#### IN-DIND cleaner
+
+**Purpose:** Removes unneeded *docker containers, images, volumes* inside Kubernetes volume mounted on the dind pod
+
+**Where it runs:** Inside each dind pod as script
+
+**Triggered by:** SIGTERM and also during the run when disk usage (cleaner-agent ) > 90% (configurable)
+
+**Configured by:**  Environment Variables which can be set in Runtime Environment configuration
+
+**Configuration/Logic:** [README.md](https://github.com/codefresh-io/dind/tree/master/cleaner#readme)
+
+Override `.Values.runtime.dind.env` if necessary (the following are **defaults**):
+
+```yaml
+runtime:
+  dind:
+    env:
+      CLEAN_PERIOD_SECONDS: '21600' # launch clean if last clean was more than CLEAN_PERIOD_SECONDS seconds ago
+      CLEAN_PERIOD_BUILDS: '5' # launch clean if last clean was more CLEAN_PERIOD_BUILDS builds since last build
+      IMAGE_RETAIN_PERIOD: '14400' # do not delete docker images if they have events since current_timestamp - IMAGE_RETAIN_PERIOD
+      VOLUMES_RETAIN_PERIOD: '14400' # do not delete docker volumes if they have events since current_timestamp - VOLUMES_RETAIN_PERIOD
+      DISK_USAGE_THRESHOLD: '0.8' # launch clean based on current disk usage DISK_USAGE_THRESHOLD
+      INODES_USAGE_THRESHOLD: '0.8' # launch clean based on current inodes usage INODES_USAGE_THRESHOLD
+```
+
+#### External volume cleaner
+
+**Purpose:** Removes unused *kubernetes volumes and related backend volumes*
+
+**Where it runs:** On Runtime Cluster as CronJob
+(`kubectl get cronjobs -n codefresh -l app=dind-volume-cleanup`). Installed in case the Runner uses non-local volumes (`.Values.storage.backend != local`)
+
+**Triggered by:** CronJob every 10min (configurable)
+
+**Configuration:**
+
+Set `codefresh.io/volume-retention` for dinds' PVCs:
+
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        ...
+        annotations:
+          codefresh.io/volume-retention: 7d
+```
+
+Or override environment variables for `dind-volume-cleanup` cronjob:
+
+```yaml
+volumeProvisioner:
+  dind-volume-cleanup:
+    env:
+      RETENTION_DAYS: 7   # clean volumes that were last used more than `RETENTION_DAYS` (default is 4) ago
+```
+
+#### Local volume cleaner
+
+**Purpose:** Deletes local volumes when node disk space is close to the threshold
+
+**Where it runs:** On each node on runtime cluster as DaemonSet `dind-lv-monitor`. Installed in case the Runner uses local volumes (`.Values.storage.backend == local`)
+
+**Triggered by:** Disk space usage or node usage that exceeds thresholds (configurable)
+
+**Configuration:**
+
+Override environment variables for `dind-lv-monitor` daemonset:
+
+
+```yaml
+volumeProvisioner:
+  dind-lv-monitor:
+    env:
+      KB_USAGE_THRESHOLD: 60  # default 80 (percentage)
+      INODE_USAGE_THRESHOLD: 60  # default 80
+```
 
 {{ template "chart.requirementsSection" . }}
 
