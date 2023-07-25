@@ -297,7 +297,7 @@ Docker images and volumes must be cleaned on a regular basis.
 * [External volume cleaner](https://github.com/codefresh-io/dind-volume-cleanup): Deletes unused **external** PVs (EBS, GCE/Azure disks).
 * [Local volume cleaner](https://github.com/codefresh-io/dind-volume-utils/blob/master/local-volumes/lv-cleaner.sh): Deletes **local** volumes if node disk space is close to the threshold.
 
-#### IN-DIND cleaner
+### IN-DIND cleaner
 
 **Purpose:** Removes unneeded *docker containers, images, volumes* inside Kubernetes volume mounted on the DIND pod
 
@@ -323,7 +323,7 @@ runtime:
       INODES_USAGE_THRESHOLD: '0.8' # launch clean based on current inodes usage INODES_USAGE_THRESHOLD
 ```
 
-#### External volume cleaner
+### External volume cleaner
 
 **Purpose:** Removes unused *kubernetes volumes and related backend volumes*
 
@@ -354,7 +354,7 @@ volumeProvisioner:
       RETENTION_DAYS: 7   # clean volumes that were last used more than `RETENTION_DAYS` (default is 4) ago
 ```
 
-#### Local volume cleaner
+### Local volume cleaner
 
 **Purpose:** Deletes local volumes when node disk space is close to the threshold
 
