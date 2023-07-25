@@ -325,6 +325,7 @@ Downside: More PVs to maintain and therefore higher costs.
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
 | global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
+| global.namespace | string | `""` | Runner namespace |
 | global.runtimeName | string | `""` | Runtime name |
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |

@@ -10,6 +10,8 @@ global:
 
   # NOTE!
   # The following values are generated from `codefresh runner init --generate-helm-values-file` output
+
+  # -- Runner namespace
   namespace: ""
   # -- URL of Codefresh Platform
   codefreshHost: ""
@@ -22,6 +24,7 @@ global:
   # codefreshTokenSecretKeyRef:
   #   name: my-codefresh-api-token
   #   key: codefresh-api-token
+
   # -- Agent token in plain text.
   agentToken: ""
   # -- Agent token that references an existing secret containing API key.
@@ -30,6 +33,7 @@ global:
   # agentTokenSecretKeyRef:
   #   name: my-codefresh-agent-secret
   #   key: codefresh-agent-token
+
   # -- Agent ID
   agentId: ""
   # -- Agent Name
