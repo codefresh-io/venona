@@ -188,3 +188,37 @@ tests:
           content:
             name: ALICE
             value: BOB
+
+  - it: Test default runner agent token
+    template: templates/venona/deployment.yaml
+    values:
+      - ../generated_values.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: CODEFRESH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: codefresh-agent-token
+                name: cf-runtime-runner
+
+  - it: Test runner agent token secret ref
+    template: templates/venona/deployment.yaml
+    set:
+      global.agentTokenSecretKeyRef:
+        name: my-secret
+        key: my-key
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          count: 1
+          any: true
+          content:
+            name: CODEFRESH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: my-secret
+                key: my-key

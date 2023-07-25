@@ -333,3 +333,26 @@ tests:
           path: parameters.AvailabilityZone
           value: us-east-1c
         template: templates/volume-provisioner/storageclass.yaml
+
+  - it: Test volume provisioner disabled
+    set:
+      volumeProvisioner.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/cronjob.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/daemonset.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/rbac.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/secret.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/storageclass.yaml

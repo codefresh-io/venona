@@ -1,4 +1,6 @@
 # Values used in `helm-chart-ci` pipeline
+global:
+  codefreshToken: placeholder
 appProxy:
   enabled: true
   ingress:
@@ -10,3 +12,38 @@ monitor:
   rbac:
     namespaced: true
 runner: {}
+runtime:
+  dind:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    limits:
+        cpu: 1001m
+        memory: 1024Mi
+    podAnnotations:
+      karpenter.sh/do-not-evict: 'true'
+    nodeSelector:
+      node-type: dind
+    tolerations:
+    - effect: NoSchedule
+      key: codefresh.io
+      operator: Equal
+      value: dinds
+  engine:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    limits:
+        cpu: 1000m
+        memory: 1024Mi
+    podAnnotations:
+      karpenter.sh/do-not-evict: 'true'
+    nodeSelector:
+      node-type: engine
+    tolerations:
+    - effect: NoSchedule
+      key: codefresh.io
+      operator: Equal
+      value: engines

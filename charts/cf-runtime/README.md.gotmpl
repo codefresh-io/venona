@@ -2,6 +2,23 @@
 
 {{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
 
+Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
+
+## Table of Content
+
+- [Prerequisites](#prerequisites)
+- [Get Repo Info](#get-repo-info)
+- [Install Chart](#install-chart)
+- [Upgrade Chart](#upgrade-chart)
+  - [To 2.x](#to-2x)
+  - [To 3.x](#to-3x)
+- [Architecture](#architecture)
+- [Configuration](#configuration)
+  - [EBS backend volume configuration](#ebs-backend-volume-configuration)
+  - [Custom volume mounts](#custom-volume-mounts)
+  - [Custom global environment variables](#custom-global-environment-variables)
+  - [Volume reuse policy](#volume-reuse-policy)
+
 ## Prerequisites
 
 - Kubernetes **1.19+**
@@ -34,10 +51,52 @@ helm repo update
 
     helm upgrade --install cf-runtime cf-runtime/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
     ```
+
+    *Install from OCI-based registry*
+    ```console
+    helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
+    ```
 4. At this point you should have a working Codefresh Runner. You can verify the installation by running:
     ```console
     codefresh runner execute-test-pipeline --runtime-name <runtime-name>
     ```
+
+## Upgrade chart
+
+### To 2.x
+
+This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
+
+Affected values:
+- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
+- `re` is renamed to `runtime`
+- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
+- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
+- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
+- pod's `annotations` is renamed to `podAnnotations`
+
+### To 3.x
+
+⚠️⚠️⚠️
+### Please, READ this before the upgrade!
+
+This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
+That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
+
+**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (for example, you did use [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands to modify the runtime-environment), you MUST add these into chart's [values.yaml](./values.yaml) for `.Values.runtime.dind` or(and) .`Values.runtime.engine`**
+
+**For backward compatibility, you can disable updating runtime-environment spec via** `.Values.runtime.patch.enabled=false`
+
+Affected values:
+- added **mandatory** `global.codefresh.codefreshToken`/`global.codefresh.codefreshTokenSecretKeyRef` **You must specify it before the upgrade!**
+- `runtime.engine` is added
+- `runtime.dind` is added
+- `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
+- `global.existingDindCertsSecret` is replaced with `global.dindCertsSecretRef`
+
+## Architecture
+
+[Codefresh Runner architecture](https://codefresh.io/docs/docs/installation/codefresh-runner/#codefresh-runner-architecture)
 
 ## Configuration
 
@@ -148,21 +207,76 @@ volumeProvisioner:
         eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
+### Custom volume mounts
+
+You can add your own volumes and volume mounts in the runtime environment, so that all pipeline steps will have access to the same set of external files.
+
+```yaml
+runtime:
+  dind:
+    userVolumes:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        secret:
+          items:
+            - key: .dockerconfigjson
+              path: config.json
+          secretName: regctl-docker-registry
+          optional: true
+    userVolumeMounts:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        mountPath: /home/appuser/.docker/
+        readOnly: true
+
+```
+
+### Custom global environment variables
+
+You can add your own environment variables to the runtime environment. All pipeline steps have access to the global variables.
+
+```yaml
+runtime:
+  engine:
+    userEnvVars:
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: github-token
+          key: token
+```
+
+### Volume reuse policy
+
+Volume reuse behavior depends on the configuration for `reuseVolumeSelector` in the runtime environment spec.
+
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        ...
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+The following options are available:
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'` - PV can be used by ANY pipeline in the specified account (default).
+Benefit: Fewer PVs, resulting in lower costs. Since any PV can be used by any pipeline, the cluster needs to maintain/reserve fewer PVs in its PV pool for Codefresh.
+Downside: Since the PV can be used by any pipeline, the PVs could have assets and info from different pipelines, reducing the probability of cache.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,project_id'` - PV can be used by ALL pipelines in your account, assigned to the same project.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id'` - PV can be used only by a single pipeline.
+Benefit: More probability of cache without “spam” from other pipelines.
+Downside: More PVs to maintain and therefore higher costs.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,io.codefresh.branch_name'` - PV can be used only by single pipeline AND single branch.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'` - PV can be used only by single pipeline AND single trigger.
+
+
 {{ template "chart.requirementsSection" . }}
-
-## Upgrading
-
-### To 2.0.0
-
-This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
-
-Affected values:
-- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
-- `re` is renamed to `runtime`
-- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
-- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
-- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
-- pod's `annotations` is renamed to `podAnnotations`
 
 {{ template "chart.valuesSection" . }}
 

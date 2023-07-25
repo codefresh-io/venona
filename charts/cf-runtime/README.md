@@ -1,6 +1,23 @@
 ## Codefresh Runner
 
-![Version: 2.0.1](https://img.shields.io/badge/Version-2.0.1-informational?style=flat-square)
+![Version: 3.0.0](https://img.shields.io/badge/Version-3.0.0-informational?style=flat-square)
+
+Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
+
+## Table of Content
+
+- [Prerequisites](#prerequisites)
+- [Get Repo Info](#get-repo-info)
+- [Install Chart](#install-chart)
+- [Upgrade Chart](#upgrade-chart)
+  - [To 2.x](#to-2x)
+  - [To 3.x](#to-3x)
+- [Architecture](#architecture)
+- [Configuration](#configuration)
+  - [EBS backend volume configuration](#ebs-backend-volume-configuration)
+  - [Custom volume mounts](#custom-volume-mounts)
+  - [Custom global environment variables](#custom-global-environment-variables)
+  - [Volume reuse policy](#volume-reuse-policy)
 
 ## Prerequisites
 
@@ -34,10 +51,52 @@ helm repo update
 
     helm upgrade --install cf-runtime cf-runtime/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
     ```
+
+    *Install from OCI-based registry*
+    ```console
+    helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
+    ```
 4. At this point you should have a working Codefresh Runner. You can verify the installation by running:
     ```console
     codefresh runner execute-test-pipeline --runtime-name <runtime-name>
     ```
+
+## Upgrade chart
+
+### To 2.x
+
+This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
+
+Affected values:
+- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
+- `re` is renamed to `runtime`
+- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
+- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
+- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
+- pod's `annotations` is renamed to `podAnnotations`
+
+### To 3.x
+
+⚠️⚠️⚠️
+### Please, READ this before the upgrade!
+
+This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
+That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
+
+**If you had any overrides (i.e. tolerations/nodeSelector/environment variables/etc) added in runtime spec via [codefresh CLI](https://codefresh-io.github.io/cli/) (for example, you did use [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands to modify the runtime-environment), you MUST add these into chart's [values.yaml](./values.yaml) for `.Values.runtime.dind` or(and) .`Values.runtime.engine`**
+
+**For backward compatibility, you can disable updating runtime-environment spec via** `.Values.runtime.patch.enabled=false`
+
+Affected values:
+- added **mandatory** `global.codefresh.codefreshToken`/`global.codefresh.codefreshTokenSecretKeyRef` **You must specify it before the upgrade!**
+- `runtime.engine` is added
+- `runtime.dind` is added
+- `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
+- `global.existingDindCertsSecret` is replaced with `global.dindCertsSecretRef`
+
+## Architecture
+
+[Codefresh Runner architecture](https://codefresh.io/docs/docs/installation/codefresh-runner/#codefresh-runner-architecture)
 
 ## Configuration
 
@@ -148,25 +207,79 @@ volumeProvisioner:
         eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
+### Custom volume mounts
+
+You can add your own volumes and volume mounts in the runtime environment, so that all pipeline steps will have access to the same set of external files.
+
+```yaml
+runtime:
+  dind:
+    userVolumes:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        secret:
+          items:
+            - key: .dockerconfigjson
+              path: config.json
+          secretName: regctl-docker-registry
+          optional: true
+    userVolumeMounts:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        mountPath: /home/appuser/.docker/
+        readOnly: true
+
+```
+
+### Custom global environment variables
+
+You can add your own environment variables to the runtime environment. All pipeline steps have access to the global variables.
+
+```yaml
+runtime:
+  engine:
+    userEnvVars:
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: github-token
+          key: token
+```
+
+### Volume reuse policy
+
+Volume reuse behavior depends on the configuration for `reuseVolumeSelector` in the runtime environment spec.
+
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        ...
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+The following options are available:
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'` - PV can be used by ANY pipeline in the specified account (default).
+Benefit: Fewer PVs, resulting in lower costs. Since any PV can be used by any pipeline, the cluster needs to maintain/reserve fewer PVs in its PV pool for Codefresh.
+Downside: Since the PV can be used by any pipeline, the PVs could have assets and info from different pipelines, reducing the probability of cache.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,project_id'` - PV can be used by ALL pipelines in your account, assigned to the same project.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id'` - PV can be used only by a single pipeline.
+Benefit: More probability of cache without “spam” from other pipelines.
+Downside: More PVs to maintain and therefore higher costs.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,io.codefresh.branch_name'` - PV can be used only by single pipeline AND single branch.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'` - PV can be used only by single pipeline AND single trigger.
+
 ## Requirements
 
 | Repository | Name | Version |
 |------------|------|---------|
 | https://chartmuseum.codefresh.io/cf-common | cf-common | 0.9.3 |
-
-## Upgrading
-
-### To 2.0.0
-
-This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
-
-Affected values:
-- `dockerRegistry` is deprecated. Replaced with `global.imageRegistry`
-- `re` is renamed to `runtime`
-- `storage.localVolumeMonitor` is replaced with `volumeProvisioner.dind-lv-monitor`
-- `volumeProvisioner.volume-cleanup` is replaced with `volumeProvisioner.dind-volume-cleanup`
-- `image` values structure has been updated. Split to `image.registry` `image.repository` `image.tag`
-- pod's `annotations` is renamed to `podAnnotations`
 
 ## Values
 
@@ -200,10 +313,20 @@ Affected values:
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
 | global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
-| global.existingAgentToken | string | `""` | Existing secret (name-of-existing-secret) with API token from Codefresh supersedes value for global.agentToken; secret must contain `codefresh.token` key |
-| global.existingDindCertsSecret | string | `""` | Existing secret (name has to be `codefresh-certs-server`) supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys |
+| global.accountId | string | `""` | Account ID |
+| global.agentId | string | `""` | Agent ID |
+| global.agentName | string | `""` | Agent Name |
+| global.agentToken | string | `""` | Agent token in plain text. |
+| global.agentTokenSecretKeyRef | object | `{}` | Agent token that references an existing secret containing API key. |
+| global.codefreshHost | string | `""` | URL of Codefresh Platform |
+| global.codefreshToken | string | `""` | User token in plain text. Ref: https://g.codefresh.io/user/settings (see API Keys) |
+| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key. |
+| global.dindCertsSecretRef | object | `{}` | Certs for Dind docker daemon that references an existing secret |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
+| global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
+| global.namespace | string | `""` | Runner namespace |
+| global.runtimeName | string | `""` | Runtime name |
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
@@ -248,9 +371,43 @@ Affected values:
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
+| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind.affinity | object | `{}` | Set affinity |
+| runtime.dind.env | object | `{}` | Set additional env vars. |
+| runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"}` | Set dind image. |
+| runtime.dind.nodeSelector | object | `{}` | Set node selector. |
+| runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
+| runtime.dind.pvcs | list | `[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}]` | PV claim spec parametes. |
+| runtime.dind.pvcs[0] | object | `{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}` | PVC name prefix. Keep `dind` as default! Don't change! |
+| runtime.dind.pvcs[0].reuseVolumeSelector | string | `"codefresh-app,io.codefresh.accountName"` | PV reuse selector. Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy |
+| runtime.dind.pvcs[0].storageClassName | string | `"{{ include \"dind-volume-provisioner.storageClassName\" . }}"` | PVC storage class name. Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner |
+| runtime.dind.pvcs[0].volumeSize | string | `"16Gi"` | PVC size. |
+| runtime.dind.resources | object | `{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}}` | Set dind resources. |
+| runtime.dind.schedulerName | string | `""` | Set scheduler name. |
+| runtime.dind.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
+| runtime.dind.tolerations | list | `[]` | Set tolerations. |
+| runtime.dind.userAccess | bool | `true` | Keep `true` as default! |
+| runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
+| runtime.dind.userVolumes | object | `{}` | Add extra volumes |
+| runtime.dindDaemon | object | See below | DinD pod daemon config |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.9"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.9","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.12","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.19","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine.affinity | object | `{}` | Set affinity |
+| runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
+| runtime.engine.env | object | `{}` | Set additional env vars. |
+| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.9"}` | Set image. |
+| runtime.engine.nodeSelector | object | `{}` | Set node selector. |
+| runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
+| runtime.engine.resources | object | `{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Set resources. |
+| runtime.engine.runtimeImages | object | See below. | Set system(base) runtime images. |
+| runtime.engine.schedulerName | string | `""` | Set scheduler name. |
+| runtime.engine.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
+| runtime.engine.tolerations | list | `[]` | Set tolerations. |
+| runtime.engine.userEnvVars | list | `[]` | Set extra env vars |
+| runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
+| runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
 | storage.azuredisk.cachingMode | string | `"None"` |  |
 | storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |
@@ -273,6 +430,7 @@ Affected values:
 | volumeProvisioner | object | See below | Volume Provisioner parameters |
 | volumeProvisioner.affinity | object | `{}` | Set affinity |
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
+| volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
 | volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.33.3"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |

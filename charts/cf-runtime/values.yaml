@@ -8,24 +8,55 @@ global:
   # -- Global Docker registry secret names as array
   imagePullSecrets: []
 
+  # NOTE!
   # The following values are generated from `codefresh runner init --generate-helm-values-file` output
+
+  # -- Runner namespace
   namespace: ""
+  # -- URL of Codefresh Platform
   codefreshHost: ""
+  # -- User token in plain text.
+  # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  codefreshToken: ""
+  # -- User token that references an existing secret containing API key.
+  codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
+
+  # -- Agent token in plain text.
   agentToken: ""
-  # -- Existing secret (name-of-existing-secret) with API token from Codefresh
-  # supersedes value for global.agentToken; secret must contain `codefresh.token` key
-  existingAgentToken: ""
+  # -- Agent token that references an existing secret containing API key.
+  agentTokenSecretKeyRef: {}
+  # E.g.
+  # agentTokenSecretKeyRef:
+  #   name: my-codefresh-agent-secret
+  #   key: codefresh-agent-token
+
+  # -- Agent ID
   agentId: ""
+  # -- Agent Name
   agentName: ""
+  # -- Account ID
   accountId: ""
+  # -- Runtime name
   runtimeName: ""
-  # -- Existing secret (name has to be `codefresh-certs-server`)
-  # supersedes value for global.keys; secret must contain `server-cert.pem` `server-key.pem` and `ca.pem`` keys
-  existingDindCertsSecret: ""
+  # -- Certs for Dind docker daemon
   keys:
     key: ""
     ca: ""
     serverCert: ""
+  # -- Certs for Dind docker daemon that references an existing secret
+  dindCertsSecretRef: {}
+  # E.g.
+  # dindCertsSecretRef:
+  #   name: codefresh-certs-server # name has to be `codefresh-certs-server` (secret must contain `server-cert.pem` `server-key.pem` and `ca.pem` keys)
+
+  # DEPRECATED -- Use `.Values.global.agentTokenSecretKeyRef` instead
+  existingAgentToken: ""
+  # DEPRECATED -- Use `.Values.global.existingDindCertsSecret` instead
+  existingDindCertsSecret: ""
 
 # DEPRECATED -- Use `.Values.global.imageRegistry` instead
 dockerRegistry: ""
@@ -97,6 +128,8 @@ runner:
 # -- Volume Provisioner parameters
 # @default -- See below
 volumeProvisioner:
+  # -- Enable volume-provisioner
+  enabled: true
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
@@ -337,7 +370,151 @@ runtime:
     # -- Add custom rule to the engine role
     rules: []
 
-  # DinD pod daemon config
+  # -- Parameters for DinD (docker-in-docker) pod (aka "runtime" pod).
+  dind:
+    # -- Set dind image.
+    image:
+      registry: quay.io
+      repository: codefresh/dind
+      tag: 20.10.18-1.25.7
+    # -- Set dind resources.
+    resources:
+      requests:
+        cpu: 400m
+        memory: 800Mi
+      limits:
+        cpu: 400m
+        memory: 800Mi
+    # -- PV claim spec parametes.
+    pvcs:
+        # -- PVC name prefix.
+        # Keep `dind` as default! Don't change!
+      - name: dind
+        # -- PVC storage class name.
+        # Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner
+        storageClassName: '{{ include "dind-volume-provisioner.storageClassName" . }}'
+        # -- PVC size.
+        volumeSize: 16Gi
+        # -- PV reuse selector.
+        # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+    # -- Set additional env vars.
+    env: {}
+    # -- Set pod annotations.
+    podAnnotations: {}
+    # -- Set node selector.
+    nodeSelector: {}
+    # -- Set affinity
+    affinity: {}
+    # -- Set tolerations.
+    tolerations: []
+    # -- Set scheduler name.
+    schedulerName: ""
+    # -- Set service account for pod.
+    serviceAccount: codefresh-engine
+    # -- Keep `true` as default!
+    userAccess: true
+    # -- Add extra volumes
+    userVolumes: {}
+    # E.g.:
+    # userVolumes:
+    #   regctl-docker-registry:
+    #     name: regctl-docker-registry
+    #     secret:
+    #       items:
+    #         - key: .dockerconfigjson
+    #           path: config.json
+    #       secretName: regctl-docker-registry
+    #       optional: true
+    # -- Add extra volume mounts
+    userVolumeMounts: {}
+    # E.g.:
+    # userVolumeMounts:
+    #   regctl-docker-registry:
+    #     name: regctl-docker-registry
+    #     mountPath: /home/appuser/.docker/
+    #     readOnly: true
+
+  # -- Parameters for Engine pod (aka "pipeline" orchestrator).
+  engine:
+    # -- Set image.
+    image:
+      registry: quay.io
+      repository: codefresh/engine
+      tag: 1.164.9
+    # -- Set container command.
+    command:
+      - npm
+      - run
+      - start
+    # -- Set resources.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+    # -- Set system(base) runtime images.
+    # @default -- See below.
+    runtimeImages:
+      COMPOSE_IMAGE: quay.io/codefresh/compose:1.3.0
+      CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.10.2
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.5
+      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.9
+      DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.12
+      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.9
+      FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3
+      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.1.19
+      KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11
+      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.0
+      TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.13.8
+    # -- Set additional env vars.
+    env: {}
+    # -- Set pod annotations.
+    podAnnotations: {}
+    # -- Set node selector.
+    nodeSelector: {}
+    # -- Set affinity
+    affinity: {}
+    # -- Set tolerations.
+    tolerations: []
+    # -- Set scheduler name.
+    schedulerName: ""
+    # -- Set service account for pod.
+    serviceAccount: codefresh-engine
+    # -- Set extra env vars
+    userEnvVars: []
+    # E.g.
+    # userEnvVars:
+    # - name: GITHUB_TOKEN
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: github-token
+    #       key: token
+
+  # -- Parameters for `runtime-patch` post-upgrade/install hook
+  # @default -- See below
+  patch:
+    enabled: true
+    image:
+      registry: quay.io
+      repository: codefresh/cli
+      tag: 0.84.6
+    annotations: {}
+    affinity: {}
+    nodeSelector: {}
+    podSecurityContext: {}
+    resources: {}
+    tolerations: []
+
+  # -- Set parent runtime to inherit.
+  # Should not be changes. Parent runtime is controlled from Codefresh side.
+  runtimeExtends:
+    - system/default/hybrid/k8s_low_limits
+
+  # -- DinD pod daemon config
   # @default -- See below
   dindDaemon:
     hosts:

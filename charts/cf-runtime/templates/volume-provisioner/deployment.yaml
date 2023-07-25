@@ -1,3 +1,4 @@
+{{- if .Values.volumeProvisioner.enabled }}
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{ $values := .Values.volumeProvisioner }}
 ---
@@ -62,3 +63,4 @@ spec:
       {{- with $values.extraVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
+{{- end }}

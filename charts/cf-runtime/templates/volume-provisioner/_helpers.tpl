@@ -87,3 +87,7 @@ Create the name of the service account to use
 {{- default "default" .Values.volumeProvisioner.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "dind-volume-provisioner.storageClassName" }}
+{{- printf "dind-local-volumes-runner-%s" .Release.Namespace }}
+{{- end }}
