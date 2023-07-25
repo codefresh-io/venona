@@ -308,8 +308,19 @@ Downside: More PVs to maintain and therefore higher costs.
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
 | global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
+| global.accountId | string | `""` | Account ID |
+| global.agentId | string | `""` | Agent ID |
+| global.agentName | string | `""` | Agent Name |
+| global.agentToken | string | `""` | Agent token in plain text. |
+| global.agentTokenSecretKeyRef | object | `{}` | Agent token that references an existing secret containing API key. |
+| global.codefreshHost | string | `""` | URL of Codefresh Platform |
+| global.codefreshToken | string | `""` | User token in plain text. Ref: https://g.codefresh.io/user/settings (see API Keys) |
+| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key. |
+| global.dindCertsSecretRef | object | `{}` | Certs for Dind docker daemon that references an existing secret |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
+| global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
+| global.runtimeName | string | `""` | Runtime name |
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |

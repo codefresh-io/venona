@@ -8,25 +8,42 @@ global:
   # -- Global Docker registry secret names as array
   imagePullSecrets: []
 
+  # IMPORTANT!
   # The following values are generated from `codefresh runner init --generate-helm-values-file` output
   namespace: ""
+  # -- URL of Codefresh Platform
   codefreshHost: ""
+  # -- User token in plain text.
+  # Ref: https://g.codefresh.io/user/settings (see API Keys)
   codefreshToken: ""
+  # -- User token that references an existing secret containing API key.
   codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
+  # -- Agent token in plain text.
   agentToken: ""
+  # -- Agent token that references an existing secret containing API key.
   agentTokenSecretKeyRef: {}
   # E.g.
   # agentTokenSecretKeyRef:
   #   name: my-codefresh-agent-secret
   #   key: codefresh-agent-token
+  # -- Agent ID
   agentId: ""
+  # -- Agent Name
   agentName: ""
+  # -- Account ID
   accountId: ""
+  # -- Runtime name
   runtimeName: ""
+  # -- Certs for Dind docker daemon
   keys:
     key: ""
     ca: ""
     serverCert: ""
+  # -- Certs for Dind docker daemon that references an existing secret
   dindCertsSecretRef: {}
   # E.g.
   # dindCertsSecretRef:
