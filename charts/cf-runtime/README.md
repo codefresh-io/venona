@@ -78,6 +78,7 @@ Affected values:
 ### To 3.x
 
 ⚠️⚠️⚠️
+#### Please, READ this before the upgrade!
 
 This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
 That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
