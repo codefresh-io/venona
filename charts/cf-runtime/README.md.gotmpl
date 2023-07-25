@@ -202,10 +202,76 @@ volumeProvisioner:
         eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
+### Custom volume mounts
+
+You can add your own volumes and volume mounts in the runtime environment, so that all pipeline steps will have access to the same set of external files.
+
+```yaml
+runtime:
+  dind:
+    userVolumes:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        secret:
+          items:
+            - key: .dockerconfigjson
+              path: config.json
+          secretName: regctl-docker-registry
+          optional: true
+    userVolumeMounts:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        mountPath: /home/appuser/.docker/
+        readOnly: true
+
+```
+
+### Custom global environment variables
+
+You can add your own environment variables to the runtime environment. All pipeline steps have access to the global variables.
+
+```yaml
+runtime:
+  engine:
+    userEnvVars:
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: github-token
+          key: token
+```
+
+### Volume reuse policy
+
+Volume reuse behavior depends on the configuration for `reuseVolumeSelector` in the runtime environment spec.
+
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        ...
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+The following options are available:
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'` - PV can be used by ANY pipeline in the specified account (default).
+Benefit: Fewer PVs, resulting in lower costs. Since any PV can be used by any pipeline, the cluster needs to maintain/reserve fewer PVs in its PV pool for Codefresh.
+Downside: Since the PV can be used by any pipeline, the PVs could have assets and info from different pipelines, reducing the probability of cache.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,project_id'` - PV can be used by ALL pipelines in your account, assigned to the same project.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id'` - PV can be used only by a single pipeline.
+Benefit: More probability of cache without “spam” from other pipelines.
+Downside: More PVs to maintain and therefore higher costs.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,io.codefresh.branch_name'` - PV can be used only by single pipeline AND single branch.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'` - PV can be used only by single pipeline AND single trigger.
+
 
 {{ template "chart.requirementsSection" . }}
-
-
 
 {{ template "chart.valuesSection" . }}
 

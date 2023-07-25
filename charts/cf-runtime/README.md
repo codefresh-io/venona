@@ -202,6 +202,74 @@ volumeProvisioner:
         eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
+### Custom volume mounts
+
+You can add your own volumes and volume mounts in the runtime environment, so that all pipeline steps will have access to the same set of external files.
+
+```yaml
+runtime:
+  dind:
+    userVolumes:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        secret:
+          items:
+            - key: .dockerconfigjson
+              path: config.json
+          secretName: regctl-docker-registry
+          optional: true
+    userVolumeMounts:
+      regctl-docker-registry:
+        name: regctl-docker-registry
+        mountPath: /home/appuser/.docker/
+        readOnly: true
+
+```
+
+### Custom global environment variables
+
+You can add your own environment variables to the runtime environment. All pipeline steps have access to the global variables.
+
+```yaml
+runtime:
+  engine:
+    userEnvVars:
+    - name: GITHUB_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: github-token
+          key: token
+```
+
+### Volume reuse policy
+
+Volume reuse behavior depends on the configuration for `reuseVolumeSelector` in the runtime environment spec.
+
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        ...
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+The following options are available:
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'` - PV can be used by ANY pipeline in the specified account (default).
+Benefit: Fewer PVs, resulting in lower costs. Since any PV can be used by any pipeline, the cluster needs to maintain/reserve fewer PVs in its PV pool for Codefresh.
+Downside: Since the PV can be used by any pipeline, the PVs could have assets and info from different pipelines, reducing the probability of cache.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,project_id'` - PV can be used by ALL pipelines in your account, assigned to the same project.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id'` - PV can be used only by a single pipeline.
+Benefit: More probability of cache without “spam” from other pipelines.
+Downside: More PVs to maintain and therefore higher costs.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,io.codefresh.branch_name'` - PV can be used only by single pipeline AND single branch.
+
+- `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'` - PV can be used only by single pipeline AND single trigger.
+
 ## Requirements
 
 | Repository | Name | Version |
@@ -286,11 +354,9 @@ volumeProvisioner:
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
-| runtime.dind | object | `{"affinity":{},"env":{},"extraVolumeMounts":{},"extraVolumes":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":{"cpu":"400m","memory":"800Mi"}},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{}` | Set additional env vars. |
-| runtime.dind.extraVolumeMounts | object | `{}` | Add extra volume mounts |
-| runtime.dind.extraVolumes | object | `{}` | Add extra volumes |
 | runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.4"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
@@ -304,8 +370,10 @@ volumeProvisioner:
 | runtime.dind.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
 | runtime.dind.tolerations | list | `[]` | Set tolerations. |
 | runtime.dind.userAccess | bool | `true` | Keep `true` as default! |
+| runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
+| runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.7"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.9","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.12","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.19","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.7"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.9","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.12","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.19","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
 | runtime.engine.env | object | `{}` | Set additional env vars. |
@@ -317,6 +385,7 @@ volumeProvisioner:
 | runtime.engine.schedulerName | string | `""` | Set scheduler name. |
 | runtime.engine.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
 | runtime.engine.tolerations | list | `[]` | Set tolerations. |
+| runtime.engine.userEnvVars | list | `[]` | Set extra env vars |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |

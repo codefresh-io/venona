@@ -395,20 +395,21 @@ runtime:
     # -- Keep `true` as default!
     userAccess: true
     # -- Add extra volumes
-    extraVolumes: {}
+    userVolumes: {}
     # E.g.:
-    # regctl-docker-registry:
-    #   name: regctl-docker-registry
-    #   secret:
-    #     items:
-    #       - key: .dockerconfigjson
-    #         path: config.json
-    #     secretName: regctl-docker-registry
-    #     optional: true
+    # userVolumes:
+    #   regctl-docker-registry:
+    #     name: regctl-docker-registry
+    #     secret:
+    #       items:
+    #         - key: .dockerconfigjson
+    #           path: config.json
+    #       secretName: regctl-docker-registry
+    #       optional: true
     # -- Add extra volume mounts
-    extraVolumeMounts: {}
+    userVolumeMounts: {}
     # E.g.:
-    # extraVolumeMounts:
+    # userVolumeMounts:
     #   regctl-docker-registry:
     #     name: regctl-docker-registry
     #     mountPath: /home/appuser/.docker/
@@ -462,6 +463,15 @@ runtime:
     schedulerName: ""
     # -- Set service account for pod.
     serviceAccount: codefresh-engine
+    # -- Set extra env vars
+    userEnvVars: []
+    # E.g.
+    # userEnvVars:
+    # - name: GITHUB_TOKEN
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: github-token
+    #       key: token
 
   # -- Parameters for `runtime-patch` post-upgrade/install hook
   # @default -- See below
