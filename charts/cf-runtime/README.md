@@ -323,7 +323,7 @@ runtime:
       INODES_USAGE_THRESHOLD: '0.8' # launch clean based on current inodes usage INODES_USAGE_THRESHOLD
 ```
 
-### External volume cleaner
+### External volumes cleaner
 
 **Purpose:** Removes unused *kubernetes volumes and related backend volumes*
 
@@ -354,7 +354,7 @@ volumeProvisioner:
       RETENTION_DAYS: 7   # clean volumes that were last used more than `RETENTION_DAYS` (default is 4) ago
 ```
 
-### Local volume cleaner
+### Local volumes cleaner
 
 **Purpose:** Deletes local volumes when node disk space is close to the threshold
 
