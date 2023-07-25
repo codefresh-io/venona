@@ -327,8 +327,7 @@ runtime:
 
 **Purpose:** Removes unused *kubernetes volumes and related backend volumes*
 
-**How it runs:** Runs as CronJob
-(`kubectl get cronjobs -n codefresh -l app=dind-volume-cleanup`). Installed in case the Runner uses non-local volumes (`.Values.storage.backend != local`)
+**How it runs:** Runs as `dind-volume-cleanup` CronJob. Installed in case the Runner uses non-local volumes (`.Values.storage.backend != local`)
 
 **Triggered by:** CronJob every 10min (configurable)
 
@@ -359,7 +358,7 @@ volumeProvisioner:
 
 **Purpose:** Deletes local volumes when node disk space is close to the threshold
 
-**How it runs:** On each node on runtime cluster as DaemonSet `dind-lv-monitor`. Installed in case the Runner uses local volumes (`.Values.storage.backend == local`)
+**How it runs:** Runs as `dind-lv-monitor` DaemonSet. Installed in case the Runner uses local volumes (`.Values.storage.backend == local`)
 
 **Triggered by:** Disk space usage or node usage that exceeds thresholds (configurable)
 
