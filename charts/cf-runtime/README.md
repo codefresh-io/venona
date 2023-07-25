@@ -14,6 +14,10 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 3.x](#to-3x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
+  - [EBS backend volume configuration](#ebs-backend-volume-configuration)
+  - [Custom volume mounts](#custom-volume-mounts)
+  - [Custom global environment variables](#custom-global-environment-variables)
+  - [Volume reuse policy](#volume-reuse-policy)
 
 ## Prerequisites
 
