@@ -276,7 +276,7 @@ Downside: More PVs to maintain and therefore higher costs.
 
 - `reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'` - PV can be used only by single pipeline AND single trigger.
 
-## Volume cleaners
+### Volume cleaners
 
 Codefresh pipelines require disk space for:
   * [Pipeline Shared Volume](https://codefresh.io/docs/docs/pipelines/introduction-to-codefresh-pipelines/#sharing-the-workspace-between-build-steps) (`/codefresh/volume`, implemented as [docker volume](https://docs.docker.com/storage/volumes/))
