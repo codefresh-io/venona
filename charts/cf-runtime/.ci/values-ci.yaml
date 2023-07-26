@@ -26,7 +26,7 @@ runtime:
     podAnnotations:
       karpenter.sh/do-not-evict: 'true'
     nodeSelector:
-      node-type: dind-rootless
+      node-type: dind
     tolerations:
     - effect: NoSchedule
       key: codefresh.io
