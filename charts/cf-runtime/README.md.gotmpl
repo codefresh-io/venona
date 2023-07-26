@@ -89,7 +89,7 @@ That means it is possible to set parametes for `dind` and `engine` pods via [val
 **For backward compatibility, you can disable updating runtime-environment spec via** `.Values.runtime.patch.enabled=false`
 
 Affected values:
-- added **mandatory** `global.codefresh.codefreshToken`/`global.codefresh.codefreshTokenSecretKeyRef` **You must specify it before the upgrade!**
+- added **mandatory** `global.codefreshToken`/`global.codefreshTokenSecretKeyRef` **You must specify it before the upgrade!**
 - `runtime.engine` is added
 - `runtime.dind` is added
 - `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
