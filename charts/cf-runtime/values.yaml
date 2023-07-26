@@ -376,7 +376,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 20.10.18-1.25.7 # use `latest-rootless/rootless/20.10.24-1.27.0-rootless` tags for rootless-dind
+      tag: 20.10.18-1.25.7  # use `latest-rootless/rootless/20.10.24-1.27.0-rootless` tags for rootless-dind
     # -- Set dind resources.
     resources:
       requests: null
