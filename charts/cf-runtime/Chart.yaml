@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 3.0.0
+version: 3.0.1
 keywords:
   - codefresh
   - runner
@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: added
-      description: Added runtime-environment template
+      description: Added option to specify null requests for dind
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
