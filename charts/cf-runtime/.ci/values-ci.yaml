@@ -14,12 +14,14 @@ monitor:
 runner: {}
 runtime:
   dind:
+    image:
+      tag: 20.10.24-1.27.0-rootless
     resources:
       requests:
         cpu: 100m
         memory: 128Mi
     limits:
-        cpu: 1001m
+        cpu: 1000m
         memory: 1024Mi
     podAnnotations:
       karpenter.sh/do-not-evict: 'true'
