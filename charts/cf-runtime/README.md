@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 3.0.3](https://img.shields.io/badge/Version-3.0.3-informational?style=flat-square)
+![Version: 3.0.4](https://img.shields.io/badge/Version-3.0.4-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -378,7 +378,7 @@ volumeProvisioner:
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.9.3 |
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.11.1 |
 
 ## Values
 
@@ -411,6 +411,7 @@ volumeProvisioner:
 | appProxy.tolerations | list | `[]` | Set tolerations |
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
+| extraResources | list | `[]` | Array of extra objects to deploy with the release |
 | global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
 | global.accountId | string | `""` | Account ID |
 | global.agentId | string | `""` | Agent ID |
