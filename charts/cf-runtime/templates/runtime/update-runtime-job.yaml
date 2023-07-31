@@ -48,7 +48,7 @@ spec:
           {{- include "runtime.installation-token-env-var-value" . | indent 10}}
         - name: API_HOST
           value: {{ .Values.global.codefreshHost }}
-        {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 8 }}
+          {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 10 }}
         volumeMounts:
         - name: config
           mountPath: /usr/share/extras/runtime.yaml
