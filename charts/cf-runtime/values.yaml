@@ -506,6 +506,7 @@ runtime:
     podSecurityContext: {}
     resources: {}
     tolerations: []
+    env: {}
 
   # -- Set parent runtime to inherit.
   # Should not be changes. Parent runtime is controlled from Codefresh side.
