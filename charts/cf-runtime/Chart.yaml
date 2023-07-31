@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 3.0.6
+version: 3.0.7
 keywords:
   - codefresh
   - runner
@@ -14,8 +14,8 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: added
-      description: Add env to runtime patch job
+    - kind: fixed
+      description: Fix env var indent in runtime patch job
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
