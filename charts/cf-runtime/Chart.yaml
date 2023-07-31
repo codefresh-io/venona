@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: fixed
-      description: Fix security context for dind-lv-monitor (OpenShift Support)
+      description: Fix security context for dind-lv-monitor (OpenShift support)
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
