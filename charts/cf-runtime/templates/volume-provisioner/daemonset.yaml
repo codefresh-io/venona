@@ -38,10 +38,15 @@ spec:
         args:
          - -ec
          - |
-           chown -R {{ $values.podSecurityContext.fsGroup }}:{{ $values.podSecurityContext.fsGroup }} {{ $localVolumeParentDir }}
+           chown -R {{ $values.podSecurityContext.runAsUser }}:{{ $values.podSecurityContext.fsGroup }} {{ $localVolumeParentDir }}
         volumeMounts:
         - mountPath: {{ $localVolumeParentDir }}
           name: dind-volume-dir
+        {{- if eq ( toString ( $values.volumePermissions.securityContext.runAsUser )) "auto" }}
+        securityContext: {{- omit $values.volumePermissions.securityContext "runAsUser" | toYaml | nindent 10 }}
+        {{- else }}
+        securityContext: {{- $values.volumePermissions.securityContext | toYaml | nindent 10 }}
+        {{- end }}
         resources:
           {{- toYaml $values.volumePermissions.resources | nindent 10 }}
       {{- end }}
@@ -49,6 +54,9 @@ spec:
       - name: dind-lv-monitor
         image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $values.image "context" .) }}
         imagePullPolicy: {{ $values.image.pullPolicy | default "Always" }}
+        {{- if $values.containerSecurityContext.enabled }}
+        securityContext: {{- omit $values.containerSecurityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
         command:
           - /home/dind-volume-utils/bin/local-volumes-agent
         env:

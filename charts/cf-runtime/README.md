@@ -19,6 +19,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
   - [Volume cleaners](#volume-cleaners)
+  - [Openshift](#openshift)
 
 ## Prerequisites
 
