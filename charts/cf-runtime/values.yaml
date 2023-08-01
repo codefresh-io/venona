@@ -194,7 +194,9 @@ volumeProvisioner:
     podAnnotations: {}
     podSecurityContext:
       enabled: true
+      runAsUser: 1000
       fsGroup: 1000
+    containerSecurityContext: {}
     env: {}
     resources: {}
     nodeSelector: {}
@@ -209,6 +211,8 @@ volumeProvisioner:
         repository: alpine
         tag: 3.18
       resources: {}
+      securityContext:
+        runAsUser: 0 # auto
 
   # `dind-volume-cleanup` CronJob parameters
   # (external volumes cleaner)
@@ -499,14 +503,15 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.84.6
+      tag: 0.84.8-rootless
     annotations: {}
     affinity: {}
     nodeSelector: {}
     podSecurityContext: {}
     resources: {}
     tolerations: []
-    env: {}
+    env:
+      HOME: /tmp
 
   # -- Set parent runtime to inherit.
   # Should not be changes. Parent runtime is controlled from Codefresh side.

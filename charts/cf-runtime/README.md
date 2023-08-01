@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 3.0.7](https://img.shields.io/badge/Version-3.0.7-informational?style=flat-square)
+![Version: 3.0.8](https://img.shields.io/badge/Version-3.0.8-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -19,6 +19,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
   - [Volume cleaners](#volume-cleaners)
+  - [Openshift](#openshift)
 
 ## Prerequisites
 
@@ -372,6 +373,39 @@ volumeProvisioner:
     env:
       KB_USAGE_THRESHOLD: 60  # default 80 (percentage)
       INODE_USAGE_THRESHOLD: 60  # default 80
+```
+
+### Openshift
+
+To install Codefresh Runner on OpenShift use the following `values.yaml` example
+
+```yaml
+runner:
+  podSecurityContext:
+    enabled: false
+
+volumeProvisioner:
+  podSecurityContext:
+    enabled: false
+  env:
+    PRIVILEGED_CONTAINER: true
+  dind-lv-monitor:
+    containerSecurityContext:
+      enabled: true
+      privileged: true
+    volumePermissions:
+      enabled: true
+      securityContext:
+        privileged: true
+        runAsUser: auto
+```
+
+Grant `privileged` SCC to `cf-runtime-runner` and `cf-runtime-volume-provisioner` service accounts.
+
+```console
+oc adm policy add-scc-to-user privileged system:serviceaccount:codefresh:cf-runtime-runner
+
+oc adm policy add-scc-to-user privileged system:serviceaccount:codefresh:cf-runtime-volume-provisioner
 ```
 
 ## Requirements
