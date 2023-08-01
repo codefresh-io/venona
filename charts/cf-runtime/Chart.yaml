@@ -16,6 +16,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: fixed
       description: Fix security context for dind-lv-monitor (OpenShift support)
+    - kind: changed
+      description: Use rootless cli image for runtime patch job
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
