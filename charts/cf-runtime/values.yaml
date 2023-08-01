@@ -503,14 +503,15 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.84.6
+      tag: 0.84.8-rootless
     annotations: {}
     affinity: {}
     nodeSelector: {}
     podSecurityContext: {}
     resources: {}
     tolerations: []
-    env: {}
+    env:
+      HOME: /tmp
 
   # -- Set parent runtime to inherit.
   # Should not be changes. Parent runtime is controlled from Codefresh side.
