@@ -398,13 +398,6 @@ volumeProvisioner:
       securityContext:
         privileged: true
         runAsUser: auto
-
-runtime:
-  patch:
-    image:
-      tag: latest-rootless
-    env:
-      HOME: /tmp
 ```
 
 Grant `privileged` SCC to `cf-runtime-runner` and `cf-runtime-volume-provisioner` service accounts.
