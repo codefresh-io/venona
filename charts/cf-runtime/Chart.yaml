@@ -15,9 +15,11 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: added
-      description: Added inCluster onprem runtime option (Codefresh On-Premises only)
+      description: Add inCluster onprem runtime option (Codefresh On-Premises only)
     - kind: changed
-      description: Changed templates as lib components
+      description: Change templates as lib components
+    - kind: changed
+      description: Update cf-common dependency subchart
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common

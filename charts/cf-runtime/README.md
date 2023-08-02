@@ -100,10 +100,10 @@ Affected values:
 
 ### To 4.x
 
-This major release adds agentless inCluster runtime mode (relevant only for [Codefresh On-Premises](#on-premises) users)
+This major release adds **agentless inCluster** runtime mode (relevant only for [Codefresh On-Premises](#on-premise) users)
 
 Affected values:
-- `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.nameOverride` are added
+- `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.nameOverride` / `runtime.description` are added
 
 ## Architecture
 
@@ -428,7 +428,7 @@ Agent (aka venona) is Runner component which responsible for calling Codefresh A
 **What are the prerequisites?**
 - You have a running [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) control-plane environment
 - You have a Codefresh API token with platform **Admin** permissions scope
-- Runtime will be **on the same** as On-Premises control-plane environment
+- Runtime will be **on the same** k8s cluster as On-Premises control-plane environment
 
 **How to deploy it?**
 - Enable cluster-level permissions for cf-api (part of On-Premises control-plane)
@@ -463,14 +463,16 @@ global:
   agent: false
   # -- (for On-Premise only; mandatory!) Distinguished runtime name
   # Must be prefixed with "system/..."
-  nameOverride: "system/prod-ueast-1-some-cluster-name"
+  nameOverride: "system/prod-ue1-some-cluster-name"
   # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
   # `inCluster` flag used when Runtime and On-Premises control-plane are run on the same cluster
-  # It is the only supported mode at the moment!
+  # It is the only supported mode at the moment! Don't change!
   inCluster: true
   # -- (for On-Premise only; optional) Assign accounts to runtime (list of account ids; default is empty)
-  # Accounts can be assigned to the runtime in Codefresh UI later.
+  # Accounts can be assigned to the runtime in Codefresh UI later so you can kepp it empty.
   accounts: []
+  # -- Set parent runtime to inherit.
+  runtimeExtends: []
 ```
 
 - Install the chart
