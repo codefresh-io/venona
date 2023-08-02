@@ -64,8 +64,10 @@ valueFrom:
 
 {{- define "runtime.runtime-environment-spec.name" }}
 {{- if and (not .Values.runtime.agent) }}
-  {{- if and (not (hasPrefix "system/" .Values.global.runtimeName) ) }}
+  {{- if not (hasPrefix "system/" .Values.global.runtimeName) }}
     {{- fail "ERROR: .runtime.agent is set to false! .global.runtimeName should start with system/ prefix" }}
+  {{- else }}
+    {{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
   {{- end }}
 {{- else }}
 {{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
