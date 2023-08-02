@@ -41,9 +41,9 @@ spec:
         - |
           codefresh auth create-context --api-key $API_KEY --url $API_HOST
 {{- if .Values.runtime.agent }}
-          codefresh delete re {{ .Values.global.runtimeName }}
+          codefresh delete re {{ .Values.global.runtimeName }} || true
 {{- else }}
-          codefresh delete sys-re {{ .Values.runtime.nameOverride }}
+          codefresh delete sys-re {{ .Values.runtime.nameOverride }} || true
 {{- end }}
         env:
         - name: API_KEY

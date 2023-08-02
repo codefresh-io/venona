@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
 suite: runner test
+values:
+  - ../generated_values.yaml
 templates:
   - templates/runner/deployment.yaml
   - templates/runner/rbac.yaml
@@ -208,6 +210,7 @@ tests:
   - it: Test runner agent token secret ref
     template: templates/runner/deployment.yaml
     set:
+      global.agentToken: ""
       global.agentTokenSecretKeyRef:
         name: my-secret
         key: my-key

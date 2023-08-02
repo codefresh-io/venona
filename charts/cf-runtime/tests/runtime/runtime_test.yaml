@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
 suite: runtime test
+values:
+  - ../generated_values.yaml
 templates:
   - templates/hooks/job-update-runtime.yaml
   - templates/hooks/cm-update-runtime.yaml

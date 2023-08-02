@@ -21,7 +21,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [Volume reuse policy](#volume-reuse-policy)
   - [Volume cleaners](#volume-cleaners)
   - [Openshift](#openshift)
-- [On-premise](#on-premise)
+  - [On-premise](#on-premise)
 
 ## Prerequisites
 

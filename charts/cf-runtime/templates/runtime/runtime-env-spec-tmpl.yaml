@@ -1,11 +1,11 @@
-{{- define "runtime.runtime-environment-spec-template" }}
+{{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
 {{- $kubeconfigFilePath := .Values.runtime.nameOverride -}}
 {{- $name := .Values.runtime.nameOverride -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
 metadata:
-  name: {{ coalesce .Values.global.runtimeName .Values.runtime.nameOverride }}
+  name: {{ include "runtime.runtime-environment-spec.name" . }}
   agent: {{ .Values.runtime.agent }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
 {{- with .Values.runtime.description }}
