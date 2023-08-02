@@ -20,5 +20,5 @@ annotations:
       description: Changed templates as lib components
 dependencies:
   - name: cf-common
-    repository: https://chartmuseum-dev.codefresh.io/cf-common
+    repository: https://chartmuseum.codefresh.io/cf-common
     version: 0.11.2

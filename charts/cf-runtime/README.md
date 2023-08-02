@@ -12,6 +12,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Upgrade Chart](#upgrade-chart)
   - [To 2.x](#to-2x)
   - [To 3.x](#to-3x)
+  - [To 4.x](#to-4x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -96,6 +97,13 @@ Affected values:
 - `runtime.dind` is added
 - `global.existingAgentToken` is replaced with `global.agentTokenSecretKeyRef`
 - `global.existingDindCertsSecret` is replaced with `global.dindCertsSecretRef`
+
+### To 4.x
+
+This major release adds agentless inCluster runtime mode (relevant only for [Codefresh On-Premises](#on-premises) users)
+
+Affected values:
+- `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.nameOverride` are added
 
 ## Architecture
 
@@ -426,7 +434,7 @@ Agent (aka venona) is Runner component which responsible for calling Codefresh A
 - Enable cluster-level permissions for cf-api (part of On-Premises control-plane)
 
 > `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
-```
+```yaml
 cfapi:
   ...
   # -- Enable ClusterRole/ClusterRoleBinding
@@ -457,7 +465,8 @@ global:
   # Must be prefixed with "system/..."
   nameOverride: "system/prod-ueast-1-some-cluster-name"
   # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
-  # inCluster flag used when Runtime and On-Premises control-plane are run on the same cluster (it's the only supported mode at the moment!)
+  # `inCluster` flag used when Runtime and On-Premises control-plane are run on the same cluster
+  # It is the only supported mode at the moment!
   inCluster: true
   # -- (for On-Premise only; optional) Assign accounts to runtime (list of account ids; default is empty)
   # Accounts can be assigned to the runtime in Codefresh UI later.
@@ -480,7 +489,7 @@ Or run `codefresh get system-runtime-environments` CLI command.
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum-dev.codefresh.io/cf-common | cf-common | 0.11.2 |
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.11.2 |
 
 ## Values
 
