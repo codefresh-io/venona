@@ -478,7 +478,7 @@ global:
 - Install the chart
 
 ```console
-helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace cf=runtime
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace cf-runtime
 ```
 
 - Verify the runtime and run test pipeline
