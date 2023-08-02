@@ -46,6 +46,8 @@ spec:
         env:
         - name: NAMESPACE
           value: {{ .Release.Namespace }}
+        - name: RELEASE
+          value: {{ .Release.Name }}
         - name: CF_API_HOST
           value: {{ required "global.codefreshHost is required!" .Values.global.codefreshHost }}
         - name: CF_API_TOKEN

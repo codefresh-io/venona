@@ -68,6 +68,7 @@ API_TOKEN=${2:-"$CF_API_TOKEN"}
 API_SIGN_PATH=${API_SIGN_PATH:-"api/custom_clusters/signServerCerts"}
 
 NAMESPACE=${NAMESPACE:-default}
+RELEASE=${RELEASE:-cf-runtime}
 
 DIR=$(dirname $0)
 TMPDIR=/tmp/codefresh/
@@ -127,6 +128,9 @@ echo -e "\n------------------\nCreating certificate secret "
         --from-file=$SRV_TLS_CA_CERT \
         --from-file=$SRV_TLS_KEY \
         --from-file=$SRV_TLS_CERT || fatal "Failed storing the generated certificates in Kubernetes!"
+    kubectl label --overwrite secret ${K8S_CERT_SECRET_NAME} app.kubernetes.io/managed-by=Helm
+    kubectl annotate --overwrite secret ${K8S_CERT_SECRET_NAME} meta.helm.sh/release-name=$RELEASE
+    kubectl annotate --overwrite secret ${K8S_CERT_SECRET_NAME} meta.helm.sh/release-namespace=$NAMESPACE
   else
     msg "${K8S_CERT_SECRET_NAME} secret already exists. Skipping."
   fi
