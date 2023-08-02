@@ -58,10 +58,16 @@ valueFrom:
   {{- end }}
 {{- end }}
 
+{{/*
+Print Codefresh API token secret name
+*/}}
 {{- define "runtime.installation-token-secret-name" }}
 {{- print "codefresh-user-token" }}
 {{- end }}
 
+{{/*
+Print runtime-environment name
+*/}}
 {{- define "runtime.runtime-environment-spec.name" }}
 {{- if and (not .Values.runtime.agent) }}
   {{- if not (hasPrefix "system/" .Values.global.runtimeName) }}
@@ -72,5 +78,12 @@ valueFrom:
 {{- else }}
 {{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
 {{- end }}
+{{- end }}
 
+{{- define "runtime.runtime-environment-spec.codefresh-host" }}
+{{- if and (not .Values.global.codefreshHost) }}
+  {{- fail "ERROR: .global.codefreshHost is required" }}
+{{- else }}
+  {{- printf "%s" (trimSuffix "/" .Values.global.codefreshHost) }}
+{{- end }}
 {{- end }}

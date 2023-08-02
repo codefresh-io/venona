@@ -10,7 +10,7 @@ SELF_DEPLOYMENT_NAME:
 AGENT_ID: {{ .Values.global.agentName }}
 CODEFRESH_TOKEN: {{ include "runner.secretTokenName" . | nindent 2 }}
 CODEFRESH_IN_CLUSTER_RUNTIME: {{ .Values.global.runtimeName }}
-CODEFRESH_HOST: {{ .Values.global.codefreshHost }}
+CODEFRESH_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
 DOCKER_REGISTRY: {{ .Values.global.imageRegistry }}
 {{- end }}
 

@@ -49,7 +49,7 @@ spec:
         - name: API_KEY
           {{- include "runtime.installation-token-env-var-value" . | indent 10}}
         - name: API_HOST
-          value: {{ .Values.global.codefreshHost }}
+          value: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
           {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 8 }}
       {{- with $values.nodeSelector }}
       nodeSelector:
