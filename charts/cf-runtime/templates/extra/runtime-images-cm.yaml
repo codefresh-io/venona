@@ -4,7 +4,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  {{- /* template just to list runtime images */}}
+  {{- /* dummy template just to list runtime images */}}
   name: {{ include "runtime.fullname" . }}-images
   labels:
     {{- include "runtime.labels" . | nindent 4 }}

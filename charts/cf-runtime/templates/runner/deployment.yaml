@@ -1,0 +1,7 @@
+{{- $runnerContext := deepCopy . }}
+{{- $_ := set $runnerContext "Values" (get .Values "runner") }}
+{{- $_ := set $runnerContext.Values "global" (get .Values "global") }}
+
+{{- if $runnerContext.Values.enabled }}
+{{- include "runner.resources.deployment" $runnerContext }}
+{{- end }}

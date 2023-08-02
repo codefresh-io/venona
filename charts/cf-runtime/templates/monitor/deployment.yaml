@@ -1,72 +1,7 @@
-{{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := .Values.monitor }}
-{{- if $values.enabled }}
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ include "monitor.fullname" . }}
-  labels:
-    {{- include "monitor.labels" . | nindent 4 }}
-spec:
-  replicas: {{ $values.replicasCount }}
-  strategy:
-    type: {{ $values.updateStrategy.type }}
-  selector:
-    matchLabels:
-      {{- include "monitor.selectorLabels" . | nindent 6 }}
-  template:
-    metadata:
-      labels:
-        {{- include "monitor.selectorLabels" . | nindent 8 }}
-      {{- with $values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-    spec:
-      {{- include (printf "%s.image.pullSecrets" $cfCommonTplSemver ) . | nindent 8 }}
-      serviceAccountName: {{ include "monitor.serviceAccountName" . }}
-      {{- if $values.podSecurityContext.enabled }}
-      securityContext: {{- omit $values.podSecurityContext "enabled" | toYaml | nindent 8 }}
-      {{- end }}
-      containers:
-      - name: monitor
-        image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $values.image "context" .) }}
-        imagePullPolicy: {{ $values.image.pullPolicy | default "Always" }}
-        env:
-        {{- include "monitor.environment-variables" . | nindent 8 }}
-        ports:
-        - name: http
-          containerPort: 9020
-        readinessProbe:
-          initialDelaySeconds: {{ $values.readinessProbe.initialDelaySeconds }}
-          periodSeconds: {{ $values.readinessProbe.periodSeconds }}
-          timeoutSeconds: {{ $values.readinessProbe.timeoutSeconds }}
-          successThreshold: {{ $values.readinessProbe.successThreshold }}
-          failureThreshold: {{ $values.readinessProbe.failureThreshold }}
-          httpGet:
-            path: /api/ping
-            port: 9020
-        resources:
-          {{- toYaml $values.resources | nindent 12  }}
-        volumeMounts:
-        {{- with $values.extraVolumeMounts }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with $values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with $values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with $values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 6 }}
-      {{- end }}
-      volumes:
-      {{- with $values.extraVolumes }}
-        {{- toYaml . | nindent 6 }}
-      {{- end }}
+{{- $monitorContext := deepCopy . }}
+{{- $_ := set $monitorContext "Values" (get .Values "monitor") }}
+{{- $_ := set $monitorContext.Values "global" (get .Values "global") }}
+
+{{- if $monitorContext.Values.enabled }}
+{{- include "monitor.resources.deployment" $monitorContext }}
 {{- end }}

@@ -1,19 +1,18 @@
-{{ $values := .Values.runner }}
----
-{{- if $values.serviceAccount.create }}
+{{- define "runner.resources.rbac" -}}
+{{- if .Values.serviceAccount.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ include "runner.serviceAccountName" . }}
   labels:
     {{- include "runner.labels" . | nindent 4 }}
-  {{- with $values.serviceAccount.annotations }}
+  {{- with .Values.serviceAccount.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
 ---
-{{- if $values.rbac.create }}
+{{- if .Values.rbac.create }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -24,12 +23,12 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods", "persistentvolumeclaims" ]
     verbs: [ "get", "create", "delete" ]
-{{- with $values.rbac.rules }}
+{{- with .Values.rbac.rules }}
   {{ toYaml . | nindent 2 }}
 {{- end }}
 {{- end }}
 ---
-{{- if and $values.serviceAccount.create $values.rbac.create }}
+{{- if and .Values.serviceAccount.create .Values.rbac.create }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -45,4 +44,4 @@ roleRef:
   name: {{ include "runner.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-
+{{- end -}}

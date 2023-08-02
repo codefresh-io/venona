@@ -1,34 +1,7 @@
-{{ $values := .Values.appProxy }}
----
-{{- if $values.enabled }}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ include "app-proxy.fullname" . }}
-  labels: {{- include "app-proxy.labels" . | nindent 4 }}
-  {{- with $values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-spec:
-  {{- if and $values.ingress.class (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ $values.ingress.class }}
-  {{- end }}
-  {{- if $values.ingress.tlsSecret }}
-  tls:
-    - hosts:
-        - {{ $values.ingress.host }}
-      secretName: {{ $values.tlsSecret }}
-  {{- end }}
-  rules:
-    - host: {{ $values.ingress.host }}
-      http:
-        paths:
-          - path: {{ $values.ingress.pathPrefix }}
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: {{ include "app-proxy.fullname" . }}
-                port:
-                  number: 80
+{{- $appProxyContext := deepCopy . }}
+{{- $_ := set $appProxyContext "Values" (get .Values "appProxy") }}
+{{- $_ := set $appProxyContext.Values "global" (get .Values "global") }}
+
+{{- if $appProxyContext.Values.enabled }}
+{{- include "app-proxy.resources.ingress" $appProxyContext }}
 {{- end }}

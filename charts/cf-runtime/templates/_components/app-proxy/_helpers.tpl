@@ -35,9 +35,9 @@ codefresh.io/application: app-proxy
 Create the name of the service account to use
 */}}
 {{- define "app-proxy.serviceAccountName" -}}
-{{- if .Values.appProxy.serviceAccount.create }}
-{{- default (include "app-proxy.fullname" .) .Values.appProxy.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "app-proxy.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.appProxy.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}

@@ -1,60 +1,9 @@
-{{- if .Values.volumeProvisioner.enabled }}
-{{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := index .Values.volumeProvisioner "dind-volume-cleanup" }}
----
-{{- if not (eq .Values.storage.backend "local") }}
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: {{ include "dind-volume-cleanup.fullname" . }}
-  labels:
-    {{- include "dind-volume-cleanup.labels" . | nindent 4 }}
-spec:
-  concurrencyPolicy: {{ $values.concurrencyPolicy }}
-  schedule: {{ $values.schedule | quote }}
-  successfulJobsHistoryLimit: {{ $values.successfulJobsHistory }}
-  failedJobsHistoryLimit: {{ $values.failedJobsHistory }}
-  {{- with $values.suspend }}
-  suspend: {{ . }}
-  {{- end }}
-  jobTemplate:
-    spec:
-      template:
-        metadata:
-          labels:
-            {{- include "dind-volume-cleanup.selectorLabels" . | nindent 12 }}
-          {{- with $values.podAnnotations }}
-          annotations:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-        spec:
-          {{- include (printf "%s.image.pullSecrets" $cfCommonTplSemver ) . | nindent 10 }}
-          serviceAccountName: {{ include "dind-volume-provisioner.serviceAccountName" . }}
-          {{- if $values.podSecurityContext.enabled }}
-          securityContext: {{- omit $values.podSecurityContext "enabled" | toYaml | nindent 12 }}
-          {{- end }}
-          restartPolicy: {{ $values.restartPolicy | default "Never" }}
-          containers:
-          - name: dind-volume-cleanup
-            image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $values.image "context" .) }}
-            imagePullPolicy: {{ $values.image.pullPolicy | default "Always" }}
-            env:
-            {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 12 }}
-            - name: PROVISIONED_BY
-              value: {{ include "dind-volume-provisioner.volumeProvisionerName" . }}
-            resources:
-            {{- toYaml $values.resources | nindent 14 }}
-          {{- with $values.nodeSelector }}
-          nodeSelector:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with $values.affinity }}
-          affinity:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          {{- with $values.tolerations }}
-          tolerations:
-            {{- toYaml . | nindent 10 }}
-          {{- end }}
-  {{- end }}
+{{- $volumeProvisionerContext := deepCopy . }}
+{{- $_ := set $volumeProvisionerContext "Values" (get .Values.volumeProvisioner "dind-volume-cleanup") }}
+{{- $_ := set $volumeProvisionerContext.Values "serviceAccount" (get .Values.volumeProvisioner "serviceAccount") }}
+{{- $_ := set $volumeProvisionerContext.Values "global" (get .Values "global") }}
+{{- $_ := set $volumeProvisionerContext.Values "storage" (get .Values "storage") }}
+
+{{- if and $volumeProvisionerContext.Values.enabled .Values.volumeProvisioner.enabled }}
+{{- include "dind-volume-provisioner.resources.cronjob" $volumeProvisionerContext }}
 {{- end }}

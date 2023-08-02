@@ -11,11 +11,11 @@ API_TOKEN:
     secretKeyRef:
       name: {{ include "monitor.secretTokenName" . }}
       key: codefresh.token
-CLUSTER_ID: {{ .Values.monitor.clusterId }}
+CLUSTER_ID: {{ .Values.clusterId }}
 API_URL: {{ .Values.global.codefreshHost }}/api/k8s-monitor/events
 ACCOUNT_ID: {{ .Values.global.accountId }}
 NAMESPACE: {{ .Release.Namespace }}
-{{- if .Values.monitor.rbac.namespaced }}
+{{- if .Values.rbac.namespaced }}
 ROLE_BINDING: true
 {{- end }}
 {{- end }}
@@ -24,7 +24,7 @@ ROLE_BINDING: true
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{- $defaults := (include "monitor.environment-variables.defaults" . | fromYaml) }}
 {{- $calculated := (include "monitor.environment-variables.calculated" . | fromYaml) }}
-{{- $overrides := .Values.monitor.env }}
+{{- $overrides := .Values.env }}
 {{- $mergedValues := mergeOverwrite (merge $defaults $calculated) $overrides }}
 {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $mergedValues "context" .) }}
 {{- end }}

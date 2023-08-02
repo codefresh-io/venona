@@ -4,7 +4,7 @@ PORT: 3000
 
 {{- define "app-proxy.environment-variables.calculated" }}
 CODEFRESH_HOST: {{ .Values.global.codefreshHost }}
-{{- with .Values.appProxy.ingress.pathPrefix }}
+{{- with .Values.ingress.pathPrefix }}
 API_PATH_PREFIX: {{ . | quote }}
 {{- end }}
 {{- end }}
@@ -13,7 +13,7 @@ API_PATH_PREFIX: {{ . | quote }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{- $defaults := (include "app-proxy.environment-variables.defaults" . | fromYaml) }}
 {{- $calculated := (include "app-proxy.environment-variables.calculated" . | fromYaml) }}
-{{- $overrides := .Values.appProxy.env }}
+{{- $overrides := .Values.env }}
 {{- $mergedValues := mergeOverwrite (merge $defaults $calculated) $overrides }}
 {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $mergedValues "context" .) }}
 {{- end }}
