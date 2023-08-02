@@ -17,11 +17,11 @@ annotations:
     - kind: added
       description: Add inCluster onprem runtime option (Codefresh On-Premises only)
     - kind: changed
-      description: Change templates as lib components
+      description: Change templates to lib components
     - kind: changed
       description: Update cf-common dependency subchart
     - kind: added
-      description: Post-delete hook to delete the runtime from platform
+      description: Post-delete hook to delete runtime from platform (Codefresh On-Premises only)
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
