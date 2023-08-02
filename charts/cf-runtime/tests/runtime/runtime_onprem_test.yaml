@@ -1,0 +1,154 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: runtime onprem test
+templates:
+  - templates/hooks/job-update-runtime.yaml
+  - templates/hooks/cm-update-runtime.yaml
+  - templates/runtime/secret.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test default runtime spec metadata
+    template: templates/hooks/cm-update-runtime.yaml
+    values:
+      - ./runtime_onprem_values.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - isNotEmpty:
+          path: data["runtime.yaml"]
+
+  - it: Test runtime spec override
+    template: templates/hooks/cm-update-runtime.yaml
+    values:
+      - ./runtime_onprem_values.yaml
+    asserts:
+      - equal:
+          path: data["runtime.yaml"]
+          value: |-
+            metadata:
+              name: system/my-runtime
+              agent: false
+            extends:
+              []
+            description: some description
+            accounts:
+              - 59009117c102763beda7ce71
+            runtimeScheduler:
+              type: KubernetesPod
+              image: quay.io/codefresh/engine:tagoverride
+              command:
+                - one
+                - two
+                - three
+              envVars:
+                FOO: BAR
+                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
+                CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'quay.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-pusher:tagoverride'
+                DOCKER_TAG_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-tag-pusher:tagoverride'
+                FS_OPS_IMAGE: 'quay.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'quay.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
+              cluster:
+                namespace: codefresh
+                serviceAccount: service-account-override
+                inCluster: true
+                kubeconfigFilePath: null
+                nodeSelector:
+                  topology.kubernetes.io/zone: us-east-1a
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                        - engine
+              tolerations:
+                - effect: NoSchedule
+                  key: codefresh.io
+                  operator: Equal
+                  value: engine
+              annotations:
+                karpenter.sh/do-not-evict: "true"
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+                requests:
+                  cpu: 200m
+                  memory: 256Mi
+            dockerDaemonScheduler:
+              type: DindKubernetesPod
+              dindImage: quay.io/codefresh/dind:tagoverride
+              userAccess: true
+              env:
+                ALICE: BOB
+              cluster:
+                namespace: codefresh
+                serviceAccount: service-account-override
+                inCluster: true
+                kubeconfigFilePath: null
+                nodeSelector:
+                  topology.kubernetes.io/zone: us-east-1a
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                        - dind
+              tolerations:
+                - effect: NoSchedule
+                  key: codefresh.io
+                  operator: Equal
+                  value: dinds
+              annotations:
+                karpenter.sh/do-not-evict: "true"
+              pvcs:
+                - name: dind
+                  reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+                  reuseVolumeSortOrder: pipeline_id
+                  storageClassName: my-custom-storage-class
+                  volumeSize: 8Gi
+              defaultDindResources:
+                limits:
+                  cpu: 1000m
+                  memory: 2048Mi
+                requests: null
+              userVolumeMounts:
+                my-cert:
+                  mountPath: /etc/ssl/cert
+                  name: cert
+                  readOnly: true
+              userVolumes:
+                my-cert:
+                  name: cert
+                  secret:
+                    secretName: tls-secret
+              clientCertPath: /etc/ssl/cf/
+              volumeMounts:
+                cf-certs-dind:
+                  name: cf-certs-dind
+                  mountPath: /etc/ssl/cf
+                  readOnly: false
+              volumes:
+                cf-certs-dind:
+                  name: cf-certs-dind
+                  secret:
+                    secretName: cf-certs-dind

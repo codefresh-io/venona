@@ -1,0 +1,107 @@
+global:
+  codefreshHost: "https://onprem.somedomain.com"
+  codefreshToken: 1234567890abcdef
+
+  runtimeName: "system/my-runtime"
+
+runtime:
+  agent: false
+  inCluster: true
+  description: "some description"
+  runtimeExtends: []
+  accounts:
+    - 59009117c102763beda7ce71
+
+  dind:
+    image:
+      tag: tagoverride
+    resources:
+      requests: null
+      limits:
+        cpu: 1000m
+        memory: 2048Mi
+    pvcs:
+      - name: dind
+        storageClassName: my-custom-storage-class
+        volumeSize: 8Gi
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+    env:
+      ALICE: BOB
+    podAnnotations:
+      karpenter.sh/do-not-evict: "true"
+    nodeSelector:
+      topology.kubernetes.io/zone: us-east-1a
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - dind
+    tolerations:
+      - effect: NoSchedule
+        key: codefresh.io
+        operator: Equal
+        value: dinds
+    serviceAccount: service-account-override
+    userVolumeMounts:
+      my-cert:
+        name: cert
+        mountPath: /etc/ssl/cert
+        readOnly: true
+    userVolumes:
+      my-cert:
+        name: cert
+        secret:
+          secretName: tls-secret
+
+  engine:
+    image:
+      tag: tagoverride
+    command:
+      - one
+      - two
+      - three
+    resources:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    runtimeImages:
+      COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverride
+      CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:tagoverride
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:tagoverride
+      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:tagoverride
+      DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:tagoverride
+      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:tagoverride
+      FS_OPS_IMAGE: quay.io/codefresh/fs-ops:tagoverride
+      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:tagoverride
+      KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:tagoverride
+      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:tagoverride
+      TEMPLATE_ENGINE: quay.io/codefresh/pikolo:tagoverride
+    env:
+      FOO: BAR
+    podAnnotations:
+      karpenter.sh/do-not-evict: "true"
+    nodeSelector:
+      topology.kubernetes.io/zone: us-east-1a
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - engine
+    tolerations:
+      - effect: NoSchedule
+        key: codefresh.io
+        operator: Equal
+        value: engine
+    serviceAccount: service-account-override
