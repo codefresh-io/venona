@@ -20,6 +20,8 @@ annotations:
       description: Change templates as lib components
     - kind: changed
       description: Update cf-common dependency subchart
+    - kind: added
+      description: Post-delete hook to delete the runtime from platform
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common

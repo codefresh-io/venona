@@ -8,7 +8,7 @@ metadata:
   name: {{ coalesce .Values.global.runtimeName .Values.runtime.nameOverride }}
   agent: {{ .Values.runtime.agent }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
-description: {{- .Values.runtime.description }}
+description: {{ .Values.runtime.description }}
 {{- if not .Values.runtime.agent }}
 accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
 {{- end }}
