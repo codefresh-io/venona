@@ -395,8 +395,6 @@ runtime:
   inCluster: true
   # -- (for On-Premise only) Assign accounts to runtime (list of account ids)
   accounts: []
-  # -- (for On-Premise only) Runtime nameoverride
-  nameOverride: ""
 
   # -- Parameters for DinD (docker-in-docker) pod (aka "runtime" pod).
   dind:

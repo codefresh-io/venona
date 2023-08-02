@@ -103,7 +103,7 @@ Affected values:
 This major release adds **agentless inCluster** runtime mode (relevant only for [Codefresh On-Premises](#on-premise) users)
 
 Affected values:
-- `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.nameOverride` / `runtime.description` are added
+- `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.description` are added
 
 ## Architecture
 
@@ -624,7 +624,6 @@ Or run `codefresh get system-runtime-environments` CLI command.
 | runtime.engine.userEnvVars | list | `[]` | Set extra env vars |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
-| runtime.nameOverride | string | `""` | (for On-Premise only) Runtime nameoverride |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
