@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 3.0.8](https://img.shields.io/badge/Version-3.0.8-informational?style=flat-square)
+![Version: 4.0.0](https://img.shields.io/badge/Version-4.0.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -472,7 +472,7 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 
 - Verify the runtime and run test pipeline
 
-Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system] to see the runtime.
+Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime.
 
 Or run `codefresh get system-runtime-environments` CLI command.
 
@@ -514,6 +514,7 @@ Or run `codefresh get system-runtime-environments` CLI command.
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
 | extraResources | list | `[]` | Array of extra objects to deploy with the release |
+| fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
 | global.accountId | string | `""` | Account ID |
 | global.agentId | string | `""` | Agent ID |
@@ -552,9 +553,11 @@ Or run `codefresh get system-runtime-environments` CLI command.
 | monitor.token | string | `""` | API token from Codefresh Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.tolerations | list | `[]` | Set tolerations |
 | monitor.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
+| nameOverride | string | `""` | String to partially override cf-runtime.fullname template (will maintain the release name) |
 | re | object | `{}` |  |
 | runner | object | See below | Runner parameters |
 | runner.affinity | object | `{}` | Set affinity |
+| runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
 | runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.9.16"}` | Set image |
 | runner.nodeSelector | object | `{}` | Set node selector |
