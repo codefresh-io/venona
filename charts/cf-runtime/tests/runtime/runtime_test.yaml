@@ -37,7 +37,6 @@ tests:
               agent: true
             extends:
               - system/default/hybrid/k8s_low_limits
-            description:
             runtimeScheduler:
               type: KubernetesPod
               image: quay.io/codefresh/engine:tagoverride
