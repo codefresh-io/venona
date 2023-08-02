@@ -41,7 +41,7 @@ spec:
         - |
           codefresh auth create-context --api-key $API_KEY --url $API_HOST
 {{- if .Values.runtime.agent }}
-          codefresh delete re {{ .Values.global.runtimeName }} || true
+          exit 0  # TO-DO
 {{- else }}
           codefresh delete sys-re {{ .Values.runtime.nameOverride }} || true
 {{- end }}
