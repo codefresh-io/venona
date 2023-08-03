@@ -429,7 +429,7 @@ Agent (aka venona) is Runner component which responsible for calling Codefresh A
 - You have a running [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) control-plane environment
 - You have a Codefresh API token with platform **Admin** permissions scope
 
-### **How to deploy it when the runtime is on THE SAME k8s cluster as On-Premises control-plane environment?**
+### How to deploy agentless runtime when it's on THE SAME k8s cluster as On-Premises control-plane environment?**
 
 - Enable cluster-level permissions for cf-api (part of On-Premises control-plane)
 
@@ -488,7 +488,7 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 
 Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
 
-### **How to deploy it when th runtime is on THE DIFFERENT k8s cluster than On-Premises control-plane environment?**
+### **How to deploy agentless runtime when it's on THE DIFFERENT k8s cluster than On-Premises control-plane environment?**
 
 In this case, it's required to mount runtime cluster's `KUBECONFIG` into On-Premises `cf-api` deployment
 
@@ -549,6 +549,9 @@ CLUSTER_NAME=prod-ue1-some-cluster-name
 CURRENT_CONTEXT=$(kubectl config current-context)
 
 USER_TOKEN_VALUE=$(kubectl -n cf-runtime get secret/codefresh-runtime-user-token -o=go-template='{{.data.token}}' | base64 --decode)
+CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
+CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
+CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}')
 
 export -p USER_TOKEN_VALUE CURRENT_CONTEXT CURRENT_CLUSTER CLUSTER_CA CLUSTER_SERVER
 ```
