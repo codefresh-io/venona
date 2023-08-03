@@ -1,7 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
-suite: runtime test
-values:
-  - ../generated_values.yaml
+suite: runtime onprem test
 templates:
   - templates/hooks/job-update-runtime.yaml
   - templates/hooks/cm-update-runtime.yaml
@@ -17,6 +15,8 @@ chart:
 tests:
   - it: Test default runtime spec metadata
     template: templates/hooks/cm-update-runtime.yaml
+    values:
+      - ./runtime_onprem_values.yaml
     asserts:
       - hasDocuments:
           count: 1
@@ -28,17 +28,19 @@ tests:
   - it: Test runtime spec override
     template: templates/hooks/cm-update-runtime.yaml
     values:
-      - ../generated_values.yaml
-      - ./runtime_values.yaml
+      - ./runtime_onprem_values.yaml
     asserts:
       - equal:
           path: data["runtime.yaml"]
           value: |-
             metadata:
-              name: my-context/codefresh
-              agent: true
+              name: system/my-runtime
+              agent: false
             extends:
-              - system/default/hybrid/k8s_low_limits
+              []
+            description: some description
+            accounts:
+              - 59009117c102763beda7ce71
             runtimeScheduler:
               type: KubernetesPod
               image: quay.io/codefresh/engine:tagoverride
@@ -62,9 +64,8 @@ tests:
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override
-                clusterProvider:
-                  accountId: 7890
-                  selector: my-context
+                inCluster: true
+                kubeconfigFilePath: null
                 nodeSelector:
                   topology.kubernetes.io/zone: us-east-1a
               affinity:
@@ -99,9 +100,8 @@ tests:
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override
-                clusterProvider:
-                  accountId: 7890
-                  selector: my-context
+                inCluster: true
+                kubeconfigFilePath: null
                 nodeSelector:
                   topology.kubernetes.io/zone: us-east-1a
               affinity:
@@ -141,3 +141,14 @@ tests:
                   name: cert
                   secret:
                     secretName: tls-secret
+              clientCertPath: /etc/ssl/cf/
+              volumeMounts:
+                cf-certs-dind:
+                  name: cf-certs-dind
+                  mountPath: /etc/ssl/cf
+                  readOnly: false
+              volumes:
+                cf-certs-dind:
+                  name: cf-certs-dind
+                  secret:
+                    secretName: cf-certs-dind

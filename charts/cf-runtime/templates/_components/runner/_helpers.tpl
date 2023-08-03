@@ -55,9 +55,9 @@ valueFrom:
 Create the name of the service account to use
 */}}
 {{- define "runner.serviceAccountName" -}}
-{{- if .Values.runner.serviceAccount.create }}
-{{- default (include "runner.fullname" .) .Values.runner.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "runner.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.runner.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}

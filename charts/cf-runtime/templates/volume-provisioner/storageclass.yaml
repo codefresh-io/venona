@@ -1,49 +1,8 @@
-{{- if .Values.volumeProvisioner.enabled }}
-{{ $values := .Values.storage }}
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  {{/* has to be exactly that */}}
-  name: {{ include "dind-volume-provisioner.storageClassName" . }}
-  labels:
-    {{- include "dind-volume-provisioner.labels" . | nindent 4 }}
-provisioner: {{ include "dind-volume-provisioner.volumeProvisionerName" . }}
-parameters:
-{{- if eq $values.backend "local" }}
-  volumeBackend: local
-  volumeParentDir: {{ $values.local.volumeParentDir }}
-{{- else if eq $values.backend "gcedisk" }}
-  volumeBackend: {{ $values.backend }}
-  type: {{ $values.gcedisk.volumeType | default "pd-ssd" }}
-  zone: {{ required ".Values.storage.gcedisk.availabilityZone is required" $values.gcedisk.availabilityZone }}
-  fsType: {{ $values.fsType | default "ext4" }}
-{{- else if or (eq $values.backend "ebs") (eq $values.backend "ebs-csi")}}
-  volumeBackend: {{ $values.backend }}
-  VolumeType: {{ $values.ebs.volumeType | default "gp3" }}
-  AvailabilityZone: {{ required ".Values.storage.ebs.availabilityZone is required" $values.ebs.availabilityZone }}
-  fsType: {{ $values.fsType | default "ext4" }}
-  encrypted: {{ $values.ebs.encrypted | default "false" | quote }}
-  {{- with .Values.storage.ebs.kmsKeyId }}
-  kmsKeyId: {{ . | quote }}
-  {{- end }}
-  {{- with $values.ebs.iops }}
-  iops: {{ . | quote }}
-  {{- end }}
-  {{- with $values.ebs.throughput }}
-  throughput: {{ . | quote }}
-  {{- end }}
-{{- else if or (eq $values.backend "azuredisk") (eq $values.backend "azuredisk-csi")}}
-  volumeBackend: {{ $values.backend }}
-  kind: managed
-  skuName: {{ $values.azuredisk.skuName | default "Premium_LRS" }}
-  fsType: {{ $values.fsType | default "ext4" }}
-  cachingMode: {{ $values.azuredisk.cachingMode | default "None" }}
-  {{- with $values.azuredisk.location }}
-  location: {{ . | quote }}
-  {{- end }}
-  {{- with $values.azuredisk.resourceGroup }}
-  resourceGroup: {{ . | quote }}
-  {{- end }}
-{{- end }}
+{{- $volumeProvisionerContext := deepCopy . }}
+{{- $_ := set $volumeProvisionerContext "Values" (get .Values "volumeProvisioner") }}
+{{- $_ := set $volumeProvisionerContext.Values "global" (get .Values "global") }}
+{{- $_ := set $volumeProvisionerContext.Values "storage" (get .Values "storage") }}
+
+{{- if $volumeProvisionerContext.Values.enabled }}
+{{- include "dind-volume-provisioner.resources.storageclass" $volumeProvisionerContext }}
 {{- end }}

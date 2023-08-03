@@ -1,8 +1,12 @@
+# -- String to partially override cf-runtime.fullname template (will maintain the release name)
+nameOverride: ""
+# -- String to fully override cf-runtime.fullname template
+fullNameOverride: ""
+
 # -- Global parameters
 # Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`!
 # @default -- See below
 global:
-
   # -- Global Docker image registry
   imageRegistry: ""
   # -- Global Docker registry secret names as array
@@ -14,7 +18,7 @@ global:
   # -- Runner namespace
   namespace: ""
   # -- URL of Codefresh Platform
-  codefreshHost: ""
+  codefreshHost: "https://g.codefresh.io"
   # -- User token in plain text.
   # Ref: https://g.codefresh.io/user/settings (see API Keys)
   codefreshToken: ""
@@ -67,6 +71,8 @@ re: {}
 # -- Runner parameters
 # @default -- See below
 runner:
+  # -- Enable the runner
+  enabled: true
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
@@ -187,6 +193,7 @@ volumeProvisioner:
   # (local volumes cleaner)
   # @default -- See below
   dind-lv-monitor:
+    enabled: true
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
@@ -218,6 +225,7 @@ volumeProvisioner:
   # (external volumes cleaner)
   # @default -- See below
   dind-volume-cleanup:
+    enabled: true
     image:
       registry: quay.io
       repository: codefresh/dind-volume-cleanup
@@ -367,12 +375,26 @@ runtime:
     #     annotations:
     #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 
+  # -- Set parent runtime to inherit.
+  # Should not be changes. Parent runtime is controlled from Codefresh side.
+  runtimeExtends:
+    - system/default/hybrid/k8s_low_limits
+  # -- Runtime description
+  description: ""
+
   # -- RBAC parameters
   rbac:
     # -- Create RBAC resources
     create: true
     # -- Add custom rule to the engine role
     rules: []
+
+  # -- (for On-Premise only) Enable agent
+  agent: true
+  # -- (for On-Premise only) Set inCluster runtime
+  inCluster: true
+  # -- (for On-Premise only) Assign accounts to runtime (list of account ids)
+  accounts: []
 
   # -- Parameters for DinD (docker-in-docker) pod (aka "runtime" pod).
   dind:
@@ -510,13 +532,27 @@ runtime:
     podSecurityContext: {}
     resources: {}
     tolerations: []
+    ttlSecondsAfterFinished: 180
     env:
       HOME: /tmp
 
-  # -- Set parent runtime to inherit.
-  # Should not be changes. Parent runtime is controlled from Codefresh side.
-  runtimeExtends:
-    - system/default/hybrid/k8s_low_limits
+  # -- Parameters for `gencerts-dind` post-upgrade/install hook
+  # @default -- See below
+  gencerts:
+    enabled: true
+    image:
+      registry: quay.io
+      repository: codefresh/kubectl
+      tag: 1.27.2
+    rbac:
+      enabled: true
+    annotations: {}
+    affinity: {}
+    nodeSelector: {}
+    podSecurityContext: {}
+    resources: {}
+    tolerations: []
+    ttlSecondsAfterFinished: 180
 
   # -- DinD pod daemon config
   # @default -- See below

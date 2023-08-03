@@ -1,11 +1,19 @@
-{{- define "runtime.runtime-environment-spec-template" }}
+{{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
+{{- $kubeconfigFilePath := trimPrefix "system/" .Values.global.runtimeName -}}
+{{- $name := trimPrefix "system/" .Values.global.runtimeName -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
 metadata:
-  name: {{ .Values.global.runtimeName }}
-  agent: true
+  name: {{ include "runtime.runtime-environment-spec.name" . }}
+  agent: {{ .Values.runtime.agent }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
+{{- with .Values.runtime.description }}
+description: {{ . }}
+{{- end }}
+{{- if not .Values.runtime.agent }}
+accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
+{{- end }}
 runtimeScheduler:
   type: KubernetesPod
   {{- if $engineContext.image }}
@@ -35,9 +43,19 @@ runtimeScheduler:
   cluster:
     namespace: {{ .Release.Namespace }}
     serviceAccount: {{ $engineContext.serviceAccount }}
+    {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
       selector: {{ .Values.monitor.clusterId }}
+    {{- else }}
+      {{- if .Values.runtime.inCluster }}
+    inCluster: true
+    kubeconfigFilePath: null
+      {{- else }}
+    name: {{ $name }}
+    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+      {{- end }}
+    {{- end }}
     {{- with $engineContext.nodeSelector }}
     nodeSelector: {{- toYaml . | nindent 6 }}
     {{- end }}
@@ -71,9 +89,19 @@ dockerDaemonScheduler:
   cluster:
     namespace: {{ .Release.Namespace }}
     serviceAccount: {{ $dindContext.serviceAccount }}
+    {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
       selector: {{ .Values.monitor.clusterId }}
+    {{- else }}
+      {{- if .Values.runtime.inCluster }}
+    inCluster: true
+    kubeconfigFilePath: null
+      {{- else }}
+    name: {{ $name }}
+    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+      {{- end }}
+    {{- end }}
     {{- with $dindContext.nodeSelector }}
     nodeSelector: {{- toYaml . | nindent 6 }}
     {{- end }}
@@ -109,5 +137,18 @@ dockerDaemonScheduler:
   {{- end }}
   {{- with $dindContext.userVolumes }}
   userVolumes: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if and (not .Values.runtime.agent)  }}
+  clientCertPath: /etc/ssl/cf/
+  volumeMounts:
+    cf-certs-dind:
+      name: cf-certs-dind
+      mountPath: /etc/ssl/cf
+      readOnly: false
+  volumes:
+    cf-certs-dind:
+      name: cf-certs-dind
+      secret:
+        secretName: cf-certs-dind
   {{- end }}
 {{- end }}

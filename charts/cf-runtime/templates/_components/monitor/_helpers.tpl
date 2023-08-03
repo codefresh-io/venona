@@ -35,8 +35,8 @@ codefresh.io/application: monitor
 Get the token secret.
 */}}
 {{- define "monitor.secretTokenName" -}}
-    {{- if .Values.monitor.existingMonitorToken -}}
-        {{- printf "%s" (tpl .Values.monitor.existingMonitorToken $) -}}
+    {{- if .Values.existingMonitorToken -}}
+        {{- printf "%s" (tpl .Values.existingMonitorToken $) -}}
     {{- else -}}
         {{- printf "%s" (include "monitor.fullname" .) -}}
     {{- end -}}
@@ -46,9 +46,9 @@ Get the token secret.
 Create the name of the service account to use
 */}}
 {{- define "monitor.serviceAccountName" -}}
-{{- if .Values.monitor.serviceAccount.create }}
-{{- default (include "monitor.fullname" .) .Values.monitor.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "monitor.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.monitor.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}

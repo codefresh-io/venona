@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 3.0.8
+version: 4.0.0
 keywords:
   - codefresh
   - runner
@@ -14,11 +14,15 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Fix security context for dind-lv-monitor (OpenShift support)
+    - kind: added
+      description: Add inCluster onprem runtime option (Codefresh On-Premises only)
     - kind: changed
-      description: Use rootless cli image for runtime patch job
+      description: Change templates to lib components
+    - kind: changed
+      description: Update cf-common dependency subchart
+    - kind: added
+      description: Post-delete hook to delete runtime from platform (Codefresh On-Premises only)
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
-    version: 0.11.1
+    version: 0.11.2

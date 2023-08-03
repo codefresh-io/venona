@@ -10,7 +10,7 @@ SELF_DEPLOYMENT_NAME:
 AGENT_ID: {{ .Values.global.agentName }}
 CODEFRESH_TOKEN: {{ include "runner.secretTokenName" . | nindent 2 }}
 CODEFRESH_IN_CLUSTER_RUNTIME: {{ .Values.global.runtimeName }}
-CODEFRESH_HOST: {{ .Values.global.codefreshHost }}
+CODEFRESH_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
 DOCKER_REGISTRY: {{ .Values.global.imageRegistry }}
 {{- end }}
 
@@ -18,7 +18,7 @@ DOCKER_REGISTRY: {{ .Values.global.imageRegistry }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{- $defaults := (include "runner.environment-variables.defaults" . | fromYaml) }}
 {{- $calculated := (include "runner.environment-variables.calculated" . | fromYaml) }}
-{{- $overrides := .Values.runner.env }}
+{{- $overrides := .Values.env }}
 {{- $mergedValues := mergeOverwrite (merge $defaults $calculated) $overrides }}
 {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $mergedValues "context" .) }}
 {{- end }}

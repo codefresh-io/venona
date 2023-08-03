@@ -1,0 +1,7 @@
+{{- $runnerContext := deepCopy . }}
+{{- $_ := set $runnerContext "Values" (get .Values "runner") }}
+{{- $_ := set $runnerContext.Values "global" (get .Values "global") }}
+
+{{- if and $runnerContext.Values.enabled .Values.runtime.agent }}
+{{- include "runner.resources.rbac" $runnerContext }}
+{{- end }}

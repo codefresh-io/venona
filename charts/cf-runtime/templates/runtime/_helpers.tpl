@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "runtime.name" -}}
-    {{- printf "%s-%s" (include "cf-runtime.name" .) "runtime" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s" (include "cf-runtime.name" .)  | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -11,7 +11,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "runtime.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "runtime" | trunc 63 | trimSuffix "-" }}
+    {{- printf "%s" (include "cf-runtime.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -58,6 +58,32 @@ valueFrom:
   {{- end }}
 {{- end }}
 
+{{/*
+Print Codefresh API token secret name
+*/}}
 {{- define "runtime.installation-token-secret-name" }}
 {{- print "codefresh-user-token" }}
+{{- end }}
+
+{{/*
+Print runtime-environment name
+*/}}
+{{- define "runtime.runtime-environment-spec.name" }}
+{{- if and (not .Values.runtime.agent) }}
+  {{- if not (hasPrefix "system/" .Values.global.runtimeName) }}
+    {{- fail "ERROR: .runtime.agent is set to false! .global.runtimeName should start with system/ prefix" }}
+  {{- else }}
+    {{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
+  {{- end }}
+{{- else }}
+{{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
+{{- end }}
+{{- end }}
+
+{{- define "runtime.runtime-environment-spec.codefresh-host" }}
+{{- if and (not .Values.global.codefreshHost) }}
+  {{- fail "ERROR: .global.codefreshHost is required" }}
+{{- else }}
+  {{- printf "%s" (trimSuffix "/" .Values.global.codefreshHost) }}
+{{- end }}
 {{- end }}

@@ -81,10 +81,10 @@ codefresh.io/application: pv-cleanup
 Create the name of the service account to use
 */}}
 {{- define "dind-volume-provisioner.serviceAccountName" -}}
-{{- if .Values.volumeProvisioner.serviceAccount.create }}
-{{- default (include "dind-volume-provisioner.fullname" .) .Values.volumeProvisioner.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "dind-volume-provisioner.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.volumeProvisioner.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
