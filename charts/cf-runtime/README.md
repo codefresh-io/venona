@@ -433,7 +433,7 @@ Agent (aka venona) is Runner component which responsible for calling Codefresh A
 
 - Enable cluster-level permissions for cf-api (On-Premises control-plane component)
 
-> `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
+> `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) Helm chart
 ```yaml
 cfapi:
   ...
@@ -442,16 +442,15 @@ cfapi:
     namespaced: false
 ```
 
-- Set the following values for Runner helm chart
+- Set the following values for Runner Helm chart
 
 `.Values.global.codefreshHost=...` \
 `.Values.global.codefreshToken=...` \
 `.Values.global.runtimeName=system/...` \
 `.Values.runtime.agent=false` \
-`.Values.runtime.inCluster=true` \
+`.Values.runtime.inCluster=true`
 
-`values.yaml`
-
+> `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
 ```yaml
 global:
   # -- URL of Codefresh On-Premises Platform
@@ -501,7 +500,6 @@ In this case, it's required to mount runtime cluster's `KUBECONFIG` into On-Prem
 - Create the neccessary RBAC resources
 
 > `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
-
 ```yaml
 extraResources:
 - apiVersion: rbac.authorization.k8s.io/v1
@@ -612,7 +610,6 @@ cf-api:
 - Set the following values for Runner helm chart
 
 > `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
-
 **Important!**
 `.Values.global.name` ("system/" prefix is ignored!) should match the cluster name (key in `dind-runtime-clusters` secret created previously)
 ```yaml
