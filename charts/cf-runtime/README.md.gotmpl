@@ -428,9 +428,9 @@ Agent (aka venona) is Runner component which responsible for calling Codefresh A
 **What are the prerequisites?**
 - You have a running [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) control-plane environment
 - You have a Codefresh API token with platform **Admin** permissions scope
-- Runtime will be **on the same** k8s cluster as On-Premises control-plane environment
 
-**How to deploy it?**
+**How to deploy it when the runtime is on THE SAME k8s cluster as On-Premises control-plane environment?**
+
 - Enable cluster-level permissions for cf-api (part of On-Premises control-plane)
 
 > `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
@@ -465,8 +465,8 @@ global:
   # Must be prefixed with "system/..."
   nameOverride: "system/prod-ue1-some-cluster-name"
   # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
-  # `inCluster` flag used when Runtime and On-Premises control-plane are run on the same cluster
-  # It is the only supported mode at the moment! Don't change!
+  # `inCluster=true` flag is set when Runtime and On-Premises control-plane are run on the same cluster
+  # `inCluster=false` flag is set when Runtime and On-Premises control-plane are on different clusters
   inCluster: true
   # -- (for On-Premise only; optional) Assign accounts to runtime (list of account ids; default is empty)
   # Accounts can be assigned to the runtime in Codefresh UI later so you can kepp it empty.
@@ -483,9 +483,172 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 
 - Verify the runtime and run test pipeline
 
-Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime.
+Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
 
-Or run `codefresh get system-runtime-environments` CLI command.
+**How to deploy it when th runtime is on THE DIFFERENT k8s cluster than On-Premises control-plane environment?**
+
+In this case, it's required to mount runtime cluster's `KUBECONFIG` into On-Premises `cf-api` deployment
+
+- Create the neccessary RBAC resources
+
+> `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
+
+```yaml
+extraResources:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: codefresh-role
+    namespace: '{{ .Release.Namespace }}'
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "persistentvolumeclaims", "persistentvolumes"]
+      verbs: ["list", "watch", "get", "create", "patch", "delete"]
+    - apiGroups: ["snapshot.storage.k8s.io"]
+      resources: ["volumesnapshots"]
+      verbs: ["list", "watch", "get", "create", "patch", "delete"]
+---
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: codefresh-runtime-user
+    namespace: '{{ .Release.Namespace }}'
+---
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: codefresh-runtime-user
+    namespace: '{{ .Release.Namespace }}'
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: codefresh-role
+  subjects:
+  - kind: ServiceAccount
+    name: codefresh-runtime-user
+    namespace: '{{ .Release.Namespace }}'
+---
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: codefresh-runtime-user-token
+    namespace: '{{ .Release.Namespace }}'
+    annotations:
+      kubernetes.io/service-account.name: codefresh-runtime-user
+  type: kubernetes.io/service-account-token
+```
+
+- Set up the following environment variables to create a kubeconfig file
+
+```console
+NAMESPACE=cf-runtime
+CLUSTER_NAME=prod-ue1-some-cluster-name
+CURRENT_CONTEXT=$(kubectl config current-context)
+
+USER_TOKEN_VALUE=$(kubectl -n cf-runtime get secret/codefresh-runtime-user-token -o=go-template='{{.data.token}}' | base64 --decode)
+CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
+CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
+CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}')
+
+export -p USER_TOKEN_VALUE CURRENT_CONTEXT CURRENT_CLUSTER CLUSTER_CA CLUSTER_SERVER
+```
+
+- Create a kubeconfig file
+
+```console
+cat << EOF > $CLUSTER_NAME-kubeconfig
+apiVersion: v1
+kind: Config
+current-context: ${CLUSTER_NAME}
+contexts:
+- name: ${CLUSTER_NAME}
+  context:
+    cluster: ${CLUSTER_NAME}
+    user: codefresh-runtime-user
+    namespace: ${NAMESPACE}
+clusters:
+- name: ${CLUSTER_NAME}
+  cluster:
+    certificate-authority-data: ${CLUSTER_CA}
+    server: ${CLUSTER_SERVER}
+users:
+- name: ${CLUSTER_NAME}
+  user:
+    token: ${USER_TOKEN_VALUE}
+EOF
+```
+
+- Switch to On-Premises control-plane cluster. Create k8s secret (via any tool like [ESO](https://external-secrets.io/v0.4.4/), `kubectl`, etc ) containing runtime cluster's `KUBECONFG`
+
+```yaml
+NAMESPACE=codefresh
+kubectl create secret generic dind-runtime-clusters --from-file=$CLUSTER_NAME=$CLUSTER_NAME-kubeconfig -n $NAMESPACE
+```
+
+- Mount the secret into cf-api in On-Premises control-plane cluster
+
+> `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
+```
+cf-api:
+  ...
+  volumes:
+    dind-clusters:
+      enabled: true
+      type: secret
+      nameOverride: dind-runtime-clusters
+      optional: true
+```
+> volumeMount `/etc/kubeconfig` is already configured in cf-api Helm chart template
+
+- Set the following values for Runner helm chart
+
+> `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
+
+**Important!**
+`.Values.global.name`("system/" prefix is ignored!) should match the cluster name (key in `dind-runtime-clusters` secret created previously)
+```
+global:
+  # -- URL of Codefresh On-Premises Platform
+  codefreshHost: "https://myonprem.somedomain.com"
+  # -- User token in plain text with Admin permission scope
+  codefreshToken: ""
+  # -- User token that references an existing secret containing API key.
+  codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
+
+  # -- Distinguished runtime name
+  # (for On-Premise only; mandatory!) Must be prefixed with "system/..."
+  name: "system/prod-ue1-some-cluster-name"
+
+# -- Set runtime parameters
+runtime:
+  # -- (for On-Premise only; mandatory!) Disable agent
+  agent: false
+  # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
+  # `inCluster=true` flag is set when Runtime and On-Premises control-plane are run on the same cluster
+  # `inCluster=false` flag is set when Runtime and On-Premises control-plane are on different clusters
+  inCluster: false
+  # -- (for On-Premise only; optional) Assign accounts to runtime (list of account ids; default is empty)
+  # Accounts can be assigned to the runtime in Codefresh UI later so you can kepp it empty.
+  accounts: []
+  # -- (optional) Set parent runtime to inherit.
+  runtimeExtends: []
+```
+
+- Install the chart
+
+```console
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace cf-runtime
+```
+
+- Verify the runtime and run test pipeline
+
+Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
+
+
 
 {{ template "chart.requirementsSection" . }}
 

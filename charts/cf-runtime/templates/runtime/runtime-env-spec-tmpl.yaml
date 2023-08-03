@@ -1,7 +1,7 @@
 {{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
-{{- $kubeconfigFilePath := .Values.runtime.nameOverride -}}
-{{- $name := .Values.runtime.nameOverride -}}
+{{- $kubeconfigFilePath := trimPrefix "system/" .Values.global.runtimeName -}}
+{{- $name := trimPrefix "system/" .Values.global.runtimeName -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
 metadata:
