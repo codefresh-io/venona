@@ -429,9 +429,9 @@ Agent (aka venona) is Runner component which responsible for calling Codefresh A
 - You have a running [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) control-plane environment
 - You have a Codefresh API token with platform **Admin** permissions scope
 
-### How to deploy agentless runtime when it's on THE SAME k8s cluster as On-Premises control-plane environment?
+### How to deploy agentless runtime when it's on the SAME k8s cluster as On-Premises control-plane environment?
 
-- Enable cluster-level permissions for cf-api (part of On-Premises control-plane)
+- Enable cluster-level permissions for cf-api (On-Premises control-plane component)
 
 > `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
 ```yaml
@@ -443,6 +443,11 @@ cfapi:
 ```
 
 - Set the following values for Runner helm chart
+`.Values.global.codefreshHost=...`
+`.Values.global.codefreshToken=...`
+`.Values.global.runtimeName=system/...`
+`.Values.runtime.agent=false`
+`.Values.runtime.inCluster=true`
 
 `values.yaml`
 
@@ -461,7 +466,7 @@ global:
 
   # -- Distinguished runtime name
   # (for On-Premise only; mandatory!) Must be prefixed with "system/..."
-  name: "system/prod-ue1-some-cluster-name"
+  runtimeName: "system/prod-ue1-some-cluster-name"
 
 # -- Set runtime parameters
 runtime:
@@ -486,9 +491,9 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 
 - Verify the runtime and run test pipeline
 
-Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
+Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to check the runtime. Assign it to the required account(s). Run test pipeline on it.
 
-### How to deploy agentless runtime when it's on THE DIFFERENT k8s cluster than On-Premises control-plane environment?
+### How to deploy agentless runtime when it's on the DIFFERENT k8s cluster than On-Premises control-plane environment?
 
 In this case, it's required to mount runtime cluster's `KUBECONFIG` into On-Premises `cf-api` deployment
 
@@ -541,7 +546,7 @@ extraResources:
   type: kubernetes.io/service-account-token
 ```
 
-- Set up the following environment variables to create a kubeconfig file
+- Set up the following environment variables to create a `KUBECONFIG` file
 
 ```console
 NAMESPACE=cf-runtime
@@ -553,7 +558,7 @@ CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{
 CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
 CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}')
 
-export -p USER_TOKEN_VALUE CURRENT_CONTEXT CURRENT_CLUSTER CLUSTER_CA CLUSTER_SERVER
+export -p USER_TOKEN_VALUE CURRENT_CONTEXT CURRENT_CLUSTER CLUSTER_CA CLUSTER_SERVER CLUSTER_NAME
 ```
 
 - Create a kubeconfig file
@@ -581,14 +586,14 @@ users:
 EOF
 ```
 
-- Switch to On-Premises control-plane cluster. Create k8s secret (via any tool like [ESO](https://external-secrets.io/v0.4.4/), `kubectl`, etc ) containing runtime cluster's `KUBECONFG`
+- **Switch context to On-Premises control-plane cluster**. Create k8s secret (via any tool like [ESO](https://external-secrets.io/v0.4.4/), `kubectl`, etc ) containing runtime cluster's `KUBECONFG` created in previous step.
 
-```yaml
+```console
 NAMESPACE=codefresh
 kubectl create secret generic dind-runtime-clusters --from-file=$CLUSTER_NAME=$CLUSTER_NAME-kubeconfig -n $NAMESPACE
 ```
 
-- Mount the secret into cf-api in On-Premises control-plane cluster
+- Mount secret containing runtime cluster's `KUBECONFG`into cf-api in On-Premises control-plane cluster
 
 > `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
 ```yaml
@@ -601,14 +606,14 @@ cf-api:
       nameOverride: dind-runtime-clusters
       optional: true
 ```
-> volumeMount `/etc/kubeconfig` is already configured in cf-api Helm chart template
+> volumeMount `/etc/kubeconfig` is already configured in cf-api Helm chart template. No need to specify it.
 
 - Set the following values for Runner helm chart
 
 > `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
 
 **Important!**
-`.Values.global.name`("system/" prefix is ignored!) should match the cluster name (key in `dind-runtime-clusters` secret created previously)
+`.Values.global.name` ("system/" prefix is ignored!) should match the cluster name (key in `dind-runtime-clusters` secret created previously)
 ```yaml
 global:
   # -- URL of Codefresh On-Premises Platform
