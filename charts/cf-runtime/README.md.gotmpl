@@ -459,11 +459,14 @@ global:
   #   name: my-codefresh-api-token
   #   key: codefresh-api-token
 
+  # -- Distinguished runtime name
+  # (for On-Premise only; mandatory!) Must be prefixed with "system/..."
+  name: "system/prod-ue1-some-cluster-name"
+
+# -- Set runtime parameters
+runtime:
   # -- (for On-Premise only; mandatory!) Disable agent
   agent: false
-  # -- (for On-Premise only; mandatory!) Distinguished runtime name
-  # Must be prefixed with "system/..."
-  nameOverride: "system/prod-ue1-some-cluster-name"
   # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
   # `inCluster=true` flag is set when Runtime and On-Premises control-plane are run on the same cluster
   # `inCluster=false` flag is set when Runtime and On-Premises control-plane are on different clusters
@@ -499,7 +502,7 @@ extraResources:
   kind: Role
   metadata:
     name: codefresh-role
-    namespace: '{{ .Release.Namespace }}'
+    namespace: '{{ "{{ .Release.Namespace }}" }}'
   rules:
     - apiGroups: [""]
       resources: ["pods", "persistentvolumeclaims", "persistentvolumes"]
@@ -512,13 +515,13 @@ extraResources:
   kind: ServiceAccount
   metadata:
     name: codefresh-runtime-user
-    namespace: '{{ .Release.Namespace }}'
+    namespace: '{{ "{{ .Release.Namespace }}" }}'
 ---
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
     name: codefresh-runtime-user
-    namespace: '{{ .Release.Namespace }}'
+    namespace: '{{ "{{ .Release.Namespace }}" }}'
   roleRef:
     apiGroup: rbac.authorization.k8s.io
     kind: Role
@@ -526,13 +529,13 @@ extraResources:
   subjects:
   - kind: ServiceAccount
     name: codefresh-runtime-user
-    namespace: '{{ .Release.Namespace }}'
+    namespace: '{{ "{{ .Release.Namespace }}" }}'
 ---
 - apiVersion: v1
   kind: Secret
   metadata:
     name: codefresh-runtime-user-token
-    namespace: '{{ .Release.Namespace }}'
+    namespace: '{{ "{{ .Release.Namespace }}" }}'
     annotations:
       kubernetes.io/service-account.name: codefresh-runtime-user
   type: kubernetes.io/service-account-token
@@ -545,10 +548,6 @@ NAMESPACE=cf-runtime
 CLUSTER_NAME=prod-ue1-some-cluster-name
 CURRENT_CONTEXT=$(kubectl config current-context)
 
-USER_TOKEN_VALUE=$(kubectl -n cf-runtime get secret/codefresh-runtime-user-token -o=go-template='{{.data.token}}' | base64 --decode)
-CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
-CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
-CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}')
 
 export -p USER_TOKEN_VALUE CURRENT_CONTEXT CURRENT_CLUSTER CLUSTER_CA CLUSTER_SERVER
 ```

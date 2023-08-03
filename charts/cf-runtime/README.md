@@ -459,11 +459,14 @@ global:
   #   name: my-codefresh-api-token
   #   key: codefresh-api-token
 
+  # -- Distinguished runtime name
+  # (for On-Premise only; mandatory!) Must be prefixed with "system/..."
+  name: "system/prod-ue1-some-cluster-name"
+
+# -- Set runtime parameters
+runtime:
   # -- (for On-Premise only; mandatory!) Disable agent
   agent: false
-  # -- (for On-Premise only; mandatory!) Distinguished runtime name
-  # Must be prefixed with "system/..."
-  nameOverride: "system/prod-ue1-some-cluster-name"
   # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
   # `inCluster=true` flag is set when Runtime and On-Premises control-plane are run on the same cluster
   # `inCluster=false` flag is set when Runtime and On-Premises control-plane are on different clusters
@@ -499,4 +502,329 @@ extraResources:
   kind: Role
   metadata:
     name: codefresh-role
-    namespace: '
+    namespace: '{{ .Release.Namespace }}'
+  rules:
+    - apiGroups: [""]
+      resources: ["pods", "persistentvolumeclaims", "persistentvolumes"]
+      verbs: ["list", "watch", "get", "create", "patch", "delete"]
+    - apiGroups: ["snapshot.storage.k8s.io"]
+      resources: ["volumesnapshots"]
+      verbs: ["list", "watch", "get", "create", "patch", "delete"]
+---
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: codefresh-runtime-user
+    namespace: '{{ .Release.Namespace }}'
+---
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: codefresh-runtime-user
+    namespace: '{{ .Release.Namespace }}'
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: codefresh-role
+  subjects:
+  - kind: ServiceAccount
+    name: codefresh-runtime-user
+    namespace: '{{ .Release.Namespace }}'
+---
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: codefresh-runtime-user-token
+    namespace: '{{ .Release.Namespace }}'
+    annotations:
+      kubernetes.io/service-account.name: codefresh-runtime-user
+  type: kubernetes.io/service-account-token
+```
+
+- Set up the following environment variables to create a kubeconfig file
+
+```console
+NAMESPACE=cf-runtime
+CLUSTER_NAME=prod-ue1-some-cluster-name
+CURRENT_CONTEXT=$(kubectl config current-context)
+
+export -p USER_TOKEN_VALUE CURRENT_CONTEXT CURRENT_CLUSTER CLUSTER_CA CLUSTER_SERVER
+```
+
+- Create a kubeconfig file
+
+```console
+cat << EOF > $CLUSTER_NAME-kubeconfig
+apiVersion: v1
+kind: Config
+current-context: ${CLUSTER_NAME}
+contexts:
+- name: ${CLUSTER_NAME}
+  context:
+    cluster: ${CLUSTER_NAME}
+    user: codefresh-runtime-user
+    namespace: ${NAMESPACE}
+clusters:
+- name: ${CLUSTER_NAME}
+  cluster:
+    certificate-authority-data: ${CLUSTER_CA}
+    server: ${CLUSTER_SERVER}
+users:
+- name: ${CLUSTER_NAME}
+  user:
+    token: ${USER_TOKEN_VALUE}
+EOF
+```
+
+- Switch to On-Premises control-plane cluster. Create k8s secret (via any tool like [ESO](https://external-secrets.io/v0.4.4/), `kubectl`, etc ) containing runtime cluster's `KUBECONFG`
+
+```yaml
+NAMESPACE=codefresh
+kubectl create secret generic dind-runtime-clusters --from-file=$CLUSTER_NAME=$CLUSTER_NAME-kubeconfig -n $NAMESPACE
+```
+
+- Mount the secret into cf-api in On-Premises control-plane cluster
+
+> `values.yaml` for [Codefresh On-Premises](https://artifacthub.io/packages/helm/codefresh-onprem/codefresh) helm chart
+```
+cf-api:
+  ...
+  volumes:
+    dind-clusters:
+      enabled: true
+      type: secret
+      nameOverride: dind-runtime-clusters
+      optional: true
+```
+> volumeMount `/etc/kubeconfig` is already configured in cf-api Helm chart template
+
+- Set the following values for Runner helm chart
+
+> `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
+
+**Important!**
+`.Values.global.name`("system/" prefix is ignored!) should match the cluster name (key in `dind-runtime-clusters` secret created previously)
+```
+global:
+  # -- URL of Codefresh On-Premises Platform
+  codefreshHost: "https://myonprem.somedomain.com"
+  # -- User token in plain text with Admin permission scope
+  codefreshToken: ""
+  # -- User token that references an existing secret containing API key.
+  codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
+
+  # -- Distinguished runtime name
+  # (for On-Premise only; mandatory!) Must be prefixed with "system/..."
+  name: "system/prod-ue1-some-cluster-name"
+
+# -- Set runtime parameters
+runtime:
+  # -- (for On-Premise only; mandatory!) Disable agent
+  agent: false
+  # -- (for On-Premise only; optional) Set inCluster runtime (default: `true`)
+  # `inCluster=true` flag is set when Runtime and On-Premises control-plane are run on the same cluster
+  # `inCluster=false` flag is set when Runtime and On-Premises control-plane are on different clusters
+  inCluster: false
+  # -- (for On-Premise only; optional) Assign accounts to runtime (list of account ids; default is empty)
+  # Accounts can be assigned to the runtime in Codefresh UI later so you can kepp it empty.
+  accounts: []
+  # -- (optional) Set parent runtime to inherit.
+  runtimeExtends: []
+```
+
+- Install the chart
+
+```console
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace cf-runtime
+```
+
+- Verify the runtime and run test pipeline
+
+Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
+
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.11.2 |
+
+## Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| appProxy.affinity | object | `{}` | Set affinity |
+| appProxy.enabled | bool | `false` | Enable app-proxy |
+| appProxy.env | object | `{}` | Add additional env vars |
+| appProxy.image | object | `{"registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"latest"}` | Set image |
+| appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
+| appProxy.ingress.class | string | `""` | Set ingress class |
+| appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
+| appProxy.ingress.pathPrefix | string | `"/"` | Set path prefix for ingress |
+| appProxy.ingress.tlsSecret | string | `""` | Set k8s tls secret for the ingress object |
+| appProxy.nodeSelector | object | `{}` | Set node selector |
+| appProxy.podAnnotations | object | `{}` | Set pod annotations |
+| appProxy.podSecurityContext | object | `{}` | Set security context for the pod |
+| appProxy.rbac | object | `{"create":true,"namespaced":true,"rules":[]}` | RBAC parameters |
+| appProxy.rbac.create | bool | `true` | Create RBAC resources |
+| appProxy.rbac.namespaced | bool | `true` | Use Role(true)/ClusterRole(true) |
+| appProxy.rbac.rules | list | `[]` | Add custom rule to the role |
+| appProxy.readinessProbe | object | See below | Readiness probe configuration |
+| appProxy.replicasCount | int | `1` | Set number of pods |
+| appProxy.resources | object | `{}` | Set requests and limits |
+| appProxy.serviceAccount | object | `{"annotations":{},"create":true,"name":"","namespaced":true}` | Service Account parameters |
+| appProxy.serviceAccount.annotations | object | `{}` | Additional service account annotations |
+| appProxy.serviceAccount.create | bool | `true` | Create service account |
+| appProxy.serviceAccount.name | string | `""` | Override service account name |
+| appProxy.serviceAccount.namespaced | bool | `true` | Use Role(true)/ClusterRole(true) |
+| appProxy.tolerations | list | `[]` | Set tolerations |
+| appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
+| dockerRegistry | string | `""` |  |
+| extraResources | list | `[]` | Array of extra objects to deploy with the release |
+| fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
+| global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
+| global.accountId | string | `""` | Account ID |
+| global.agentId | string | `""` | Agent ID |
+| global.agentName | string | `""` | Agent Name |
+| global.agentToken | string | `""` | Agent token in plain text. |
+| global.agentTokenSecretKeyRef | object | `{}` | Agent token that references an existing secret containing API key. |
+| global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform |
+| global.codefreshToken | string | `""` | User token in plain text. Ref: https://g.codefresh.io/user/settings (see API Keys) |
+| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key. |
+| global.dindCertsSecretRef | object | `{}` | Certs for Dind docker daemon that references an existing secret |
+| global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
+| global.imageRegistry | string | `""` | Global Docker image registry |
+| global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
+| global.namespace | string | `""` | Runner namespace |
+| global.runtimeName | string | `""` | Runtime name |
+| monitor.affinity | object | `{}` | Set affinity |
+| monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
+| monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
+| monitor.env | object | `{}` | Add additional env vars |
+| monitor.existingMonitorToken | string | `""` | Set Existing secret (name-of-existing-secret) with API token from Codefresh supersedes value of monitor.token; secret must contain `codefresh.token` key |
+| monitor.image | object | `{"registry":"quay.io","repository":"codefresh/agent","tag":"stable"}` | Set image |
+| monitor.nodeSelector | object | `{}` | Set node selector |
+| monitor.podAnnotations | object | `{}` | Set pod annotations |
+| monitor.podSecurityContext | object | `{}` |  |
+| monitor.rbac | object | `{"create":true,"namespaced":true,"rules":[]}` | RBAC parameters |
+| monitor.rbac.create | bool | `true` | Create RBAC resources |
+| monitor.rbac.namespaced | bool | `true` | Use Role(true)/ClusterRole(true) |
+| monitor.rbac.rules | list | `[]` | Add custom rule to the role |
+| monitor.readinessProbe | object | See below | Readiness probe configuration |
+| monitor.replicasCount | int | `1` | Set number of pods |
+| monitor.resources | object | `{}` | Set resources |
+| monitor.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Service Account parameters |
+| monitor.serviceAccount.annotations | object | `{}` | Additional service account annotations |
+| monitor.serviceAccount.create | bool | `true` | Create service account |
+| monitor.serviceAccount.name | string | `""` | Override service account name |
+| monitor.token | string | `""` | API token from Codefresh Generated from `codefresh runner init --generate-helm-values-file` output |
+| monitor.tolerations | list | `[]` | Set tolerations |
+| monitor.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
+| nameOverride | string | `""` | String to partially override cf-runtime.fullname template (will maintain the release name) |
+| re | object | `{}` |  |
+| runner | object | See below | Runner parameters |
+| runner.affinity | object | `{}` | Set affinity |
+| runner.enabled | bool | `true` | Enable the runner |
+| runner.env | object | `{}` | Add additional env vars |
+| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.9.16"}` | Set image |
+| runner.nodeSelector | object | `{}` | Set node selector |
+| runner.podAnnotations | object | `{}` | Set pod annotations |
+| runner.podSecurityContext | object | See below | Set security context for the pod |
+| runner.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
+| runner.rbac.create | bool | `true` | Create RBAC resources |
+| runner.rbac.rules | list | `[]` | Add custom rule to the role |
+| runner.readinessProbe | object | See below | Readiness probe configuration |
+| runner.replicasCount | int | `1` | Set number of pods |
+| runner.resources | object | `{}` | Set requests and limits |
+| runner.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Service Account parameters |
+| runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
+| runner.serviceAccount.create | bool | `true` | Create service account |
+| runner.serviceAccount.name | string | `""` | Override service account name |
+| runner.tolerations | list | `[]` | Set tolerations |
+| runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
+| runtime | object | See below | Set runtime parameters |
+| runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
+| runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
+| runtime.description | string | `""` | Runtime description |
+| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind.affinity | object | `{}` | Set affinity |
+| runtime.dind.env | object | `{}` | Set additional env vars. |
+| runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"}` | Set dind image. |
+| runtime.dind.nodeSelector | object | `{}` | Set node selector. |
+| runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
+| runtime.dind.pvcs | list | `[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}]` | PV claim spec parametes. |
+| runtime.dind.pvcs[0] | object | `{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}` | PVC name prefix. Keep `dind` as default! Don't change! |
+| runtime.dind.pvcs[0].reuseVolumeSelector | string | `"codefresh-app,io.codefresh.accountName"` | PV reuse selector. Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy |
+| runtime.dind.pvcs[0].storageClassName | string | `"{{ include \"dind-volume-provisioner.storageClassName\" . }}"` | PVC storage class name. Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner |
+| runtime.dind.pvcs[0].volumeSize | string | `"16Gi"` | PVC size. |
+| runtime.dind.resources | object | `{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null}` | Set dind resources. |
+| runtime.dind.schedulerName | string | `""` | Set scheduler name. |
+| runtime.dind.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
+| runtime.dind.tolerations | list | `[]` | Set tolerations. |
+| runtime.dind.userAccess | bool | `true` | Keep `true` as default! |
+| runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
+| runtime.dind.userVolumes | object | `{}` | Add extra volumes |
+| runtime.dindDaemon | object | See below | DinD pod daemon config |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.9"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.9","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.12","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.19","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine.affinity | object | `{}` | Set affinity |
+| runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
+| runtime.engine.env | object | `{}` | Set additional env vars. |
+| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.9"}` | Set image. |
+| runtime.engine.nodeSelector | object | `{}` | Set node selector. |
+| runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
+| runtime.engine.resources | object | `{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Set resources. |
+| runtime.engine.runtimeImages | object | See below. | Set system(base) runtime images. |
+| runtime.engine.schedulerName | string | `""` | Set scheduler name. |
+| runtime.engine.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
+| runtime.engine.tolerations | list | `[]` | Set tolerations. |
+| runtime.engine.userEnvVars | list | `[]` | Set extra env vars |
+| runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
+| runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
+| runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
+| runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
+| runtime.rbac.create | bool | `true` | Create RBAC resources |
+| runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
+| runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
+| runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
+| storage.azuredisk.cachingMode | string | `"None"` |  |
+| storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |
+| storage.backend | string | `"local"` | Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`) |
+| storage.ebs.accessKeyId | string | `""` | Set AWS_ACCESS_KEY_ID for volume-provisioner (optional) Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions |
+| storage.ebs.accessKeyIdSecretKeyRef | object | `{}` | Existing secret containing AWS_ACCESS_KEY_ID. |
+| storage.ebs.availabilityZone | string | `"us-east-1a"` | Set EBS volumes availability zone (required) |
+| storage.ebs.encrypted | string | `"false"` | Enable encryption (optional) |
+| storage.ebs.kmsKeyId | string | `""` | Set KMS encryption key ID (optional) |
+| storage.ebs.secretAccessKey | string | `""` | Set AWS_SECRET_ACCESS_KEY for volume-provisioner (optional) Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions |
+| storage.ebs.secretAccessKeySecretKeyRef | object | `{}` | Existing secret containing AWS_SECRET_ACCESS_KEY |
+| storage.ebs.volumeType | string | `"gp2"` | Set EBS volume type (`gp2`/`gp3`/`io1`) (required) |
+| storage.fsType | string | `"ext4"` | Set filesystem type (`ext4`/`xfs`) |
+| storage.gcedisk.availabilityZone | string | `"us-west1-a"` | Set GCP volume availability zone |
+| storage.gcedisk.serviceAccountJson | string | `""` | Set Google SA JSON key for volume-provisioner (optional) |
+| storage.gcedisk.serviceAccountJsonSecretKeyRef | object | `{}` | Existing secret containing containing Google SA JSON key for volume-provisioner (optional) |
+| storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
+| storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
+| storage.mountAzureJson | bool | `false` |  |
+| volumeProvisioner | object | See below | Volume Provisioner parameters |
+| volumeProvisioner.affinity | object | `{}` | Set affinity |
+| volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
+| volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
+| volumeProvisioner.env | object | `{}` | Add additional env vars |
+| volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.33.3"}` | Set image |
+| volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
+| volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
+| volumeProvisioner.podSecurityContext | object | See below | Set security context for the pod |
+| volumeProvisioner.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
+| volumeProvisioner.rbac.create | bool | `true` | Create RBAC resources |
+| volumeProvisioner.rbac.rules | list | `[]` | Add custom rule to the role |
+| volumeProvisioner.replicasCount | int | `1` | Set number of pods |
+| volumeProvisioner.resources | object | `{}` | Set resources |
+| volumeProvisioner.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Service Account parameters |
+| volumeProvisioner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
+| volumeProvisioner.serviceAccount.create | bool | `true` | Create service account |
+| volumeProvisioner.serviceAccount.name | string | `""` | Override service account name |
+| volumeProvisioner.tolerations | list | `[]` | Set tolerations |
+| volumeProvisioner.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
+
