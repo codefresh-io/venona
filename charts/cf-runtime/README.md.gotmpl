@@ -612,6 +612,13 @@ cf-api:
 - Set the following values for Runner helm chart
 
 > `values.yaml` for [Codefresh Runner](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime) helm chart
+
+`.Values.global.codefreshHost=...` \
+`.Values.global.codefreshToken=...` \
+`.Values.global.runtimeName=system/...` \
+`.Values.runtime.agent=false` \
+`.Values.runtime.inCluster=false`
+
 **Important!**
 `.Values.global.name` ("system/" prefix is ignored!) should match the cluster name (key in `dind-runtime-clusters` secret created previously)
 ```yaml
