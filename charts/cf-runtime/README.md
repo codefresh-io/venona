@@ -443,11 +443,12 @@ cfapi:
 ```
 
 - Set the following values for Runner helm chart
-`.Values.global.codefreshHost=...`
-`.Values.global.codefreshToken=...`
-`.Values.global.runtimeName=system/...`
-`.Values.runtime.agent=false`
-`.Values.runtime.inCluster=true`
+
+`.Values.global.codefreshHost=...` \
+`.Values.global.codefreshToken=...` \
+`.Values.global.runtimeName=system/...` \
+`.Values.runtime.agent=false` \
+`.Values.runtime.inCluster=true` \
 
 `values.yaml`
 

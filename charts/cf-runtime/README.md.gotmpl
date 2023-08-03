@@ -444,11 +444,12 @@ cfapi:
 ```
 
 - Set the following values for Runner helm chart
-`.Values.global.codefreshHost=...`
-`.Values.global.codefreshToken=...`
-`.Values.global.runtimeName=system/...`
-`.Values.runtime.agent=false`
-`.Values.runtime.inCluster=true`
+
+`.Values.global.codefreshHost=...` \
+`.Values.global.codefreshToken=...` \
+`.Values.global.runtimeName=system/...` \
+`.Values.runtime.agent=false` \
+`.Values.runtime.inCluster=true` \
 
 `values.yaml`
 
@@ -657,8 +658,6 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 - Verify the runtime and run test pipeline
 
 Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
-
-
 
 {{ template "chart.requirementsSection" . }}
 
