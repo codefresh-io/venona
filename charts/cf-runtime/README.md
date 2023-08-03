@@ -514,13 +514,11 @@ extraResources:
     - apiGroups: ["snapshot.storage.k8s.io"]
       resources: ["volumesnapshots"]
       verbs: ["list", "watch", "get", "create", "patch", "delete"]
----
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
     name: codefresh-runtime-user
     namespace: '{{ .Release.Namespace }}'
----
 - apiVersion: rbac.authorization.k8s.io/v1
   kind: RoleBinding
   metadata:
@@ -534,7 +532,6 @@ extraResources:
   - kind: ServiceAccount
     name: codefresh-runtime-user
     namespace: '{{ .Release.Namespace }}'
----
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -547,7 +544,7 @@ extraResources:
 
 - Set up the following environment variables to create a `KUBECONFIG` file
 
-```console
+```shell
 NAMESPACE=cf-runtime
 CLUSTER_NAME=prod-ue1-some-cluster-name
 CURRENT_CONTEXT=$(kubectl config current-context)
@@ -587,7 +584,7 @@ EOF
 
 - **Switch context to On-Premises control-plane cluster**. Create k8s secret (via any tool like [ESO](https://external-secrets.io/v0.4.4/), `kubectl`, etc ) containing runtime cluster's `KUBECONFG` created in previous step.
 
-```console
+```shell
 NAMESPACE=codefresh
 kubectl create secret generic dind-runtime-clusters --from-file=$CLUSTER_NAME=$CLUSTER_NAME-kubeconfig -n $NAMESPACE
 ```
