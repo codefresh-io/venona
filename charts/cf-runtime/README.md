@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 4.0.0](https://img.shields.io/badge/Version-4.0.0-informational?style=flat-square)
+![Version: 4.0.1](https://img.shields.io/badge/Version-4.0.1-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -662,7 +662,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.11.2 |
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.12.1 |
 
 ## Values
 
