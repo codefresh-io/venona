@@ -14,15 +14,9 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: added
-      description: Add inCluster onprem runtime option (Codefresh On-Premises only)
     - kind: changed
-      description: Change templates to lib components
-    - kind: changed
-      description: Update cf-common dependency subchart
-    - kind: added
-      description: Post-delete hook to delete runtime from platform (Codefresh On-Premises only)
+      description: Update cf-common lib chart
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
-    version: 0.11.2
+    version: 0.12.1

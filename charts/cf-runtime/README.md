@@ -662,7 +662,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.11.2 |
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.12.1 |
 
 ## Values
 
