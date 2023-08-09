@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square)
+![Version: 5.1.0](https://img.shields.io/badge/Version-5.1.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -813,11 +813,11 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
 | runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.9"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.9","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.12","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.19","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.11"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.6","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.12","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.13","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.11","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.5","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.21","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.2.5","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.3","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
 | runtime.engine.env | object | `{}` | Set additional env vars. |
-| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.9"}` | Set image. |
+| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.11"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |
 | runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.engine.resources | object | `{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Set resources. |

@@ -468,7 +468,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.164.9
+      tag: 1.164.11
     # -- Set container command.
     command:
       - npm
@@ -487,14 +487,14 @@ runtime:
     runtimeImages:
       COMPOSE_IMAGE: quay.io/codefresh/compose:1.3.0
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.10.2
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.5
-      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.9
-      DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.12
-      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.9
-      FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3
-      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.1.19
-      KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11
-      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.0
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.6
+      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.12
+      DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.13
+      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.11
+      FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.5
+      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.1.21
+      KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.2.5
+      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.3
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.13.8
     # -- Set additional env vars.
     env: {}
