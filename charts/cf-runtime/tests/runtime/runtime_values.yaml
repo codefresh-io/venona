@@ -74,6 +74,12 @@ runtime:
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:tagoverride
     env:
       FOO: BAR
+    userEnvVars:
+    - name: ALICE
+      valueFrom:
+        secretKeyRef:
+          name: alice-secret
+          key: token
     podAnnotations:
       karpenter.sh/do-not-evict: "true"
     nodeSelector:
