@@ -411,9 +411,11 @@ runtime:
         memory: 800Mi
     # -- PV claim spec parametes.
     pvcs:
+      # -- Default dind PVC parameters
+      dind:
         # -- PVC name prefix.
         # Keep `dind` as default! Don't change!
-      - name: dind
+        name: dind
         # -- PVC storage class name.
         # Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner
         storageClassName: '{{ include "dind-volume-provisioner.storageClassName" . }}'

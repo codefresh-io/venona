@@ -118,7 +118,11 @@ dockerDaemonScheduler:
   schedulerName: {{ $dindContext.schedulerName }}
   {{- end }}
   {{- if $dindContext.pvcs }}
-  pvcs: {{- include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" $dindContext.pvcs "context" .) | nindent 4 }}
+  pvcs:
+  {{- range $index, $pvc := $dindContext.pvcs }}
+  - name: {{ $index }}
+  {{- include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" (omit $pvc "name" ) "context" $) | nindent 4 }}
+  {{- end }}
   {{- end }}
   defaultDindResources:
   {{- with $dindContext.resources }}

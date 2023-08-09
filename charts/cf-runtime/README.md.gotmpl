@@ -13,6 +13,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 2.x](#to-2x)
   - [To 3.x](#to-3x)
   - [To 4.x](#to-4x)
+  - [To 5.x](#to-5x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -104,6 +105,39 @@ This major release adds **agentless inCluster** runtime mode (relevant only for 
 
 Affected values:
 - `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.description` are added
+
+### To 5.x
+
+This major release converts `.runtime.dind.pvcs` from **list** to **dict**
+
+> 4.x chart's values example:
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        storageClassName: my-storage-class-name
+        volumeSize: 32Gi
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+> 5.x chart's values example:
+```yaml
+runtime:
+  dind:
+    pvcs:
+      dind:
+        name: dind
+        storageClassName: my-storage-class-name
+        volumeSize: 32Gi
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+Affected values:
+- `.runtime.dind.pvcs` converted from **list** to **dict**
+
 
 ## Architecture
 
@@ -213,9 +247,8 @@ volumeProvisioner:
     # -- Create service account
     create: true
     # -- Additional service account annotations
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
 ### Custom volume mounts
