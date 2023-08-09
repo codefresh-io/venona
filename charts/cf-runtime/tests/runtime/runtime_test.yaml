@@ -59,6 +59,12 @@ tests:
                 KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
                 PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
+              userEnvVars:
+              - name: ALICE
+                valueFrom:
+                  secretKeyRef:
+                    name: alice-secret
+                    key: token
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override
