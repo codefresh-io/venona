@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 4.0.2
+version: 5.0.0
 keywords:
   - codefresh
   - runner
@@ -15,10 +15,10 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: added
-      description: Add external secrets template
-    - kind: fixed
-      description: Fix condition if existing secrets are provided (API and Agent tokens)
+      description: Update cf-common lib chart
+    - kind: changed
+      description: Change .runtime.dind.pvcs from list to dict
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
-    version: 0.12.2
+    version: 0.12.3
