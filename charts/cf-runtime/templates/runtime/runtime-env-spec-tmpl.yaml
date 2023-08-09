@@ -38,7 +38,7 @@ runtimeScheduler:
     PIPELINE_DEBUGGER_IMAGE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.PIPELINE_DEBUGGER_IMAGE) }}'
     TEMPLATE_ENGINE: '{{ include "runtime.runtimeImageName" (dict "registry" .Values.global.imageRegisty "imageFullName" $engineContext.runtimeImages.TEMPLATE_ENGINE) }}'
   {{- with $engineContext.userEnvVars }}
-  userEnvVars:  {{- toYaml . | nindent 4 }}
+  userEnvVars:  {{- toYaml . | nindent 2 }}
   {{- end }}
   {{- with $engineContext.workflowLimits }}
   workflowLimits: {{ toYaml . | nindent 4 }}
