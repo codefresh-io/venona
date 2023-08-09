@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 4.0.3](https://img.shields.io/badge/Version-4.0.3-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -13,6 +13,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 2.x](#to-2x)
   - [To 3.x](#to-3x)
   - [To 4.x](#to-4x)
+  - [To 5.x](#to-5x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -104,6 +105,38 @@ This major release adds **agentless inCluster** runtime mode (relevant only for 
 
 Affected values:
 - `runtime.agent` / `runtime.inCluster` / `runtime.accounts` / `runtime.description` are added
+
+### To 5.x
+
+This major release converts `.runtime.dind.pvcs` from **list** to **dict**
+
+> 4.x chart's values example:
+```yaml
+runtime:
+  dind:
+    pvcs:
+      - name: dind
+        storageClassName: my-storage-class-name
+        volumeSize: 32Gi
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+> 5.x chart's values example:
+```yaml
+runtime:
+  dind:
+    pvcs:
+      dind:
+        name: dind
+        storageClassName: my-storage-class-name
+        volumeSize: 32Gi
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+        reuseVolumeSortOrder: pipeline_id
+```
+
+Affected values:
+- `.runtime.dind.pvcs` converted from **list** to **dict**
 
 ## Architecture
 
@@ -213,9 +246,8 @@ volumeProvisioner:
     # -- Create service account
     create: true
     # -- Additional service account annotations
-    serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
 ### Custom volume mounts
@@ -662,7 +694,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum-dev.codefresh.io/cf-common | cf-common | 0.12.3 |
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.12.3 |
 
 ## Values
 
@@ -761,17 +793,18 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"},"nodeSelector":{},"podAnnotations":{},"pvcs":[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}],"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"},"nodeSelector":{},"podAnnotations":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{}` | Set additional env vars. |
 | runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
-| runtime.dind.pvcs | list | `[{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}]` | PV claim spec parametes. |
-| runtime.dind.pvcs[0] | object | `{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}` | PVC name prefix. Keep `dind` as default! Don't change! |
-| runtime.dind.pvcs[0].reuseVolumeSelector | string | `"codefresh-app,io.codefresh.accountName"` | PV reuse selector. Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy |
-| runtime.dind.pvcs[0].storageClassName | string | `"{{ include \"dind-volume-provisioner.storageClassName\" . }}"` | PVC storage class name. Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner |
-| runtime.dind.pvcs[0].volumeSize | string | `"16Gi"` | PVC size. |
+| runtime.dind.pvcs | object | `{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}}` | PV claim spec parametes. |
+| runtime.dind.pvcs.dind | object | `{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}` | Default dind PVC parameters |
+| runtime.dind.pvcs.dind.name | string | `"dind"` | PVC name prefix. Keep `dind` as default! Don't change! |
+| runtime.dind.pvcs.dind.reuseVolumeSelector | string | `"codefresh-app,io.codefresh.accountName"` | PV reuse selector. Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy |
+| runtime.dind.pvcs.dind.storageClassName | string | `"{{ include \"dind-volume-provisioner.storageClassName\" . }}"` | PVC storage class name. Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner |
+| runtime.dind.pvcs.dind.volumeSize | string | `"16Gi"` | PVC size. |
 | runtime.dind.resources | object | `{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null}` | Set dind resources. |
 | runtime.dind.schedulerName | string | `""` | Set scheduler name. |
 | runtime.dind.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
