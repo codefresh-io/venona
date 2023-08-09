@@ -120,7 +120,7 @@ dockerDaemonScheduler:
   {{- if $dindContext.pvcs }}
   pvcs:
   {{- range $index, $pvc := $dindContext.pvcs }}
-  - name: {{ $index }}
+  - name: {{ $pvc.name }}
   {{- include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" (omit $pvc "name" ) "context" $) | nindent 4 }}
   {{- end }}
   {{- end }}
