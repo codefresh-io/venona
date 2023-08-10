@@ -732,7 +732,7 @@ monitor:
 # @default -- See below
 serviceMonitor:
   main:
-    # -- Enabled service monitor
+    # -- Enable service monitor
     enabled: false
     selector:
       matchLabels:
@@ -748,7 +748,7 @@ serviceMonitor:
 # @default -- See below
 podMonitor:
   main:
-    # -- Enabled service monitor
+    # -- Enable service monitor
     enabled: false
     selector:
       matchLabels:
