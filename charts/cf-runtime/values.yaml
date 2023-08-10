@@ -728,7 +728,7 @@ monitor:
   # -- Set affinity
   affinity: {}
 
-# -- Add serviceMonitor (dind)
+# -- Add serviceMonitor (for dind pods)
 # @default -- See below
 serviceMonitor:
   main:
@@ -744,7 +744,7 @@ serviceMonitor:
       - action: labelmap
         regex: __meta_kubernetes_pod_label_(.+)
 
-# -- Add podMonitor (engine)
+# -- Add podMonitor (for engine pods)
 # @default -- See below
 podMonitor:
   main:
