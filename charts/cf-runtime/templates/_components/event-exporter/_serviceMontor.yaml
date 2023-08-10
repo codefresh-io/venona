@@ -9,5 +9,6 @@ spec:
   endpoints:
   - port: metrics
   selector:
-    {{- include "event-exporter.selectorLabels" . | nindent 4 }}
+    matchLabels:
+    {{- include "event-exporter.selectorLabels" . | nindent 6 }}
 {{- end -}}
