@@ -1,0 +1,7 @@
+{{- $eventExporterContext := deepCopy . }}
+{{- $_ := set $eventExporterContext "Values" (get .Values "event-exporter") }}
+{{- $_ := set $eventExporterContext.Values "global" (get .Values "global") }}
+
+{{- if and $eventExporterContext.Values.enabled }}
+{{- include "event-exporter.resources.rbac" $eventExporterContext }}
+{{- end }}
