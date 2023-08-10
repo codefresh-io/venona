@@ -694,7 +694,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum-dev.codefresh.io/cf-common | cf-common | 0.13.0 |
+| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.13.0 |
 
 ## Values
 
