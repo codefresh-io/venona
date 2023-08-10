@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 5.2.0](https://img.shields.io/badge/Version-5.2.0-informational?style=flat-square)
+![Version: 5.3.0](https://img.shields.io/badge/Version-5.3.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -727,6 +727,25 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | appProxy.tolerations | list | `[]` | Set tolerations |
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | dockerRegistry | string | `""` |  |
+| event-exporter | object | See below | Event exporter parameters |
+| event-exporter.affinity | object | `{}` | Set affinity |
+| event-exporter.enabled | bool | `false` | Enable event-exporter |
+| event-exporter.env | object | `{}` | Add additional env vars |
+| event-exporter.image | object | `{"registry":"docker.io","repository":"codefresh/k8s-event-exporter","tag":"latest"}` | Set image |
+| event-exporter.nodeSelector | object | `{}` | Set node selector |
+| event-exporter.podAnnotations | object | `{}` | Set pod annotations |
+| event-exporter.podSecurityContext | object | See below | Set security context for the pod |
+| event-exporter.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
+| event-exporter.rbac.create | bool | `true` | Create RBAC resources |
+| event-exporter.rbac.rules | list | `[]` | Add custom rule to the role |
+| event-exporter.replicasCount | int | `1` | Set number of pods |
+| event-exporter.resources | object | `{}` | Set resources |
+| event-exporter.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Service Account parameters |
+| event-exporter.serviceAccount.annotations | object | `{}` | Additional service account annotations |
+| event-exporter.serviceAccount.create | bool | `true` | Create service account |
+| event-exporter.serviceAccount.name | string | `""` | Override service account name |
+| event-exporter.tolerations | list | `[]` | Set tolerations |
+| event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
 | extraResources | list | `[]` | Array of extra objects to deploy with the release |
 | fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |

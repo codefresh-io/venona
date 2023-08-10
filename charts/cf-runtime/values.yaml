@@ -757,6 +757,57 @@ podMonitor:
     - path: /metrics
       targetPort: 9100
 
+# -- Event exporter parameters
+# @default -- See below
+event-exporter:
+  # -- Enable event-exporter
+  enabled: false
+  # -- Set number of pods
+  replicasCount: 1
+  # -- Upgrade strategy
+  updateStrategy:
+    type: Recreate
+  # -- Set pod annotations
+  podAnnotations: {}
+
+  # -- Set image
+  image:
+    registry: docker.io
+    repository: codefresh/k8s-event-exporter
+    tag: latest
+  # -- Add additional env vars
+  env: {}
+
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: ""
+    # -- Additional service account annotations
+    annotations: {}
+
+  # -- RBAC parameters
+  rbac:
+    # -- Create RBAC resources
+    create: true
+    # -- Add custom rule to the role
+    rules: []
+
+  # -- Set security context for the pod
+  # @default -- See below
+  podSecurityContext:
+    enabled: false
+
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set resources
+  resources: {}
+  # -- Set tolerations
+  tolerations: []
+  # -- Set affinity
+  affinity: {}
+
 # -- Array of extra objects to deploy with the release
 extraResources: []
 # E.g.
