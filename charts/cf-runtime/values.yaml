@@ -728,6 +728,35 @@ monitor:
   # -- Set affinity
   affinity: {}
 
+# -- Add serviceMonitor (dind)
+# @default -- See below
+serviceMonitor:
+  main:
+    # -- Enabled service monitor
+    enabled: false
+    selector:
+      matchLabels:
+        app: dind
+    endpoints:
+    - path: /metrics
+      targetPort: 9100
+      relabelings:
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+
+# -- Add podMonitor (engine)
+# @default -- See below
+podMonitor:
+  main:
+    # -- Enabled service monitor
+    enabled: false
+    selector:
+      matchLabels:
+        app: runtime
+    podMetricsEndpoints:
+    - path: /metrics
+      targetPort: 9100
+
 # -- Array of extra objects to deploy with the release
 extraResources: []
 # E.g.

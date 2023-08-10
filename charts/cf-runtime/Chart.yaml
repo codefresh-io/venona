@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 5.1.1
+version: 5.2.0
 keywords:
   - codefresh
   - runner
@@ -14,9 +14,9 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Fix userEnvVars for .runtime.engine
+    - kind: added
+      description: Add serviceMonitor and podMonitor templates
 dependencies:
   - name: cf-common
-    repository: https://chartmuseum.codefresh.io/cf-common
-    version: 0.12.3
+    repository: https://chartmuseum-dev.codefresh.io/cf-common
+    version: 0.13.0
