@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 5.3.0](https://img.shields.io/badge/Version-5.3.0-informational?style=flat-square)
+![Version: 5.3.1](https://img.shields.io/badge/Version-5.3.1-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -794,7 +794,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.9.16"}` | Set image |
+| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.9.17"}` | Set image |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
 | runner.podSecurityContext | object | See below | Set security context for the pod |
