@@ -85,7 +85,7 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 1.9.16
+    tag: 1.9.17
   # -- Add additional env vars
   env: {}
 
