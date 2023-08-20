@@ -49,7 +49,7 @@ runtimeScheduler:
     {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
-      selector: {{ .Values.monitor.clusterId }}
+      selector: {{ .Values.global.context }}
     {{- else }}
       {{- if .Values.runtime.inCluster }}
     inCluster: true
@@ -95,7 +95,7 @@ dockerDaemonScheduler:
     {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
-      selector: {{ .Values.monitor.clusterId }}
+      selector: {{ .Values.global.context }}
     {{- else }}
       {{- if .Values.runtime.inCluster }}
     inCluster: true

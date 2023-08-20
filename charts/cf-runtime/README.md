@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 5.3.1](https://img.shields.io/badge/Version-5.3.1-informational?style=flat-square)
+![Version: 5.4.0](https://img.shields.io/badge/Version-5.4.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -761,7 +761,6 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
 | global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
-| global.namespace | string | `""` | Runner namespace |
 | global.runtimeName | string | `""` | Runtime name |
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
@@ -813,6 +812,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime | object | See below | Set runtime parameters |
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
+| runtime.create | object | See below | Parameters for `create` pre-install hook |
 | runtime.description | string | `""` | Runtime description |
 | runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"},"nodeSelector":{},"podAnnotations":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |

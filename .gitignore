@@ -34,3 +34,6 @@ venona/venona
 
 # test values
 **/test-values/**
+
+# only ignore the values.yaml file at the root of the repo
+/values.yaml

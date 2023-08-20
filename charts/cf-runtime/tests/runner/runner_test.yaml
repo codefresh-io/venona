@@ -204,7 +204,7 @@ tests:
             name: CODEFRESH_TOKEN
             valueFrom:
               secretKeyRef:
-                key: codefresh-agent-token
+                key: agent-codefresh-token
                 name: cf-runtime-runner
 
   - it: Test runner agent token secret ref

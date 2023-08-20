@@ -23,6 +23,12 @@ rules:
   - apiGroups: [ "" ]
     resources: [ "pods", "persistentvolumeclaims" ]
     verbs: [ "get", "create", "delete" ]
+  - apiGroups: [ "" ]
+    resources: [ "configmaps", "secrets" ]
+    verbs: [ "get", "create" ]
+  - apiGroups: [ "apps" ]
+    resources: [ "deployments" ]
+    verbs: [ "get" ]
 {{- with .Values.rbac.rules }}
   {{ toYaml . | nindent 2 }}
 {{- end }}

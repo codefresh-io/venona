@@ -11,9 +11,13 @@ API_TOKEN:
     secretKeyRef:
       name: {{ include "monitor.secretTokenName" . }}
       key: codefresh.token
-CLUSTER_ID: {{ .Values.clusterId }}
+CLUSTER_ID: {{ .Values.global.context }}
 API_URL: {{ .Values.global.codefreshHost }}/api/k8s-monitor/events
-ACCOUNT_ID: {{ .Values.global.accountId }}
+ACCOUNT_ID:
+  valueFrom:
+    configMapKeyRef:
+      name: {{ include "monitor.fullname" . }}
+      key: accountId
 NAMESPACE: {{ .Release.Namespace }}
 {{- if .Values.rbac.namespaced }}
 ROLE_BINDING: true

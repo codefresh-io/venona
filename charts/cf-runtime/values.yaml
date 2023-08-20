@@ -15,8 +15,6 @@ global:
   # NOTE!
   # The following values are generated from `codefresh runner init --generate-helm-values-file` output
 
-  # -- Runner namespace
-  namespace: ""
   # -- URL of Codefresh Platform
   codefreshHost: "https://g.codefresh.io"
   # -- User token in plain text.
@@ -36,7 +34,7 @@ global:
   # E.g.
   # agentTokenSecretKeyRef:
   #   name: my-codefresh-agent-secret
-  #   key: codefresh-agent-token
+  #   key: agent-codefresh-token
 
   # -- Agent ID
   agentId: ""
@@ -86,6 +84,21 @@ runner:
     registry: quay.io
     repository: codefresh/venona
     tag: 1.9.17
+
+  init:
+    image:
+      registry: quay.io
+      repository: codefresh/cli
+      tag: 0.85.0-rootless
+
+    resources:
+      limits:
+        memory: 512Mi
+        cpu: '1'
+      requests:
+        memory: 256Mi
+        cpu: '0.2'
+
   # -- Add additional env vars
   env: {}
 
@@ -671,7 +684,7 @@ monitor:
   # Generated from `codefresh runner init --generate-helm-values-file` output
   token: ""
   # -- Set Existing secret (name-of-existing-secret) with API token from Codefresh
-  # supersedes value of monitor.token; secret must contain `codefresh.token` key
+  # supersedes value of monitor.token; secret must contain `codefresh-user-token` key
   existingMonitorToken: ""
 
   # -- Set number of pods
