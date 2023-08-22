@@ -32,15 +32,15 @@ runtime:
     limits:
         cpu: 1000m
         memory: 1024Mi
-    podAnnotations:
-      karpenter.sh/do-not-evict: 'true'
-    nodeSelector:
-      node-type: dind
-    tolerations:
-    - effect: NoSchedule
-      key: codefresh.io
-      operator: Equal
-      value: dinds
+    # podAnnotations:
+    #   karpenter.sh/do-not-evict: 'true'
+    # nodeSelector:
+    #   node-type: dind
+    # tolerations:
+    # - effect: NoSchedule
+    #   key: codefresh.io
+    #   operator: Equal
+    #   value: dinds
   engine:
     resources:
       requests:
@@ -49,12 +49,12 @@ runtime:
     limits:
         cpu: 1000m
         memory: 1024Mi
-    podAnnotations:
-      karpenter.sh/do-not-evict: 'true'
-    nodeSelector:
-      node-type: engine
-    tolerations:
-    - effect: NoSchedule
-      key: codefresh.io
-      operator: Equal
-      value: engines
+    # podAnnotations:
+    #   karpenter.sh/do-not-evict: 'true'
+    # nodeSelector:
+    #   node-type: engine
+    # tolerations:
+    # - effect: NoSchedule
+    #   key: codefresh.io
+    #   operator: Equal
+    #   value: engines
