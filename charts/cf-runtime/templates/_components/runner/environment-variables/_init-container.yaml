@@ -3,7 +3,7 @@ HOME: /tmp
 {{- end }}
 
 {{- define "runner-init.environment-variables.calculated" }}
-AGENT_NAME: {{ .Values.global.agentName }}
+AGENT_NAME: {{ include "runtime.runtime-environment-spec.agent-name" . }}
 API_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
 AGENT_CODEFRESH_TOKEN:
   valueFrom:

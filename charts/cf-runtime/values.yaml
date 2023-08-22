@@ -23,11 +23,6 @@ global:
   #   name: my-codefresh-api-token
   #   key: codefresh-api-token
 
-  # -- Agent Name (required!)
-  agentName: ""
-  # E.g.
-  # agentName: prod-ue1-runtime-1
-
   # -- Account ID (required!)
   # Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information
   accountId: ""
@@ -36,6 +31,12 @@ global:
   context: ""
   # E.g.
   # context: prod-ue1-runtime-1
+
+  # -- Agent Name (optional!)
+  # If omitted, the following format will be used `{{ .Values.global.context }}_{{ .Release.Namespace }}`
+  agentName: ""
+  # E.g.
+  # agentName: prod-ue1-runtime-1
 
   # -- Runtime name (optional!)
   # If omitted, the following format will be used `{{ .Values.global.context }}/{{ .Release.Namespace }}`

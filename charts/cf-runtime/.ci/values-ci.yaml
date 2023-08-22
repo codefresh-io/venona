@@ -3,10 +3,10 @@
 global:
   codefreshToken: placeholder
   accountId: placeholder
-  agentName: placeholder
   context: placeholder
   # intentionally empty
   runtimeName: ""
+  agentName: ""
 appProxy:
   enabled: true
   ingress:

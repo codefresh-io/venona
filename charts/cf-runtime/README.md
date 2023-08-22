@@ -183,6 +183,52 @@ Affected values:
 - **Removed** `.global.existingAgentToken` / `existingDindCertsSecret`
 - **Removed** `.monitor.clusterId` / `.monitor.token` / `.monitor.existingMonitorToken`
 
+#### Migrate the Helm chart from version 5.x to 6.x
+
+Given this is the legacy `generated_values.yaml` values:
+
+> legacy `generated_values.yaml`
+```yaml
+{
+    "appProxy": {
+        "enabled": false,
+    },
+    "monitor": {
+        "enabled": false,
+        "clusterId": "my-cluster-name",
+        "token": "1234567890"
+    },
+    "global": {
+        "namespace": "namespace",
+        "codefreshHost": "https://g.codefresh.io",
+        "agentToken": "0987654321",
+        "agentId": "agent-id-here",
+        "agentName": "my-cluster-name_my-namespace",
+        "accountId": "my-account-id",
+        "runtimeName": "my-cluster-name/my-namespace",
+        "codefreshToken": "1234567890",
+        "keys": {
+            "key": "-----BEGIN RSA PRIVATE KEY-----...",
+            "csr": "-----BEGIN CERTIFICATE REQUEST-----...",
+            "ca": "-----BEGIN CERTIFICATE-----...",
+            "serverCert": "-----BEGIN CERTIFICATE-----..."
+        }
+    }
+}
+```
+
+Update `values.yaml` for new chart version:
+
+> updated `values.yaml`
+```yaml
+global:
+  codefreshToken: "1234567890"
+  accountId: "my-account-id"
+  context: "my-cluster-name"
+  agentName: "my-cluster-name_my-namespace" # optional
+  runtimeName: "my-cluster-name/my-namespace" # optional
+```
+
 ## Architecture
 
 [Codefresh Runner architecture](https://codefresh.io/docs/docs/installation/codefresh-runner/#codefresh-runner-architecture)
@@ -795,7 +841,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters |
 | global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
-| global.agentName | string | `""` | Agent Name (required!) |
+| global.agentName | string | `""` | Agent Name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}_{{ .Release.Namespace }}` |
 | global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform (required!) |
 | global.codefreshToken | string | `""` | User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!) Ref: https://g.codefresh.io/user/settings (see API Keys) |
 | global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!) |

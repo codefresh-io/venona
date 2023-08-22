@@ -81,9 +81,20 @@ Print runtime-environment name
 */}}
 {{- define "runtime.runtime-environment-spec.runtime-name" }}
 {{- if and (not .Values.global.runtimeName) }}
-  {{- printf "%s-%s" .Values.global.context .Release.Namespace }}
+  {{- printf "%s/%s" .Values.global.context .Release.Namespace }}
 {{- else }}
   {{- printf "%s" .Values.global.runtimeName }}
+{{- end }}
+{{- end }}
+
+{{/*
+Print agent name
+*/}}
+{{- define "runtime.runtime-environment-spec.agent-name" }}
+{{- if and (not .Values.global.agentName) }}
+  {{- printf "%s_%s" .Values.global.context .Release.Namespace }}
+{{- else }}
+  {{- printf "%s" .Values.global.agentName }}
 {{- end }}
 {{- end }}
 
