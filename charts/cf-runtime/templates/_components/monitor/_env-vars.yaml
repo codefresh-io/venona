@@ -7,8 +7,8 @@ NODE_OPTIONS: "--max_old_space_size=4096"
 
 {{- define "monitor.environment-variables.calculated" }}
 API_TOKEN: {{ include "runtime.installation-token-env-var-value" . | nindent 2 }}
-CLUSTER_ID: {{ .Values.global.context }}
-API_URL: {{ .Values.global.codefreshHost }}/api/k8s-monitor/events
+CLUSTER_ID: {{ include "runtime.runtime-environment-spec.context-name" . }}
+API_URL: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}/api/k8s-monitor/events
 ACCOUNT_ID:
   valueFrom:
     configMapKeyRef:

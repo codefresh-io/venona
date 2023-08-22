@@ -43,7 +43,7 @@ spec:
 {{- if .Values.runtime.agent }}
           exit 0  # TO-DO
 {{- else }}
-          codefresh delete sys-re {{ .Values.global.runtimeName }} || true
+          codefresh delete sys-re {{ include "runtime.runtime-environment-spec.runtime-name" . }} || true
 {{- end }}
         env:
         - name: API_KEY

@@ -3,7 +3,7 @@ PORT: 3000
 {{- end }}
 
 {{- define "app-proxy.environment-variables.calculated" }}
-CODEFRESH_HOST: {{ .Values.global.codefreshHost }}
+CODEFRESH_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
 {{- with .Values.ingress.pathPrefix }}
 API_PATH_PREFIX: {{ . | quote }}
 {{- end }}

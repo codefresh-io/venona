@@ -9,7 +9,7 @@ SELF_DEPLOYMENT_NAME:
 {{- define "runner.environment-variables.calculated" }}
 AGENT_ID: {{ .Values.global.agentName }}
 CODEFRESH_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
-CODEFRESH_IN_CLUSTER_RUNTIME: {{ .Values.global.runtimeName }}
+CODEFRESH_IN_CLUSTER_RUNTIME: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
 CODEFRESH_TOKEN:
   valueFrom:
     secretKeyRef:

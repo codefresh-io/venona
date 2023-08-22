@@ -4,7 +4,7 @@ HOME: /tmp
 
 {{- define "runner-init.environment-variables.calculated" }}
 AGENT_NAME: {{ .Values.global.agentName }}
-API_HOST: {{ .Values.global.codefreshHost }}
+API_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
 AGENT_CODEFRESH_TOKEN:
   valueFrom:
     secretKeyRef:
@@ -12,10 +12,10 @@ AGENT_CODEFRESH_TOKEN:
       key: agent-codefresh-token
       optional: true
 CONFIG_MAP_NAME: {{ include "runner.fullname" . }}
-KUBE_CONTEXT: {{ .Values.global.context }}
+KUBE_CONTEXT: {{ include "runtime.runtime-environment-spec.context-name" . }}
 KUBE_NAMESPACE: {{ .Release.Namespace }}
 OWNER_NAME: {{ include "runner.fullname" . }}
-RUNTIME_NAME: {{ .Values.global.runtimeName }}
+RUNTIME_NAME: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
 SECRET_NAME: {{ include "runner.fullname" . }}
 USER_CODEFRESH_TOKEN: {{ include "runtime.installation-token-env-var-value" . | nindent 2 }}
 {{- end }}

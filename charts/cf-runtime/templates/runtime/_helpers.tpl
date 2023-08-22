@@ -66,24 +66,34 @@ Print Codefresh API token secret name
 {{- end }}
 
 {{/*
-Print runtime-environment name
+Print Codefresh host
 */}}
-{{- define "runtime.runtime-environment-spec.name" }}
-{{- if and (not .Values.runtime.agent) }}
-  {{- if not (hasPrefix "system/" .Values.global.runtimeName) }}
-    {{- fail "ERROR: .runtime.agent is set to false! .global.runtimeName should start with system/ prefix" }}
-  {{- else }}
-    {{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
-  {{- end }}
-{{- else }}
-{{- printf "%s" (required ".global.runtimeName is required" .Values.global.runtimeName) }}
-{{- end }}
-{{- end }}
-
 {{- define "runtime.runtime-environment-spec.codefresh-host" }}
 {{- if and (not .Values.global.codefreshHost) }}
   {{- fail "ERROR: .global.codefreshHost is required" }}
 {{- else }}
   {{- printf "%s" (trimSuffix "/" .Values.global.codefreshHost) }}
+{{- end }}
+{{- end }}
+
+{{/*
+Print runtime-environment name
+*/}}
+{{- define "runtime.runtime-environment-spec.runtime-name" }}
+{{- if and (not .Values.global.runtimeName) }}
+  {{- printf "%s-%s" .Values.global.context .Release.Namespace }}
+{{- else }}
+  {{- printf "%s" .Values.global.runtimeName }}
+{{- end }}
+{{- end }}
+
+{{/*
+Print context
+*/}}
+{{- define "runtime.runtime-environment-spec.context-name" }}
+{{- if and (not .Values.global.context) }}
+  {{- fail "ERROR: .global.context is required" }}
+{{- else }}
+  {{- printf "%s" .Values.global.context }}
 {{- end }}
 {{- end }}

@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 5.4.0](https://img.shields.io/badge/Version-5.4.0-informational?style=flat-square)
+![Version: 6.0.0](https://img.shields.io/badge/Version-6.0.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -9,11 +9,13 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Prerequisites](#prerequisites)
 - [Get Repo Info](#get-repo-info)
 - [Install Chart](#install-chart)
+- [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
   - [To 2.x](#to-2x)
   - [To 3.x](#to-3x)
   - [To 4.x](#to-4x)
   - [To 5.x](#to-5x)
+  - [To 6.x](#to-5x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -40,31 +42,61 @@ helm repo update
 
 **Important:** only helm3 is supported
 
-1. Download the Codefresh CLI and authenticate it with your Codefresh account. Follow [here](https://codefresh-io.github.io/cli/getting-started/) for more detailed instructions.
-2. Run the following command to create mandatory values for Codefresh Runner:
+- Specify the following mandatory values
 
-    ```console
-    codefresh runner init --generate-helm-values-file
-    ```
+```yaml
+# -- Global parameters
+# @default -- See below
+global:
+  # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
+  # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  codefreshToken: ""
+  # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
+  codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
 
-   * This will not install anything on your cluster, except for running cluster acceptance tests, which may be skipped using the `--skip-cluster-test` option.
-   * This command will also generate a `generated_values.yaml` file in your current directory, which you will need to provide to the `helm upgrade` command later.
-3. Run the following to complete the installation:
+  # -- Agent Name (required!)
+  agentName: ""
+  # E.g.
+  # agentName: prod-ue1-runtime-1
 
-    ```console
-    helm repo add cf-runtime https://chartmuseum.codefresh.io/cf-runtime
+  # -- Account ID (required!)
+  # Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information
+  accountId: ""
 
-    helm upgrade --install cf-runtime cf-runtime/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
-    ```
+  # -- K8s context name (required!)
+  context: ""
+  # E.g.
+  # context: prod-ue1-runtime-1
 
-    *Install from OCI-based registry*
-    ```console
-    helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
-    ```
-4. At this point you should have a working Codefresh Runner. You can verify the installation by running:
-    ```console
-    codefresh runner execute-test-pipeline --runtime-name <runtime-name>
-    ```
+  # -- Runtime name (optional!)
+  # If omitted, the following format will be used '{{ .Values.global.context }}/{{ .Release.Namespace }}'
+  runtimeName: ""
+  # E.g.
+  # runtimeName: prod-ue1-runtime-1/namespace
+```
+
+- Install chart
+
+```console
+helm upgrade --install cf-runtime cf-runtime/cf-runtime --create-namespace --namespace codefresh
+```
+
+*Install from OCI-based registry*
+```console
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime --create-namespace --namespace codefresh
+```
+
+## Chart Configuration
+
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
+
+```console
+helm show values cf-runtime/cf-runtime
+```
 
 ## Upgrade Chart
 
@@ -137,6 +169,18 @@ runtime:
 
 Affected values:
 - `.runtime.dind.pvcs` converted from **list** to **dict**
+
+### To 6.x
+
+This major release deprecates previously required `codefresh runner init --generate-helm-values-file`.
+
+Affected values:
+- **Added** `.global.context` as **mandatory** value!
+
+- **Removed** `.global.agentToken` / `.global.agentTokenSecretKeyRef`
+- **Removed** `.global.agentId`
+- **Removed** `.global.keys` / `.global.dindCertsSecretRef`
+- **Removed** `.global.existingAgentToken` / `existingDindCertsSecret`
 
 ## Architecture
 
@@ -748,20 +792,16 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
 | extraResources | list | `[]` | Array of extra objects to deploy with the release |
 | fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
-| global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
-| global.accountId | string | `""` | Account ID |
-| global.agentId | string | `""` | Agent ID |
-| global.agentName | string | `""` | Agent Name |
-| global.agentToken | string | `""` | Agent token in plain text. |
-| global.agentTokenSecretKeyRef | object | `{}` | Agent token that references an existing secret containing API key. |
-| global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform |
-| global.codefreshToken | string | `""` | User token in plain text. Ref: https://g.codefresh.io/user/settings (see API Keys) |
-| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key. |
-| global.dindCertsSecretRef | object | `{}` | Certs for Dind docker daemon that references an existing secret |
+| global | object | See below | Global parameters |
+| global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
+| global.agentName | string | `""` | Agent Name (required!) |
+| global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform (required!) |
+| global.codefreshToken | string | `""` | User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!) Ref: https://g.codefresh.io/user/settings (see API Keys) |
+| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!) |
+| global.context | string | `""` | K8s context name (required!) |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
-| global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
-| global.runtimeName | string | `""` | Runtime name |
+| global.runtimeName | string | `""` | Runtime name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}/{{ .Release.Namespace }}` |
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
