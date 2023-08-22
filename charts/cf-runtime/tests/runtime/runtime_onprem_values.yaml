@@ -21,7 +21,8 @@ runtime:
         cpu: 1000m
         memory: 2048Mi
     pvcs:
-      - name: dind
+      dind:
+        name: dind
         storageClassName: my-custom-storage-class
         volumeSize: 8Gi
         reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
