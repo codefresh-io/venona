@@ -175,7 +175,7 @@ Affected values:
 This major release deprecates previously required `codefresh runner init --generate-helm-values-file`.
 
 Affected values:
-- **Added** `.global.context` as **mandatory** value!
+- **Replaced** `.monitor.clusterId` with `.global.context` as **mandatory** value!
 
 - **Removed** `.global.agentToken` / `.global.agentTokenSecretKeyRef`
 - **Removed** `.global.agentId`
