@@ -1,6 +1,11 @@
 # Values used in `helm-chart-ci` pipeline
+# All placeholders will be set during ci build
 global:
   codefreshToken: placeholder
+  accountId: placeholder
+  agentName: placeholder
+  runtimeName: placeholder
+  context: placeholder
 appProxy:
   enabled: true
   ingress:
@@ -11,7 +16,11 @@ monitor:
   enabled: true
   rbac:
     namespaced: true
-runner: {}
+runner:
+  # TO-DO: remove once https://github.com/codefresh-io/cli/pull/833 is merged
+  init:
+    image:
+      tag: CR-16346-venona-helm-rootless
 runtime:
   dind:
     image:
