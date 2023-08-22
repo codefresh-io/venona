@@ -68,13 +68,13 @@ global:
   # context: prod-ue1-runtime-1
 
   # -- Agent Name (optional!)
-  # If omitted, the following format will be used `{{ .Values.global.context }}_{{ .Release.Namespace }}`
+  # If omitted, the following format will be used '{{ `{{ .Values.global.context }}_{{ .Release.Namespace }}` }}'
   agentName: ""
   # E.g.
   # agentName: prod-ue1-runtime-1
 
   # -- Runtime name (optional!)
-  # If omitted, the following format will be used `{{ .Values.global.context }}/{{ .Release.Namespace }}`
+  # If omitted, the following format will be used '{{ `{{ .Values.global.context }}/{{ .Release.Namespace }}` }}'
   runtimeName: ""
   # E.g.
   # runtimeName: prod-ue1-runtime-1/namespace
