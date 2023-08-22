@@ -181,6 +181,7 @@ Affected values:
 - **Removed** `.global.agentId`
 - **Removed** `.global.keys` / `.global.dindCertsSecretRef`
 - **Removed** `.global.existingAgentToken` / `existingDindCertsSecret`
+- **Removed** `.monitor.clusterId` / `.monitor.token` / `.monitor.existingMonitorToken`
 
 ## Architecture
 
@@ -803,10 +804,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | global.imageRegistry | string | `""` | Global Docker image registry |
 | global.runtimeName | string | `""` | Runtime name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}/{{ .Release.Namespace }}` |
 | monitor.affinity | object | `{}` | Set affinity |
-| monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.existingMonitorToken | string | `""` | Set Existing secret (name-of-existing-secret) with API token from Codefresh supersedes value of monitor.token; secret must contain `codefresh-user-token` key |
 | monitor.image | object | `{"registry":"quay.io","repository":"codefresh/agent","tag":"stable"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
@@ -822,7 +821,6 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | monitor.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | monitor.serviceAccount.create | bool | `true` | Create service account |
 | monitor.serviceAccount.name | string | `""` | Override service account name |
-| monitor.token | string | `""` | API token from Codefresh Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.tolerations | list | `[]` | Set tolerations |
 | monitor.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | nameOverride | string | `""` | String to partially override cf-runtime.fullname template (will maintain the release name) |
