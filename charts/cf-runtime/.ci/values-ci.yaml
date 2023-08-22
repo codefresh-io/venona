@@ -4,8 +4,9 @@ global:
   codefreshToken: placeholder
   accountId: placeholder
   agentName: placeholder
-  runtimeName: placeholder
   context: placeholder
+  # intentionally empty
+  runtimeName: ""
 appProxy:
   enabled: true
   ingress:

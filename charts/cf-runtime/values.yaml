@@ -660,16 +660,6 @@ monitor:
   # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component
   enabled: false
 
-  # -- Cluster name as it registered in account
-  # Generated from `codefresh runner init --generate-helm-values-file` output
-  clusterId: ""
-  # -- API token from Codefresh
-  # Generated from `codefresh runner init --generate-helm-values-file` output
-  token: ""
-  # -- Set Existing secret (name-of-existing-secret) with API token from Codefresh
-  # supersedes value of monitor.token; secret must contain `codefresh-user-token` key
-  existingMonitorToken: ""
-
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
