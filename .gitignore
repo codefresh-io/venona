@@ -37,3 +37,9 @@ venona/venona
 
 # only ignore the values.yaml file at the root of the repo
 /values.yaml
+
+# helm charts
+**/*.tgz
+**/charts/**/charts
+**/dry-run.yaml
+**/values-dev.yaml

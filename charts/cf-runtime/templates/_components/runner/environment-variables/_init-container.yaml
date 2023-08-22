@@ -11,18 +11,13 @@ AGENT_CODEFRESH_TOKEN:
       name: {{ include "runner.fullname" . }}
       key: agent-codefresh-token
       optional: true
-CONFIG_MAP_NAME: {{ include "monitor.fullname" . }}
+CONFIG_MAP_NAME: {{ include "runner.fullname" . }}
 KUBE_CONTEXT: {{ .Values.global.context }}
 KUBE_NAMESPACE: {{ .Release.Namespace }}
 OWNER_NAME: {{ include "runner.fullname" . }}
 RUNTIME_NAME: {{ .Values.global.runtimeName }}
 SECRET_NAME: {{ include "runner.fullname" . }}
-USER_CODEFRESH_TOKEN:
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "monitor.fullname" . }}
-      key: codefresh.token
-      optional: true
+USER_CODEFRESH_TOKEN: {{ include "runtime.installation-token-env-var-value" . | nindent 2 }}
 {{- end }}
 
 {{- define "runner-init.environment-variables" }}

@@ -6,17 +6,13 @@ NODE_OPTIONS: "--max_old_space_size=4096"
 {{- end }}
 
 {{- define "monitor.environment-variables.calculated" }}
-API_TOKEN:
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "monitor.secretTokenName" . }}
-      key: codefresh.token
+API_TOKEN: {{ include "runtime.installation-token-env-var-value" . | nindent 2 }}
 CLUSTER_ID: {{ .Values.global.context }}
 API_URL: {{ .Values.global.codefreshHost }}/api/k8s-monitor/events
 ACCOUNT_ID:
   valueFrom:
     configMapKeyRef:
-      name: {{ include "monitor.fullname" . }}
+      name: {{ include "runner.fullname" . }}
       key: accountId
 NAMESPACE: {{ .Release.Namespace }}
 {{- if .Values.rbac.namespaced }}
