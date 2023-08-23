@@ -15,7 +15,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 3.x](#to-3x)
   - [To 4.x](#to-4x)
   - [To 5.x](#to-5x)
-  - [To 6.x](#to-5x)
+  - [To 6.x](#to-6x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -180,8 +180,7 @@ This major release deprecates previously required `codefresh runner init --gener
 
 Affected values:
 - **Replaced** `.monitor.clusterId` with `.global.context` as **mandatory** value!
-
-- **Removed** `.global.agentToken` / `.global.agentTokenSecretKeyRef`
+- **Deprecated** `.global.agentToken` / `.global.agentTokenSecretKeyRef`
 - **Removed** `.global.agentId`
 - **Removed** `.global.keys` / `.global.dindCertsSecretRef`
 - **Removed** `.global.existingAgentToken` / `existingDindCertsSecret`
@@ -222,6 +221,8 @@ Given this is the legacy `generated_values.yaml` values:
 ```
 
 Update `values.yaml` for new chart version:
+
+> For existing installation for backward compatibility `.Values.global.agentToken/agentTokenSecretKeyRef` must be provided! For installation from scratch this value is no longer required.
 
 > updated `values.yaml`
 ```yaml
