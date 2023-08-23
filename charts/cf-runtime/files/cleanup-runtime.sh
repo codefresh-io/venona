@@ -7,7 +7,7 @@ echo "RUNTIME_NAME:     ${RUNTIME_NAME}"
 echo "-----"
 
 auth() {
-  codefresh auth create-context --api-key ${USER_CODEFRESH_TOKEN} --url ${API_HOST}
+  codefresh auth create-context --api-key ${API_TOKEN} --url ${API_HOST}
 }
 
 remove_runtime() {
