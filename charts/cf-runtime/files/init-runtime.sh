@@ -3,7 +3,6 @@
 echo "-----"
 echo "API_HOST:         ${API_HOST}"
 echo "AGENT_NAME:       ${AGENT_NAME}"
-echo "CONFIG_MAP_NAME:  ${CONFIG_MAP_NAME}"
 echo "KUBE_CONTEXT:     ${KUBE_CONTEXT}"
 echo "KUBE_NAMESPACE:   ${KUBE_NAMESPACE}"
 echo "OWNER_NAME:       ${OWNER_NAME}"
@@ -41,27 +40,10 @@ RES=$(codefresh install agent \
 AGENT_CODEFRESH_TOKEN=$(echo "${RES}" | tail -n 1)
 echo "generated agent + runtime in platform"
 
-ACCOUNT_ID=$(codefresh get re ${RUNTIME_NAME} -o yaml | yq -r '.accountId')
-echo "got accountId: ${ACCOUNT_ID}"
-
 OWNER_UID=$(kubectl get deploy ${OWNER_NAME} --namespace ${KUBE_NAMESPACE} -o jsonpath='{.metadata.uid}')
 echo "got owner uid: ${OWNER_UID}"
 
 kubectl apply -f - <<EOF
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ${CONFIG_MAP_NAME}
-  namespace: ${KUBE_NAMESPACE}
-  ownerReferences:
-  - apiVersion: apps/v1
-    kind: Deploy
-    name: ${OWNER_NAME}
-    uid: ${OWNER_UID}
-data:
-  accountId: =${ACCOUNT_ID}
----
-
 apiVersion: v1
 kind: Secret
 type: Opaque
