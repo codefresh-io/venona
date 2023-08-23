@@ -11,7 +11,7 @@ AGENT_CODEFRESH_TOKEN:
       name: {{ include "runner.fullname" . }}
       key: agent-codefresh-token
       optional: true
-EXISTING_AGENT_CODEFRESH_TOKEN: {{ .Values.global.agentToken }}
+EXISTING_AGENT_CODEFRESH_TOKEN: {{ include "runtime.agent-token-env-var-value" . | nindent 2 }}
 KUBE_CONTEXT: {{ include "runtime.runtime-environment-spec.context-name" . }}
 KUBE_NAMESPACE: {{ .Release.Namespace }}
 OWNER_NAME: {{ include "runner.fullname" . }}

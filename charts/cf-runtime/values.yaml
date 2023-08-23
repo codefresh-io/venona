@@ -19,9 +19,6 @@ global:
   # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
   codefreshTokenSecretKeyRef: {}
 
-  # DEPRECATED -- existing Agent token to be used when upgrading an existing runtime.
-  agentToken: ""
-
   # E.g.
   # codefreshTokenSecretKeyRef:
   #   name: my-codefresh-api-token
@@ -47,6 +44,15 @@ global:
   runtimeName: ""
   # E.g.
   # runtimeName: prod-ue1-runtime-1/namespace
+
+  # -- DEPRECATED Agent token in plain text.
+  agentToken: ""
+  # -- DEPRECATED Agent token that references an existing secret containing API key.
+  agentTokenSecretKeyRef: {}
+  # E.g.
+  # agentTokenSecretKeyRef:
+  #   name: my-codefresh-agent-secret
+  #   key: codefresh-agent-token
 
 # DEPRECATED -- Use `.Values.global.imageRegistry` instead
 dockerRegistry: ""

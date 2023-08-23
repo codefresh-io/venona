@@ -59,6 +59,19 @@ valueFrom:
 {{- end }}
 
 {{/*
+Environment variable value of Codefresh agent token
+*/}}
+{{- define "runtime.agent-token-env-var-value" -}}
+  {{- if .Values.global.agentToken }}
+{{- printf "%s" .Values.global.agentToken | toYaml }}
+  {{- else if .Values.global.agentTokenSecretKeyRef  }}
+valueFrom:
+  secretKeyRef:
+  {{- .Values.global.agentTokenSecretKeyRef | toYaml | nindent 4 }}
+  {{- end }}
+{{- end }}
+
+{{/*
 Print Codefresh API token secret name
 */}}
 {{- define "runtime.installation-token-secret-name" }}
