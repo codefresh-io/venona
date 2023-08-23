@@ -10,6 +10,29 @@ echo "RUNTIME_NAME:     ${RUNTIME_NAME}"
 echo "SECRET_NAME:      ${SECRET_NAME}"
 echo "-----"
 
+create_agent_secret() {
+
+  kubectl apply -f - <<EOF
+  apiVersion: v1
+  kind: Secret
+  type: Opaque
+  metadata:
+    name: ${SECRET_NAME}
+    namespace: ${KUBE_NAMESPACE}
+    ownerReferences:
+    - apiVersion: apps/v1
+      kind: Deploy
+      name: ${OWNER_NAME}
+      uid: ${OWNER_UID}
+  stringData:
+    agent-codefresh-token: ${1}
+EOF
+
+}
+
+OWNER_UID=$(kubectl get deploy ${OWNER_NAME} --namespace ${KUBE_NAMESPACE} -o jsonpath='{.metadata.uid}')
+echo "got owner uid: ${OWNER_UID}"
+
 if [ ! -z "${AGENT_CODEFRESH_TOKEN}" ]; then
     echo "-----"
     echo "runtime and agent are already initialized"
@@ -19,9 +42,7 @@ fi
 
 if [ ! -z "${EXISTING_AGENT_CODEFRESH_TOKEN}" ]; then
     echo "using existing agentToken value"
-    kubectl patch Secret ${SECRET_NAME} \
-      --namespace ${KUBE_NAMESPACE} \
-      --patch '{"stringData":{"agent-codefresh-token":"'"${EXISTING_AGENT_CODEFRESH_TOKEN}"'"}}'
+    create_agent_secret $EXISTING_AGENT_CODEFRESH_TOKEN
     exit 0
 fi
 
@@ -48,24 +69,7 @@ RES=$(codefresh install agent \
 AGENT_CODEFRESH_TOKEN=$(echo "${RES}" | tail -n 1)
 echo "generated agent + runtime in platform"
 
-OWNER_UID=$(kubectl get deploy ${OWNER_NAME} --namespace ${KUBE_NAMESPACE} -o jsonpath='{.metadata.uid}')
-echo "got owner uid: ${OWNER_UID}"
-
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-type: Opaque
-metadata:
-  name: ${SECRET_NAME}
-  namespace: ${KUBE_NAMESPACE}
-  ownerReferences:
-  - apiVersion: apps/v1
-    kind: Deploy
-    name: ${OWNER_NAME}
-    uid: ${OWNER_UID}
-stringData:
-  agent-codefresh-token: ${AGENT_CODEFRESH_TOKEN}
-EOF
+create_agent_secret $AGENT_CODEFRESH_TOKEN
 
 echo "-----"
 echo "done initializing runtime and agent"
