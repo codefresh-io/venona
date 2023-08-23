@@ -846,6 +846,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | global | object | See below | Global parameters |
 | global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
 | global.agentName | string | `""` | Agent Name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}_{{ .Release.Namespace }}` |
+| global.agentToken | string | `""` | DEPRECATED Agent token in plain text. |
+| global.agentTokenSecretKeyRef | object | `{}` | DEPRECATED Agent token that references an existing secret containing API key. |
 | global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform (required!) |
 | global.codefreshToken | string | `""` | User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!) Ref: https://g.codefresh.io/user/settings (see API Keys) |
 | global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!) |
