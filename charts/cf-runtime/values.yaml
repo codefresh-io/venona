@@ -46,8 +46,10 @@ global:
   # runtimeName: prod-ue1-runtime-1/namespace
 
   # -- DEPRECATED Agent token in plain text.
+  # !!! MUST BE provided if migrating from < 6.x chart version
   agentToken: ""
   # -- DEPRECATED Agent token that references an existing secret containing API key.
+  # !!! MUST BE provided if migrating from < 6.x chart version
   agentTokenSecretKeyRef: {}
   # E.g.
   # agentTokenSecretKeyRef:
