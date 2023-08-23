@@ -18,6 +18,10 @@ global:
   codefreshToken: ""
   # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
   codefreshTokenSecretKeyRef: {}
+
+  # DEPRECATED -- existing Agent token to be used when upgrading an existing runtime.
+  agentToken: ""
+
   # E.g.
   # codefreshTokenSecretKeyRef:
   #   name: my-codefresh-api-token

@@ -17,6 +17,14 @@ if [ ! -z "${AGENT_CODEFRESH_TOKEN}" ]; then
     exit 0
 fi
 
+if [ ! -z "${EXISTING_AGENT_CODEFRESH_TOKEN}" ]; then
+    echo "using existing agentToken value"
+    kubectl patch Secret ${SECRET_NAME} \
+      --namespace ${KUBE_NAMESPACE} \
+      --patch '{"stringData":{"agent-codefresh-token":"'"${EXISTING_AGENT_CODEFRESH_TOKEN}"'"}}'
+    exit 0
+fi
+
 if [ -z "${USER_CODEFRESH_TOKEN}" ]; then
     echo "-----"
     echo "missing codefresh user token. must supply \".global.codefreshToken\" if agent-codefresh-token does not exist"
