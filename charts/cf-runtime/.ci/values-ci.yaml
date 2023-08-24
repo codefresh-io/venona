@@ -23,6 +23,10 @@ runner:
     image:
       tag: CR-16346-venona-helm-rootless
 runtime:
+  # TO-DO: remove once https://github.com/codefresh-io/cli/pull/833 is merged
+  patch:
+    image:
+      tag: CR-16346-venona-helm-rootless
   dind:
     image:
       tag: 20.10.24-1.27.0-rootless

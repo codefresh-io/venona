@@ -19,6 +19,10 @@ create_agent_secret() {
   metadata:
     name: ${SECRET_NAME}
     namespace: ${KUBE_NAMESPACE}
+    labels:
+      codefresh.io/internal: "true"
+    finalizers:
+    - kubernetes
     ownerReferences:
     - apiVersion: apps/v1
       kind: Deploy

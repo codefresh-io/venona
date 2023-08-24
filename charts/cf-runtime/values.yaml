@@ -537,6 +537,8 @@ runtime:
       registry: quay.io
       repository: codefresh/cli
       tag: 0.84.8-rootless
+    rbac:
+      enabled: true
     annotations: {}
     affinity: {}
     nodeSelector: {}

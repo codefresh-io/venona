@@ -1,17 +1,16 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{ $values := .Values.runtime.patch }}
-{{- if $values.enabled }}
+{{- if and $values.enabled }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "runtime.fullname" . }}-patch
+  name: {{ include "runtime.fullname" . }}-cleanup
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-weight: "5"
-    helm.sh/hook-delete-policy: before-hook-creation
+    helm.sh/hook: pre-delete
+    helm.sh/hook-delete-policy:  hook-succeeded,before-hook-creation
     {{- with $values.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -24,14 +23,17 @@ spec:
   {{- end }}
   template:
     metadata:
-      name: {{ include "runtime.fullname" . }}-patch
+      name: {{ include "runtime.fullname" . }}-cleanup
       labels:
         {{- include "runtime.labels" . | nindent 8 }}
     spec:
+      {{- if $values.rbac.enabled }}
+      serviceAccountName: {{ template "runtime.fullname" . }}-cleanup
+      {{- end }}
       securityContext:
         {{- toYaml $values.podSecurityContext | nindent 8 }}
       containers:
-      - name: patch-runtime
+      - name: cleanup
         image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $values.image "context" .) }}
         imagePullPolicy: {{ $values.image.pullPolicy | default "Always" }}
         command:
@@ -39,24 +41,19 @@ spec:
         args:
         - -ec
         - |
-          codefresh auth create-context --api-key $API_KEY --url $API_HOST
-          cat /usr/share/extras/runtime.yaml
-          codefresh get re
-{{- if .Values.runtime.agent }}
-          codefresh patch re -f /usr/share/extras/runtime.yaml
-{{- else }}
-          codefresh patch sys-re -f /usr/share/extras/runtime.yaml
-{{- end }}
+          {{ .Files.Get "files/cleanup-runtime.sh" | nindent 10 }}
         env:
-        - name: API_KEY
-          {{- include "runtime.installation-token-env-var-value" . | indent 10}}
+        - name: AGENT_NAME
+          value: {{ include "runtime.runtime-environment-spec.agent-name" . }}
+        - name: RUNTIME_NAME
+          value: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
         - name: API_HOST
           value: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
+        - name: API_TOKEN
+          {{- include "runtime.installation-token-env-var-value" . | indent 10}}
+        - name: AGENT
+          value: {{ .Values.runtime.agent | quote }}
           {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 8 }}
-        volumeMounts:
-        - name: config
-          mountPath: /usr/share/extras/runtime.yaml
-          subPath: runtime.yaml
       {{- with $values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -70,8 +67,4 @@ spec:
         {{- toYaml . | nindent 6 }}
       {{- end }}
       restartPolicy: OnFailure
-      volumes:
-      - name: config
-        configMap:
-          name: {{ include "runtime.fullname" . }}-spec
 {{- end }}
