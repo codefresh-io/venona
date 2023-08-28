@@ -16,6 +16,10 @@ annotations:
   artifacthub.io/changes: |
     - kind: deprecated
       description: Deprecated --generate-helm-values-file
+    - kind: changed
+      description: Update engine version
+    - kind: changed
+      description: Update dind version
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
