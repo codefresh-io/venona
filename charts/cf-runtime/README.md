@@ -222,7 +222,7 @@ Given this is the legacy `generated_values.yaml` values:
 
 Update `values.yaml` for new chart version:
 
-> For existing installation for backward compatibility `.Values.global.agentToken/agentTokenSecretKeyRef` must be provided! For installation from scratch this value is no longer required.
+> For existing installation for backward compatibility `.Values.global.agentToken/agentTokenSecretKeyRef` **must be provided!** For installation from scratch this value is no longer required.
 
 > updated `values.yaml`
 ```yaml
@@ -230,7 +230,7 @@ global:
   codefreshToken: "1234567890"
   accountId: "my-account-id"
   context: "my-cluster-name"
-  agentToken: "0987654321"  # !!! MUST BE provided if migrating from < 6.x chart version
+  agentToken: "0987654321"  # MANDATORY when migrating from < 6.x chart version !
   agentName: "my-cluster-name_my-namespace" # optional
   runtimeName: "my-cluster-name/my-namespace" # optional
 ```
