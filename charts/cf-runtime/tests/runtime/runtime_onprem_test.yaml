@@ -143,12 +143,12 @@ tests:
                     secretName: tls-secret
               clientCertPath: /etc/ssl/cf/
               volumeMounts:
-                cf-certs-dind:
-                  name: cf-certs-dind
+                codefresh-certs-server:
+                  name: codefresh-certs-server
                   mountPath: /etc/ssl/cf
                   readOnly: false
               volumes:
-                cf-certs-dind:
-                  name: cf-certs-dind
+                codefresh-certs-server:
+                  name: codefresh-certs-server
                   secret:
-                    secretName: cf-certs-dind
+                    secretName: codefresh-certs-server
