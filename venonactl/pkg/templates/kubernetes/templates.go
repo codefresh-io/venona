@@ -177,11 +177,10 @@ spec:
         - key: 'codefresh/dind'
           operator: 'Exists'
           effect: 'NoSchedule'
+        
+{{ toYaml .Tolerations | indent 8 | unescape}}
       securityContext:
         fsGroup: 1000
-
-{{ toYaml .Tolerations | indent 8 | unescape}}
-
       initContainers:
       - command:
         - chown

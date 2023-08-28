@@ -1,6 +1,12 @@
 # Values used in `helm-chart-ci` pipeline
+# All placeholders will be set during ci build
 global:
   codefreshToken: placeholder
+  accountId: placeholder
+  context: placeholder
+  # intentionally empty
+  runtimeName: ""
+  agentName: ""
 appProxy:
   enabled: true
   ingress:
@@ -23,15 +29,6 @@ runtime:
     limits:
         cpu: 1000m
         memory: 1024Mi
-    podAnnotations:
-      karpenter.sh/do-not-evict: 'true'
-    nodeSelector:
-      node-type: dind
-    tolerations:
-    - effect: NoSchedule
-      key: codefresh.io
-      operator: Equal
-      value: dinds
   engine:
     resources:
       requests:
@@ -40,12 +37,3 @@ runtime:
     limits:
         cpu: 1000m
         memory: 1024Mi
-    podAnnotations:
-      karpenter.sh/do-not-evict: 'true'
-    nodeSelector:
-      node-type: engine
-    tolerations:
-    - effect: NoSchedule
-      key: codefresh.io
-      operator: Equal
-      value: engines

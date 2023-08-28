@@ -1,6 +1,6 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{ $values := .Values.runtime.gencerts }}
-{{- if and $values.enabled (not .Values.runtime.agent) }}
+{{- if and $values.enabled }}
 ---
 apiVersion: v1
 kind: ServiceAccount

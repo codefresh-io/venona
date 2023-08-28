@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
 suite: runtime onprem test
 templates:
-  - templates/hooks/job-update-runtime.yaml
-  - templates/hooks/cm-update-runtime.yaml
+  - templates/hooks/post-install/job-update-runtime.yaml
+  - templates/hooks/post-install/cm-update-runtime.yaml
   - templates/runtime/secret.yaml
 release:
   name: cf-runtime
@@ -14,7 +14,7 @@ chart:
   appVersion: 1.0.0
 tests:
   - it: Test default runtime spec metadata
-    template: templates/hooks/cm-update-runtime.yaml
+    template: templates/hooks/post-install/cm-update-runtime.yaml
     values:
       - ./runtime_onprem_values.yaml
     asserts:
@@ -26,7 +26,7 @@ tests:
           path: data["runtime.yaml"]
 
   - it: Test runtime spec override
-    template: templates/hooks/cm-update-runtime.yaml
+    template: templates/hooks/post-install/cm-update-runtime.yaml
     values:
       - ./runtime_onprem_values.yaml
     asserts:
@@ -143,12 +143,12 @@ tests:
                     secretName: tls-secret
               clientCertPath: /etc/ssl/cf/
               volumeMounts:
-                cf-certs-dind:
-                  name: cf-certs-dind
+                codefresh-certs-server:
+                  name: codefresh-certs-server
                   mountPath: /etc/ssl/cf
                   readOnly: false
               volumes:
-                cf-certs-dind:
-                  name: cf-certs-dind
+                codefresh-certs-server:
+                  name: codefresh-certs-server
                   secret:
-                    secretName: cf-certs-dind
+                    secretName: codefresh-certs-server

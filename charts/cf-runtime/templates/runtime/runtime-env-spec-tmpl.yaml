@@ -1,11 +1,11 @@
 {{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
-{{- $kubeconfigFilePath := trimPrefix "system/" .Values.global.runtimeName -}}
-{{- $name := trimPrefix "system/" .Values.global.runtimeName -}}
+{{- $kubeconfigFilePath := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
+{{- $name := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
 metadata:
-  name: {{ include "runtime.runtime-environment-spec.name" . }}
+  name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
 {{- with .Values.runtime.description }}
@@ -49,7 +49,7 @@ runtimeScheduler:
     {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
-      selector: {{ .Values.monitor.clusterId }}
+      selector: {{ include "runtime.runtime-environment-spec.context-name" . }}
     {{- else }}
       {{- if .Values.runtime.inCluster }}
     inCluster: true
@@ -95,7 +95,7 @@ dockerDaemonScheduler:
     {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
-      selector: {{ .Values.monitor.clusterId }}
+      selector: {{ include "runtime.runtime-environment-spec.context-name" . }}
     {{- else }}
       {{- if .Values.runtime.inCluster }}
     inCluster: true
@@ -148,14 +148,14 @@ dockerDaemonScheduler:
   {{- if and (not .Values.runtime.agent)  }}
   clientCertPath: /etc/ssl/cf/
   volumeMounts:
-    cf-certs-dind:
-      name: cf-certs-dind
+    codefresh-certs-server:
+      name: codefresh-certs-server
       mountPath: /etc/ssl/cf
       readOnly: false
   volumes:
-    cf-certs-dind:
-      name: cf-certs-dind
+    codefresh-certs-server:
+      name: codefresh-certs-server
       secret:
-        secretName: cf-certs-dind
+        secretName: codefresh-certs-server
   {{- end }}
 {{- end }}

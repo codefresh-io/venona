@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 5.3.1](https://img.shields.io/badge/Version-5.3.1-informational?style=flat-square)
+![Version: 6.0.0](https://img.shields.io/badge/Version-6.0.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -9,11 +9,13 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Prerequisites](#prerequisites)
 - [Get Repo Info](#get-repo-info)
 - [Install Chart](#install-chart)
+- [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
-  - [To 2.x](#to-2x)
-  - [To 3.x](#to-3x)
-  - [To 4.x](#to-4x)
-  - [To 5.x](#to-5x)
+  - [To 2.x](#to-2-x)
+  - [To 3.x](#to-3-x)
+  - [To 4.x](#to-4-x)
+  - [To 5.x](#to-5-x)
+  - [To 6.x](#to-6-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -40,31 +42,62 @@ helm repo update
 
 **Important:** only helm3 is supported
 
-1. Download the Codefresh CLI and authenticate it with your Codefresh account. Follow [here](https://codefresh-io.github.io/cli/getting-started/) for more detailed instructions.
-2. Run the following command to create mandatory values for Codefresh Runner:
+- Specify the following mandatory values
 
-    ```console
-    codefresh runner init --generate-helm-values-file
-    ```
+```yaml
+# -- Global parameters
+# @default -- See below
+global:
+  # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
+  # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  codefreshToken: ""
+  # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
+  codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
 
-   * This will not install anything on your cluster, except for running cluster acceptance tests, which may be skipped using the `--skip-cluster-test` option.
-   * This command will also generate a `generated_values.yaml` file in your current directory, which you will need to provide to the `helm upgrade` command later.
-3. Run the following to complete the installation:
+  # -- Account ID (required!)
+  # Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information
+  accountId: ""
 
-    ```console
-    helm repo add cf-runtime https://chartmuseum.codefresh.io/cf-runtime
+  # -- K8s context name (required!)
+  context: ""
+  # E.g.
+  # context: prod-ue1-runtime-1
 
-    helm upgrade --install cf-runtime cf-runtime/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
-    ```
+  # -- Agent Name (optional!)
+  # If omitted, the following format will be used '{{ .Values.global.context }}_{{ .Release.Namespace }}'
+  agentName: ""
+  # E.g.
+  # agentName: prod-ue1-runtime-1
 
-    *Install from OCI-based registry*
-    ```console
-    helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
-    ```
-4. At this point you should have a working Codefresh Runner. You can verify the installation by running:
-    ```console
-    codefresh runner execute-test-pipeline --runtime-name <runtime-name>
-    ```
+  # -- Runtime name (optional!)
+  # If omitted, the following format will be used '{{ .Values.global.context }}/{{ .Release.Namespace }}'
+  runtimeName: ""
+  # E.g.
+  # runtimeName: prod-ue1-runtime-1/namespace
+```
+
+- Install chart
+
+```console
+helm upgrade --install cf-runtime cf-runtime/cf-runtime --create-namespace --namespace codefresh
+```
+
+*Install from OCI-based registry*
+```console
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime --create-namespace --namespace codefresh
+```
+
+## Chart Configuration
+
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
+
+```console
+helm show values cf-runtime/cf-runtime
+```
 
 ## Upgrade Chart
 
@@ -83,7 +116,7 @@ Affected values:
 ### To 3.x
 
 ⚠️⚠️⚠️
-### Please, READ this before the upgrade!
+### READ this before the upgrade!
 
 This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
 That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
@@ -137,6 +170,70 @@ runtime:
 
 Affected values:
 - `.runtime.dind.pvcs` converted from **list** to **dict**
+
+### To 6.x
+
+⚠️⚠️⚠️
+### READ this before the upgrade!
+
+This major release deprecates previously required `codefresh runner init --generate-helm-values-file`.
+
+Affected values:
+- **Replaced** `.monitor.clusterId` with `.global.context` as **mandatory** value!
+- **Deprecated** `.global.agentToken` / `.global.agentTokenSecretKeyRef`
+- **Removed** `.global.agentId`
+- **Removed** `.global.keys` / `.global.dindCertsSecretRef`
+- **Removed** `.global.existingAgentToken` / `existingDindCertsSecret`
+- **Removed** `.monitor.clusterId` / `.monitor.token` / `.monitor.existingMonitorToken`
+
+#### Migrate the Helm chart from version 5.x to 6.x
+
+Given this is the legacy `generated_values.yaml` values:
+
+> legacy `generated_values.yaml`
+```yaml
+{
+    "appProxy": {
+        "enabled": false,
+    },
+    "monitor": {
+        "enabled": false,
+        "clusterId": "my-cluster-name",
+        "token": "1234567890"
+    },
+    "global": {
+        "namespace": "namespace",
+        "codefreshHost": "https://g.codefresh.io",
+        "agentToken": "0987654321",
+        "agentId": "agent-id-here",
+        "agentName": "my-cluster-name_my-namespace",
+        "accountId": "my-account-id",
+        "runtimeName": "my-cluster-name/my-namespace",
+        "codefreshToken": "1234567890",
+        "keys": {
+            "key": "-----BEGIN RSA PRIVATE KEY-----...",
+            "csr": "-----BEGIN CERTIFICATE REQUEST-----...",
+            "ca": "-----BEGIN CERTIFICATE-----...",
+            "serverCert": "-----BEGIN CERTIFICATE-----..."
+        }
+    }
+}
+```
+
+Update `values.yaml` for new chart version:
+
+> For existing installation for backward compatibility `.Values.global.agentToken/agentTokenSecretKeyRef` **must be provided!** For installation from scratch this value is no longer required.
+
+> updated `values.yaml`
+```yaml
+global:
+  codefreshToken: "1234567890"
+  accountId: "my-account-id"
+  context: "my-cluster-name"
+  agentToken: "0987654321"  # MANDATORY when migrating from < 6.x chart version !
+  agentName: "my-cluster-name_my-namespace" # optional
+  runtimeName: "my-cluster-name/my-namespace" # optional
+```
 
 ## Architecture
 
@@ -748,26 +845,21 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
 | extraResources | list | `[]` | Array of extra objects to deploy with the release |
 | fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
-| global | object | See below | Global parameters Global values are in generated_values.yaml. Run `codefresh runner init --generate-helm-values-file`! |
-| global.accountId | string | `""` | Account ID |
-| global.agentId | string | `""` | Agent ID |
-| global.agentName | string | `""` | Agent Name |
-| global.agentToken | string | `""` | Agent token in plain text. |
-| global.agentTokenSecretKeyRef | object | `{}` | Agent token that references an existing secret containing API key. |
-| global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform |
-| global.codefreshToken | string | `""` | User token in plain text. Ref: https://g.codefresh.io/user/settings (see API Keys) |
-| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key. |
-| global.dindCertsSecretRef | object | `{}` | Certs for Dind docker daemon that references an existing secret |
+| global | object | See below | Global parameters |
+| global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
+| global.agentName | string | `""` | Agent Name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}_{{ .Release.Namespace }}` |
+| global.agentToken | string | `""` | DEPRECATED Agent token in plain text. !!! MUST BE provided if migrating from < 6.x chart version |
+| global.agentTokenSecretKeyRef | object | `{}` | DEPRECATED Agent token that references an existing secret containing API key. !!! MUST BE provided if migrating from < 6.x chart version |
+| global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform (required!) |
+| global.codefreshToken | string | `""` | User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!) Ref: https://g.codefresh.io/user/settings (see API Keys) |
+| global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!) |
+| global.context | string | `""` | K8s context name (required!) |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |
 | global.imageRegistry | string | `""` | Global Docker image registry |
-| global.keys | object | `{"ca":"","key":"","serverCert":""}` | Certs for Dind docker daemon |
-| global.namespace | string | `""` | Runner namespace |
-| global.runtimeName | string | `""` | Runtime name |
+| global.runtimeName | string | `""` | Runtime name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}/{{ .Release.Namespace }}` |
 | monitor.affinity | object | `{}` | Set affinity |
-| monitor.clusterId | string | `""` | Cluster name as it registered in account Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.existingMonitorToken | string | `""` | Set Existing secret (name-of-existing-secret) with API token from Codefresh supersedes value of monitor.token; secret must contain `codefresh.token` key |
 | monitor.image | object | `{"registry":"quay.io","repository":"codefresh/agent","tag":"stable"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
@@ -783,7 +875,6 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | monitor.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | monitor.serviceAccount.create | bool | `true` | Create service account |
 | monitor.serviceAccount.name | string | `""` | Override service account name |
-| monitor.token | string | `""` | API token from Codefresh Generated from `codefresh runner init --generate-helm-values-file` output |
 | monitor.tolerations | list | `[]` | Set tolerations |
 | monitor.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | nameOverride | string | `""` | String to partially override cf-runtime.fullname template (will maintain the release name) |
@@ -814,10 +905,10 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"},"nodeSelector":{},"podAnnotations":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.24-1.27.0"},"nodeSelector":{},"podAnnotations":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{}` | Set additional env vars. |
-| runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.18-1.25.7"}` | Set dind image. |
+| runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"20.10.24-1.27.0"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.pvcs | object | `{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}}` | PV claim spec parametes. |
@@ -834,11 +925,11 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
 | runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.11"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.2","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.6","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.12","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.13","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.11","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.5","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.21","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.2.5","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.3","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.165.2"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:1.3.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.3","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.6","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.14","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.13","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.11","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.21","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
 | runtime.engine.env | object | `{}` | Set additional env vars. |
-| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.164.11"}` | Set image. |
+| runtime.engine.image | object | `{"registry":"quay.io","repository":"codefresh/engine","tag":"1.165.2"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |
 | runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.engine.resources | object | `{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Set resources. |

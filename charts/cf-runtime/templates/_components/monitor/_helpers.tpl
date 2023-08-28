@@ -30,18 +30,6 @@ Selector labels
 codefresh.io/application: monitor
 {{- end }}
 
-
-{{/*
-Get the token secret.
-*/}}
-{{- define "monitor.secretTokenName" -}}
-    {{- if .Values.existingMonitorToken -}}
-        {{- printf "%s" (tpl .Values.existingMonitorToken $) -}}
-    {{- else -}}
-        {{- printf "%s" (include "monitor.fullname" .) -}}
-    {{- end -}}
-{{- end -}}
-
 {{/*
 Create the name of the service account to use
 */}}

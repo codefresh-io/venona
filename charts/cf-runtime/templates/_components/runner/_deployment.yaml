@@ -27,10 +27,26 @@ spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      initContainers:
+      - name: init
+        image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" .Values.init.image "context" .) }}
+        imagePullPolicy: {{ .Values.init.image.pullPolicy | default "IfNotPresent" }}
+        command:
+        - /bin/bash
+        args:
+        - -ec
+        - |
+          {{ .Files.Get "files/init-runtime.sh" | nindent 10 }}
+        env:
+        {{- include "runner-init.environment-variables" . | nindent 8 }}
+        {{- with .Values.init.resources }}
+        resources:
+          {{- toYaml . | nindent 10  }}
+        {{- end }}
       containers:
       - name: runner
         image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" .Values.image "context" .) }}
-        imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+        imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
         env:
         {{- include "runner.environment-variables" . | nindent 8 }}
         ports:
@@ -45,10 +61,12 @@ spec:
           httpGet:
             path: /health
             port: http
+        {{- with .Values.resources }}
         resources:
-          {{- toYaml .Values.resources | nindent 12  }}
-        volumeMounts:
+          {{- toYaml . | nindent 10  }}
+        {{- end }}
         {{- with .Values.extraVolumeMounts }}
+        volumeMounts:
           {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
@@ -63,8 +81,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 6 }}
       {{- end }}
-      volumes:
       {{- with .Values.extraVolumes }}
+      volumes:
         {{- toYaml . | nindent 6 }}
       {{- end }}
 {{- end -}}

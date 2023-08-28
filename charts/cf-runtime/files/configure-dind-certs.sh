@@ -84,7 +84,7 @@ CF_SRV_TLS_CERT=${CERTS_DIR}/cf-server-cert.pem
 CF_SRV_TLS_CA_CERT=${CERTS_DIR}/cf-ca.pem
 mkdir -p $TMPDIR $CERTS_DIR
 
-K8S_CERT_SECRET_NAME=cf-certs-dind
+K8S_CERT_SECRET_NAME=codefresh-certs-server
 echo -e "\n------------------\nGenerating server tls certificates ... "
 
 SERVER_CERT_CN=${SERVER_CERT_CN:-"docker.codefresh.io"}
@@ -123,15 +123,10 @@ SERVER_CERT_EXTRA_SANS="${SERVER_CERT_EXTRA_SANS}"
 
 echo -e "\n------------------\nCreating certificate secret "
 
-  if ! kubectl -n$NAMESPACE get secret "${K8S_CERT_SECRET_NAME}"; then
-    kubectl -n$NAMESPACE create secret generic $K8S_CERT_SECRET_NAME \
-        --from-file=$SRV_TLS_CA_CERT \
-        --from-file=$SRV_TLS_KEY \
-        --from-file=$SRV_TLS_CERT || fatal "Failed storing the generated certificates in Kubernetes!"
-    kubectl label --overwrite secret ${K8S_CERT_SECRET_NAME} app.kubernetes.io/managed-by=Helm
-    kubectl annotate --overwrite secret ${K8S_CERT_SECRET_NAME} meta.helm.sh/release-name=$RELEASE
-    kubectl annotate --overwrite secret ${K8S_CERT_SECRET_NAME} meta.helm.sh/release-namespace=$NAMESPACE
-  else
-    msg "${K8S_CERT_SECRET_NAME} secret already exists. Skipping."
-  fi
-
+kubectl -n $NAMESPACE create secret generic $K8S_CERT_SECRET_NAME \
+    --from-file=$SRV_TLS_CA_CERT \
+    --from-file=$SRV_TLS_KEY \
+    --from-file=$SRV_TLS_CERT \
+    --dry-run=client -o yaml | kubectl apply --overwrite -f -
+kubectl -n $NAMESPACE label --overwrite secret ${K8S_CERT_SECRET_NAME} codefresh.io/internal=true
+kubectl -n $NAMESPACE patch secret $K8S_CERT_SECRET_NAME -p '{"metadata": {"finalizers": ["kubernetes"]}}'

@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
 suite: volume-provisioner test
 values:
-  - ../generated_values.yaml
+  - ../values.yaml
 templates:
   - templates/volume-provisioner/deployment.yaml
   - templates/volume-provisioner/rbac.yaml
@@ -232,12 +232,12 @@ tests:
                 key: aws_secret_access_key
         template: templates/volume-provisioner/deployment.yaml
       - equal:
-          path: data.aws_access_key_id
-          value: TVlLRVlJRA==
+          path: stringData.aws_access_key_id
+          value: MYKEYID
         template: templates/volume-provisioner/secret.yaml
       - equal:
-          path: data.aws_secret_access_key
-          value: TVlBQ0NFU1NLRVk=
+          path: stringData.aws_secret_access_key
+          value: MYACCESSKEY
         template: templates/volume-provisioner/secret.yaml
       - equal:
           path: parameters.volumeBackend

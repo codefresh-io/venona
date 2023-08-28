@@ -9,11 +9,13 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Prerequisites](#prerequisites)
 - [Get Repo Info](#get-repo-info)
 - [Install Chart](#install-chart)
+- [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
-  - [To 2.x](#to-2x)
-  - [To 3.x](#to-3x)
-  - [To 4.x](#to-4x)
-  - [To 5.x](#to-5x)
+  - [To 2.x](#to-2-x)
+  - [To 3.x](#to-3-x)
+  - [To 4.x](#to-4-x)
+  - [To 5.x](#to-5-x)
+  - [To 6.x](#to-6-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration](#ebs-backend-volume-configuration)
@@ -40,31 +42,62 @@ helm repo update
 
 **Important:** only helm3 is supported
 
-1. Download the Codefresh CLI and authenticate it with your Codefresh account. Follow [here](https://codefresh-io.github.io/cli/getting-started/) for more detailed instructions.
-2. Run the following command to create mandatory values for Codefresh Runner:
+- Specify the following mandatory values
 
-    ```console
-    codefresh runner init --generate-helm-values-file
-    ```
+```yaml
+# -- Global parameters
+# @default -- See below
+global:
+  # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
+  # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  codefreshToken: ""
+  # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
+  codefreshTokenSecretKeyRef: {}
+  # E.g.
+  # codefreshTokenSecretKeyRef:
+  #   name: my-codefresh-api-token
+  #   key: codefresh-api-token
 
-   * This will not install anything on your cluster, except for running cluster acceptance tests, which may be skipped using the `--skip-cluster-test` option.
-   * This command will also generate a `generated_values.yaml` file in your current directory, which you will need to provide to the `helm upgrade` command later.
-3. Run the following to complete the installation:
+  # -- Account ID (required!)
+  # Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information
+  accountId: ""
 
-    ```console
-    helm repo add cf-runtime https://chartmuseum.codefresh.io/cf-runtime
+  # -- K8s context name (required!)
+  context: ""
+  # E.g.
+  # context: prod-ue1-runtime-1
 
-    helm upgrade --install cf-runtime cf-runtime/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
-    ```
+  # -- Agent Name (optional!)
+  # If omitted, the following format will be used '{{ `{{ .Values.global.context }}_{{ .Release.Namespace }}` }}'
+  agentName: ""
+  # E.g.
+  # agentName: prod-ue1-runtime-1
 
-    *Install from OCI-based registry*
-    ```console
-    helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f ./generated_values.yaml --create-namespace --namespace codefresh
-    ```
-4. At this point you should have a working Codefresh Runner. You can verify the installation by running:
-    ```console
-    codefresh runner execute-test-pipeline --runtime-name <runtime-name>
-    ```
+  # -- Runtime name (optional!)
+  # If omitted, the following format will be used '{{ `{{ .Values.global.context }}/{{ .Release.Namespace }}` }}'
+  runtimeName: ""
+  # E.g.
+  # runtimeName: prod-ue1-runtime-1/namespace
+```
+
+- Install chart
+
+```console
+helm upgrade --install cf-runtime cf-runtime/cf-runtime --create-namespace --namespace codefresh
+```
+
+*Install from OCI-based registry*
+```console
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime --create-namespace --namespace codefresh
+```
+
+## Chart Configuration
+
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
+
+```console
+helm show values cf-runtime/cf-runtime
+```
 
 ## Upgrade Chart
 
@@ -83,7 +116,7 @@ Affected values:
 ### To 3.x
 
 ⚠️⚠️⚠️
-### Please, READ this before the upgrade!
+### READ this before the upgrade!
 
 This major release adds [runtime-environment](https://codefresh.io/docs/docs/installation/codefresh-runner/#runtime-environment-specification) spec into chart templates.
 That means it is possible to set parametes for `dind` and `engine` pods via [values.yaml](./values.yaml).
@@ -138,6 +171,69 @@ runtime:
 Affected values:
 - `.runtime.dind.pvcs` converted from **list** to **dict**
 
+### To 6.x
+
+⚠️⚠️⚠️
+### READ this before the upgrade!
+
+This major release deprecates previously required `codefresh runner init --generate-helm-values-file`.
+
+Affected values:
+- **Replaced** `.monitor.clusterId` with `.global.context` as **mandatory** value!
+- **Deprecated** `.global.agentToken` / `.global.agentTokenSecretKeyRef`
+- **Removed** `.global.agentId`
+- **Removed** `.global.keys` / `.global.dindCertsSecretRef`
+- **Removed** `.global.existingAgentToken` / `existingDindCertsSecret`
+- **Removed** `.monitor.clusterId` / `.monitor.token` / `.monitor.existingMonitorToken`
+
+#### Migrate the Helm chart from version 5.x to 6.x
+
+Given this is the legacy `generated_values.yaml` values:
+
+> legacy `generated_values.yaml`
+```yaml
+{
+    "appProxy": {
+        "enabled": false,
+    },
+    "monitor": {
+        "enabled": false,
+        "clusterId": "my-cluster-name",
+        "token": "1234567890"
+    },
+    "global": {
+        "namespace": "namespace",
+        "codefreshHost": "https://g.codefresh.io",
+        "agentToken": "0987654321",
+        "agentId": "agent-id-here",
+        "agentName": "my-cluster-name_my-namespace",
+        "accountId": "my-account-id",
+        "runtimeName": "my-cluster-name/my-namespace",
+        "codefreshToken": "1234567890",
+        "keys": {
+            "key": "-----BEGIN RSA PRIVATE KEY-----...",
+            "csr": "-----BEGIN CERTIFICATE REQUEST-----...",
+            "ca": "-----BEGIN CERTIFICATE-----...",
+            "serverCert": "-----BEGIN CERTIFICATE-----..."
+        }
+    }
+}
+```
+
+Update `values.yaml` for new chart version:
+
+> For existing installation for backward compatibility `.Values.global.agentToken/agentTokenSecretKeyRef` **must be provided!** For installation from scratch this value is no longer required.
+
+> updated `values.yaml`
+```yaml
+global:
+  codefreshToken: "1234567890"
+  accountId: "my-account-id"
+  context: "my-cluster-name"
+  agentToken: "0987654321"  # MANDATORY when migrating from < 6.x chart version !
+  agentName: "my-cluster-name_my-namespace" # optional
+  runtimeName: "my-cluster-name/my-namespace" # optional
+```
 
 ## Architecture
 

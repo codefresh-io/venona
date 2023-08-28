@@ -1,0 +1,2149 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/codefresh-io/go/venona/cmd/cmdutils.go (33.3%)</option>
+				
+				<option value="file1">github.com/codefresh-io/go/venona/cmd/root.go (0.0%)</option>
+				
+				<option value="file2">github.com/codefresh-io/go/venona/cmd/start.go (48.2%)</option>
+				
+				<option value="file3">github.com/codefresh-io/go/venona/pkg/agent/agent.go (31.2%)</option>
+				
+				<option value="file4">github.com/codefresh-io/go/venona/pkg/codefresh/codefresh.go (29.1%)</option>
+				
+				<option value="file5">github.com/codefresh-io/go/venona/pkg/codefresh/codefresh_mock.go (0.0%)</option>
+				
+				<option value="file6">github.com/codefresh-io/go/venona/pkg/codefresh/error.go (0.0%)</option>
+				
+				<option value="file7">github.com/codefresh-io/go/venona/pkg/codefresh/status.go (0.0%)</option>
+				
+				<option value="file8">github.com/codefresh-io/go/venona/pkg/config/loader.go (68.6%)</option>
+				
+				<option value="file9">github.com/codefresh-io/go/venona/pkg/kubernetes/kubernetes.go (73.1%)</option>
+				
+				<option value="file10">github.com/codefresh-io/go/venona/pkg/kubernetes/kubernetes_mock.go (0.0%)</option>
+				
+				<option value="file11">github.com/codefresh-io/go/venona/pkg/queue/queue.go (77.8%)</option>
+				
+				<option value="file12">github.com/codefresh-io/go/venona/pkg/runtime/runtime.go (88.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">no coverage</span>
+				<span class="cov1">low coverage</span>
+				<span class="cov2">*</span>
+				<span class="cov3">*</span>
+				<span class="cov4">*</span>
+				<span class="cov5">*</span>
+				<span class="cov6">*</span>
+				<span class="cov7">*</span>
+				<span class="cov8">*</span>
+				<span class="cov9">*</span>
+				<span class="cov10">high coverage</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package cmd
+
+import (
+        "fmt"
+        "os"
+)
+
+func dieOnError(err error) <span class="cov10" title="28">{
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err.Error())
+                os.Exit(1)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package cmd
+
+import "github.com/spf13/cobra"
+
+const (
+        // AppName holds the name of the application, to be used in monitoring tools
+        AppName = "Codefresh-Runner"
+)
+
+var version string
+
+var rootCmd = &amp;cobra.Command{
+        Use:     "venona",
+        Version: version,
+        Long:    "Codefresh agent process",
+}
+
+// Execute - execute the root command
+func Execute() <span class="cov0" title="0">{
+        err := rootCmd.Execute()
+        dieOnError(err)
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package cmd
+
+import (
+        "context"
+        "crypto/tls"
+        "errors"
+        "fmt"
+        "net/http"
+        "os"
+        "os/signal"
+        "syscall"
+        "time"
+
+        "github.com/codefresh-io/go/venona/pkg/agent"
+        "github.com/codefresh-io/go/venona/pkg/codefresh"
+        "github.com/codefresh-io/go/venona/pkg/config"
+        "github.com/codefresh-io/go/venona/pkg/kubernetes"
+        "github.com/codefresh-io/go/venona/pkg/logger"
+        "github.com/codefresh-io/go/venona/pkg/monitoring"
+        "github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
+        "github.com/codefresh-io/go/venona/pkg/runtime"
+        "github.com/codefresh-io/go/venona/pkg/server"
+
+        nr "github.com/newrelic/go-agent/v3/newrelic"
+        "github.com/prometheus/client_golang/prometheus"
+        "github.com/spf13/cobra"
+        "github.com/spf13/pflag"
+        "github.com/spf13/viper"
+)
+
+type startOptions struct {
+        codefreshToken                 string
+        codefreshHost                  string
+        verbose                        bool
+        rejectTLSUnauthorized          bool
+        agentID                        string
+        taskPullingSecondsInterval     int64
+        statusReportingSecondsInterval int64
+        concurrency                    int
+        bufferSize                     int
+        configDir                      string
+        serverPort                     string
+        newrelicLicenseKey             string
+        newrelicAppname                string
+        inClusterRuntime               string
+        qps                            float32
+        burst                          int
+}
+
+const (
+        defaultCodefreshHost           = "https://g.codefresh.io"
+        defaultTaskPullingInterval     = 3
+        defaultStatusReportingInterval = 10
+        defaultWorkflowConcurrency     = 50
+        defaultWorkflowBufferSize      = 1000
+        defaultK8sClientQPS            = 50
+        defaultK8sClientBurst          = 100
+)
+
+var (
+        startCmdOptions startOptions
+        handleSignal    = signal.Notify
+)
+
+var startCmd = &amp;cobra.Command{
+        Use:  "start",
+        Long: "Start venona process",
+        PreRunE: func(_ *cobra.Command, _ []string) error <span class="cov0" title="0">{
+                if startCmdOptions.taskPullingSecondsInterval &lt;= 0 </span><span class="cov0" title="0">{
+                        return errors.New("--task-pulling-interval must be a positive number")
+                }</span>
+
+                <span class="cov0" title="0">if startCmdOptions.statusReportingSecondsInterval &lt;= 0 </span><span class="cov0" title="0">{
+                        return errors.New("--status-reporting-interval must be a positive number")
+                }</span>
+
+                <span class="cov0" title="0">if startCmdOptions.concurrency &lt;= 0 </span><span class="cov0" title="0">{
+                        return errors.New("--workflow-concurrency must be a positive number")
+                }</span>
+
+                <span class="cov0" title="0">if startCmdOptions.bufferSize &lt;= 0 </span><span class="cov0" title="0">{
+                        return errors.New("--workflow-buffer-size must be a positive number")
+                }</span>
+
+                <span class="cov0" title="0">if startCmdOptions.qps &lt;= 0 </span><span class="cov0" title="0">{
+                        return errors.New("--k8s-client-qps must be a positive number")
+                }</span>
+
+                <span class="cov0" title="0">if startCmdOptions.burst &lt;= 0 </span><span class="cov0" title="0">{
+                        return errors.New("--k8s-client-burst must be a positive number")
+                }</span>
+
+                <span class="cov0" title="0">return nil</span>
+        },
+        Run: func(_ *cobra.Command, _ []string) <span class="cov0" title="0">{
+                run(startCmdOptions)
+        }</span>,
+}
+
+func init() <span class="cov1" title="1">{
+        dieOnError(viper.BindEnv("codefresh-token", "CODEFRESH_TOKEN"))
+        dieOnError(viper.BindEnv("codefresh-host", "CODEFRESH_HOST"))
+        dieOnError(viper.BindEnv("in-cluster-runtime", "CODEFRESH_IN_CLUSTER_RUNTIME"))
+        dieOnError(viper.BindEnv("agent-id", "AGENT_ID"))
+        dieOnError(viper.BindEnv("config-dir", "VENONA_CONFIG_DIR"))
+        dieOnError(viper.BindEnv("port", "PORT"))
+        dieOnError(viper.BindEnv("NODE_TLS_REJECT_UNAUTHORIZED"))
+        dieOnError(viper.BindEnv("verbose", "VERBOSE"))
+        dieOnError(viper.BindEnv("newrelic-license-key", "NEWRELIC_LICENSE_KEY"))
+        dieOnError(viper.BindEnv("newrelic-appname", "NEWRELIC_APPNAME"))
+        dieOnError(viper.BindEnv("task-pulling-interval", "TASK_PULLING_INTERVAL"))
+        dieOnError(viper.BindEnv("status-reporting-interval", "STATUS_REPORTING_INTERVAL"))
+        dieOnError(viper.BindEnv("workflow-concurrency", "WORKFLOW_CONCURRENCY"))
+        dieOnError(viper.BindEnv("workflow-buffer-size", "WORKFLOW_BUFFER_SIZE"))
+        dieOnError(viper.BindEnv("k8s-client-qps", "K8S_CLIENT_QPS"))
+        dieOnError(viper.BindEnv("k8s-client-burst", "K8S_CLIENT_BURST"))
+
+        viper.SetDefault("codefresh-host", defaultCodefreshHost)
+        viper.SetDefault("port", "8080")
+        viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
+        viper.SetDefault("in-cluster-runtime", "")
+        viper.SetDefault("newrelic-appname", AppName)
+        viper.SetDefault("task-pulling-interval", defaultTaskPullingInterval)
+        viper.SetDefault("status-reporting-interval", defaultStatusReportingInterval)
+        viper.SetDefault("workflow-concurrency", defaultWorkflowConcurrency)
+        viper.SetDefault("workflow-buffer-size", defaultWorkflowBufferSize)
+        viper.SetDefault("k8s-client-qps", defaultK8sClientQPS)
+        viper.SetDefault("k8s-client-burst", defaultK8sClientBurst)
+
+        startCmd.Flags().BoolVar(&amp;startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
+        startCmd.Flags().BoolVar(&amp;startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.inClusterRuntime, "in-cluster-runtime", viper.GetString("in-cluster-runtime"), "Runtime name to run agent in cluster mode [$CODEFRESH_IN_CLUSTER_RUNTIME]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.serverPort, "port", viper.GetString("port"), "The port to start the server [$PORT]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
+        startCmd.Flags().Int64Var(&amp;startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", viper.GetInt64("task-pulling-interval"), "The interval (seconds) to pull new tasks from Codefresh [$TASK_PULLING_INTERVAL]")
+        startCmd.Flags().Int64Var(&amp;startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", viper.GetInt64("status-reporting-interval"), "The interval (seconds) to report status back to Codefresh [$STATUS_REPORTING_INTERVAL]")
+        startCmd.Flags().IntVar(&amp;startCmdOptions.concurrency, "workflow-concurrency", viper.GetInt("workflow-concurrency"), "How many workflow tasks to handle concurrently [$WORKFLOW_CONCURRENCY]")
+        startCmd.Flags().IntVar(&amp;startCmdOptions.bufferSize, "workflow-buffer-size", viper.GetInt("workflow-cbuffer-sizeoncurrency"), "The size of the workflow channel buffer [$WORKFLOW_BUFFER_SIZE]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
+        startCmd.Flags().StringVar(&amp;startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
+        startCmd.Flags().Float32Var(&amp;startCmdOptions.qps, "k8s-client-qps", float32(viper.GetFloat64("k8s-client-qps")), "the maximum QPS to the master from this client [$K8S_CLIENT_QPS]")
+        startCmd.Flags().IntVar(&amp;startCmdOptions.burst, "k8s-client-burst", viper.GetInt("k8s-client-burst"), "k8s client maximum burst for throttle [$K8S_CLIENT_BURST]")
+
+        startCmd.Flags().VisitAll(func(f *pflag.Flag) </span><span class="cov10" title="16">{
+                if viper.IsSet(f.Name) &amp;&amp; viper.GetString(f.Name) != "" </span><span class="cov8" title="9">{
+                        dieOnError(startCmd.Flags().Set(f.Name, viper.GetString(f.Name)))
+                }</span>
+        })
+
+        <span class="cov1" title="1">dieOnError(startCmd.MarkFlagRequired("codefresh-token"))
+        dieOnError(startCmd.MarkFlagRequired("agent-id"))
+        dieOnError(startCmd.MarkFlagRequired("port"))
+
+        rootCmd.AddCommand(startCmd)</span>
+}
+
+func run(options startOptions) <span class="cov0" title="0">{
+        log := logger.New(logger.Options{
+                Verbose: options.verbose,
+        })
+
+        log.Debug("Starting", "pid", os.Getpid(), "version", version)
+        if !options.rejectTLSUnauthorized </span><span class="cov0" title="0">{
+                log.Warn("Running in insecure mode", "NODE_TLS_REJECT_UNAUTHORIZED", options.rejectTLSUnauthorized)
+        }</span>
+
+        <span class="cov0" title="0">reg := prometheus.NewRegistry()
+
+        var runtimes map[string]runtime.Runtime
+        k8sLog := log.New("module", "k8s")
+        if options.inClusterRuntime != "" </span><span class="cov0" title="0">{
+                runtimes = inClusterRuntimeConfiguration(options, k8sLog)
+        }</span> else<span class="cov0" title="0"> {
+                runtimes = remoteRuntimeConfiguration(options, k8sLog)
+        }</span>
+
+        <span class="cov0" title="0">var monitor monitoring.Monitor = monitoring.NewEmpty()
+        var err error
+
+        if options.newrelicLicenseKey != "" </span><span class="cov0" title="0">{
+                monitor, err = newrelic.New(
+                        nr.ConfigAppName(options.newrelicAppname),
+                        nr.ConfigLicense(options.newrelicLicenseKey),
+                )
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Warn("Failed to create monitor", "error", err)
+                }</span> else<span class="cov0" title="0"> {
+                        log.Info("Using New Relic monitor", "app-name", options.newrelicAppname, "license-key", options.newrelicLicenseKey)
+                }</span>
+        } else<span class="cov0" title="0"> {
+                log.Warn("New Relic not starting without license key!")
+        }</span>
+
+        <span class="cov0" title="0">var cf codefresh.Codefresh
+        </span><span class="cov0" title="0">{
+                var httpClient http.Client
+                if !options.rejectTLSUnauthorized </span><span class="cov0" title="0">{
+                        customTransport := http.DefaultTransport.(*http.Transport).Clone()
+                        // #nosec
+                        customTransport.TLSClientConfig = &amp;tls.Config{InsecureSkipVerify: true}
+
+                        httpClient = http.Client{
+                                Transport: customTransport,
+                        }
+                }</span>
+
+                <span class="cov0" title="0">httpClient.Transport = monitor.NewRoundTripper(httpClient.Transport)
+
+                httpHeaders := http.Header{}
+                </span><span class="cov0" title="0">{
+                        httpHeaders.Add("User-Agent", fmt.Sprintf("codefresh-runner-%s", version))
+                }</span>
+
+                <span class="cov0" title="0">cf = codefresh.New(codefresh.Options{
+                        Host:       options.codefreshHost,
+                        Token:      options.codefreshToken,
+                        AgentID:    options.agentID,
+                        HTTPClient: &amp;httpClient,
+                        Headers:    httpHeaders,
+                })</span>
+        }
+
+        <span class="cov0" title="0">agent, err := agent.New(&amp;agent.Options{
+                Codefresh:                      cf,
+                Logger:                         log.New("module", "agent"),
+                Runtimes:                       runtimes,
+                ID:                             options.agentID,
+                TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
+                StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
+                Monitor:                        monitor,
+                Concurrency:                    options.concurrency,
+                BufferSize:                     options.bufferSize,
+        })
+        dieOnError(err)
+
+        server, err := server.New(&amp;server.Options{
+                Port:            fmt.Sprintf(":%s", options.serverPort),
+                Logger:          log.New("module", "server"),
+                Monitor:         monitor,
+                MetricsRegistry: reg,
+        })
+        dieOnError(err)
+
+        ctx := context.Background()
+
+        ctx = withSignals(ctx, server.Stop, agent.Stop, log)
+        go func() </span><span class="cov0" title="0">{ dieOnError(agent.Start(ctx)) }</span>()
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{ dieOnError(server.Start()) }</span>()
+
+        <span class="cov0" title="0">&lt;-ctx.Done()</span>
+}
+
+func inClusterRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime <span class="cov0" title="0">{
+        k, err := kubernetes.NewInCluster(log, options.qps, options.burst)
+        dieOnError(err)
+        re := runtime.New(runtime.Options{
+                Kubernetes: k,
+        })
+        return map[string]runtime.Runtime{options.inClusterRuntime: re}
+}</span>
+
+func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime <span class="cov0" title="0">{
+        configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
+        dieOnError(err)
+        runtimes := map[string]runtime.Runtime{}
+        for name, config := range configs </span><span class="cov0" title="0">{
+                k, err := kubernetes.New(kubernetes.Options{
+                        Logger:   log,
+                        Token:    config.Token,
+                        Type:     config.Type,
+                        Host:     config.Host,
+                        Cert:     config.Cert,
+                        Insecure: !options.rejectTLSUnauthorized,
+                        QPS:      options.qps,
+                        Burst:    options.burst,
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">re := runtime.New(runtime.Options{
+                        Kubernetes: k,
+                })
+                runtimes[config.Name] = re</span>
+        }
+
+        <span class="cov0" title="0">return runtimes</span>
+}
+
+func withSignals(
+        ctx context.Context,
+        stopServer func(context.Context) error,
+        stopAgent func() error,
+        log logger.Logger,
+) context.Context <span class="cov4" title="3">{
+        var terminationReq int32 = 0
+        ctx, cancel := context.WithCancel(ctx)
+        sigChan := make(chan os.Signal, 10)
+
+        handleSignal(sigChan, syscall.SIGTERM, syscall.SIGINT)
+
+        go func() </span><span class="cov4" title="3">{
+                for </span><span class="cov6" title="6">{
+                        &lt;-sigChan
+                        if terminationReq++; terminationReq &gt; 1 </span><span class="cov1" title="1">{
+                                // signal received more than once, forcing termination
+                                log.Warn("Forcing termination!")
+                                cancel()
+                                return
+                        }</span>
+
+                        <span class="cov4" title="3">go func() </span><span class="cov4" title="3">{
+                                log.Warn("Received shutdown request, stopping agent and server...")
+                                // order matters, the process will exit as soon as server is stopped
+                                if err := stopAgent(); err != nil </span><span class="cov0" title="0">{
+                                        log.Error(err.Error())
+                                }</span>
+
+                                <span class="cov4" title="3">if err := stopServer(ctx); err != nil </span><span class="cov0" title="0">{
+                                        log.Error(err.Error())
+                                }</span>
+
+                                <span class="cov4" title="3">cancel()</span> // done
+                        }()
+                }
+        }()
+
+        <span class="cov4" title="3">return ctx</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package agent
+
+import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "errors"
+        "fmt"
+        "io"
+        "sort"
+        "sync"
+        "time"
+
+        "github.com/codefresh-io/go/venona/pkg/codefresh"
+        "github.com/codefresh-io/go/venona/pkg/logger"
+        "github.com/codefresh-io/go/venona/pkg/metrics"
+        "github.com/codefresh-io/go/venona/pkg/monitoring"
+        "github.com/codefresh-io/go/venona/pkg/queue"
+        "github.com/codefresh-io/go/venona/pkg/runtime"
+        "github.com/codefresh-io/go/venona/pkg/task"
+        "github.com/codefresh-io/go/venona/pkg/workflow"
+
+        retryablehttp "github.com/hashicorp/go-retryablehttp"
+        "github.com/stretchr/objx"
+)
+
+type (
+        // Options for creating a new Agent instance
+        Options struct {
+                ID                             string
+                Codefresh                      codefresh.Codefresh
+                Runtimes                       map[string]runtime.Runtime
+                Logger                         logger.Logger
+                TaskPullingSecondsInterval     time.Duration
+                StatusReportingSecondsInterval time.Duration
+                Monitor                        monitoring.Monitor
+                Concurrency                    int
+                BufferSize                     int
+        }
+
+        // Agent holds all the references from Codefresh
+        // in order to run the process
+        Agent struct {
+                id                 string
+                cf                 codefresh.Codefresh
+                log                logger.Logger
+                taskPullerTicker   *time.Ticker
+                reportStatusTicker *time.Ticker
+                wfQueue            queue.WorkflowQueue
+                running            bool
+                lastStatus         Status
+                wg                 *sync.WaitGroup
+                monitor            monitoring.Monitor
+        }
+
+        // Status of the agent
+        Status struct {
+                Message string    `json:"message"`
+                Time    time.Time `json:"time"`
+        }
+)
+
+const (
+        defaultProxyRequestTimeout = time.Second * 30
+        defaultProxyRequestRetries = 3
+)
+
+var (
+        // internal errors
+        errAlreadyRunning           = errors.New("Agent already running")
+        errAlreadyStopped           = errors.New("Agent already stopped")
+        errOptionsRequired          = errors.New("Options are required")
+        errIDRequired               = errors.New("ID options is required")
+        errRuntimesRequired         = errors.New("Runtimes options is required")
+        errLoggerRequired           = errors.New("Logger options is required")
+        errFailedToParseAgentTask   = errors.New("Failed to parse agent task spec")
+        errUknownAgentTaskType      = errors.New("Agent task has unknown type")
+        errAgentTaskMalformedParams = errors.New("failed to marshal agent task params")
+        errProxyTaskWithoutURL      = errors.New(`url not provided for task of type "proxy"`)
+        errProxyTaskWithoutToken    = errors.New(`token not provided for task of type "proxy"`)
+
+        httpClient = retryablehttp.NewClient()
+
+        agentTaskExecutors = map[string]func(t *task.AgentTask, log logger.Logger) error{
+                "proxy": proxyRequest,
+        }
+)
+
+// New creates a new Agent instance
+func New(opts *Options) (*Agent, error) <span class="cov10" title="4">{
+        if err := checkOptions(opts); err != nil </span><span class="cov10" title="4">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">id := opts.ID
+        cf := opts.Codefresh
+        log := opts.Logger
+        taskPullerTicker := time.NewTicker(opts.TaskPullingSecondsInterval)
+        reportStatusTicker := time.NewTicker(opts.StatusReportingSecondsInterval)
+        wg := &amp;sync.WaitGroup{}
+
+        if opts.Monitor == nil </span><span class="cov0" title="0">{
+                opts.Monitor = monitoring.NewEmpty()
+        }</span>
+
+        <span class="cov0" title="0">httpClient.HTTPClient.Transport = opts.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
+        wfq := queue.New(&amp;queue.Options{
+                Runtimes:    opts.Runtimes,
+                Log:         log,
+                WG:          wg,
+                Monitor:     opts.Monitor,
+                Concurrency: opts.Concurrency,
+                BufferSize:  opts.BufferSize,
+        })
+        return &amp;Agent{
+                id:                 id,
+                cf:                 cf,
+                log:                log,
+                taskPullerTicker:   taskPullerTicker,
+                reportStatusTicker: reportStatusTicker,
+                wfQueue:            wfq,
+                running:            false,
+                lastStatus:         Status{},
+                wg:                 wg,
+                monitor:            opts.Monitor,
+        }, nil</span>
+}
+
+// Start starting the agent process
+func (a *Agent) Start(ctx context.Context) error <span class="cov0" title="0">{
+        if a.running </span><span class="cov0" title="0">{
+                return errAlreadyRunning
+        }</span>
+
+        <span class="cov0" title="0">a.running = true
+        a.log.Info("Starting agent")
+
+        go a.startTaskPullerRoutine(ctx)
+        go a.startStatusReporterRoutine(ctx)
+        a.wfQueue.Start(ctx)
+
+        a.reportStatus(ctx, codefresh.AgentStatus{
+                Message: "All good",
+        })
+
+        return nil</span>
+}
+
+// Stop stops the agents work and blocks until all leftover tasks are finished
+func (a *Agent) Stop() error <span class="cov0" title="0">{
+        if !a.running </span><span class="cov0" title="0">{
+                return errAlreadyStopped
+        }</span>
+
+        <span class="cov0" title="0">a.running = false
+        a.log.Warn("Received graceful termination request, stopping tasks...")
+        a.reportStatusTicker.Stop()
+        a.taskPullerTicker.Stop()
+        a.wfQueue.Stop()
+        a.log.Warn("stopped both tickers")
+        a.wg.Wait()
+        return nil</span>
+}
+
+// Status returns the last knows status of the agent and related runtimes
+func (a *Agent) Status() Status <span class="cov0" title="0">{
+        return a.lastStatus
+}</span>
+
+func (a *Agent) startTaskPullerRoutine(ctx context.Context) <span class="cov0" title="0">{
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        a.log.Info("stopping task puller routine")
+                        return</span>
+                case &lt;-a.taskPullerTicker.C:<span class="cov0" title="0">
+                        agentTasks, workflows := a.getTasks(ctx)
+
+                        // perform all agentTasks (in goroutine)
+                        for i := range agentTasks </span><span class="cov0" title="0">{
+                                a.handleAgentTask(&amp;agentTasks[i])
+                        }</span>
+
+                        // send all wfTasks to tasksQueue
+                        <span class="cov0" title="0">for i := range workflows </span><span class="cov0" title="0">{
+                                a.wfQueue.Enqueue(workflows[i])
+                        }</span>
+
+                        <span class="cov0" title="0">size := a.wfQueue.Size()
+                        agentTasksLen := len(agentTasks)
+                        wfTasksLen := len(workflows)
+                        if agentTasksLen &gt; 0 || wfTasksLen &gt; 0 || size &gt; 0 </span><span class="cov0" title="0">{
+                                a.log.Info("done pulling tasks",
+                                        "agentTasks", agentTasksLen,
+                                        "workflows", wfTasksLen,
+                                        "queueSize", size,
+                                )
+                        }</span>
+
+                        <span class="cov0" title="0">metrics.UpdateQueueSizes(agentTasksLen, wfTasksLen, size)</span>
+                }
+        }
+}
+
+func (a *Agent) startStatusReporterRoutine(ctx context.Context) <span class="cov0" title="0">{
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-ctx.Done():<span class="cov0" title="0">
+                        a.log.Info("stopping status reporter routine")
+                        return</span>
+                case &lt;-a.reportStatusTicker.C:<span class="cov0" title="0">
+                        a.wg.Add(1)
+                        go func() </span><span class="cov0" title="0">{
+                                defer a.wg.Done()
+                                a.reportStatus(ctx, codefresh.AgentStatus{
+                                        Message: "All good",
+                                })
+                        }</span>()
+                }
+        }
+}
+
+func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) <span class="cov5" title="2">{
+        err := a.cf.ReportStatus(ctx, status)
+        if err != nil </span><span class="cov1" title="1">{
+                a.log.Error("Failed reporting status", "error", err)
+        }</span>
+}
+
+func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow) <span class="cov0" title="0">{
+        tasks := a.pullTasks(ctx)
+        return a.splitTasks(tasks)
+}</span>
+
+func (a *Agent) pullTasks(ctx context.Context) task.Tasks <span class="cov0" title="0">{
+        start := time.Now()
+        tasks, err := a.cf.Tasks(ctx)
+        metrics.ObserveGetTasks(start)
+
+        if err != nil </span><span class="cov0" title="0">{
+                a.log.Error("Failed pulling tasks", "error", err)
+                return task.Tasks{}
+        }</span>
+
+        <span class="cov0" title="0">if len(tasks) == 0 </span><span class="cov0" title="0">{
+                return task.Tasks{}
+        }</span>
+
+        <span class="cov0" title="0">return tasks</span>
+}
+
+func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) <span class="cov1" title="1">{
+        pullTime := time.Now()
+        agentTasks := task.Tasks{}
+        wfMap := map[string]*workflow.Workflow{}
+
+        // divide tasks by types
+        for i := range tasks </span><span class="cov8" title="3">{
+                t := tasks[i]
+                switch t.Type </span>{
+                case task.TypeAgentTask:<span class="cov0" title="0">
+                        t.Timeline.Pulled = pullTime
+                        agentTasks = append(agentTasks, t)</span>
+                case task.TypeCreatePod, task.TypeCreatePVC, task.TypeDeletePod, task.TypeDeletePVC:<span class="cov8" title="3">
+                        wf, ok := wfMap[t.Metadata.Workflow]
+                        if !ok </span><span class="cov1" title="1">{
+                                wf = workflow.New(t.Metadata)
+                                wfMap[t.Metadata.Workflow] = wf
+                        }</span>
+
+                        <span class="cov8" title="3">err := wf.AddTask(&amp;t)
+                        if err != nil </span><span class="cov0" title="0">{
+                                a.log.Error("failed adding task to workflow", "error", err)
+                        }</span>
+                default:<span class="cov0" title="0">
+                        a.log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)</span>
+                }
+        }
+
+        // sort agentTasks by creationDate
+        <span class="cov1" title="1">sort.SliceStable(agentTasks, func(i, j int) bool </span><span class="cov0" title="0">{
+                task1, task2 := agentTasks[i], tasks[j]
+                return task.Less(task1, task2)
+        }</span>)
+
+        <span class="cov1" title="1">workflows := []*workflow.Workflow{}
+        for _, wf := range wfMap </span><span class="cov1" title="1">{
+                wf.Timeline.Pulled = pullTime
+
+                task.SortByType(wf.Tasks)
+                workflows = append(workflows, wf)
+        }</span>
+
+        // sort workflows by creationDate
+        <span class="cov1" title="1">sort.SliceStable(workflows, func(i, j int) bool </span><span class="cov0" title="0">{
+                wf1, wf2 := workflows[i], workflows[j]
+                return workflow.Less(*wf1, *wf2)
+        }</span>)
+        <span class="cov1" title="1">return agentTasks, workflows</span>
+}
+
+func (a *Agent) handleAgentTask(t *task.Task) <span class="cov0" title="0">{
+        a.log.Info("executing agent task", "tid", t.Metadata.Workflow)
+        a.wg.Add(1)
+        go func() </span><span class="cov0" title="0">{
+                defer a.wg.Done()
+                txn := task.NewTaskTransaction(a.monitor, t.Metadata)
+                defer txn.End()
+                err := a.executeAgentTask(t)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        a.log.Error(err.Error())
+                        txn.NoticeError(err)
+                }</span>
+
+        }()
+}
+
+func (a *Agent) executeAgentTask(t *task.Task) error <span class="cov8" title="3">{
+        t.Timeline.Started = time.Now()
+        specJSON, err := json.Marshal(t.Spec)
+        if err != nil </span><span class="cov0" title="0">{
+                return errFailedToParseAgentTask
+        }</span>
+
+        <span class="cov8" title="3">spec := task.AgentTask{}
+        if err = json.Unmarshal(specJSON, &amp;spec); err != nil </span><span class="cov0" title="0">{
+                return errFailedToParseAgentTask
+        }</span>
+
+        <span class="cov8" title="3">e, ok := agentTaskExecutors[spec.Type]
+        if !ok </span><span class="cov0" title="0">{
+                return errUknownAgentTaskType
+        }</span>
+
+        <span class="cov8" title="3">err = e(&amp;spec, a.log)
+        sinceCreation, inRunner, processed := t.GetLatency()
+        a.log.Info("Done handling agent task",
+                "tid", t.Metadata.Workflow,
+                "time since creation", sinceCreation,
+                "time in runner", inRunner,
+                "processing time", processed,
+        )
+        metrics.ObserveAgentTaskMetrics(spec.Type, sinceCreation, inRunner, processed)
+        return err</span>
+}
+
+func proxyRequest(t *task.AgentTask, log logger.Logger) error <span class="cov0" title="0">{
+        spec := objx.Map(t.Params)
+        vars := objx.Map(spec.Get("runtimeContext.context.variables").MSI())
+        token := spec.Get("runtimeContext.context.eventReporting.token").Str()
+        if token == "" </span><span class="cov0" title="0">{
+                return errProxyTaskWithoutToken
+        }</span>
+
+        <span class="cov0" title="0">url := vars.Get("proxyUrl").Str()
+        if url == "" </span><span class="cov0" title="0">{
+                return errProxyTaskWithoutURL
+        }</span>
+
+        <span class="cov0" title="0">method := vars.Get("method").Str("POST")
+
+        json, err := json.Marshal(t.Params)
+        if err != nil </span><span class="cov0" title="0">{
+                return errAgentTaskMalformedParams
+        }</span>
+
+        <span class="cov0" title="0">if json == nil </span><span class="cov0" title="0">{
+                json = []byte{}
+        }</span>
+
+        <span class="cov0" title="0">req, err := retryablehttp.NewRequest(method, url, bytes.NewReader(json))
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed creating new request: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">req.Header.Add("x-req-type", "workflow-request")
+        req.Header.Add("x-access-token", token)
+        req.Header.Add("Content-Type", "application/json")
+        req.Header.Add("Content-Length", fmt.Sprintf("%v", len(json)))
+
+        log.Info("executing proxy task", "url", url, "method", method)
+
+        resp, err := httpClient.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed sending request: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">defer resp.Body.Close()
+        body, _ := io.ReadAll(resp.Body)
+        log.Info("finished proxy task", "url", url, "method", method, "status", resp.Status, "body", string(body))
+
+        return nil</span>
+}
+
+func groupTasks(tasks task.Tasks) map[string]task.Tasks <span class="cov1" title="1">{
+        candidates := map[string]task.Tasks{}
+        for _, task := range tasks </span><span class="cov8" title="3">{
+                name := task.Metadata.Workflow
+                if name == "" </span><span class="cov0" title="0">{
+                        // If for some reason the task is not related to any workflow
+                        // Might heppen in older versions on Codefresh
+                        name = "_"
+                }</span>
+
+                <span class="cov8" title="3">candidates[name] = append(candidates[name], task)</span>
+        }
+
+        <span class="cov1" title="1">return candidates</span>
+}
+
+func checkOptions(opts *Options) error <span class="cov10" title="4">{
+        if opts == nil </span><span class="cov1" title="1">{
+                return errOptionsRequired
+        }</span>
+
+        <span class="cov8" title="3">if opts.ID == "" </span><span class="cov1" title="1">{
+                return errIDRequired
+        }</span>
+
+        <span class="cov5" title="2">if len(opts.Runtimes) == 0 </span><span class="cov1" title="1">{
+                return errRuntimesRequired
+        }</span>
+
+        <span class="cov1" title="1">if opts.Logger == nil </span><span class="cov1" title="1">{
+                return errLoggerRequired
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func init() <span class="cov1" title="1">{
+        httpClient.RetryMax = defaultProxyRequestRetries
+        httpClient.HTTPClient.Timeout = defaultProxyRequestTimeout
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package codefresh
+
+import (
+        "bytes"
+        "context"
+        "fmt"
+        "io"
+        "net/http"
+        "net/url"
+        "path"
+
+        "github.com/codefresh-io/go/venona/pkg/task"
+)
+
+const (
+        defaultHost = "https://g.codefresh.io"
+)
+
+type (
+        // Codefresh API client
+        Codefresh interface {
+                Tasks(ctx context.Context) (task.Tasks, error)
+                ReportStatus(ctx context.Context, status AgentStatus) error
+                Host() string
+        }
+
+        // RequestDoer runs HTTP request
+        RequestDoer interface {
+                Do(*http.Request) (*http.Response, error)
+        }
+
+        // Options for codefresh
+        Options struct {
+                Host       string
+                Token      string
+                AgentID    string
+                HTTPClient RequestDoer
+                Headers    http.Header
+        }
+
+        cf struct {
+                host       string
+                token      string
+                agentID    string
+                httpClient RequestDoer
+                headers    http.Header
+        }
+)
+
+// New build Codefresh client from options
+func New(opts Options) Codefresh <span class="cov5" title="2">{
+        host := opts.Host
+        if host == "" </span><span class="cov1" title="1">{
+                host = defaultHost
+        }</span>
+
+        <span class="cov5" title="2">return &amp;cf{
+                agentID:    opts.AgentID,
+                httpClient: opts.HTTPClient,
+                host:       host,
+                token:      opts.Token,
+                headers:    opts.Headers,
+        }</span>
+}
+
+// Tasks get from Codefresh all latest tasks
+func (c cf) Tasks(ctx context.Context) (task.Tasks, error) <span class="cov0" title="0">{
+        res, err := c.doRequest(ctx, "GET", nil, "api", "agent", c.agentID, "tasks")
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">tasks, err := task.UnmarshalTasks(res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return tasks, nil</span>
+}
+
+// Host returns the host
+func (c cf) Host() string <span class="cov10" title="4">{
+        return c.host
+}</span>
+
+// ReportStatus updates the agent entity with given status
+func (c cf) ReportStatus(ctx context.Context, status AgentStatus) error <span class="cov0" title="0">{
+        s, err := status.Marshal()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed marshalling when reporting status: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">_, err = c.doRequest(ctx, "PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed sending request when reporting status: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (c cf) buildErrorFromResponse(status int, body []byte) error <span class="cov0" title="0">{
+        return Error{
+                APIStatusCode: status,
+                Message:       string(body),
+        }
+}</span>
+
+func (c cf) prepareURL(paths ...string) (*url.URL, error) <span class="cov8" title="3">{
+        u, err := url.Parse(c.host)
+        if err != nil </span><span class="cov1" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov5" title="2">accPath := []string{}
+        accRawPath := []string{}
+
+        for _, p := range paths </span><span class="cov8" title="3">{
+                accRawPath = append(accRawPath, url.PathEscape(p))
+                accPath = append(accPath, p)
+        }</span>
+
+        <span class="cov5" title="2">u.Path = path.Join(accPath...)
+        u.RawPath = path.Join(accRawPath...)
+        return u, nil</span>
+}
+
+func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http.Request, error) <span class="cov0" title="0">{
+        u, err := c.prepareURL(apis...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">req, err := http.NewRequest(method, u.String(), data)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">req.Header = c.headers.Clone()
+        if c.token != "" </span><span class="cov0" title="0">{
+                req.Header.Add("Authorization", c.token)
+        }</span>
+
+        <span class="cov0" title="0">req.Header.Add("Content-Type", "application/json")
+        return req, nil</span>
+}
+
+func (c cf) doRequest(ctx context.Context, method string, body io.Reader, apis ...string) ([]byte, error) <span class="cov0" title="0">{
+        req, err := c.prepareRequest(method, body, apis...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">resp, err := c.httpClient.Do(req.WithContext(ctx))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">defer resp.Body.Close()
+        data, err := io.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">if resp.StatusCode &gt;= 400 </span><span class="cov0" title="0">{
+                return nil, c.buildErrorFromResponse(resp.StatusCode, data)
+        }</span>
+
+        <span class="cov0" title="0">return data, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">// Copyright 2023 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Code generated by mockery v2.32.0. DO NOT EDIT.
+
+package codefresh
+
+import (
+        context "context"
+
+        task "github.com/codefresh-io/go/venona/pkg/task"
+        mock "github.com/stretchr/testify/mock"
+)
+
+// MockCodefresh is an autogenerated mock type for the Codefresh type
+type MockCodefresh struct {
+        mock.Mock
+}
+
+type MockCodefresh_Expecter struct {
+        mock *mock.Mock
+}
+
+func (_m *MockCodefresh) EXPECT() *MockCodefresh_Expecter <span class="cov0" title="0">{
+        return &amp;MockCodefresh_Expecter{mock: &amp;_m.Mock}
+}</span>
+
+// Host provides a mock function with given fields:
+func (_m *MockCodefresh) Host() string <span class="cov0" title="0">{
+        ret := _m.Called()
+
+        var r0 string
+        if rf, ok := ret.Get(0).(func() string); ok </span><span class="cov0" title="0">{
+                r0 = rf()
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Get(0).(string)
+        }</span>
+
+        <span class="cov0" title="0">return r0</span>
+}
+
+// MockCodefresh_Host_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Host'
+type MockCodefresh_Host_Call struct {
+        *mock.Call
+}
+
+// Host is a helper method to define mock.On call
+func (_e *MockCodefresh_Expecter) Host() *MockCodefresh_Host_Call <span class="cov0" title="0">{
+        return &amp;MockCodefresh_Host_Call{Call: _e.mock.On("Host")}
+}</span>
+
+func (_c *MockCodefresh_Host_Call) Run(run func()) *MockCodefresh_Host_Call <span class="cov0" title="0">{
+        _c.Call.Run(func(args mock.Arguments) </span><span class="cov0" title="0">{
+                run()
+        }</span>)
+        <span class="cov0" title="0">return _c</span>
+}
+
+func (_c *MockCodefresh_Host_Call) Return(_a0 string) *MockCodefresh_Host_Call <span class="cov0" title="0">{
+        _c.Call.Return(_a0)
+        return _c
+}</span>
+
+func (_c *MockCodefresh_Host_Call) RunAndReturn(run func() string) *MockCodefresh_Host_Call <span class="cov0" title="0">{
+        _c.Call.Return(run)
+        return _c
+}</span>
+
+// ReportStatus provides a mock function with given fields: ctx, status
+func (_m *MockCodefresh) ReportStatus(ctx context.Context, status AgentStatus) error <span class="cov0" title="0">{
+        ret := _m.Called(ctx, status)
+
+        var r0 error
+        if rf, ok := ret.Get(0).(func(context.Context, AgentStatus) error); ok </span><span class="cov0" title="0">{
+                r0 = rf(ctx, status)
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Error(0)
+        }</span>
+
+        <span class="cov0" title="0">return r0</span>
+}
+
+// MockCodefresh_ReportStatus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ReportStatus'
+type MockCodefresh_ReportStatus_Call struct {
+        *mock.Call
+}
+
+// ReportStatus is a helper method to define mock.On call
+//   - ctx context.Context
+//   - status AgentStatus
+func (_e *MockCodefresh_Expecter) ReportStatus(ctx interface{}, status interface{}) *MockCodefresh_ReportStatus_Call <span class="cov0" title="0">{
+        return &amp;MockCodefresh_ReportStatus_Call{Call: _e.mock.On("ReportStatus", ctx, status)}
+}</span>
+
+func (_c *MockCodefresh_ReportStatus_Call) Run(run func(ctx context.Context, status AgentStatus)) *MockCodefresh_ReportStatus_Call <span class="cov0" title="0">{
+        _c.Call.Run(func(args mock.Arguments) </span><span class="cov0" title="0">{
+                run(args[0].(context.Context), args[1].(AgentStatus))
+        }</span>)
+        <span class="cov0" title="0">return _c</span>
+}
+
+func (_c *MockCodefresh_ReportStatus_Call) Return(_a0 error) *MockCodefresh_ReportStatus_Call <span class="cov0" title="0">{
+        _c.Call.Return(_a0)
+        return _c
+}</span>
+
+func (_c *MockCodefresh_ReportStatus_Call) RunAndReturn(run func(context.Context, AgentStatus) error) *MockCodefresh_ReportStatus_Call <span class="cov0" title="0">{
+        _c.Call.Return(run)
+        return _c
+}</span>
+
+// Tasks provides a mock function with given fields: ctx
+func (_m *MockCodefresh) Tasks(ctx context.Context) (task.Tasks, error) <span class="cov0" title="0">{
+        ret := _m.Called(ctx)
+
+        var r0 task.Tasks
+        var r1 error
+        if rf, ok := ret.Get(0).(func(context.Context) (task.Tasks, error)); ok </span><span class="cov0" title="0">{
+                return rf(ctx)
+        }</span>
+        <span class="cov0" title="0">if rf, ok := ret.Get(0).(func(context.Context) task.Tasks); ok </span><span class="cov0" title="0">{
+                r0 = rf(ctx)
+        }</span> else<span class="cov0" title="0"> {
+                if ret.Get(0) != nil </span><span class="cov0" title="0">{
+                        r0 = ret.Get(0).(task.Tasks)
+                }</span>
+        }
+
+        <span class="cov0" title="0">if rf, ok := ret.Get(1).(func(context.Context) error); ok </span><span class="cov0" title="0">{
+                r1 = rf(ctx)
+        }</span> else<span class="cov0" title="0"> {
+                r1 = ret.Error(1)
+        }</span>
+
+        <span class="cov0" title="0">return r0, r1</span>
+}
+
+// MockCodefresh_Tasks_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Tasks'
+type MockCodefresh_Tasks_Call struct {
+        *mock.Call
+}
+
+// Tasks is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockCodefresh_Expecter) Tasks(ctx interface{}) *MockCodefresh_Tasks_Call <span class="cov0" title="0">{
+        return &amp;MockCodefresh_Tasks_Call{Call: _e.mock.On("Tasks", ctx)}
+}</span>
+
+func (_c *MockCodefresh_Tasks_Call) Run(run func(ctx context.Context)) *MockCodefresh_Tasks_Call <span class="cov0" title="0">{
+        _c.Call.Run(func(args mock.Arguments) </span><span class="cov0" title="0">{
+                run(args[0].(context.Context))
+        }</span>)
+        <span class="cov0" title="0">return _c</span>
+}
+
+func (_c *MockCodefresh_Tasks_Call) Return(_a0 task.Tasks, _a1 error) *MockCodefresh_Tasks_Call <span class="cov0" title="0">{
+        _c.Call.Return(_a0, _a1)
+        return _c
+}</span>
+
+func (_c *MockCodefresh_Tasks_Call) RunAndReturn(run func(context.Context) (task.Tasks, error)) *MockCodefresh_Tasks_Call <span class="cov0" title="0">{
+        _c.Call.Return(run)
+        return _c
+}</span>
+
+// NewMockCodefresh creates a new instance of MockCodefresh. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewMockCodefresh(t interface {
+        mock.TestingT
+        Cleanup(func())
+}) *MockCodefresh <span class="cov0" title="0">{
+        mock := &amp;MockCodefresh{}
+        mock.Mock.Test(t)
+
+        t.Cleanup(func() </span><span class="cov0" title="0">{ mock.AssertExpectations(t) }</span>)
+
+        <span class="cov0" title="0">return mock</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package codefresh
+
+import "fmt"
+
+type (
+        // Error is an error that may be thrown from Codefresh API
+        Error struct {
+                Message       string
+                APIStatusCode int
+        }
+)
+
+func (c Error) Error() string <span class="cov0" title="0">{
+        return fmt.Sprintf("HTTP request to Codefresh API rejected. Status-Code: %d. Message: %s", c.APIStatusCode, c.Message)
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package codefresh
+
+import "encoding/json"
+
+type (
+        // AgentStatus is the latest status of the agent
+        AgentStatus struct {
+                Message string `json:"message"`
+        }
+)
+
+// Marshal status
+func (r *AgentStatus) Marshal() ([]byte, error) <span class="cov0" title="0">{
+        return json.Marshal(r)
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package config
+
+import (
+        "os"
+        "path/filepath"
+        "regexp"
+
+        "github.com/codefresh-io/go/venona/pkg/logger"
+
+        "gopkg.in/yaml.v2"
+)
+
+var (
+        readfile     = os.ReadFile
+        walkFilePath = filepath.Walk
+)
+
+type (
+        // Config used to define the connectivity to remote clusters
+        Config struct {
+                Type  string `yaml:"type" json:"type"`
+                Cert  string `yaml:"crt" json:"crt"`
+                Token string `yaml:"token" json:"token"`
+                Host  string `yaml:"host" json:"host"`
+                Name  string `yaml:"name" json:"name"`
+        }
+
+        // Options to load the config
+        Options struct {
+                Logger logger.Logger
+                Dir    string
+        }
+)
+
+// Load read the dir and load all the matching files matchig to the config
+// In case of conflict, the first matching is used
+func Load(dir string, pattern string, logger logger.Logger) (map[string]Config, error) <span class="cov10" title="2">{
+        regexp, err := regexp.Compile(pattern)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov10" title="2">var files []string
+        if err := walkFilePath(dir, visit(&amp;files, regexp, logger)); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov10" title="2">return buildConfigMap(files, logger)</span>
+}
+
+func visit(files *[]string, re *regexp.Regexp, log logger.Logger) filepath.WalkFunc <span class="cov10" title="2">{
+        return func(path string, info os.FileInfo, err error) error </span><span class="cov10" title="2">{
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Error("Failed to visit", "path", path, "err", err.Error())
+                        return nil
+                }</span>
+
+                <span class="cov10" title="2">if info.IsDir() </span><span class="cov0" title="0">{
+                        log.Debug("Directory ignored, Venona loading only files that are mached to regexp", "regexp", re.String(), "dir", info.Name())
+                        return nil
+                }</span>
+
+                <span class="cov10" title="2">if !re.MatchString(info.Name()) </span><span class="cov1" title="1">{
+                        log.Debug("File ignored, regexp does not match", "regexp", re.String(), "file", info.Name())
+                        return nil
+                }</span>
+
+                <span class="cov1" title="1">*files = append(*files, path)
+                return nil</span>
+        }
+}
+
+func unmarshalConfig(data []byte) (Config, error) <span class="cov1" title="1">{
+        cnf := Config{}
+        if err := yaml.Unmarshal(data, &amp;cnf); err != nil </span><span class="cov0" title="0">{
+                return cnf, err
+        }</span>
+
+        <span class="cov1" title="1">return cnf, nil</span>
+}
+
+func buildConfigMap(files []string, logger logger.Logger) (map[string]Config, error) <span class="cov10" title="2">{
+        result := map[string]Config{}
+        for _, file := range files </span><span class="cov1" title="1">{
+                b, err := readfile(file)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Error("Failed to read file content", "file", file, "err", err.Error())
+                        continue</span>
+                }
+
+                <span class="cov1" title="1">cnf, err := unmarshalConfig(b)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Error("Failed to unmarshal file content into struct", "file", file, "err", err.Error())
+                        continue</span>
+                }
+
+                <span class="cov1" title="1">result[file] = cnf</span>
+        }
+
+        <span class="cov10" title="2">return result, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package kubernetes
+
+import (
+        "context"
+        "encoding/json"
+        "errors"
+        "fmt"
+        "time"
+
+        "github.com/codefresh-io/go/venona/pkg/logger"
+        "github.com/codefresh-io/go/venona/pkg/metrics"
+        "github.com/codefresh-io/go/venona/pkg/task"
+
+        v1 "k8s.io/api/core/v1"
+        metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+        "k8s.io/client-go/kubernetes"
+        "k8s.io/client-go/kubernetes/scheme"
+        "k8s.io/client-go/rest"
+)
+
+var errNotValidType = errors.New("not a valid type")
+var kubeDecode = scheme.Codecs.UniversalDeserializer().Decode
+
+type (
+        // Kubernetes API client
+        Kubernetes interface {
+                CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error
+                DeleteResource(ctx context.Context, opts DeleteOptions) error
+        }
+
+        // Options for Kubernetes
+        Options struct {
+                Logger   logger.Logger
+                Type     string
+                Cert     string
+                Token    string
+                Host     string
+                Insecure bool
+                QPS      float32
+                Burst    int
+        }
+
+        // DeleteOptions to delete resource from the cluster
+        DeleteOptions struct {
+                Name      string
+                Namespace string
+                Kind      task.Type
+        }
+
+        kube struct {
+                client kubernetes.Interface
+                log    logger.Logger
+        }
+)
+
+// NewInCluster build Kubernetes API based on local in cluster runtime
+func NewInCluster(log logger.Logger, qps float32, burst int) (Kubernetes, error) <span class="cov0" title="0">{
+        client, err := buildKubeInCluster(qps, burst)
+        return &amp;kube{
+                client: client,
+                log:    log,
+        }, err
+}</span>
+
+// New build Kubernetes API
+func New(opts Options) (Kubernetes, error) <span class="cov4" title="2">{
+        if opts.Type != "runtime" </span><span class="cov1" title="1">{
+                return nil, errNotValidType
+        }</span>
+
+        <span class="cov1" title="1">client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure, opts.QPS, opts.Burst)
+        return &amp;kube{
+                client: client,
+                log:    opts.Logger,
+        }, err</span>
+}
+
+func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error <span class="cov7" title="3">{
+        start := time.Now()
+        bytes, err := json.Marshal(spec)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed marshalling when creating resource: %w", err)
+        }</span>
+
+        <span class="cov7" title="3">obj, _, err := kubeDecode(bytes, nil, nil)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed decoding when creating resource: %w", err)
+        }</span>
+
+        <span class="cov7" title="3">var namespace, name string
+        switch obj := obj.(type) </span>{
+        case *v1.PersistentVolumeClaim:<span class="cov1" title="1">
+                namespace, name = obj.Namespace, obj.Name
+                _, err = k.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, obj, metav1.CreateOptions{})
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed creating persistent volume claims \"%s\\%s\": %w", namespace, obj.Name, err)
+                }</span>
+        case *v1.Pod:<span class="cov1" title="1">
+                namespace, name = obj.Namespace, obj.Name
+                _, err = k.client.CoreV1().Pods(namespace).Create(ctx, obj, metav1.CreateOptions{})
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed creating pod \"%s\\%s\": %w", namespace, obj.Name, err)
+                }</span>
+        default:<span class="cov1" title="1">
+                return fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind())</span>
+        }
+
+        <span class="cov4" title="2">processed := time.Since(start)
+        k.log.Info("Done handling k8s task",
+                "type", taskType,
+                "namespace", namespace,
+                "name", name,
+                "processing time", processed,
+        )
+        metrics.ObserveK8sMetrics(taskType, processed)
+        return nil</span>
+}
+
+func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error <span class="cov10" title="5">{
+        start := time.Now()
+        switch opts.Kind </span>{
+        case task.TypeDeletePVC:<span class="cov1" title="1">
+                err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+                }</span>
+        case task.TypeDeletePod:<span class="cov7" title="3">
+                err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
+                if err != nil </span><span class="cov4" title="2">{
+                        return fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+                }</span>
+        default:<span class="cov1" title="1">
+                return fmt.Errorf("failed deleting resource of type %s", opts.Kind)</span>
+        }
+
+        <span class="cov4" title="2">processed := time.Since(start)
+        k.log.Info("Done handling k8s task",
+                "type", opts.Kind,
+                "namespace", opts.Namespace,
+                "name", opts.Name,
+                "processing time", processed,
+        )
+        metrics.ObserveK8sMetrics(opts.Kind, processed)
+        return nil</span>
+}
+
+func buildKubeClient(host string, token string, crt string, insecure bool, qps float32, burst int) (kubernetes.Interface, error) <span class="cov1" title="1">{
+        var tlsconf rest.TLSClientConfig
+        if insecure </span><span class="cov0" title="0">{
+                tlsconf = rest.TLSClientConfig{
+                        Insecure: true,
+                }
+        }</span> else<span class="cov1" title="1"> {
+                tlsconf = rest.TLSClientConfig{
+                        CAData: []byte(crt),
+                }
+        }</span>
+
+        <span class="cov1" title="1">return kubernetes.NewForConfig(&amp;rest.Config{
+                Host:            host,
+                BearerToken:     token,
+                TLSClientConfig: tlsconf,
+                QPS:             qps,
+                Burst:           burst,
+        })</span>
+}
+
+func buildKubeInCluster(qps float32, burst int) (kubernetes.Interface, error) <span class="cov0" title="0">{
+        config, err := rest.InClusterConfig()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">config.QPS = qps
+        config.Burst = burst
+        return kubernetes.NewForConfig(config)</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">// Copyright 2023 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Code generated by mockery v2.32.0. DO NOT EDIT.
+
+package kubernetes
+
+import (
+        context "context"
+
+        task "github.com/codefresh-io/go/venona/pkg/task"
+        mock "github.com/stretchr/testify/mock"
+)
+
+// MockKubernetes is an autogenerated mock type for the Kubernetes type
+type MockKubernetes struct {
+        mock.Mock
+}
+
+type MockKubernetes_Expecter struct {
+        mock *mock.Mock
+}
+
+func (_m *MockKubernetes) EXPECT() *MockKubernetes_Expecter <span class="cov0" title="0">{
+        return &amp;MockKubernetes_Expecter{mock: &amp;_m.Mock}
+}</span>
+
+// CreateResource provides a mock function with given fields: ctx, taskType, spec
+func (_m *MockKubernetes) CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error <span class="cov0" title="0">{
+        ret := _m.Called(ctx, taskType, spec)
+
+        var r0 error
+        if rf, ok := ret.Get(0).(func(context.Context, task.Type, interface{}) error); ok </span><span class="cov0" title="0">{
+                r0 = rf(ctx, taskType, spec)
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Error(0)
+        }</span>
+
+        <span class="cov0" title="0">return r0</span>
+}
+
+// MockKubernetes_CreateResource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateResource'
+type MockKubernetes_CreateResource_Call struct {
+        *mock.Call
+}
+
+// CreateResource is a helper method to define mock.On call
+//   - ctx context.Context
+//   - taskType task.Type
+//   - spec interface{}
+func (_e *MockKubernetes_Expecter) CreateResource(ctx interface{}, taskType interface{}, spec interface{}) *MockKubernetes_CreateResource_Call <span class="cov0" title="0">{
+        return &amp;MockKubernetes_CreateResource_Call{Call: _e.mock.On("CreateResource", ctx, taskType, spec)}
+}</span>
+
+func (_c *MockKubernetes_CreateResource_Call) Run(run func(ctx context.Context, taskType task.Type, spec interface{})) *MockKubernetes_CreateResource_Call <span class="cov0" title="0">{
+        _c.Call.Run(func(args mock.Arguments) </span><span class="cov0" title="0">{
+                run(args[0].(context.Context), args[1].(task.Type), args[2].(interface{}))
+        }</span>)
+        <span class="cov0" title="0">return _c</span>
+}
+
+func (_c *MockKubernetes_CreateResource_Call) Return(_a0 error) *MockKubernetes_CreateResource_Call <span class="cov0" title="0">{
+        _c.Call.Return(_a0)
+        return _c
+}</span>
+
+func (_c *MockKubernetes_CreateResource_Call) RunAndReturn(run func(context.Context, task.Type, interface{}) error) *MockKubernetes_CreateResource_Call <span class="cov0" title="0">{
+        _c.Call.Return(run)
+        return _c
+}</span>
+
+// DeleteResource provides a mock function with given fields: ctx, opts
+func (_m *MockKubernetes) DeleteResource(ctx context.Context, opts DeleteOptions) error <span class="cov0" title="0">{
+        ret := _m.Called(ctx, opts)
+
+        var r0 error
+        if rf, ok := ret.Get(0).(func(context.Context, DeleteOptions) error); ok </span><span class="cov0" title="0">{
+                r0 = rf(ctx, opts)
+        }</span> else<span class="cov0" title="0"> {
+                r0 = ret.Error(0)
+        }</span>
+
+        <span class="cov0" title="0">return r0</span>
+}
+
+// MockKubernetes_DeleteResource_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteResource'
+type MockKubernetes_DeleteResource_Call struct {
+        *mock.Call
+}
+
+// DeleteResource is a helper method to define mock.On call
+//   - ctx context.Context
+//   - opts DeleteOptions
+func (_e *MockKubernetes_Expecter) DeleteResource(ctx interface{}, opts interface{}) *MockKubernetes_DeleteResource_Call <span class="cov0" title="0">{
+        return &amp;MockKubernetes_DeleteResource_Call{Call: _e.mock.On("DeleteResource", ctx, opts)}
+}</span>
+
+func (_c *MockKubernetes_DeleteResource_Call) Run(run func(ctx context.Context, opts DeleteOptions)) *MockKubernetes_DeleteResource_Call <span class="cov0" title="0">{
+        _c.Call.Run(func(args mock.Arguments) </span><span class="cov0" title="0">{
+                run(args[0].(context.Context), args[1].(DeleteOptions))
+        }</span>)
+        <span class="cov0" title="0">return _c</span>
+}
+
+func (_c *MockKubernetes_DeleteResource_Call) Return(_a0 error) *MockKubernetes_DeleteResource_Call <span class="cov0" title="0">{
+        _c.Call.Return(_a0)
+        return _c
+}</span>
+
+func (_c *MockKubernetes_DeleteResource_Call) RunAndReturn(run func(context.Context, DeleteOptions) error) *MockKubernetes_DeleteResource_Call <span class="cov0" title="0">{
+        _c.Call.Return(run)
+        return _c
+}</span>
+
+// NewMockKubernetes creates a new instance of MockKubernetes. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
+// The first argument is typically a *testing.T value.
+func NewMockKubernetes(t interface {
+        mock.TestingT
+        Cleanup(func())
+}) *MockKubernetes <span class="cov0" title="0">{
+        mock := &amp;MockKubernetes{}
+        mock.Mock.Test(t)
+
+        t.Cleanup(func() </span><span class="cov0" title="0">{ mock.AssertExpectations(t) }</span>)
+
+        <span class="cov0" title="0">return mock</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package queue
+
+import (
+        "context"
+        "errors"
+        "sync"
+        "time"
+
+        "github.com/codefresh-io/go/venona/pkg/logger"
+        "github.com/codefresh-io/go/venona/pkg/metrics"
+        "github.com/codefresh-io/go/venona/pkg/monitoring"
+        "github.com/codefresh-io/go/venona/pkg/runtime"
+        "github.com/codefresh-io/go/venona/pkg/task"
+        "github.com/codefresh-io/go/venona/pkg/workflow"
+)
+
+type (
+        // WorkflowQueue handles incoming workflow batch tasks
+        WorkflowQueue interface {
+                Start(ctx context.Context)
+                Stop()
+                Size() int
+                Enqueue(wf *workflow.Workflow)
+        }
+
+        // Options to create a new WorkflowQueue
+        Options struct {
+                Runtimes    map[string]runtime.Runtime
+                Log         logger.Logger
+                WG          *sync.WaitGroup
+                Monitor     monitoring.Monitor
+                Concurrency int
+                BufferSize  int
+        }
+
+        wfQueueImpl struct {
+                runtimes        map[string]runtime.Runtime
+                log             logger.Logger
+                wg              *sync.WaitGroup
+                monitor         monitoring.Monitor
+                queue           chan *workflow.Workflow
+                concurrency     int
+                stop            []chan bool
+                activeWorkflows map[string]struct{}
+                mutex           sync.Mutex
+        }
+)
+
+var errRuntimeNotFound = errors.New("Runtime environment not found")
+
+// New creates a new TaskQueue instance
+func New(opts *Options) WorkflowQueue <span class="cov4" title="4">{
+        return &amp;wfQueueImpl{
+                runtimes:        opts.Runtimes,
+                log:             opts.Log,
+                wg:              opts.WG,
+                monitor:         opts.Monitor,
+                queue:           make(chan *workflow.Workflow, opts.BufferSize),
+                concurrency:     opts.Concurrency,
+                stop:            make([]chan bool, opts.Concurrency),
+                activeWorkflows: make(map[string]struct{}),
+        }
+}</span>
+
+// Start creates the workflow handlers that will handle the incoming Workflows
+func (wfq *wfQueueImpl) Start(ctx context.Context) <span class="cov4" title="4">{
+        wfq.log.Info("starting workflow queue", "concurrency", wfq.concurrency)
+        for i := 0; i &lt; wfq.concurrency; i++ </span><span class="cov5" title="6">{
+                stopChan := make(chan bool, 1)
+                wfq.stop[i] = stopChan
+                handlerID := i
+                wfq.wg.Add(1)
+                go wfq.handleChannel(ctx, stopChan, handlerID)
+        }</span>
+}
+
+// Stop sends a signal to each of the handler to notify it to stop once the queue is empty
+func (wfq *wfQueueImpl) Stop() <span class="cov4" title="4">{
+        for i := 0; i &lt; wfq.concurrency; i++ </span><span class="cov5" title="6">{
+                wfq.stop[i] &lt;- true
+        }</span>
+}
+
+// Size returns the current size of the queue (used for logs)
+func (wfq *wfQueueImpl) Size() int <span class="cov0" title="0">{
+        return len(wfq.queue)
+}</span>
+
+// Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
+func (wfq *wfQueueImpl) Enqueue(wf *workflow.Workflow) <span class="cov7" title="14">{
+        wfq.queue &lt;- wf
+}</span>
+
+func (wfq *wfQueueImpl) handleChannel(ctx context.Context, stopChan chan bool, id int) <span class="cov5" title="6">{
+        ctxCancelled := false
+
+        defer wfq.wg.Done()
+        for </span><span class="cov9" title="26">{
+                select </span>{
+                case &lt;-stopChan:<span class="cov5" title="6">
+                        wfq.log.Info("stopping workflow handler", "handlerId", id)
+                        ctxCancelled = true</span>
+                case wf := &lt;-wfq.queue:<span class="cov7" title="14">
+                        wfq.mutex.Lock()
+                        if _, ok := wfq.activeWorkflows[wf.Metadata.Workflow]; ok </span><span class="cov0" title="0">{
+                                // Workflow is already being handled, enqueue it again and skip processing
+                                wfq.mutex.Unlock()
+                                wfq.log.Info("Workflow", wf.Metadata.Workflow, " is already being handled, enqueue it again and skip processing")
+                                time.Sleep(100 * time.Millisecond)
+                                wfq.Enqueue(wf)
+                                continue</span>
+                        }
+                        // Mark the workflow as active
+                        <span class="cov7" title="14">wfq.activeWorkflows[wf.Metadata.Workflow] = struct{}{}
+                        wfq.mutex.Unlock()
+
+                        wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow)
+                        wfq.handleWorkflow(ctx, wf)
+                        wfq.mutex.Lock()
+                        delete(wfq.activeWorkflows, wf.Metadata.Workflow)
+                        wfq.mutex.Unlock()</span>
+                default:<span class="cov5" title="6">
+                        if ctxCancelled </span><span class="cov5" title="6">{
+                                wfq.log.Info("stopped workflow handler", "handlerId", id)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">time.Sleep(100 * time.Millisecond)</span>
+                }
+        }
+}
+
+func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflow) <span class="cov7" title="14">{
+        wf.Timeline.Started = time.Now()
+        txn := task.NewTaskTransaction(wfq.monitor, wf.Metadata)
+        defer txn.End()
+
+        workflow := wf.Metadata.Workflow
+        reName := wf.Metadata.ReName
+        runtime, ok := wfq.runtimes[reName]
+        if !ok </span><span class="cov0" title="0">{
+                wfq.log.Error("failed handling task", "error", errRuntimeNotFound, "workflow", workflow)
+                txn.NoticeError(errRuntimeNotFound)
+                return
+        }</span>
+
+        <span class="cov7" title="14">for i := range wf.Tasks </span><span class="cov10" title="31">{
+                err := runtime.HandleTask(ctx, wf.Tasks[i])
+                if err != nil </span><span class="cov0" title="0">{
+                        wfq.log.Error("failed handling task", "error", err, "workflow", workflow)
+                        txn.NoticeError(errRuntimeNotFound)
+                }</span>
+        }
+
+        <span class="cov7" title="14">sinceCreation, inRunner, processed := wf.GetLatency()
+        wfq.log.Info("Done handling workflow",
+                "workflow", wf.Metadata.Workflow,
+                "runtime", wf.Metadata.ReName,
+                "time since creation", sinceCreation,
+                "time in runner", inRunner,
+                "processing time", processed,
+        )
+        metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">// Copyright 2020 The Codefresh Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package runtime
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+
+        "github.com/codefresh-io/go/venona/pkg/kubernetes"
+        "github.com/codefresh-io/go/venona/pkg/task"
+)
+
+type (
+        // Runtime API client
+        Runtime interface {
+                HandleTask(ctx context.Context, t *task.Task) error
+        }
+
+        // Options for runtime
+        Options struct {
+                Kubernetes kubernetes.Kubernetes
+        }
+
+        runtime struct {
+                client kubernetes.Kubernetes
+        }
+)
+
+// New creates new Runtime client
+func New(opts Options) Runtime <span class="cov0" title="0">{
+        return &amp;runtime{
+                client: opts.Kubernetes,
+        }
+}</span>
+
+func (r runtime) HandleTask(ctx context.Context, t *task.Task) error <span class="cov10" title="8">{
+        var err error
+
+        switch t.Type </span>{
+        case task.TypeCreatePVC, task.TypeCreatePod:<span class="cov5" title="3">
+                err = r.client.CreateResource(ctx, t.Type, t.Spec)
+                if err != nil </span><span class="cov1" title="1">{
+                        return fmt.Errorf("failed creating resource: %w", err) // TODO: Return already executed tasks in order to terminate them
+                }</span>
+        case task.TypeDeletePVC, task.TypeDeletePod:<span class="cov7" title="4">
+                opts := kubernetes.DeleteOptions{}
+                opts.Kind = t.Type
+                b, err := json.Marshal(t.Spec)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to marshal task spec: %w", err)
+                }</span>
+
+                <span class="cov7" title="4">if err := json.Unmarshal(b, &amp;opts); err != nil </span><span class="cov1" title="1">{
+                        return fmt.Errorf("failed to unmarshal task spec: %w", err)
+                }</span>
+
+                <span class="cov5" title="3">if err = r.client.DeleteResource(ctx, opts); err != nil </span><span class="cov1" title="1">{
+                        return fmt.Errorf("failed deleting resource: %w", err)
+                }</span>
+        default:<span class="cov1" title="1">
+                return fmt.Errorf("unknown task type \"%s\"", t.Type)</span>
+        }
+
+        <span class="cov7" title="4">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
