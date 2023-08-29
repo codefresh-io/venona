@@ -81,6 +81,7 @@ runner:
     repository: codefresh/venona
     tag: 1.9.17
 
+  # -- Init container
   init:
     image:
       registry: quay.io
@@ -94,6 +95,16 @@ runner:
       requests:
         memory: 256Mi
         cpu: '0.2'
+
+  # -- Sidecar container
+  sidecar:
+    enabled: true
+    image:
+      registry: quay.io
+      repository: codefresh/ci-helpers
+      tag: 1.0.0
+
+    resources: {}
 
   # -- Add additional env vars
   env: {}
