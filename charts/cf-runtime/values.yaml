@@ -438,7 +438,7 @@ runtime:
         name: dind
         # -- PVC storage class name.
         # Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner
-        storageClassName: '{{ include "dind-volume-provisioner.storageClassName" .| squote }}'
+        storageClassName: '{{ include "dind-volume-provisioner.storageClassName" . }}'
         # -- PVC size.
         volumeSize: 16Gi
         # -- PV reuse selector.

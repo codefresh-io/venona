@@ -155,8 +155,10 @@ dockerDaemonScheduler:
         secretName: codefresh-certs-server
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
-  {{- with .Values.runtime.description }}
+  {{- if .Values.runtime.description }}
 description: {{ . }}
+  {{- else }}
+description: null
   {{- end }}
 accountId: {{ .Values.global.accountId }}
 {{- end }}
