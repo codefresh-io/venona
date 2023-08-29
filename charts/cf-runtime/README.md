@@ -900,7 +900,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | runner.serviceAccount.create | bool | `true` | Create service account |
 | runner.serviceAccount.name | string | `""` | Override service account name |
-| runner.sidecar | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"codefresh/ci-helpers","tag":"1.0.0"},"resources":{}}` | Sidecar container |
+| runner.sidecar | object | `{"enabled":true,"image":{"registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.1"},"resources":{}}` | Sidecar container |
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
