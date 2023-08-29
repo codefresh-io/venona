@@ -443,7 +443,7 @@ runtime:
         volumeSize: 16Gi
         # -- PV reuse selector.
         # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#volume-reuse-policy
-        reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+        reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
         reuseVolumeSortOrder: pipeline_id
     # -- Set additional env vars.
     env: {}
