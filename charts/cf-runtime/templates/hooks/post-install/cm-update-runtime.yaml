@@ -14,5 +14,5 @@ metadata:
     {{- end }}
 data:
   runtime.yaml: |-
-    {{ include "runtime.runtime-environment-spec.template" . | nindent 4 }}
+    {{ include "runtime.runtime-environment-spec.template" . | nindent 4 | trim }}
 {{- end }}
