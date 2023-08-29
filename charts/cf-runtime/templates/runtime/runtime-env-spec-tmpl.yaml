@@ -7,17 +7,13 @@
 metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
-extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
-{{- with .Values.runtime.description }}
-description: {{ . }}
-{{- end }}
 {{- if not .Values.runtime.agent }}
 accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
 {{- end }}
 runtimeScheduler:
   type: KubernetesPod
   {{- if $engineContext.image }}
-  image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) }}
+  image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) | squote }}
   {{- end }}
   {{- with $engineContext.command }}
   command: {{- toYaml . | nindent 4 }}
@@ -81,7 +77,7 @@ runtimeScheduler:
 dockerDaemonScheduler:
   type: DindKubernetesPod
   {{- if $dindContext.image }}
-  dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) }}
+  dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) | squote }}
   {{- end }}
   {{- with $dindContext.userAccess }}
   userAccess: {{ . }}
@@ -158,4 +154,9 @@ dockerDaemonScheduler:
       secret:
         secretName: codefresh-certs-server
   {{- end }}
+extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
+  {{- with .Values.runtime.description }}
+description: {{ . }}
+  {{- end }}
+accountId: {{ .Values.global.accountId }}
 {{- end }}
