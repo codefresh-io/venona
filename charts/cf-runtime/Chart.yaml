@@ -14,7 +14,7 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: fix
+    - kind: fixed
       description: Fix imageRegistry prefix for runtime images
 dependencies:
   - name: cf-common
