@@ -20,7 +20,7 @@ runtimeScheduler:
   {{- with $engineContext.env }}
    {{- toYaml . | nindent 4 }}
   {{- end }}
-    COMPOSE_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.COMPOSE_IMAGE) | quote }}
+    COMPOSE_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.COMPOSE_IMAGE) }}
     CONTAINER_LOGGER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.CONTAINER_LOGGER_IMAGE) }}
     DOCKER_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_BUILDER_IMAGE) }}
     DOCKER_PULLER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PULLER_IMAGE) }}
