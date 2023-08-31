@@ -24,6 +24,8 @@ codefresh auth create-context --api-key ${USER_CODEFRESH_TOKEN} --url ${API_HOST
 while true; do
   msg "Reconciling ${RUNTIME_NAME} runtime"
 
+  sleep $RECONCILE_INTERVAL
+
   codefresh get re \
       --name ${RUNTIME_NAME} \
       -o yaml \
@@ -35,6 +37,4 @@ while true; do
   | yq 'del(.metadata.resourceVersion, .metadata.uid)' \
   | yq eval '.data["runtime.yaml"] = load_str("/tmp/runtime.yaml")' \
   | kubectl apply -f -
-
-  sleep $RECONCILE_INTERVAL
 done
