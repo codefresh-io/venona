@@ -19,7 +19,7 @@ monitor:
     namespaced: true
 runner:
   sidecar:
-    enabled: false
+    enabled: true
 runtime:
   dind:
     image:
