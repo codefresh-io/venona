@@ -235,7 +235,7 @@ global:
   runtimeName: "my-cluster-name/my-namespace" # optional
 ```
 
-> Note! Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands, it's recommended to enable sidecar container to pull runtime spec from Codefresh API to detect any drift in configuration.
+> **Note!** Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands, it's recommended to enable sidecar container to pull runtime spec from Codefresh API to detect any drift in configuration.
 
 ```yaml
 runner:
