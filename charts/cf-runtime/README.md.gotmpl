@@ -220,16 +220,6 @@ Given this is the legacy `generated_values.yaml` values:
 }
 ```
 
-> Note! Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands, it's recommended to enable sidecar container to pull runtime spec from Codefresh API to detect any drift in configuration.
-
-```yaml
-runner:
-  # -- Sidecar container
-  # Reconciles runtime spec from Codefresh API for drift detection
-  sidecar:
-    enabled: true
-```
-
 Update `values.yaml` for new chart version:
 
 > For existing installation for backward compatibility `.Values.global.agentToken/agentTokenSecretKeyRef` **must be provided!** For installation from scratch this value is no longer required.
@@ -243,6 +233,16 @@ global:
   agentToken: "0987654321"  # MANDATORY when migrating from < 6.x chart version !
   agentName: "my-cluster-name_my-namespace" # optional
   runtimeName: "my-cluster-name/my-namespace" # optional
+```
+
+> Note! Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands, it's recommended to enable sidecar container to pull runtime spec from Codefresh API to detect any drift in configuration.
+
+```yaml
+runner:
+  # -- Sidecar container
+  # Reconciles runtime spec from Codefresh API for drift detection
+  sidecar:
+    enabled: true
 ```
 
 ## Architecture
