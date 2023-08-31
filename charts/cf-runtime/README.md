@@ -900,7 +900,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | runner.serviceAccount.create | bool | `true` | Create service account |
 | runner.serviceAccount.name | string | `""` | Override service account name |
-| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":180},"image":{"registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.2"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
+| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.2"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
