@@ -31,17 +31,15 @@ tests:
       - ../values.yaml
       - ./runtime_values.yaml
     asserts:
-      - equal:
+      - matchRegex:
           path: data["runtime.yaml"]
-          value: |-
+          pattern: |
             metadata:
               name: my-context/codefresh
               agent: true
-            extends:
-              - system/default/hybrid/k8s_low_limits
             runtimeScheduler:
               type: KubernetesPod
-              image: quay.io/codefresh/engine:tagoverride
+              image: 'quay.io/codefresh/engine:tagoverride'
               command:
                 - one
                 - two
@@ -98,7 +96,7 @@ tests:
                   memory: 256Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: quay.io/codefresh/dind:tagoverride
+              dindImage: 'quay.io/codefresh/dind:tagoverride'
               userAccess: true
               env:
                 ALICE: BOB
@@ -128,7 +126,7 @@ tests:
                 karpenter.sh/do-not-evict: "true"
               pvcs:
                 - name: dind
-                  reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+                  reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
                   reuseVolumeSortOrder: pipeline_id
                   storageClassName: my-custom-storage-class
                   volumeSize: 8Gi
@@ -147,3 +145,7 @@ tests:
                   name: cert
                   secret:
                     secretName: tls-secret
+            extends:
+              - system/default/hybrid/k8s_low_limits
+            description: null
+            accountId: 7890

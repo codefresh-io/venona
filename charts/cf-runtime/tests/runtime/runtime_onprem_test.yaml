@@ -30,20 +30,15 @@ tests:
     values:
       - ./runtime_onprem_values.yaml
     asserts:
-      - equal:
+      - matchRegex:
           path: data["runtime.yaml"]
-          value: |-
+          pattern: |
             metadata:
               name: system/my-runtime
               agent: false
-            extends:
-              []
-            description: some description
-            accounts:
-              - 59009117c102763beda7ce71
             runtimeScheduler:
               type: KubernetesPod
-              image: quay.io/codefresh/engine:tagoverride
+              image: 'quay.io/codefresh/engine:tagoverride'
               command:
                 - one
                 - two
@@ -93,7 +88,7 @@ tests:
                   memory: 256Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: quay.io/codefresh/dind:tagoverride
+              dindImage: 'quay.io/codefresh/dind:tagoverride'
               userAccess: true
               env:
                 ALICE: BOB
@@ -122,7 +117,7 @@ tests:
                 karpenter.sh/do-not-evict: "true"
               pvcs:
                 - name: dind
-                  reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+                  reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
                   reuseVolumeSortOrder: pipeline_id
                   storageClassName: my-custom-storage-class
                   volumeSize: 8Gi
@@ -152,3 +147,8 @@ tests:
                   name: codefresh-certs-server
                   secret:
                     secretName: codefresh-certs-server
+            extends:
+              \[\]
+            description: some description
+            accounts:
+              - 59009117c102763beda7ce71

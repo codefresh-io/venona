@@ -97,13 +97,15 @@ runner:
         cpu: '0.2'
 
   # -- Sidecar container
+  # Reconciles runtime spec from Codefresh API for drift detection
   sidecar:
     enabled: true
     image:
       registry: quay.io
       repository: codefresh/codefresh-shell
-      tag: 0.0.1
-
+      tag: 0.0.2
+    env:
+      RECONCILE_INTERVAL: 180
     resources: {}
 
   # -- Add additional env vars

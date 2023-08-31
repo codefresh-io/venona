@@ -8,9 +8,6 @@
 metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
-{{- if not .Values.runtime.agent }}
-accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
-{{- end }}
 runtimeScheduler:
   type: KubernetesPod
   {{- if $engineContext.image }}
@@ -160,9 +157,14 @@ dockerDaemonScheduler:
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}
-description: {{ . }}
+description: {{ .Values.runtime.description }}
   {{- else }}
 description: null
   {{- end }}
+{{- if .Values.global.accountId }}
 accountId: {{ .Values.global.accountId }}
+{{- end }}
+{{- if not .Values.runtime.agent }}
+accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
+{{- end }}
 {{- end }}
