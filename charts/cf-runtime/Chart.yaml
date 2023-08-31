@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: added
-      description: Add optional sidecar container in runner to reconcile runtime spec
+      description: Add optional sidecar container in runner to reconcile runtime-environment spec from Codefresh API
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
