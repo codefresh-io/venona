@@ -1,0 +1,153 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: private_registry test
+values:
+  - ../values.yaml
+  - ../values-private-registry.yaml
+templates:
+  - templates/hooks/post-install/cm-update-runtime.yaml
+  - templates/runner/deployment.yaml
+  - templates/volume-provisioner/deployment.yaml
+  - templates/volume-provisioner/daemonset.yaml
+  - templates/volume-provisioner/cronjob.yaml
+  - templates/monitor/deployment.yaml
+  - templates/app-proxy/deployment.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test private registry in runtime spec
+    template: templates/hooks/post-install/cm-update-runtime.yaml
+    asserts:
+      - equal:
+          path: data["runtime.yaml"]
+          value: |-
+            metadata:
+              name: my-context/codefresh
+              agent: true
+            extends:
+              - system/default/hybrid/k8s_low_limits
+            runtimeScheduler:
+              type: KubernetesPod
+              image: somedomain.io/codefresh/engine:tagoverride
+              command:
+                - npm
+                - run
+                - start
+              envVars:
+                COMPOSE_IMAGE: 'somedomain.io/codefresh/compose:tagoverride'
+                CONTAINER_LOGGER_IMAGE: 'somedomain.io/codefresh/cf-container-logger:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'somedomain.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-pusher:tagoverride'
+                DOCKER_TAG_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride'
+                FS_OPS_IMAGE: 'somedomain.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'somedomain.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'somedomain.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'somedomain.io/codefresh/pikolo:tagoverride'
+              cluster:
+                namespace: codefresh
+                serviceAccount: codefresh-engine
+                clusterProvider:
+                  accountId: 7890
+                  selector: my-context
+              resources:
+                limits:
+                  cpu: 1000m
+                  memory: 2048Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+            dockerDaemonScheduler:
+              type: DindKubernetesPod
+              dindImage: somedomain.io/codefresh/dind:tagoverride
+              userAccess: true
+              cluster:
+                namespace: codefresh
+                serviceAccount: codefresh-engine
+                clusterProvider:
+                  accountId: 7890
+                  selector: my-context
+              pvcs:
+                - name: dind
+                  reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+                  reuseVolumeSortOrder: pipeline_id
+                  storageClassName: 'dind-local-volumes-runner-codefresh'
+                  volumeSize: 16Gi
+              defaultDindResources:
+                limits:
+                  cpu: 400m
+                  memory: 800Mi
+                requests: null
+
+  - it: Test private registy in runner
+    template: templates/runner/deployment.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in runner init container
+    template: templates/runner/deployment.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.initContainers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in volume-provisioner
+    template: templates/runner/deployment.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in dind-lv-monitor
+    template: templates/volume-provisioner/daemonset.yaml
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in cronjob
+    template: templates/volume-provisioner/cronjob.yaml
+    set:
+      storage.backend: ebs-csi
+    asserts:
+      - matchRegex:
+          path: spec.jobTemplate.spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in monitor
+    template: templates/monitor/deployment.yaml
+    set:
+      monitor.enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in app-proxy
+    template: templates/app-proxy/deployment.yaml
+    set:
+      appProxy.enabled: true
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+
+  - it: Test private registy in hooks
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+        template: templates/hooks/post-install/job-update-runtime.yaml
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^somedomain.io/codefresh/.*$
+        template: templates/hooks/post-install/job-gencerts-dind.yaml
+
