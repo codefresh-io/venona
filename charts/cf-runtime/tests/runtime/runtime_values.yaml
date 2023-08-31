@@ -25,10 +25,10 @@ runtime:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - dind
+              - key: app
+                operator: In
+                values:
+                - dind
     tolerations:
       - effect: NoSchedule
         key: codefresh.io
@@ -89,10 +89,10 @@ runtime:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
           - matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - engine
+              - key: app
+                operator: In
+                values:
+                - engine
     tolerations:
       - effect: NoSchedule
         key: codefresh.io
