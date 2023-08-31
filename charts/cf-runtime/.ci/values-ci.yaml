@@ -17,7 +17,9 @@ monitor:
   enabled: true
   rbac:
     namespaced: true
-runner: {}
+runner:
+  sidecar:
+    enabled: true
 runtime:
   dind:
     image:

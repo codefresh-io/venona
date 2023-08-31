@@ -25,7 +25,7 @@ rules:
     verbs: [ "get", "create", "delete" ]
   - apiGroups: [ "" ]
     resources: [ "configmaps", "secrets" ]
-    verbs: [ "get", "create" ]
+    verbs: [ "get", "create", "update", patch ]
   - apiGroups: [ "apps" ]
     resources: [ "deployments" ]
     verbs: [ "get" ]

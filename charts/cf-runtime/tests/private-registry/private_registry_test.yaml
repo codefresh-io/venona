@@ -23,33 +23,31 @@ tests:
   - it: Test private registry in runtime spec
     template: templates/hooks/post-install/cm-update-runtime.yaml
     asserts:
-      - equal:
+      - matchRegex:
           path: data["runtime.yaml"]
-          value: |-
+          pattern: |
             metadata:
               name: my-context/codefresh
               agent: true
-            extends:
-              - system/default/hybrid/k8s_low_limits
             runtimeScheduler:
               type: KubernetesPod
-              image: somedomain.io/codefresh/engine:tagoverride
+              image: "somedomain.io/codefresh/engine:tagoverride"
               command:
                 - npm
                 - run
                 - start
               envVars:
-                COMPOSE_IMAGE: 'somedomain.io/codefresh/compose:tagoverride'
-                CONTAINER_LOGGER_IMAGE: 'somedomain.io/codefresh/cf-container-logger:tagoverride'
-                DOCKER_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-docker-builder:tagoverride'
-                DOCKER_PULLER_IMAGE: 'somedomain.io/codefresh/cf-docker-puller:tagoverride'
-                DOCKER_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-pusher:tagoverride'
-                DOCKER_TAG_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride'
-                FS_OPS_IMAGE: 'somedomain.io/codefresh/fs-ops:tagoverride'
-                GIT_CLONE_IMAGE: 'somedomain.io/codefresh/cf-git-cloner:tagoverride'
-                KUBE_DEPLOY: 'somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride'
-                PIPELINE_DEBUGGER_IMAGE: 'somedomain.io/codefresh/cf-debugger:tagoverride'
-                TEMPLATE_ENGINE: 'somedomain.io/codefresh/pikolo:tagoverride'
+                COMPOSE_IMAGE: "somedomain.io/codefresh/compose:tagoverride"
+                CONTAINER_LOGGER_IMAGE: "somedomain.io/codefresh/cf-container-logger:tagoverride"
+                DOCKER_BUILDER_IMAGE: "somedomain.io/codefresh/cf-docker-builder:tagoverride"
+                DOCKER_PULLER_IMAGE: "somedomain.io/codefresh/cf-docker-puller:tagoverride"
+                DOCKER_PUSHER_IMAGE: "somedomain.io/codefresh/cf-docker-pusher:tagoverride"
+                DOCKER_TAG_PUSHER_IMAGE: "somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride"
+                FS_OPS_IMAGE: "somedomain.io/codefresh/fs-ops:tagoverride"
+                GIT_CLONE_IMAGE: "somedomain.io/codefresh/cf-git-cloner:tagoverride"
+                KUBE_DEPLOY: "somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride"
+                PIPELINE_DEBUGGER_IMAGE: "somedomain.io/codefresh/cf-debugger:tagoverride"
+                TEMPLATE_ENGINE: "somedomain.io/codefresh/pikolo:tagoverride"
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine
@@ -65,7 +63,7 @@ tests:
                   memory: 128Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: somedomain.io/codefresh/dind:tagoverride
+              dindImage: "somedomain.io/codefresh/dind:tagoverride"
               userAccess: true
               cluster:
                 namespace: codefresh
@@ -75,15 +73,19 @@ tests:
                   selector: my-context
               pvcs:
                 - name: dind
-                  reuseVolumeSelector: codefresh-app,io.codefresh.accountName
+                  reuseVolumeSelector: "codefresh-app,io.codefresh.accountName"
                   reuseVolumeSortOrder: pipeline_id
-                  storageClassName: 'dind-local-volumes-runner-codefresh'
+                  storageClassName: dind-local-volumes-runner-codefresh
                   volumeSize: 16Gi
               defaultDindResources:
                 limits:
                   cpu: 400m
                   memory: 800Mi
                 requests: null
+            extends:
+              - system/default/hybrid/k8s_low_limits
+            description: null
+            accountId: 7890
 
   - it: Test private registy in runner
     template: templates/runner/deployment.yaml

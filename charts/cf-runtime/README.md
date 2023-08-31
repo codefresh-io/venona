@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.0.1](https://img.shields.io/badge/Version-6.0.1-informational?style=flat-square)
+![Version: 6.1.0](https://img.shields.io/badge/Version-6.1.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -233,6 +233,16 @@ global:
   agentToken: "0987654321"  # MANDATORY when migrating from < 6.x chart version !
   agentName: "my-cluster-name_my-namespace" # optional
   runtimeName: "my-cluster-name/my-namespace" # optional
+```
+
+> **Note!** Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands, it's recommended to enable sidecar container to pull runtime spec from Codefresh API to detect any drift in configuration.
+
+```yaml
+runner:
+  # -- Sidecar container
+  # Reconciles runtime spec from Codefresh API for drift detection
+  sidecar:
+    enabled: true
 ```
 
 ## Architecture
@@ -886,6 +896,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
 | runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.9.17"}` | Set image |
+| runner.init | object | `{"image":{"registry":"quay.io","repository":"codefresh/cli","tag":"0.85.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
 | runner.podSecurityContext | object | See below | Set security context for the pod |
@@ -899,6 +910,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | runner.serviceAccount.create | bool | `true` | Create service account |
 | runner.serviceAccount.name | string | `""` | Override service account name |
+| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.2"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
