@@ -99,7 +99,7 @@ runner:
   # -- Sidecar container
   # Reconciles runtime spec from Codefresh API for drift detection
   sidecar:
-    enabled: true
+    enabled: false
     image:
       registry: quay.io
       repository: codefresh/codefresh-shell
