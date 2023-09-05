@@ -28,12 +28,12 @@ import (
 
 func Test_runtime_HandleTask(t *testing.T) {
 	tests := map[string]struct {
-		task     task.Task
+		task     *task.Task
 		wantErr  string
 		beforeFn func(k *kubernetes.MockKubernetes)
 	}{
 		"should successfully create a resource on TypeCreatePVC task": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeCreatePVC,
 				Spec: "some spec",
 			},
@@ -42,7 +42,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 			},
 		},
 		"should successfully create a resource on TypeCreatePod task": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeCreatePod,
 				Spec: "some spec",
 			},
@@ -51,7 +51,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 			},
 		},
 		"should successfully delete a resource on TypeDeletePVC task": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeDeletePVC,
 				Spec: map[string]string{
 					"Name":      "some-name",
@@ -67,7 +67,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 			},
 		},
 		"should successfully delete a resource on TypeDeletePod task": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeDeletePod,
 				Spec: map[string]string{
 					"Name":      "some-name",
@@ -83,13 +83,13 @@ func Test_runtime_HandleTask(t *testing.T) {
 			},
 		},
 		"should fail for unknown type": {
-			task: task.Task{
+			task: &task.Task{
 				Type: "some-type",
 			},
 			wantErr: "unknown task type \"some-type\"",
 		},
 		"should fail creating if k8s client fails": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeCreatePod,
 				Spec: "some spec",
 			},
@@ -99,14 +99,14 @@ func Test_runtime_HandleTask(t *testing.T) {
 			wantErr: "failed creating resource: some error",
 		},
 		"should fail deleting if json.unmarshal fails": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeDeletePod,
 				Spec: "bad spec",
 			},
 			wantErr: "failed to unmarshal task spec: json: cannot unmarshal string into Go value of type kubernetes.DeleteOptions",
 		},
 		"should fail deleting if client fails": {
-			task: task.Task{
+			task: &task.Task{
 				Type: task.TypeDeletePod,
 				Spec: map[string]string{
 					"Name":      "some-name",
