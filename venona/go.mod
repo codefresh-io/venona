@@ -1,6 +1,6 @@
 module github.com/codefresh-io/go/venona
 
-go 1.20
+go 1.21
 
 require (
 	github.com/gorilla/mux v1.8.0
@@ -82,5 +82,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace golang.org/x/net => golang.org/x/net v0.8.0
