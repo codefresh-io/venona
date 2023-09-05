@@ -133,14 +133,6 @@ func getCodefreshMock() codefresh.Codefresh {
 	return &cf
 }
 
-func getLoggerMock() *mocks.Logger {
-	l := mocks.Logger{}
-
-	l.On("Error", mock.Anything)
-
-	return &l
-}
-
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
 		opts    *Options
@@ -159,7 +151,7 @@ func TestNew(t *testing.T) {
 				Runtimes: map[string]runtime.Runtime{
 					"x": runtime.New(runtime.Options{}),
 				},
-				Logger: &mocks.Logger{},
+				Logger: logger.New(logger.Options{}),
 			},
 			want:    nil,
 			wantErr: errIDRequired.Error(),
@@ -169,7 +161,7 @@ func TestNew(t *testing.T) {
 				ID:        "foobar",
 				Codefresh: getCodefreshMock(),
 				Runtimes:  nil,
-				Logger:    &mocks.Logger{},
+				Logger:    logger.New(logger.Options{}),
 			},
 			want:    nil,
 			wantErr: errRuntimesRequired.Error(),
@@ -291,7 +283,7 @@ func Test_executeAgentTask(t *testing.T) {
 		executorCalled = false
 		agentTaskExecutors[tt.args.executorName] = tt.args.executorFunc
 		t.Run(tt.name, func(t *testing.T) {
-			ret := executeAgentTask(tt.args.task, getLoggerMock())
+			ret := executeAgentTask(tt.args.task, logger.New(logger.Options{}))
 			if !executorCalled {
 				t.Errorf("executor function hasn't been called")
 			}

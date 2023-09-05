@@ -20,15 +20,9 @@ import (
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
-	"github.com/codefresh-io/go/venona/pkg/mocks"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func buildFakeMock() *mocks.Logger {
-	l := &mocks.Logger{}
-	return l
-}
 
 func mustURL(u string) *url.URL {
 	r, err := url.Parse(u)

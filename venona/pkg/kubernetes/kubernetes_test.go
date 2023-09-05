@@ -18,16 +18,24 @@ import (
 	"context"
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/mocks"
+	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
 )
+
+func checkResourceInFakeClientset(client *fake.Clientset, resource, name string) bool {
+	r, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", name)
+	if err != nil || r == nil {
+		return false
+	}
+
+	return true
+}
 
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
@@ -58,17 +66,12 @@ func TestNew(t *testing.T) {
 	}
 }
 
-func createMockLogger() *mocks.Logger {
-	l := &mocks.Logger{}
-	l.On("Info", mock.Anything, "namespace", mock.AnythingOfType("string"), "name", mock.AnythingOfType("string")).Return(nil)
-	return l
-}
-
 func Test_kube_CreateResource(t *testing.T) {
 	tests := map[string]struct {
 		client  kubernetes.Interface
 		spec    interface{}
 		wantErr string
+		afterFn func(t *testing.T, client *fake.Clientset)
 	}{
 		"Should successfully create a pod": {
 			client: fake.NewSimpleClientset(),
@@ -79,6 +82,10 @@ func Test_kube_CreateResource(t *testing.T) {
 					"name":      "some-pod",
 					"namespace": "some-namespace",
 				},
+			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", "some-pod")
+				assert.NoError(t, err)
 			},
 		},
 		"Should successfully create a PCV": {
@@ -91,10 +98,13 @@ func Test_kube_CreateResource(t *testing.T) {
 					"namespace": "some-namespace",
 				},
 			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("persistantvolumeclaims"), "some-namespace", "some-pvc")
+				assert.NoError(t, err)
+			},
 		},
 		"Should fail creating a Deployment": {
 			client:  fake.NewSimpleClientset(),
-			wantErr: "failed creating resource of type apps/v1, Kind=Deployment",
 			spec: map[string]interface{}{
 				"kind":       "Deployment",
 				"apiVersion": "apps/v1",
@@ -103,13 +113,14 @@ func Test_kube_CreateResource(t *testing.T) {
 					"namespace": "some-namespace",
 				},
 			},
+			wantErr: "failed creating resource of type apps/v1, Kind=Deployment",
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			k := kube{
 				client: tt.client,
-				logger: createMockLogger(),
+				logger: logger.New(logger.Options{}),
 			}
 			err := k.CreateResource(context.Background(), tt.spec)
 			if err != nil || tt.wantErr != "" {
@@ -124,6 +135,7 @@ func Test_kube_DeleteResource(t *testing.T) {
 		client  kubernetes.Interface
 		opts    DeleteOptions
 		wantErr string
+		afterFn func(t *testing.T, client *fake.Clientset)
 	}{
 		"Should successfully delete an existing Pod": {
 			client: fake.NewSimpleClientset(&v1.Pod{
@@ -137,6 +149,10 @@ func Test_kube_DeleteResource(t *testing.T) {
 				Namespace: "some-namespace",
 				Name:      "some-pod",
 			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", "some-pod")
+				assert.Error(t, err)
+			},
 		},
 		"Should successfully delete an existing PVC": {
 			client: fake.NewSimpleClientset(&v1.PersistentVolumeClaim{
@@ -149,6 +165,10 @@ func Test_kube_DeleteResource(t *testing.T) {
 				Kind:      task.TypeDeletePVC,
 				Namespace: "some-namespace",
 				Name:      "some-pvc",
+			},
+			afterFn: func(t *testing.T, client *fake.Clientset) {
+				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("persistantvolumeclaims"), "some-namespace", "some-pod")
+				assert.Error(t, err)
 			},
 		},
 		"Should fail deleting an unexisting Pod": {
@@ -183,7 +203,7 @@ func Test_kube_DeleteResource(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			k := kube{
 				client: tt.client,
-				logger: createMockLogger(),
+				logger: logger.New(logger.Options{}),
 			}
 			err := k.DeleteResource(context.Background(), tt.opts)
 			if err != nil || tt.wantErr != "" {
