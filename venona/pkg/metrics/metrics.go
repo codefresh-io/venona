@@ -15,6 +15,7 @@
 package metrics
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -22,48 +23,77 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+const (
+	runnerNamespace = "runner"
+	agentSubsystem  = "agent"
+	wfSubsystem     = "wf"
+)
+
 var (
+	retryRegex = regexp.MustCompile(`engine-.*-retry-(\d+)$`)
+
 	agentTasks = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "runner_agent_tasks",
-		Help: "Incoming agent tasks",
+		Namespace: runnerNamespace,
+		Subsystem: agentSubsystem,
+		Name:      "tasks",
+		Help:      "Incoming agent tasks",
 	})
 	wfTasks = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "runner_wf_tasks",
-		Help: "Incoming workflow tasks",
+		Namespace: runnerNamespace,
+		Subsystem: wfSubsystem,
+		Name:      "tasks",
+		Help:      "Incoming workflow tasks",
 	})
+	wfTaskRetries = prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: runnerNamespace,
+		Subsystem: wfSubsystem,
+		Name:      "tasks_retries",
+		Help:      "Incoming workflow retry tasks",
+	}, []string{"retry"})
 	queueSize = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "runner_queue_size",
-		Help: "Current number of waiting tasks",
+		Namespace: runnerNamespace,
+		Name:      "queue_size",
+		Help:      "Current number of waiting tasks",
 	})
 	getTasksDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Name:    "runner_get_tasks_duration_sec",
-		Help:    "How long each GetTasks request takes (seconds)",
-		Buckets: []float64{0.25, 0.5, 1, 2, 3, 6},
+		Namespace: runnerNamespace,
+		Name:      "get_tasks_duration_sec",
+		Help:      "How long each GetTasks request takes (seconds)",
+		Buckets:   []float64{0.25, 0.5, 1, 2, 3, 6},
 	})
 	handlingTimeSinceCreation = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "runner_wf_duration_since_creation_sec",
-		Help:    "Time since the creation of each workflow batch in the platform",
-		Buckets: []float64{0.5, 1, 1.5, 2, 3, 6, 12, 30, 60},
+		Namespace: runnerNamespace,
+		Subsystem: wfSubsystem,
+		Name:      "duration_since_creation_sec",
+		Help:      "Time since the creation of each workflow batch in the platform",
+		Buckets:   []float64{0.5, 1, 1.5, 2, 3, 6, 12, 30, 60},
 	}, []string{"workflow_type"})
 	handlingTimeInRunner = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "runner_wf_duration_in_runner_sec",
-		Help:    "Time each workflow batch has spent in the runner",
-		Buckets: []float64{0.5, 1, 1.5, 2, 3, 6, 12, 30, 60},
+		Namespace: runnerNamespace,
+		Subsystem: wfSubsystem,
+		Name:      "duration_in_runner_sec",
+		Help:      "Time each workflow batch has spent in the runner",
+		Buckets:   []float64{0.5, 1, 1.5, 2, 3, 6, 12, 30, 60},
 	}, []string{"workflow_type"})
 	agentProcessingTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "runner_agent_processing_sec",
-		Help:    "Net time to process an agent task in the runner",
-		Buckets: []float64{0.25, 0.5, 1, 1.5, 2, 3, 6},
+		Namespace: runnerNamespace,
+		Subsystem: agentSubsystem,
+		Name:      "processing_sec",
+		Help:      "Net time to process an agent task in the runner",
+		Buckets:   []float64{0.25, 0.5, 1, 1.5, 2, 3, 6},
 	}, []string{"agent_type"})
 	wfProcessingTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "runner_wf_processing_sec",
-		Help:    "Net time to process each workflow batch in the runner",
-		Buckets: []float64{0.5, 1, 1.5, 2, 3, 6, 12},
+		Namespace: runnerNamespace,
+		Subsystem: wfSubsystem,
+		Name:      "processing_sec",
+		Help:      "Net time to process each workflow batch in the runner",
+		Buckets:   []float64{0.5, 1, 1.5, 2, 3, 6, 12},
 	}, []string{"workflow_type"})
 	k8sProcessingTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "runner_k8s_processing_sec",
-		Help:    "Net time to process each workflow k8s task in the runner",
-		Buckets: []float64{0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 6, 12},
+		Namespace: runnerNamespace,
+		Name:      "k8s_processing_sec",
+		Help:      "Net time to process each workflow k8s task in the runner",
+		Buckets:   []float64{0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 6, 12},
 	}, []string{"k8s_type"})
 )
 
@@ -72,6 +102,7 @@ func Register(reg *prometheus.Registry) {
 	reg.MustRegister([]prometheus.Collector{
 		agentTasks,
 		wfTasks,
+		wfTaskRetries,
 		queueSize,
 		getTasksDuration,
 		handlingTimeSinceCreation,
@@ -86,6 +117,14 @@ func UpdateQueueSizes(agentTasksValue, wfTasksValue, queue int) {
 	agentTasks.Add(float64(agentTasksValue))
 	wfTasks.Add(float64(wfTasksValue))
 	queueSize.Add(float64(queue))
+}
+
+func IncWorkflowRetries(podName string) {
+	matches := retryRegex.FindStringSubmatch(podName)
+	if len(matches) == 2 {
+		labels := prometheus.Labels{"retry": matches[1]}
+		wfTaskRetries.With(labels).Inc()
+	}
 }
 
 func ObserveGetTasks(start time.Time) {

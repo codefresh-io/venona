@@ -115,6 +115,8 @@ func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec inter
 		if err != nil {
 			return fmt.Errorf("failed creating pod \"%s\\%s\": %w", namespace, obj.Name, err)
 		}
+
+		metrics.IncWorkflowRetries(name)
 	default:
 		return fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind())
 	}

@@ -30,6 +30,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/config"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
@@ -182,6 +183,7 @@ func run(options startOptions) {
 	}
 
 	reg := prometheus.NewRegistry()
+	metrics.Register(reg)
 
 	var runtimes map[string]runtime.Runtime
 	k8sLog := log.New("module", "k8s")
