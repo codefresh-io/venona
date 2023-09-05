@@ -1,6 +1,5 @@
 # Venona
 
-
 * venona - the agent process that is running on remote cluster
     * cmd - entrypoints to the application
     * pkg/agent - call Codefresh API every X ms to get new pipelines to run. Also, report status back to Codefresh

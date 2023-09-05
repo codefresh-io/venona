@@ -20,6 +20,7 @@ import (
 	"regexp"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -52,10 +53,12 @@ func Load(dir string, pattern string, logger logger.Logger) (map[string]Config, 
 	if err != nil {
 		return nil, err
 	}
+
 	var files []string
 	if err := walkFilePath(dir, visit(&files, regexp, logger)); err != nil {
 		return nil, err
 	}
+
 	return buildConfigMap(files, logger)
 }
 
@@ -65,14 +68,17 @@ func visit(files *[]string, re *regexp.Regexp, log logger.Logger) filepath.WalkF
 			log.Error("Failed to visit", "path", path, "err", err.Error())
 			return nil
 		}
+
 		if info.IsDir() {
 			log.Debug("Directory ignored, Venona loading only files that are mached to regexp", "regexp", re.String(), "dir", info.Name())
 			return nil
 		}
+
 		if !re.MatchString(info.Name()) {
 			log.Debug("File ignored, regexp does not match", "regexp", re.String(), "file", info.Name())
 			return nil
 		}
+
 		*files = append(*files, path)
 		return nil
 	}
@@ -83,6 +89,7 @@ func unmarshalConfig(data []byte) (Config, error) {
 	if err := yaml.Unmarshal(data, &cnf); err != nil {
 		return cnf, err
 	}
+
 	return cnf, nil
 }
 
@@ -94,13 +101,15 @@ func buildConfigMap(files []string, logger logger.Logger) (map[string]Config, er
 			logger.Error("Failed to read file content", "file", file, "err", err.Error())
 			continue
 		}
+
 		cnf, err := unmarshalConfig(b)
 		if err != nil {
 			logger.Error("Failed to unmarshal file content into struct", "file", file, "err", err.Error())
 			continue
-
 		}
+
 		result[file] = cnf
 	}
+
 	return result, nil
 }

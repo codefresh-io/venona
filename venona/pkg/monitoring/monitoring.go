@@ -44,8 +44,6 @@ type Transaction interface {
 	// number, string, or boolean.
 	AddAttribute(key string, value interface{})
 
-	NewRoundTripper(rt http.RoundTripper) http.RoundTripper
-
 	NewSegment(r *http.Request) Segment
 
 	NewSegmentByName(name string) Segment
@@ -97,10 +95,6 @@ func (t *transaction) NewSegmentByName(name string) Segment {
 }
 
 func (t *transaction) AddAttribute(key string, val interface{}) {}
-
-func (t *transaction) NewRoundTripper(rt http.RoundTripper) http.RoundTripper {
-	return rt
-}
 
 func (t *transaction) End() {}
 

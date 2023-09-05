@@ -17,6 +17,7 @@ package cmd
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -29,18 +30,17 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/config"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
+
 	nr "github.com/newrelic/go-agent/v3/newrelic"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-)
-
-const (
-	defaultCodefreshHost = "https://g.codefresh.io"
 )
 
 type startOptions struct {
@@ -51,12 +51,26 @@ type startOptions struct {
 	agentID                        string
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
+	concurrency                    int
+	bufferSize                     int
 	configDir                      string
 	serverPort                     string
 	newrelicLicenseKey             string
 	newrelicAppname                string
 	inClusterRuntime               string
+	qps                            float32
+	burst                          int
 }
+
+const (
+	defaultCodefreshHost           = "https://g.codefresh.io"
+	defaultTaskPullingInterval     = 3
+	defaultStatusReportingInterval = 10
+	defaultWorkflowConcurrency     = 50
+	defaultWorkflowBufferSize      = 1000
+	defaultK8sClientQPS            = 50
+	defaultK8sClientBurst          = 100
+)
 
 var (
 	startCmdOptions startOptions
@@ -64,12 +78,38 @@ var (
 )
 
 var startCmd = &cobra.Command{
-	Use: "start",
+	Use:  "start",
+	Long: "Start venona process",
+	PreRunE: func(_ *cobra.Command, _ []string) error {
+		if startCmdOptions.taskPullingSecondsInterval <= 0 {
+			return errors.New("--task-pulling-interval must be a positive number")
+		}
 
-	Run: func(cmd *cobra.Command, args []string) {
+		if startCmdOptions.statusReportingSecondsInterval <= 0 {
+			return errors.New("--status-reporting-interval must be a positive number")
+		}
+
+		if startCmdOptions.concurrency <= 0 {
+			return errors.New("--workflow-concurrency must be a positive number")
+		}
+
+		if startCmdOptions.bufferSize <= 0 {
+			return errors.New("--workflow-buffer-size must be a positive number")
+		}
+
+		if startCmdOptions.qps <= 0 {
+			return errors.New("--k8s-client-qps must be a positive number")
+		}
+
+		if startCmdOptions.burst <= 0 {
+			return errors.New("--k8s-client-burst must be a positive number")
+		}
+
+		return nil
+	},
+	Run: func(_ *cobra.Command, _ []string) {
 		run(startCmdOptions)
 	},
-	Long: "Start venona process",
 }
 
 func init() {
@@ -83,25 +123,41 @@ func init() {
 	dieOnError(viper.BindEnv("verbose", "VERBOSE"))
 	dieOnError(viper.BindEnv("newrelic-license-key", "NEWRELIC_LICENSE_KEY"))
 	dieOnError(viper.BindEnv("newrelic-appname", "NEWRELIC_APPNAME"))
+	dieOnError(viper.BindEnv("task-pulling-interval", "TASK_PULLING_INTERVAL"))
+	dieOnError(viper.BindEnv("status-reporting-interval", "STATUS_REPORTING_INTERVAL"))
+	dieOnError(viper.BindEnv("workflow-concurrency", "WORKFLOW_CONCURRENCY"))
+	dieOnError(viper.BindEnv("workflow-buffer-size", "WORKFLOW_BUFFER_SIZE"))
+	dieOnError(viper.BindEnv("k8s-client-qps", "K8S_CLIENT_QPS"))
+	dieOnError(viper.BindEnv("k8s-client-burst", "K8S_CLIENT_BURST"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
 	viper.SetDefault("in-cluster-runtime", "")
 	viper.SetDefault("newrelic-appname", AppName)
+	viper.SetDefault("task-pulling-interval", defaultTaskPullingInterval)
+	viper.SetDefault("status-reporting-interval", defaultStatusReportingInterval)
+	viper.SetDefault("workflow-concurrency", defaultWorkflowConcurrency)
+	viper.SetDefault("workflow-buffer-size", defaultWorkflowBufferSize)
+	viper.SetDefault("k8s-client-qps", defaultK8sClientQPS)
+	viper.SetDefault("k8s-client-burst", defaultK8sClientBurst)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
-	startCmd.Flags().StringVar(&startCmdOptions.inClusterRuntime, "in-cluster-runtime", viper.GetString("in-cluster-runtime"), "Runtime name to run agent in cluster mode ")
+	startCmd.Flags().StringVar(&startCmdOptions.inClusterRuntime, "in-cluster-runtime", viper.GetString("in-cluster-runtime"), "Runtime name to run agent in cluster mode [$CODEFRESH_IN_CLUSTER_RUNTIME]")
 	startCmd.Flags().StringVar(&startCmdOptions.agentID, "agent-id", viper.GetString("agent-id"), "ID of the agent [$AGENT_ID]")
 	startCmd.Flags().StringVar(&startCmdOptions.configDir, "config-dir", viper.GetString("config-dir"), "path to configuration folder [$CONFIG_DIR]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
 	startCmd.Flags().StringVar(&startCmdOptions.serverPort, "port", viper.GetString("port"), "The port to start the server [$PORT]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
-	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval (seconds) to pull new tasks from Codefresh")
-	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval (seconds) to report status back to Codefresh")
+	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", viper.GetInt64("task-pulling-interval"), "The interval (seconds) to pull new tasks from Codefresh [$TASK_PULLING_INTERVAL]")
+	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", viper.GetInt64("status-reporting-interval"), "The interval (seconds) to report status back to Codefresh [$STATUS_REPORTING_INTERVAL]")
+	startCmd.Flags().IntVar(&startCmdOptions.concurrency, "workflow-concurrency", viper.GetInt("workflow-concurrency"), "How many workflow tasks to handle concurrently [$WORKFLOW_CONCURRENCY]")
+	startCmd.Flags().IntVar(&startCmdOptions.bufferSize, "workflow-buffer-size", viper.GetInt("workflow-cbuffer-sizeoncurrency"), "The size of the workflow channel buffer [$WORKFLOW_BUFFER_SIZE]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
+	startCmd.Flags().Float32Var(&startCmdOptions.qps, "k8s-client-qps", float32(viper.GetFloat64("k8s-client-qps")), "the maximum QPS to the master from this client [$K8S_CLIENT_QPS]")
+	startCmd.Flags().IntVar(&startCmdOptions.burst, "k8s-client-burst", viper.GetInt("k8s-client-burst"), "k8s client maximum burst for throttle [$K8S_CLIENT_BURST]")
 
 	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
@@ -126,11 +182,15 @@ func run(options startOptions) {
 		log.Warn("Running in insecure mode", "NODE_TLS_REJECT_UNAUTHORIZED", options.rejectTLSUnauthorized)
 	}
 
+	reg := prometheus.NewRegistry()
+	metrics.Register(reg)
+
 	var runtimes map[string]runtime.Runtime
+	k8sLog := log.New("module", "k8s")
 	if options.inClusterRuntime != "" {
-		runtimes = inClusterRuntimeConfiguration(options)
+		runtimes = inClusterRuntimeConfiguration(options, k8sLog)
 	} else {
-		runtimes = remoteRuntimeConfiguration(options, log)
+		runtimes = remoteRuntimeConfiguration(options, k8sLog)
 	}
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
@@ -174,7 +234,6 @@ func run(options startOptions) {
 			Host:       options.codefreshHost,
 			Token:      options.codefreshToken,
 			AgentID:    options.agentID,
-			Logger:     log.New("module", "service", "service", "codefresh"),
 			HTTPClient: &httpClient,
 			Headers:    httpHeaders,
 		})
@@ -188,13 +247,16 @@ func run(options startOptions) {
 		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
 		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
 		Monitor:                        monitor,
+		Concurrency:                    options.concurrency,
+		BufferSize:                     options.bufferSize,
 	})
 	dieOnError(err)
 
 	server, err := server.New(&server.Options{
-		Port:    fmt.Sprintf(":%s", options.serverPort),
-		Logger:  log.New("module", "server"),
-		Monitor: monitor,
+		Port:            fmt.Sprintf(":%s", options.serverPort),
+		Logger:          log.New("module", "server"),
+		Monitor:         monitor,
+		MetricsRegistry: reg,
 	})
 	dieOnError(err)
 
@@ -207,8 +269,8 @@ func run(options startOptions) {
 	<-ctx.Done()
 }
 
-func inClusterRuntimeConfiguration(options startOptions) map[string]runtime.Runtime {
-	k, err := kubernetes.NewInCluster()
+func inClusterRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime {
+	k, err := kubernetes.NewInCluster(log, options.qps, options.burst)
 	dieOnError(err)
 	re := runtime.New(runtime.Options{
 		Kubernetes: k,
@@ -220,25 +282,28 @@ func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[str
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
-	{
-		for name, config := range configs {
-			k, err := kubernetes.New(kubernetes.Options{
-				Token:    config.Token,
-				Type:     config.Type,
-				Host:     config.Host,
-				Cert:     config.Cert,
-				Insecure: !options.rejectTLSUnauthorized,
-			})
-			if err != nil {
-				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
-				continue
-			}
-			re := runtime.New(runtime.Options{
-				Kubernetes: k,
-			})
-			runtimes[config.Name] = re
+	for name, config := range configs {
+		k, err := kubernetes.New(kubernetes.Options{
+			Logger:   log,
+			Token:    config.Token,
+			Type:     config.Type,
+			Host:     config.Host,
+			Cert:     config.Cert,
+			Insecure: !options.rejectTLSUnauthorized,
+			QPS:      options.qps,
+			Burst:    options.burst,
+		})
+		if err != nil {
+			log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
+			continue
 		}
+
+		re := runtime.New(runtime.Options{
+			Kubernetes: k,
+		})
+		runtimes[config.Name] = re
 	}
+
 	return runtimes
 }
 
@@ -263,15 +328,18 @@ func withSignals(
 				cancel()
 				return
 			}
+
 			go func() {
 				log.Warn("Received shutdown request, stopping agent and server...")
 				// order matters, the process will exit as soon as server is stopped
 				if err := stopAgent(); err != nil {
 					log.Error(err.Error())
 				}
+
 				if err := stopServer(ctx); err != nil {
 					log.Error(err.Error())
 				}
+
 				cancel() // done
 			}()
 		}

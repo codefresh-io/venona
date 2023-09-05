@@ -26,8 +26,7 @@ import (
 type (
 	// Runtime API client
 	Runtime interface {
-		StartWorkflow(context.Context, []task.Task) error
-		TerminateWorkflow(context.Context, []task.Task) []error
+		HandleTask(ctx context.Context, t *task.Task) error
 	}
 
 	// Options for runtime
@@ -41,39 +40,39 @@ type (
 )
 
 // New creates new Runtime client
-func New(opt Options) Runtime {
+func New(opts Options) Runtime {
 	return &runtime{
-		client: opt.Kubernetes,
+		client: opts.Kubernetes,
 	}
 }
 
-func (r runtime) StartWorkflow(ctx context.Context, tasks []task.Task) error {
-	for _, task := range tasks {
-		err := r.client.CreateResource(ctx, task.Spec)
+func (r runtime) HandleTask(ctx context.Context, t *task.Task) error {
+	var err error
+
+	switch t.Type {
+	case task.TypeCreatePVC, task.TypeCreatePod:
+		err = r.client.CreateResource(ctx, t.Type, t.Spec)
 		if err != nil {
-			return err // TODO: Return already executed tasks in order to terminate them
+			return fmt.Errorf("failed creating resource: %w", err) // TODO: Return already executed tasks in order to terminate them
 		}
+	case task.TypeDeletePVC, task.TypeDeletePod:
+		opts := kubernetes.DeleteOptions{}
+		opts.Kind = t.Type
+		b, err := json.Marshal(t.Spec)
+		if err != nil {
+			return fmt.Errorf("failed to marshal task spec: %w", err)
+		}
+
+		if err := json.Unmarshal(b, &opts); err != nil {
+			return fmt.Errorf("failed to unmarshal task spec: %w", err)
+		}
+
+		if err = r.client.DeleteResource(ctx, opts); err != nil {
+			return fmt.Errorf("failed deleting resource: %w", err)
+		}
+	default:
+		return fmt.Errorf("unknown task type \"%s\"", t.Type)
 	}
+
 	return nil
-}
-func (r runtime) TerminateWorkflow(ctx context.Context, tasks []task.Task) []error {
-	errs := make([]error, 0, 3)
-	for _, task := range tasks {
-		opt := kubernetes.DeleteOptions{}
-		opt.Kind = task.Type
-		b, err := json.Marshal(task.Spec)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("failed to marshal task spec"))
-			continue
-		}
-		if err := json.Unmarshal(b, &opt); err != nil {
-			errs = append(errs, fmt.Errorf("failed to unmarshal task spec"))
-			continue
-		}
-		if err = r.client.DeleteResource(ctx, opt); err != nil {
-			errs = append(errs, err)
-			continue
-		}
-	}
-	return errs
 }

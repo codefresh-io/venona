@@ -22,22 +22,25 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
 	"github.com/gorilla/mux"
 )
 
 var (
-	errAlreadyRunning  = errors.New("Server already running")
-	errAlreadyStopped  = errors.New("Server already stopped")
-	errOptionsRequired = errors.New("Options required")
-	errLoggerRequired  = errors.New("Logger is required")
+	errAlreadyRunning = errors.New("Server already running")
+	errAlreadyStopped = errors.New("Server already stopped")
+	errLoggerRequired = errors.New("Logger is required")
 )
 
 type (
 	// Options for creating a new server instance
 	Options struct {
-		Port    string
-		Logger  logger.Logger
-		Monitor monitoring.Monitor
+		Port            string
+		Logger          logger.Logger
+		Monitor         monitoring.Monitor
+		MetricsRegistry *prometheus.Registry
 	}
 
 	// Server is an HTTP server that expose API
@@ -49,23 +52,26 @@ type (
 )
 
 // New returns a new Server instance or an error
-func New(opt *Options) (*Server, error) {
-	if opt.Logger == nil {
+func New(opts *Options) (*Server, error) {
+	if opts.Logger == nil {
 		return nil, errLoggerRequired
 	}
-	log := opt.Logger
+	log := opts.Logger
 
 	r := mux.NewRouter()
-	if opt.Monitor != nil {
-		r.Use(opt.Monitor.NewGorillaMiddleware())
+	if opts.Monitor != nil {
+		r.Use(opts.Monitor.NewGorillaMiddleware())
 	}
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+
+	r.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
 	})
 
+	r.Handle("/metrics", promhttp.HandlerFor(opts.MetricsRegistry, promhttp.HandlerOpts{Registry: opts.MetricsRegistry}))
+
 	srv := &http.Server{
-		Addr:              opt.Port,
+		Addr:              opts.Port,
 		Handler:           r,
 		ReadHeaderTimeout: 60 * time.Second,
 	}
@@ -82,6 +88,7 @@ func (s *Server) Start() error {
 	if s.running {
 		return errAlreadyRunning
 	}
+
 	s.running = true
 	s.log.Info("Starting HTTP server", "addr", s.srv.Addr)
 	return s.srv.ListenAndServe()
@@ -92,11 +99,13 @@ func (s *Server) Stop(ctx context.Context) error {
 	if !s.running {
 		return errAlreadyStopped
 	}
+
 	s.running = false
 	s.log.Warn("Received graceful termination request, shutting down...")
 	err := s.srv.Shutdown(ctx)
 	if err != nil {
 		s.log.Error("failed to gracefully terminate server, cause: ", err)
 	}
+
 	return nil
 }
