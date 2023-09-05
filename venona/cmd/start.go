@@ -30,12 +30,14 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/config"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
 
 	nr "github.com/newrelic/go-agent/v3/newrelic"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -180,11 +182,14 @@ func run(options startOptions) {
 		log.Warn("Running in insecure mode", "NODE_TLS_REJECT_UNAUTHORIZED", options.rejectTLSUnauthorized)
 	}
 
+	reg := prometheus.NewRegistry()
+	metrics := metrics.New(reg, log.New("module", "metrics"))
+
 	var runtimes map[string]runtime.Runtime
 	if options.inClusterRuntime != "" {
-		runtimes = inClusterRuntimeConfiguration(options)
+		runtimes = inClusterRuntimeConfiguration(options, metrics)
 	} else {
-		runtimes = remoteRuntimeConfiguration(options, log)
+		runtimes = remoteRuntimeConfiguration(options, log, metrics)
 	}
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
@@ -228,7 +233,6 @@ func run(options startOptions) {
 			Host:       options.codefreshHost,
 			Token:      options.codefreshToken,
 			AgentID:    options.agentID,
-			Logger:     log.New("module", "service", "service", "codefresh"),
 			HTTPClient: &httpClient,
 			Headers:    httpHeaders,
 		})
@@ -244,13 +248,15 @@ func run(options startOptions) {
 		Monitor:                        monitor,
 		Concurrency:                    options.concurrency,
 		BufferSize:                     options.bufferSize,
+		Metrics:                        metrics,
 	})
 	dieOnError(err)
 
 	server, err := server.New(&server.Options{
-		Port:    fmt.Sprintf(":%s", options.serverPort),
-		Logger:  log.New("module", "server"),
-		Monitor: monitor,
+		Port:            fmt.Sprintf(":%s", options.serverPort),
+		Logger:          log.New("module", "server"),
+		Monitor:         monitor,
+		MetricsRegistry: reg,
 	})
 	dieOnError(err)
 
@@ -263,8 +269,8 @@ func run(options startOptions) {
 	<-ctx.Done()
 }
 
-func inClusterRuntimeConfiguration(options startOptions) map[string]runtime.Runtime {
-	k, err := kubernetes.NewInCluster(options.qps, options.burst)
+func inClusterRuntimeConfiguration(options startOptions, metrics metrics.Metrics) map[string]runtime.Runtime {
+	k, err := kubernetes.NewInCluster(options.qps, options.burst, metrics)
 	dieOnError(err)
 	re := runtime.New(runtime.Options{
 		Kubernetes: k,
@@ -272,31 +278,30 @@ func inClusterRuntimeConfiguration(options startOptions) map[string]runtime.Runt
 	return map[string]runtime.Runtime{options.inClusterRuntime: re}
 }
 
-func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime {
+func remoteRuntimeConfiguration(options startOptions, log logger.Logger, metrics metrics.Metrics) map[string]runtime.Runtime {
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
-	{
-		for name, config := range configs {
-			k, err := kubernetes.New(kubernetes.Options{
-				Token:    config.Token,
-				Type:     config.Type,
-				Host:     config.Host,
-				Cert:     config.Cert,
-				Insecure: !options.rejectTLSUnauthorized,
-				QPS:      options.qps,
-				Burst:    options.burst,
-			})
-			if err != nil {
-				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
-				continue
-			}
-
-			re := runtime.New(runtime.Options{
-				Kubernetes: k,
-			})
-			runtimes[config.Name] = re
+	for name, config := range configs {
+		k, err := kubernetes.New(kubernetes.Options{
+			Token:    config.Token,
+			Type:     config.Type,
+			Host:     config.Host,
+			Cert:     config.Cert,
+			Insecure: !options.rejectTLSUnauthorized,
+			QPS:      options.qps,
+			Burst:    options.burst,
+			Metrics:  metrics,
+		})
+		if err != nil {
+			log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
+			continue
 		}
+
+		re := runtime.New(runtime.Options{
+			Kubernetes: k,
+		})
+		runtimes[config.Name] = re
 	}
 
 	return runtimes

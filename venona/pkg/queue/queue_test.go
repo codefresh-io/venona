@@ -23,6 +23,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -38,7 +39,7 @@ func makeWorkflow(wfID string, numOfTasks int) *workflow.Workflow {
 	}
 	wf := workflow.New(metadata)
 	for i := 0; i < numOfTasks; i++ {
-		wf.AddTask(&task.Task{
+		_ = wf.AddTask(&task.Task{
 			Type:     task.TypeCreatePod,
 			Metadata: metadata,
 			Spec:     fmt.Sprintf("%s-%d", wfID, i),
@@ -57,6 +58,7 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 		workflows   []wfOrSleep
 		concurrency int
 		want        []string
+		beforeFn    func(mockMetrics *metrics.MockMetrics)
 		afterFn     func(t *testing.T, createdPods []string)
 	}{
 		"should create a single workflow with a single task": {
@@ -65,6 +67,8 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 			},
 			concurrency: 1,
 			want:        []string{"wf1-0"},
+			beforeFn: func(mockMetrics *metrics.MockMetrics) {
+			},
 		},
 		"should create a single workflow with several tasks": {
 			workflows: []wfOrSleep{
@@ -107,22 +111,33 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			createdPods := []string{}
 			testLock := sync.Mutex{}
-			k := &kubernetes.MockKubernetes{}
-			k.On("CreateResource", mock.Anything, mock.AnythingOfType("string")).Return(func(_ context.Context, spec interface{}) error {
+			mockKubernetes := kubernetes.NewMockKubernetes(t)
+			mockMetrics := metrics.NewMockMetrics(t)
+			mockKubernetes.EXPECT().CreateResource(mock.Anything, task.TypeCreatePod, mock.AnythingOfType("string")).RunAndReturn(func(_ context.Context, _ task.Type, spec interface{}) error {
 				s, _ := spec.(string)
 				testLock.Lock()
 				createdPods = append(createdPods, s)
 				testLock.Unlock()
 				return nil
 			})
+			mockMetrics.EXPECT().ObserveWorkflowMetrics(mock.AnythingOfType("*workflow.Workflow"))
 			runtimes := map[string]runtime.Runtime{
 				"some-rt": runtime.New(runtime.Options{
-					Kubernetes: k,
+					Kubernetes: mockKubernetes,
 				}),
 			}
 			log := logger.New(logger.Options{})
 			wg := &sync.WaitGroup{}
-			tq := New(runtimes, log, wg, monitoring.NewEmpty(), tt.concurrency, 100)
+			opts := &Options{
+				Runtimes:    runtimes,
+				Log:         log,
+				WG:          wg,
+				Monitor:     monitoring.NewEmpty(),
+				Metrics:     mockMetrics,
+				Concurrency: tt.concurrency,
+				BufferSize:  100,
+			}
+			tq := New(opts)
 			tq.Start(context.Background())
 			for _, tOrS := range tt.workflows {
 				if tOrS.wf != nil {

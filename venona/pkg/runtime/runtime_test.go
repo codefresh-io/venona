@@ -38,7 +38,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 				Spec: "some spec",
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
-				k.On("CreateResource", mock.Anything, "some spec").Return(nil)
+				k.EXPECT().CreateResource(mock.Anything, task.TypeCreatePVC, "some spec").Return(nil)
 			},
 		},
 		"should successfully create a resource on TypeCreatePod task": {
@@ -47,7 +47,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 				Spec: "some spec",
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
-				k.On("CreateResource", mock.Anything, "some spec").Return(nil)
+				k.EXPECT().CreateResource(mock.Anything, task.TypeCreatePod, "some spec").Return(nil)
 			},
 		},
 		"should successfully delete a resource on TypeDeletePVC task": {
@@ -59,7 +59,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 				},
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
-				k.On("DeleteResource", mock.Anything, kubernetes.DeleteOptions{
+				k.EXPECT().DeleteResource(mock.Anything, kubernetes.DeleteOptions{
 					Kind:      task.TypeDeletePVC,
 					Name:      "some-name",
 					Namespace: "some-namespace",
@@ -75,7 +75,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 				},
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
-				k.On("DeleteResource", mock.Anything, kubernetes.DeleteOptions{
+				k.EXPECT().DeleteResource(mock.Anything, kubernetes.DeleteOptions{
 					Kind:      task.TypeDeletePod,
 					Name:      "some-name",
 					Namespace: "some-namespace",
@@ -94,7 +94,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 				Spec: "some spec",
 			},
 			beforeFn: func(k *kubernetes.MockKubernetes) {
-				k.On("CreateResource", mock.Anything, "some spec").Return(errors.New("some error"))
+				k.EXPECT().CreateResource(mock.Anything, task.TypeCreatePod, "some spec").Return(errors.New("some error"))
 			},
 			wantErr: "failed creating resource: some error",
 		},
@@ -115,7 +115,7 @@ func Test_runtime_HandleTask(t *testing.T) {
 			},
 			wantErr: "failed deleting resource: some error",
 			beforeFn: func(k *kubernetes.MockKubernetes) {
-				k.On("DeleteResource", mock.Anything, kubernetes.DeleteOptions{
+				k.EXPECT().DeleteResource(mock.Anything, kubernetes.DeleteOptions{
 					Kind:      task.TypeDeletePod,
 					Name:      "some-name",
 					Namespace: "some-namespace",
@@ -125,13 +125,13 @@ func Test_runtime_HandleTask(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			k := &kubernetes.MockKubernetes{}
+			mockKubernetes := kubernetes.NewMockKubernetes(t)
 			if tt.beforeFn != nil {
-				tt.beforeFn(k)
+				tt.beforeFn(mockKubernetes)
 			}
 
 			r := runtime{
-				client: k,
+				client: mockKubernetes,
 			}
 			err := r.HandleTask(context.Background(), tt.task)
 			if err != nil || tt.wantErr != "" {

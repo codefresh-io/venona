@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	v1 "k8s.io/api/core/v1"
@@ -37,7 +37,7 @@ var kubeDecode = scheme.Codecs.UniversalDeserializer().Decode
 type (
 	// Kubernetes API client
 	Kubernetes interface {
-		CreateResource(ctx context.Context, spec interface{}) error
+		CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error
 		DeleteResource(ctx context.Context, opts DeleteOptions) error
 	}
 	// Options for Kubernetes
@@ -49,6 +49,7 @@ type (
 		Insecure bool
 		QPS      float32
 		Burst    int
+		Metrics  metrics.Metrics
 	}
 
 	// DeleteOptions to delete resource from the cluster
@@ -59,17 +60,17 @@ type (
 	}
 
 	kube struct {
-		client kubernetes.Interface
-		logger logger.Logger
+		client  kubernetes.Interface
+		metrics metrics.Metrics
 	}
 )
 
 // NewInCluster build Kubernetes API based on local in cluster runtime
-func NewInCluster(qps float32, burst int) (Kubernetes, error) {
+func NewInCluster(qps float32, burst int, metrics metrics.Metrics) (Kubernetes, error) {
 	client, err := buildKubeInCluster(qps, burst)
 	return &kube{
-		client: client,
-		logger: logger.New(logger.Options{}),
+		client:  client,
+		metrics: metrics,
 	}, err
 }
 
@@ -81,20 +82,13 @@ func New(opts Options) (Kubernetes, error) {
 
 	client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure, opts.QPS, opts.Burst)
 	return &kube{
-		client: client,
-		logger: logger.New(logger.Options{}),
+		client:  client,
+		metrics: opts.Metrics,
 	}, err
 }
 
-// NewWithClient builds a kubernetes API using the given k8s client interface
-func NewWithClient(client kubernetes.Interface) Kubernetes {
-	return &kube{
-		client: client,
-		logger: logger.New(logger.Options{}),
-	}
-}
-
-func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
+func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error {
+	start := time.Now()
 	bytes, err := json.Marshal(spec)
 	if err != nil {
 		return fmt.Errorf("failed marshalling when creating resource: %w", err)
@@ -105,7 +99,6 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 		return fmt.Errorf("failed decoding when creating resource: %w", err)
 	}
 
-	start := time.Now()
 	switch obj := obj.(type) {
 	case *v1.PersistentVolumeClaim:
 		_, err = k.client.CoreV1().PersistentVolumeClaims(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
@@ -113,24 +106,14 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 			return fmt.Errorf("failed creating persistent volume claims \"%s\\%s\": %w", obj.Namespace, obj.Name, err)
 		}
 
-		k.logger.Info("PersistentVolumeClaim has been created",
-			"namespace", obj.Namespace,
-			"name", obj.Name,
-			"duration", time.Now().Sub(start),
-		)
-
+		k.metrics.ObserveK8sMetrics(taskType, obj.Namespace, obj.Name, start)
 	case *v1.Pod:
 		_, err = k.client.CoreV1().Pods(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
 			return fmt.Errorf("failed creating pod \"%s\\%s\": %w", obj.Namespace, obj.Name, err)
 		}
 
-		k.logger.Info("Pod has been created",
-			"namespace", obj.Namespace,
-			"name", obj.Name,
-			"duration", time.Now().Sub(start),
-		)
-
+		k.metrics.ObserveK8sMetrics(taskType, obj.Namespace, obj.Name, start)
 	default:
 		return fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind())
 	}
@@ -146,29 +129,16 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 		if err != nil {
 			return fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 		}
-
-		k.logger.Info("PersistentVolumeClaim has been deleted",
-			"namespace", opts.Namespace,
-			"name", opts.Name,
-			"duration", time.Now().Sub(start),
-		)
-
 	case task.TypeDeletePod:
 		err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 		}
-
-		k.logger.Info("Pod has been deleted",
-			"namespace", opts.Namespace,
-			"name", opts.Name,
-			"duration", time.Now().Sub(start),
-		)
-
 	default:
 		return fmt.Errorf("failed deleting resource of type %s", opts.Kind)
 	}
 
+	k.metrics.ObserveK8sMetrics(opts.Kind, opts.Namespace, opts.Name, start)
 	return nil
 }
 

@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"path"
 
-	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
 )
 
@@ -49,7 +48,6 @@ type (
 		Host       string
 		Token      string
 		AgentID    string
-		Logger     logger.Logger
 		HTTPClient RequestDoer
 		Headers    http.Header
 	}
@@ -58,7 +56,6 @@ type (
 		host       string
 		token      string
 		agentID    string
-		logger     logger.Logger
 		httpClient RequestDoer
 		headers    http.Header
 	}
@@ -75,7 +72,6 @@ func New(opts Options) Codefresh {
 		agentID:    opts.AgentID,
 		httpClient: opts.HTTPClient,
 		host:       host,
-		logger:     opts.Logger,
 		token:      opts.Token,
 		headers:    opts.Headers,
 	}
@@ -83,7 +79,6 @@ func New(opts Options) Codefresh {
 
 // Tasks get from Codefresh all latest tasks
 func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
-	c.logger.Debug("Requesting tasks")
 	res, err := c.doRequest(ctx, "GET", nil, "api", "agent", c.agentID, "tasks")
 	if err != nil {
 		return nil, err
@@ -104,7 +99,6 @@ func (c cf) Host() string {
 
 // ReportStatus updates the agent entity with given status
 func (c cf) ReportStatus(ctx context.Context, status AgentStatus) error {
-	c.logger.Debug("Reporting status")
 	s, err := status.Marshal()
 	if err != nil {
 		return fmt.Errorf("failed marshalling when reporting status: %w", err)
@@ -166,6 +160,10 @@ func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http
 
 func (c cf) doRequest(ctx context.Context, method string, body io.Reader, apis ...string) ([]byte, error) {
 	req, err := c.prepareRequest(method, body, apis...)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := c.httpClient.Do(req.WithContext(ctx))
 	if err != nil {
 		return nil, err

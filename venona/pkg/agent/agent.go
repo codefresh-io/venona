@@ -27,6 +27,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/queue"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
@@ -49,6 +50,7 @@ type (
 		Monitor                        monitoring.Monitor
 		Concurrency                    int
 		BufferSize                     int
+		Metrics                        metrics.Metrics
 	}
 
 	// Agent holds all the references from Codefresh
@@ -56,15 +58,15 @@ type (
 	Agent struct {
 		id                 string
 		cf                 codefresh.Codefresh
-		runtimes           map[string]runtime.Runtime
 		log                logger.Logger
 		taskPullerTicker   *time.Ticker
 		reportStatusTicker *time.Ticker
-		wfQueue            *queue.WorkflowQueue
+		wfQueue            queue.WorkflowQueue
 		running            bool
 		lastStatus         Status
 		wg                 *sync.WaitGroup
 		monitor            monitoring.Monitor
+		metrics            metrics.Metrics
 	}
 
 	// Status of the agent
@@ -87,7 +89,6 @@ var (
 	errIDRequired               = errors.New("ID options is required")
 	errRuntimesRequired         = errors.New("Runtimes options is required")
 	errLoggerRequired           = errors.New("Logger options is required")
-	errRuntimeNotFound          = errors.New("Runtime environment not found")
 	errFailedToParseAgentTask   = errors.New("Failed to parse agent task spec")
 	errUknownAgentTaskType      = errors.New("Agent task has unknown type")
 	errAgentTaskMalformedParams = errors.New("failed to marshal agent task params")
@@ -109,7 +110,6 @@ func New(opts *Options) (*Agent, error) {
 
 	id := opts.ID
 	cf := opts.Codefresh
-	runtimes := opts.Runtimes
 	log := opts.Logger
 	taskPullerTicker := time.NewTicker(opts.TaskPullingSecondsInterval)
 	reportStatusTicker := time.NewTicker(opts.StatusReportingSecondsInterval)
@@ -120,17 +120,27 @@ func New(opts *Options) (*Agent, error) {
 	}
 
 	httpClient.HTTPClient.Transport = opts.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
+	wfq := queue.New(&queue.Options{
+		Runtimes:    opts.Runtimes,
+		Log:         log,
+		WG:          wg,
+		Monitor:     opts.Monitor,
+		Metrics:     opts.Metrics,
+		Concurrency: opts.Concurrency,
+		BufferSize:  opts.BufferSize,
+	})
 	return &Agent{
 		id:                 id,
 		cf:                 cf,
 		log:                log,
 		taskPullerTicker:   taskPullerTicker,
 		reportStatusTicker: reportStatusTicker,
-		wfQueue:            queue.New(runtimes, log, wg, opts.Monitor, opts.Concurrency, opts.BufferSize),
+		wfQueue:            wfq,
 		running:            false,
 		lastStatus:         Status{},
 		wg:                 wg,
 		monitor:            opts.Monitor,
+		metrics:            opts.Metrics,
 	}, nil
 }
 
@@ -194,13 +204,9 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 				a.wfQueue.Enqueue(workflows[i])
 			}
 
-			if a.wfQueue.Size() > 0 {
-				a.log.Info("done pulling tasks",
-					"agentTasks", len(agentTasks),
-					"workflows", len(workflows),
-					"queueSize", a.wfQueue.Size(),
-				)
-			}
+			size := a.wfQueue.Size()
+			a.metrics.UpdateQueueSize(len(agentTasks), len(workflows), size)
+
 		}
 	}
 }
@@ -226,7 +232,7 @@ func (a *Agent) startStatusReporterRoutine(ctx context.Context) {
 func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) {
 	err := a.cf.ReportStatus(ctx, status)
 	if err != nil {
-		a.log.Error(err.Error())
+		a.log.Error("Failed reporting status", "error", err)
 	}
 }
 
@@ -236,15 +242,16 @@ func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow)
 }
 
 func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
-	a.log.Debug("Requesting tasks from API server")
+	start := time.Now()
 	tasks, err := a.cf.Tasks(ctx)
+	a.metrics.ObserveGetTasks(start)
+
 	if err != nil {
-		a.log.Error(err.Error())
+		a.log.Error("Failed pulling tasks", "error", err)
 		return task.Tasks{}
 	}
 
 	if len(tasks) == 0 {
-		a.log.Debug("No new tasks received")
 		return task.Tasks{}
 	}
 
@@ -261,6 +268,7 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 		t := tasks[i]
 		switch t.Type {
 		case task.TypeAgentTask:
+			t.Timeline.Pulled = pullTime
 			agentTasks = append(agentTasks, t)
 		case task.TypeCreatePod, task.TypeCreatePVC, task.TypeDeletePod, task.TypeDeletePVC:
 			wf, ok := wfMap[t.Metadata.Workflow]
@@ -285,16 +293,12 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 	})
 
 	workflows := []*workflow.Workflow{}
-	ids := []string{}
-	for id, wf := range wfMap {
-		wf.Metadata.Pulled = pullTime
+	for _, wf := range wfMap {
+		wf.Timeline.Pulled = pullTime
 
 		task.SortByType(wf.Tasks)
 		workflows = append(workflows, wf)
-		ids = append(ids, id)
 	}
-
-	a.log.Debug("received workflows", "ids", ids)
 
 	// sort workflows by creationDate
 	sort.SliceStable(workflows, func(i, j int) bool {
@@ -311,16 +315,18 @@ func (a *Agent) handleAgentTask(t *task.Task) {
 		defer a.wg.Done()
 		txn := task.NewTaskTransaction(a.monitor, t.Metadata)
 		defer txn.End()
-		if err := executeAgentTask(t, a.log); err != nil {
+		err := a.executeAgentTask(t)
+
+		if err != nil {
 			a.log.Error(err.Error())
 			txn.NoticeError(err)
 		}
 
-		a.log.Info("finished agent task", "tid", t.Metadata.Workflow)
 	}()
 }
 
-func executeAgentTask(t *task.Task, log logger.Logger) error {
+func (a *Agent) executeAgentTask(t *task.Task) error {
+	t.Timeline.Started = time.Now()
 	specJSON, err := json.Marshal(t.Spec)
 	if err != nil {
 		return errFailedToParseAgentTask
@@ -336,7 +342,9 @@ func executeAgentTask(t *task.Task, log logger.Logger) error {
 		return errUknownAgentTaskType
 	}
 
-	return e(&spec, log)
+	err = e(&spec, a.log)
+	a.metrics.ObserveAgentTaskMetrics(t, spec.Type)
+	return err
 }
 
 func proxyRequest(t *task.AgentTask, log logger.Logger) error {

@@ -1,0 +1,18 @@
+boilerplate-file: ".mockery.boilerplate"
+dir: "{{.InterfaceDirRelative}}"
+filename: "{{.PackageName}}_mock.go"
+inpackage: true
+with-expecter: true
+packages:
+    github.com/codefresh-io/go/venona/pkg/codefresh:
+        interfaces:
+            Codefresh: {}
+    github.com/codefresh-io/go/venona/pkg/kubernetes:
+        interfaces:
+            Kubernetes: {}
+    github.com/codefresh-io/go/venona/pkg/logger:
+        interfaces:
+            Logger: {}
+    github.com/codefresh-io/go/venona/pkg/metrics:
+        interfaces:
+            Metrics: {}

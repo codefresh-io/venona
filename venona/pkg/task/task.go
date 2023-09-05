@@ -43,6 +43,9 @@ type (
 		Type     Type        `json:"type"`
 		Metadata Metadata    `json:"metadata"`
 		Spec     interface{} `json:"spec"`
+
+		// only used in AgentTasks
+		Timeline Timeline
 	}
 
 	// Metadata options
@@ -50,7 +53,12 @@ type (
 		CreatedAt string `json:"createdAt"`
 		ReName    string `json:"reName"`
 		Workflow  string `json:"workflow"`
-		Pulled    time.Time
+	}
+
+	// Timeline values
+	Timeline struct {
+		Pulled  time.Time
+		Started time.Time
 	}
 
 	// AgentTask describes a task of type "AgentTask"

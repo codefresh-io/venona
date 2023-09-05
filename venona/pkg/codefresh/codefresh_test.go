@@ -19,8 +19,6 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/logger"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,28 +60,27 @@ func TestNew(t *testing.T) {
 }
 
 func Test_cf_prepareURL(t *testing.T) {
-	type fields struct {
+	type args struct {
 		host       string
 		token      string
 		agentID    string
-		logger     logger.Logger
 		httpClient RequestDoer
 	}
 	tests := map[string]struct {
-		fields  fields
+		fields  args
 		paths   []string
 		want    *url.URL
 		wantErr bool
 	}{
 		"Reject when parsing the URL faile": {
-			fields: fields{
+			fields: args{
 				host: "123://sdd",
 			},
 			wantErr: true,
 		},
 		"Append path to the host": {
 			paths: []string{"123", "123"},
-			fields: fields{
+			fields: args{
 				host: "http://url",
 			},
 			wantErr: false,
@@ -91,7 +88,7 @@ func Test_cf_prepareURL(t *testing.T) {
 		},
 		"Escape paths": {
 			paths: []string{"docker:desktop/server"},
-			fields: fields{
+			fields: args{
 				host: "http://url",
 			},
 			wantErr: false,
@@ -104,7 +101,6 @@ func Test_cf_prepareURL(t *testing.T) {
 				host:       tt.fields.host,
 				token:      tt.fields.token,
 				agentID:    tt.fields.agentID,
-				logger:     tt.fields.logger,
 				httpClient: tt.fields.httpClient,
 			}
 			url, err := c.prepareURL(tt.paths...)

@@ -20,7 +20,7 @@ steps:
   download_dependencies: &deps
     title: Download Dependencies
     stage: Test
-    image: quay.io/codefresh/venona-tester:latest
+    image: quay.io/codefresh/venona-tester:1.20
     environment:
     - GO111MODULE=on
     - GOSUMDB=off

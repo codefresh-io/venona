@@ -76,15 +76,11 @@ func (t *transaction) NewSegment(r *http.Request) monitoring.Segment {
 }
 
 func (t *transaction) NewSegmentByName(name string) monitoring.Segment {
-	return &segment{nr.StartSegment(t.t, name)}
+	return &segment{t.t.StartSegment(name)}
 }
 
 func (t *transaction) AddAttribute(key string, val interface{}) {
 	t.t.AddAttribute(key, val)
-}
-
-func (t *transaction) NewRoundTripper(rt http.RoundTripper) http.RoundTripper {
-	return t.NewRoundTripper(rt)
 }
 
 func (t *transaction) End() {

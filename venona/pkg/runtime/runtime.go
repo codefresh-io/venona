@@ -51,7 +51,7 @@ func (r runtime) HandleTask(ctx context.Context, t *task.Task) error {
 
 	switch t.Type {
 	case task.TypeCreatePVC, task.TypeCreatePod:
-		err = r.client.CreateResource(ctx, t.Spec)
+		err = r.client.CreateResource(ctx, t.Type, t.Spec)
 		if err != nil {
 			return fmt.Errorf("failed creating resource: %w", err) // TODO: Return already executed tasks in order to terminate them
 		}

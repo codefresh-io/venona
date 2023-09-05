@@ -22,23 +22,25 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gorilla/mux"
 )
 
 var (
-	errAlreadyRunning  = errors.New("Server already running")
-	errAlreadyStopped  = errors.New("Server already stopped")
-	errOptionsRequired = errors.New("Options required")
-	errLoggerRequired  = errors.New("Logger is required")
+	errAlreadyRunning = errors.New("Server already running")
+	errAlreadyStopped = errors.New("Server already stopped")
+	errLoggerRequired = errors.New("Logger is required")
 )
 
 type (
 	// Options for creating a new server instance
 	Options struct {
-		Port    string
-		Logger  logger.Logger
-		Monitor monitoring.Monitor
+		Port            string
+		Logger          logger.Logger
+		Monitor         monitoring.Monitor
+		MetricsRegistry *prometheus.Registry
 	}
 
 	// Server is an HTTP server that expose API
@@ -65,6 +67,8 @@ func New(opts *Options) (*Server, error) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
 	})
+
+	r.Handle("/metrics", promhttp.HandlerFor(opts.MetricsRegistry, promhttp.HandlerOpts{Registry: opts.MetricsRegistry}))
 
 	srv := &http.Server{
 		Addr:              opts.Port,

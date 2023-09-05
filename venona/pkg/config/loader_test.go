@@ -20,71 +20,28 @@ import (
 	"testing"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
-	"github.com/codefresh-io/go/venona/pkg/mocks"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
-
-type (
-	mockLoggerOpts struct {
-		method  string
-		args    []interface{}
-		returns []interface{}
-	}
-)
-
-func mockLogger(opts ...mockLoggerOpts) *mocks.Logger {
-	m := &mocks.Logger{}
-	if len(opts) == 0 {
-		m.On(mock.Anything, mock.Anything).Return(nil)
-		m.On(mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		m.On(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-	}
-	for _, o := range opts {
-		m.On(o.method, o.args...).Return(o.returns...)
-	}
-	return m
-}
 
 func TestLoad(t *testing.T) {
 	type args struct {
 		dir     string
 		pattern string
-		logger  logger.Logger
 	}
-	tests := []struct {
-		name         string
+	tests := map[string]struct {
 		args         args
 		want         map[string]Config
-		wantErr      bool
+		wantErr      string
 		fileReadFunc func(string) ([]byte, error)
 		walkFileFunc func(string, filepath.WalkFunc) error
 	}{
-		{
-			name: "Success and return empty list when file name does not match",
+		"Success and return empty list when file name does not match": {
 			args: args{
-				dir: "location",
-				logger: mockLogger(
-					mockLoggerOpts{
-						method: "Debug",
-						args: []interface{}{
-							"File ignored, regexp does not match",
-							"regexp",
-							"some-pattern",
-							"file",
-							"file",
-						},
-					},
-				),
+				dir:     "location",
 				pattern: "some-pattern",
 			},
-			wantErr: false,
-			want:    map[string]Config{},
+			want: map[string]Config{},
 			walkFileFunc: func(root string, fn filepath.WalkFunc) error {
 				return fn("some-path", &info{
 					name:  "file",
@@ -95,14 +52,11 @@ func TestLoad(t *testing.T) {
 				return []byte{}, nil
 			},
 		},
-		{
-			name: "return config map from matching file",
+		"return config map from matching file": {
 			args: args{
 				dir:     "location",
-				logger:  mockLogger(),
 				pattern: ".*",
 			},
-			wantErr: false,
 			want: map[string]Config{
 				"location/file.a.yaml": {},
 			},
@@ -117,18 +71,20 @@ func TestLoad(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			defer func() {
 				readfile = os.ReadFile
 				walkFilePath = filepath.Walk
 			}()
 			readfile = tt.fileReadFunc
 			walkFilePath = tt.walkFileFunc
-			got, err := Load(tt.args.dir, tt.args.pattern, tt.args.logger)
-			if tt.wantErr {
-				assert.Error(t, err)
+			got, err := Load(tt.args.dir, tt.args.pattern, logger.New(logger.Options{}))
+			if err != nil || tt.wantErr != "" {
+				assert.EqualError(t, err, tt.wantErr)
+				return
 			}
+
 			assert.Equal(t, tt.want, got)
 		})
 	}

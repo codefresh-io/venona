@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -28,12 +29,31 @@ import (
 )
 
 type (
-	// WorkflowQueue manages a map of workflow (id) -> workflow
-	WorkflowQueue struct {
+	// WorkflowQueue handles incoming workflow batch tasks
+	WorkflowQueue interface {
+		Start(ctx context.Context)
+		Stop()
+		Size() int
+		Enqueue(wf *workflow.Workflow)
+	}
+
+	// Options to create a new WorkflowQueue
+	Options struct {
+		Runtimes    map[string]runtime.Runtime
+		Log         logger.Logger
+		WG          *sync.WaitGroup
+		Monitor     monitoring.Monitor
+		Metrics     metrics.Metrics
+		Concurrency int
+		BufferSize  int
+	}
+
+	wfQueueImpl struct {
 		runtimes        map[string]runtime.Runtime
 		log             logger.Logger
 		wg              *sync.WaitGroup
 		monitor         monitoring.Monitor
+		metrics         metrics.Metrics
 		queue           chan *workflow.Workflow
 		concurrency     int
 		stop            []chan bool
@@ -42,26 +62,26 @@ type (
 	}
 )
 
-var (
-	errRuntimeNotFound = errors.New("Runtime environment not found")
-)
+var errRuntimeNotFound = errors.New("Runtime environment not found")
 
 // New creates a new TaskQueue instance
-func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor, concurrency, bufferSize int) *WorkflowQueue {
-	return &WorkflowQueue{
-		runtimes:        runtimes,
-		log:             log,
-		wg:              wg,
-		monitor:         monitor,
-		queue:           make(chan *workflow.Workflow, bufferSize),
-		concurrency:     concurrency,
-		stop:            make([]chan bool, concurrency),
+func New(opts *Options) WorkflowQueue {
+	return &wfQueueImpl{
+		runtimes:        opts.Runtimes,
+		log:             opts.Log,
+		wg:              opts.WG,
+		monitor:         opts.Monitor,
+		metrics:         opts.Metrics,
+		queue:           make(chan *workflow.Workflow, opts.BufferSize),
+		concurrency:     opts.Concurrency,
+		stop:            make([]chan bool, opts.Concurrency),
 		activeWorkflows: make(map[string]struct{}),
 	}
 }
 
 // Start creates the workflow handlers that will handle the incoming Workflows
-func (wfq *WorkflowQueue) Start(ctx context.Context) {
+func (wfq *wfQueueImpl) Start(ctx context.Context) {
+	wfq.log.Info("starting workflow queue", "concurrency", wfq.concurrency)
 	for i := 0; i < wfq.concurrency; i++ {
 		stopChan := make(chan bool, 1)
 		wfq.stop[i] = stopChan
@@ -72,24 +92,23 @@ func (wfq *WorkflowQueue) Start(ctx context.Context) {
 }
 
 // Stop sends a signal to each of the handler to notify it to stop once the queue is empty
-func (wfq *WorkflowQueue) Stop() {
+func (wfq *wfQueueImpl) Stop() {
 	for i := 0; i < wfq.concurrency; i++ {
 		wfq.stop[i] <- true
 	}
 }
 
 // Size returns the current size of the queue (used for logs)
-func (wfq *WorkflowQueue) Size() int {
+func (wfq *wfQueueImpl) Size() int {
 	return len(wfq.queue)
 }
 
 // Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
-func (wfq *WorkflowQueue) Enqueue(wf *workflow.Workflow) {
+func (wfq *wfQueueImpl) Enqueue(wf *workflow.Workflow) {
 	wfq.queue <- wf
 }
 
-func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool, id int) {
-	wfq.log.Info("starting workflow handler", "handlerId", id)
+func (wfq *wfQueueImpl) handleChannel(ctx context.Context, stopChan chan bool, id int) {
 	ctxCancelled := false
 
 	defer wfq.wg.Done()
@@ -113,23 +132,7 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 			wfq.mutex.Unlock()
 
 			wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow)
-			start := time.Now()
 			wfq.handleWorkflow(ctx, wf)
-			end := time.Now()
-			created, err := time.Parse(time.RFC3339, wf.Metadata.CreatedAt)
-			if err != nil {
-				wfq.log.Error("failed parsing CreatedAt", "handlerId", id, "workflow", wf.Metadata.Workflow, "createdAt", wf.Metadata.CreatedAt)
-			}
-
-			wfq.log.Info("Done handling workflow",
-				"handlerId", id,
-				"workflow", wf.Metadata.Workflow,
-				"runtime", wf.Metadata.ReName,
-				"time since creation", end.Sub(created),
-				"time in runner", end.Sub(wf.Metadata.Pulled),
-				"processing time", end.Sub(start),
-			)
-
 			wfq.mutex.Lock()
 			delete(wfq.activeWorkflows, wf.Metadata.Workflow)
 			wfq.mutex.Unlock()
@@ -138,12 +141,14 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 				wfq.log.Info("stopped workflow handler", "handlerId", id)
 				return
 			}
+
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
 }
 
-func (wfq *WorkflowQueue) handleWorkflow(ctx context.Context, wf *workflow.Workflow) {
+func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflow) {
+	wf.Timeline.Started = time.Now()
 	txn := task.NewTaskTransaction(wfq.monitor, wf.Metadata)
 	defer txn.End()
 
@@ -163,4 +168,6 @@ func (wfq *WorkflowQueue) handleWorkflow(ctx context.Context, wf *workflow.Workf
 			txn.NoticeError(errRuntimeNotFound)
 		}
 	}
+
+	wfq.metrics.ObserveWorkflowMetrics(wf)
 }

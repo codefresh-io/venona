@@ -23,14 +23,27 @@ import (
 type (
 	// Workflow is a collection of one or more tasks related to the same runtime/workflowId (to be executed sequensially by the handlers)
 	Workflow struct {
+		Type     Type
 		Metadata task.Metadata
+		Timeline task.Timeline
 		Tasks    []*task.Task
 	}
+
+	// Type is the type of the workflow batch create/terminate/both
+	Type string
+)
+
+const (
+	workflowTypeNone      Type = ""
+	workflowTypeCreate    Type = "create"
+	workflowTypeTerminate Type = "terminate"
+	workflowTypeBoth      Type = "both"
 )
 
 // New creates a new empty Workflow instance
 func New(metadata task.Metadata) *Workflow {
 	return &Workflow{
+		Type:     workflowTypeNone,
 		Metadata: metadata,
 		Tasks:    make([]*task.Task, 0, 3),
 	}
@@ -43,7 +56,14 @@ func (wf *Workflow) AddTask(t *task.Task) error {
 	}
 
 	if wf.Metadata.CreatedAt > t.Metadata.CreatedAt {
-		wf.Metadata = t.Metadata
+		wf.Metadata.CreatedAt = t.Metadata.CreatedAt
+	}
+
+	wfType := workflowTypeFromTaskType(t.Type)
+	if wf.Type == workflowTypeNone {
+		wf.Type = wfType
+	} else if wf.Type != wfType {
+		wf.Type = workflowTypeBoth
 	}
 
 	wf.Tasks = append(wf.Tasks, t)
@@ -53,4 +73,15 @@ func (wf *Workflow) AddTask(t *task.Task) error {
 // Less compares two workflows by their CreatedAt values
 func Less(wf1 Workflow, wf2 Workflow) bool {
 	return wf1.Metadata.CreatedAt < wf2.Metadata.CreatedAt
+}
+
+func workflowTypeFromTaskType(t task.Type) Type {
+	switch t {
+	case task.TypeCreatePod, task.TypeCreatePVC:
+		return workflowTypeCreate
+	case task.TypeDeletePod, task.TypeDeletePVC:
+		return workflowTypeTerminate
+	default:
+		return workflowTypeNone
+	}
 }

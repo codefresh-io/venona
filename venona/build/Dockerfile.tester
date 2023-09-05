@@ -1,14 +1,12 @@
-FROM golang:1.19-alpine3.17 AS os
+# quay.io/codefresh/venona-tester
+FROM golang:1.20-alpine3.18 AS os
 
 RUN apk -U add --no-cache ca-certificates git make gcc g++ bash && update-ca-certificates
-RUN go install github.com/client9/misspell/cmd/misspell@latest && \
-    go install github.com/fzipp/gocyclo/cmd/gocyclo@latest && \
-    go install golang.org/x/lint/golint@latest && \
-    go install github.com/securego/gosec/v2/cmd/gosec@latest && \
-    go install github.com/google/addlicense@latest && \
-    go install github.com/github/hub@latest
+RUN go install github.com/client9/misspell/cmd/misspell@v0.3.4 && \
+    go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0 && \
+    go install github.com/securego/gosec/v2/cmd/gosec@v2.16.0 && \
+    go install github.com/google/addlicense@v1.1.1 && \
+    go install github.com/github/hub@v2.11.2+incompatible
 
 RUN apk add curl
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin
-
-# quay.io/codefresh/venona-tester
