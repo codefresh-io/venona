@@ -80,7 +80,7 @@ upload-coverage:
 	@./scripts/codecov.sh -t $(CODECOV_TOKEN)
 
 $(GOBIN)/mockery:
-	@go install github.com/vektra/mockery/v2@v2.32.0
+	@go install github.com/vektra/mockery/v2@v2.33.1
 	@mockery --version
 
 $(GOBIN)/golangci-lint:
