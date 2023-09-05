@@ -29,12 +29,13 @@ import (
 type (
 	// TaskQueue manages a map of workflow (id) -> tasks
 	TaskQueue struct {
-		runtimes map[string]runtime.Runtime
-		log      logger.Logger
-		wg       *sync.WaitGroup
-		mutex    sync.Mutex
-		monitor  monitoring.Monitor
-		tasks    map[string]chan *task.Task
+		runtimes  map[string]runtime.Runtime
+		log       logger.Logger
+		wg        *sync.WaitGroup
+		mutex     sync.Mutex
+		monitor   monitoring.Monitor
+		syncTimer *time.Ticker
+		tasks     map[string]chan *task.Task
 	}
 )
 
@@ -47,11 +48,12 @@ var (
 // New creates a new TaskQueue instance
 func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor) *TaskQueue {
 	return &TaskQueue{
-		runtimes: runtimes,
-		log:      log,
-		wg:       wg,
-		monitor:  monitor,
-		tasks:    make(map[string]chan *task.Task),
+		runtimes:  runtimes,
+		log:       log,
+		wg:        wg,
+		monitor:   monitor,
+		syncTimer: time.NewTicker(1 * time.Second),
+		tasks:     make(map[string]chan *task.Task),
 	}
 }
 
@@ -60,7 +62,6 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 	workflow := t.Metadata.Workflow
 	tq.mutex.Lock()
 	c, ok := tq.tasks[workflow]
-	tq.mutex.Unlock()
 	if !ok {
 		tq.log.Info("Creating new queue", "workflow", workflow)
 		c = make(chan *task.Task, defaultWfTaskBufferSize)
@@ -69,10 +70,11 @@ func (tq *TaskQueue) Enqueue(ctx context.Context, t *task.Task) {
 		go tq.handleChannel(ctx, c, workflow)
 	}
 
+	tq.mutex.Unlock()
 	select {
 	case c <- t:
 		// sent task to queue
-	case <- time.After(5 * time.Second):
+	case <-time.After(5 * time.Second):
 		tq.log.Error("Send operation timed out", "workflow", workflow)
 	}
 }
@@ -81,6 +83,9 @@ func (tq *TaskQueue) handleChannel(ctx context.Context, c chan *task.Task, workf
 	var txn monitoring.Transaction
 
 	defer tq.wg.Done()
+	tq.log.Info("running goroutine before sync timer", "workflow", workflow)
+	<-tq.syncTimer.C
+	tq.log.Info("running goroutine after sync timer", "workflow", workflow)
 	for {
 		select {
 		case <-ctx.Done():
@@ -107,7 +112,7 @@ func (tq *TaskQueue) handleChannel(ctx context.Context, c chan *task.Task, workf
 			{
 				// making sure the channel is still empty after the lock
 				if len(c) == 0 {
-					tq.log.Info("Wofkrlow tasks channel empty, stopping task handler", "workflow", workflow)
+					tq.log.Info("workflow tasks channel empty, stopping task handler", "workflow", workflow)
 					delete(tq.tasks, workflow)
 					close(c)
 					tq.mutex.Unlock()

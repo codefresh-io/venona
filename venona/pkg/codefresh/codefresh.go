@@ -88,10 +88,12 @@ func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	tasks, err := task.UnmarshalTasks(res)
 	if err != nil {
 		return nil, err
 	}
+
 	return tasks, nil
 }
 

@@ -140,8 +140,6 @@ func (a *Agent) Start(ctx context.Context) error {
 	a.running = true
 	a.log.Info("Starting agent")
 
-	// only 1 for the wfTaskHandlerRoutine, the other 2 don't need to be waited on
-	a.wg.Add(1)
 	go a.startTaskPullerRoutine(ctx)
 	go a.startStatusReporterRoutine(ctx)
 
@@ -241,7 +239,23 @@ func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 	}
 
 	a.log.Info("Received new tasks", "len", len(tasks))
+	a.log.Debug("List of workflow ids", "ids", tasksToIds(tasks))
+
 	return tasks
+}
+
+func tasksToIds(tasks task.Tasks) []string {
+	keys := make(map[string]bool)
+	res := []string{}
+	for _, t := range tasks {
+		workflow := t.Metadata.Workflow
+		if _, ok := keys[workflow]; !ok {
+			res = append(res, workflow)
+			keys[workflow] = true
+		}
+	}
+
+	return res
 }
 
 func sortTasks(tasks task.Tasks) {

@@ -117,10 +117,10 @@ func TestTaskQueue_Enqueue(t *testing.T) {
 				{t: makePodCreationTask("wf1", "pod2")},
 				{t: makePodCreationTask("wf2", "pod1")},
 				{sleep: time.Millisecond * 100},
-				{t: makePodCreationTask("wf1", "pod1-retry-1")},
-				{t: makePodCreationTask("wf1", "pod2-retry-1")},
 				{t: makePodDeletionTask("wf1", "pod1")},
+				{t: makePodCreationTask("wf1", "pod1-retry-1")},
 				{t: makePodDeletionTask("wf1", "pod2")},
+				{t: makePodCreationTask("wf1", "pod2-retry-1")},
 				{t: makePodDeletionTask("wf2", "pod1")},
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
@@ -174,11 +174,14 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 	tq := New(runtimes, log, wg, monitoring.NewEmpty())
 
 	doneTasks := make(map[string]int)
+	testLock := sync.Mutex{}
 	wf1Chan := make(chan bool)
 	wf2Chan := make(chan bool)
 	k.On("CreateResource", mock.Anything, mock.AnythingOfType("queue.dummySpec")).Return(func(_ context.Context, spec interface{}) error {
 		s, _ := spec.(dummySpec)
+		testLock.Lock()
 		doneTask := doneTasks[s.workflow]
+		testLock.Unlock()
 		assert.Equal(t, doneTask+1, s.order, "workflow %s", s.workflow)
 		if s.workflow == "wf1" && s.order == 3 {
 			// wait for a signal before continuing with the 3rd wf1 task
@@ -190,12 +193,15 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 			wf2Chan <- true
 		}
 
+		testLock.Lock()
 		doneTasks[s.workflow] = s.order
+		testLock.Unlock()
 		return nil
 	})
 
 	ctx := context.Background()
-	// queue 11 more tasks after it, to fill up wf1 channel
+	// queue 20 tasks for wf1, to fill up wf1 channel (but not overflow it)
+	// the 3rd will hang until later
 	for i := 1; i < 21; i++ {
 		tq.Enqueue(ctx, &task.Task{
 			Type: task.TypeCreatePod,
@@ -225,8 +231,11 @@ func TestTaskQueue_NoDeadlock(t *testing.T) {
 		})
 	}
 
+	// wait for wf2 to finish all 3 tasks
 	<-wf2Chan
+	// signal 3rd task of wf1 to stop hanging
 	wf1Chan <- true
+	// wait until all task queues are empty
 	tq.wg.Wait()
 	assert.Equal(t, doneTasks["wf1"], 20, "wf1 was not completed")
 	assert.Equal(t, doneTasks["wf2"], 3, "wf2 was not completed")
