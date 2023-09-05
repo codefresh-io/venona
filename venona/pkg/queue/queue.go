@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -52,7 +53,7 @@ func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGr
 		log:         log,
 		wg:          wg,
 		monitor:     monitor,
-		queue:       make(chan *workflow.Workflow),
+		queue:       make(chan *workflow.Workflow, 1000),
 		concurrency: concurrency,
 		stop:        make([]chan bool, concurrency),
 	}
@@ -93,7 +94,21 @@ func (wfq *WorkflowQueue) handleChannel(ctx context.Context, stopChan chan bool,
 			ctxCancelled = true
 		case wf := <-wfq.queue:
 			wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow)
+			start := time.Now()
 			wfq.handleWorkflow(ctx, wf)
+			end := time.Now()
+			created, err := time.Parse(time.RFC3339, wf.Metadata.CreatedAt)
+			if err != nil {
+				wfq.log.Error("failed parsing CreatedAt", "handlerId", id, "workflow", wf.Metadata.Workflow, "createdAt", wf.Metadata.CreatedAt)
+			}
+
+			wfq.log.Info("Done handling workflow",
+				"workflow", wf.Metadata.Workflow,
+				"runtime", wf.Metadata.ReName,
+				"time in runner", end.Sub(wf.Metadata.Pulled),
+				"processing time", end.Sub(start),
+				"time since creation", end.Sub(created),
+			)
 		default:
 			if ctxCancelled {
 				wfq.log.Info("stopped workflow handler", "handlerId", id)
