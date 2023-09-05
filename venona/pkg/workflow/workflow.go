@@ -16,6 +16,7 @@ package workflow
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/task"
 )
@@ -68,6 +69,14 @@ func (wf *Workflow) AddTask(t *task.Task) error {
 
 	wf.Tasks = append(wf.Tasks, t)
 	return nil
+}
+
+func (wf *Workflow) GetLatency() (sinceCreation, inRunner, processed time.Duration) {
+	end := time.Now()
+	created, _ := time.Parse(time.RFC3339, wf.Metadata.CreatedAt)
+	sinceCreation = end.Sub(created)
+	inRunner, processed = wf.Timeline.GetLatency(end)
+	return
 }
 
 // Less compares two workflows by their CreatedAt values

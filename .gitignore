@@ -43,3 +43,6 @@ venona/venona
 **/charts/**/charts
 **/dry-run.yaml
 **/values-dev.yaml
+
+# coverage
+**/cover

@@ -105,3 +105,17 @@ func SortByType(tasks []*Task) {
 		return order[tasks[i].Type] < order[tasks[j].Type]
 	})
 }
+
+func (t *Task) GetLatency() (sinceCreation, inRunner, processed time.Duration) {
+	end := time.Now()
+	created, _ := time.Parse(time.RFC3339, t.Metadata.CreatedAt)
+	sinceCreation = end.Sub(created)
+	inRunner, processed = t.Timeline.GetLatency(end)
+	return
+}
+
+func (t *Timeline) GetLatency(end time.Time) (inRunner, processed time.Duration) {
+	inRunner = end.Sub(t.Pulled)
+	processed = end.Sub(t.Started)
+	return
+}

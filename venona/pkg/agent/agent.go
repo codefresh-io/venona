@@ -50,7 +50,6 @@ type (
 		Monitor                        monitoring.Monitor
 		Concurrency                    int
 		BufferSize                     int
-		Metrics                        metrics.Metrics
 	}
 
 	// Agent holds all the references from Codefresh
@@ -66,7 +65,6 @@ type (
 		lastStatus         Status
 		wg                 *sync.WaitGroup
 		monitor            monitoring.Monitor
-		metrics            metrics.Metrics
 	}
 
 	// Status of the agent
@@ -125,7 +123,6 @@ func New(opts *Options) (*Agent, error) {
 		Log:         log,
 		WG:          wg,
 		Monitor:     opts.Monitor,
-		Metrics:     opts.Metrics,
 		Concurrency: opts.Concurrency,
 		BufferSize:  opts.BufferSize,
 	})
@@ -140,7 +137,6 @@ func New(opts *Options) (*Agent, error) {
 		lastStatus:         Status{},
 		wg:                 wg,
 		monitor:            opts.Monitor,
-		metrics:            opts.Metrics,
 	}, nil
 }
 
@@ -205,8 +201,17 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			}
 
 			size := a.wfQueue.Size()
-			a.metrics.UpdateQueueSize(len(agentTasks), len(workflows), size)
+			agentTasksLen := len(agentTasks)
+			wfTasksLen := len(workflows)
+			if agentTasksLen > 0 || wfTasksLen > 0 || size > 0 {
+				a.log.Info("done pulling tasks",
+					"agentTasks", agentTasksLen,
+					"workflows", wfTasksLen,
+					"queueSize", size,
+				)
+			}
 
+			metrics.UpdateQueueSizes(agentTasksLen, wfTasksLen, size)
 		}
 	}
 }
@@ -244,7 +249,7 @@ func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow)
 func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 	start := time.Now()
 	tasks, err := a.cf.Tasks(ctx)
-	a.metrics.ObserveGetTasks(start)
+	metrics.ObserveGetTasks(start)
 
 	if err != nil {
 		a.log.Error("Failed pulling tasks", "error", err)
@@ -343,7 +348,14 @@ func (a *Agent) executeAgentTask(t *task.Task) error {
 	}
 
 	err = e(&spec, a.log)
-	a.metrics.ObserveAgentTaskMetrics(t, spec.Type)
+	sinceCreation, inRunner, processed := t.GetLatency()
+	a.log.Info("Done handling agent task",
+		"tid", t.Metadata.Workflow,
+		"time since creation", sinceCreation,
+		"time in runner", inRunner,
+		"processing time", processed,
+	)
+	metrics.ObserveAgentTaskMetrics(spec.Type, sinceCreation, inRunner, processed)
 	return err
 }
 

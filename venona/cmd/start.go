@@ -30,7 +30,6 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/config"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
-	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
@@ -183,13 +182,13 @@ func run(options startOptions) {
 	}
 
 	reg := prometheus.NewRegistry()
-	metrics := metrics.New(reg, log.New("module", "metrics"))
 
 	var runtimes map[string]runtime.Runtime
+	k8sLog := log.New("module", "k8s")
 	if options.inClusterRuntime != "" {
-		runtimes = inClusterRuntimeConfiguration(options, metrics)
+		runtimes = inClusterRuntimeConfiguration(options, k8sLog)
 	} else {
-		runtimes = remoteRuntimeConfiguration(options, log, metrics)
+		runtimes = remoteRuntimeConfiguration(options, k8sLog)
 	}
 
 	var monitor monitoring.Monitor = monitoring.NewEmpty()
@@ -248,7 +247,6 @@ func run(options startOptions) {
 		Monitor:                        monitor,
 		Concurrency:                    options.concurrency,
 		BufferSize:                     options.bufferSize,
-		Metrics:                        metrics,
 	})
 	dieOnError(err)
 
@@ -269,8 +267,8 @@ func run(options startOptions) {
 	<-ctx.Done()
 }
 
-func inClusterRuntimeConfiguration(options startOptions, metrics metrics.Metrics) map[string]runtime.Runtime {
-	k, err := kubernetes.NewInCluster(options.qps, options.burst, metrics)
+func inClusterRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime {
+	k, err := kubernetes.NewInCluster(log, options.qps, options.burst)
 	dieOnError(err)
 	re := runtime.New(runtime.Options{
 		Kubernetes: k,
@@ -278,12 +276,13 @@ func inClusterRuntimeConfiguration(options startOptions, metrics metrics.Metrics
 	return map[string]runtime.Runtime{options.inClusterRuntime: re}
 }
 
-func remoteRuntimeConfiguration(options startOptions, log logger.Logger, metrics metrics.Metrics) map[string]runtime.Runtime {
+func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime {
 	configs, err := config.Load(options.configDir, ".*.runtime.yaml", log.New("module", "config-loader"))
 	dieOnError(err)
 	runtimes := map[string]runtime.Runtime{}
 	for name, config := range configs {
 		k, err := kubernetes.New(kubernetes.Options{
+			Logger:   log,
 			Token:    config.Token,
 			Type:     config.Type,
 			Host:     config.Host,
@@ -291,7 +290,6 @@ func remoteRuntimeConfiguration(options startOptions, log logger.Logger, metrics
 			Insecure: !options.rejectTLSUnauthorized,
 			QPS:      options.qps,
 			Burst:    options.burst,
-			Metrics:  metrics,
 		})
 		if err != nil {
 			log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)

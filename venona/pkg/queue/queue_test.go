@@ -23,7 +23,6 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/logger"
-	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -58,7 +57,6 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 		workflows   []wfOrSleep
 		concurrency int
 		want        []string
-		beforeFn    func(mockMetrics *metrics.MockMetrics)
 		afterFn     func(t *testing.T, createdPods []string)
 	}{
 		"should create a single workflow with a single task": {
@@ -67,8 +65,6 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 			},
 			concurrency: 1,
 			want:        []string{"wf1-0"},
-			beforeFn: func(mockMetrics *metrics.MockMetrics) {
-			},
 		},
 		"should create a single workflow with several tasks": {
 			workflows: []wfOrSleep{
@@ -112,7 +108,6 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 			createdPods := []string{}
 			testLock := sync.Mutex{}
 			mockKubernetes := kubernetes.NewMockKubernetes(t)
-			mockMetrics := metrics.NewMockMetrics(t)
 			mockKubernetes.EXPECT().CreateResource(mock.Anything, task.TypeCreatePod, mock.AnythingOfType("string")).RunAndReturn(func(_ context.Context, _ task.Type, spec interface{}) error {
 				s, _ := spec.(string)
 				testLock.Lock()
@@ -120,7 +115,6 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 				testLock.Unlock()
 				return nil
 			})
-			mockMetrics.EXPECT().ObserveWorkflowMetrics(mock.AnythingOfType("*workflow.Workflow"))
 			runtimes := map[string]runtime.Runtime{
 				"some-rt": runtime.New(runtime.Options{
 					Kubernetes: mockKubernetes,
@@ -133,7 +127,6 @@ func TestWorkflowQueue_Enqueue(t *testing.T) {
 				Log:         log,
 				WG:          wg,
 				Monitor:     monitoring.NewEmpty(),
-				Metrics:     mockMetrics,
 				Concurrency: tt.concurrency,
 				BufferSize:  100,
 			}

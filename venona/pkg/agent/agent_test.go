@@ -23,7 +23,6 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
 	"github.com/codefresh-io/go/venona/pkg/logger"
-	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
 	"github.com/stretchr/testify/assert"
@@ -257,9 +256,9 @@ func Test_executeAgentTask(t *testing.T) {
 		executorCalled = false
 		agentTaskExecutors[tt.executorName] = tt.executorFunc
 		t.Run(name, func(t *testing.T) {
-			mockMetrics := metrics.NewMockMetrics(t)
-			mockMetrics.EXPECT().ObserveAgentTaskMetrics(mock.AnythingOfType("*task.Task"), tt.executorName)
-			a := &Agent{metrics: mockMetrics}
+			a := &Agent{
+				log: logger.New(logger.Options{}),
+			}
 			err := a.executeAgentTask(tt.task)
 			if err != nil || tt.wantErr != "" {
 				assert.EqualError(t, err, tt.wantErr)
@@ -305,11 +304,9 @@ func Test_splitTasks(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			cf := &codefresh.MockCodefresh{}
-			log := logger.New(logger.Options{})
 			a := &Agent{
-				cf:  cf,
-				log: log,
+				cf:  &codefresh.MockCodefresh{},
+				log: logger.New(logger.Options{}),
 			}
 			_, workflows := a.splitTasks(tt.tasks)
 			assert.Equal(t, tt.want, workflows[0].Tasks)

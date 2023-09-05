@@ -18,11 +18,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/codefresh-io/go/venona/pkg/metrics"
+	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -63,7 +62,6 @@ func Test_kube_CreateResource(t *testing.T) {
 		taskType task.Type
 		spec     interface{}
 		wantErr  string
-		beforeFn func(metrics *metrics.MockMetrics)
 		afterFn  func(t *testing.T, client *fake.Clientset)
 	}{
 		"Should successfully create a pod": {
@@ -76,9 +74,6 @@ func Test_kube_CreateResource(t *testing.T) {
 					"name":      "some-pod",
 					"namespace": "some-namespace",
 				},
-			},
-			beforeFn: func(metrics *metrics.MockMetrics) {
-				metrics.EXPECT().ObserveK8sMetrics(task.TypeCreatePod, "some-namespace", "some-pod", mock.AnythingOfType("time.Time"))
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
 				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", "some-pod")
@@ -95,9 +90,6 @@ func Test_kube_CreateResource(t *testing.T) {
 					"name":      "some-pvc",
 					"namespace": "some-namespace",
 				},
-			},
-			beforeFn: func(metrics *metrics.MockMetrics) {
-				metrics.EXPECT().ObserveK8sMetrics(task.TypeCreatePVC, "some-namespace", "some-pvc", mock.AnythingOfType("time.Time"))
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
 				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("persistentvolumeclaims"), "some-namespace", "some-pvc")
@@ -120,14 +112,9 @@ func Test_kube_CreateResource(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockMetrics := metrics.NewMockMetrics(t)
-			if tt.beforeFn != nil {
-				tt.beforeFn(mockMetrics)
-			}
-
 			k := kube{
-				client:  tt.client,
-				metrics: mockMetrics,
+				client: tt.client,
+				log:    logger.New(logger.Options{}),
 			}
 			err := k.CreateResource(context.Background(), tt.taskType, tt.spec)
 			if err != nil || tt.wantErr != "" {
@@ -142,11 +129,10 @@ func Test_kube_CreateResource(t *testing.T) {
 
 func Test_kube_DeleteResource(t *testing.T) {
 	tests := map[string]struct {
-		client   *fake.Clientset
-		opts     DeleteOptions
-		wantErr  string
-		beforeFn func(metrics *metrics.MockMetrics)
-		afterFn  func(t *testing.T, client *fake.Clientset)
+		client  *fake.Clientset
+		opts    DeleteOptions
+		wantErr string
+		afterFn func(t *testing.T, client *fake.Clientset)
 	}{
 		"Should successfully delete an existing Pod": {
 			client: fake.NewSimpleClientset(&v1.Pod{
@@ -159,9 +145,6 @@ func Test_kube_DeleteResource(t *testing.T) {
 				Kind:      task.TypeDeletePod,
 				Namespace: "some-namespace",
 				Name:      "some-pod",
-			},
-			beforeFn: func(metrics *metrics.MockMetrics) {
-				metrics.EXPECT().ObserveK8sMetrics(task.TypeDeletePod, "some-namespace", "some-pod", mock.AnythingOfType("time.Time"))
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
 				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", "some-pod")
@@ -179,9 +162,6 @@ func Test_kube_DeleteResource(t *testing.T) {
 				Kind:      task.TypeDeletePVC,
 				Namespace: "some-namespace",
 				Name:      "some-pvc",
-			},
-			beforeFn: func(metrics *metrics.MockMetrics) {
-				metrics.EXPECT().ObserveK8sMetrics(task.TypeDeletePVC, "some-namespace", "some-pvc", mock.AnythingOfType("time.Time"))
 			},
 			afterFn: func(t *testing.T, client *fake.Clientset) {
 				_, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("persistantvolumeclaims"), "some-namespace", "some-pod")
@@ -218,14 +198,9 @@ func Test_kube_DeleteResource(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			mockMetrics := metrics.NewMockMetrics(t)
-			if tt.beforeFn != nil {
-				tt.beforeFn(mockMetrics)
-			}
-
 			k := kube{
-				client:  tt.client,
-				metrics: mockMetrics,
+				client: tt.client,
+				log:    logger.New(logger.Options{}),
 			}
 			err := k.DeleteResource(context.Background(), tt.opts)
 			if err != nil || tt.wantErr != "" {

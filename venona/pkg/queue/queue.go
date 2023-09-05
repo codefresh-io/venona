@@ -43,7 +43,6 @@ type (
 		Log         logger.Logger
 		WG          *sync.WaitGroup
 		Monitor     monitoring.Monitor
-		Metrics     metrics.Metrics
 		Concurrency int
 		BufferSize  int
 	}
@@ -53,7 +52,6 @@ type (
 		log             logger.Logger
 		wg              *sync.WaitGroup
 		monitor         monitoring.Monitor
-		metrics         metrics.Metrics
 		queue           chan *workflow.Workflow
 		concurrency     int
 		stop            []chan bool
@@ -71,7 +69,6 @@ func New(opts *Options) WorkflowQueue {
 		log:             opts.Log,
 		wg:              opts.WG,
 		monitor:         opts.Monitor,
-		metrics:         opts.Metrics,
 		queue:           make(chan *workflow.Workflow, opts.BufferSize),
 		concurrency:     opts.Concurrency,
 		stop:            make([]chan bool, opts.Concurrency),
@@ -169,5 +166,13 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 		}
 	}
 
-	wfq.metrics.ObserveWorkflowMetrics(wf)
+	sinceCreation, inRunner, processed := wf.GetLatency()
+	wfq.log.Info("Done handling workflow",
+		"workflow", wf.Metadata.Workflow,
+		"runtime", wf.Metadata.ReName,
+		"time since creation", sinceCreation,
+		"time in runner", inRunner,
+		"processing time", processed,
+	)
+	metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)
 }
