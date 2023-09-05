@@ -255,6 +255,8 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 		}
 	}
 
+	logger.Info("starting tasks", "creation", len(creationTasks), "deletion", len(deletionTasks), "agent", len(agentTasks))
+
 	// process agent tasks
 	for i := range agentTasks {
 		t := agentTasks[i]
@@ -282,7 +284,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 			txn.End()
 			continue
 		}
-		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
 		if err := runtime.StartWorkflow(ctx, tasks); err != nil {
 			logger.Error(err.Error())
 			txn.NoticeError(err)
@@ -302,7 +304,7 @@ func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runt
 			txn.End()
 			continue
 		}
-		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
+		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
 		if errs := runtime.TerminateWorkflow(ctx, tasks); len(errs) != 0 {
 			for _, err := range errs {
 				logger.Error(err.Error())
