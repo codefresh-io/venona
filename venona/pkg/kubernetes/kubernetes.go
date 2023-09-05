@@ -47,6 +47,8 @@ type (
 		Token    string
 		Host     string
 		Insecure bool
+		QPS      float32
+		Burst    int
 	}
 
 	// DeleteOptions to delete resource from the cluster
@@ -63,8 +65,8 @@ type (
 )
 
 // NewInCluster build Kubernetes API based on local in cluster runtime
-func NewInCluster() (Kubernetes, error) {
-	client, err := buildKubeInCluster()
+func NewInCluster(qps float32, burst int) (Kubernetes, error) {
+	client, err := buildKubeInCluster(qps, burst)
 	return &kube{
 		client: client,
 		logger: logger.New(logger.Options{}),
@@ -77,7 +79,7 @@ func New(opts Options) (Kubernetes, error) {
 		return nil, errNotValidType
 	}
 
-	client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure)
+	client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure, opts.QPS, opts.Burst)
 	return &kube{
 		client: client,
 		logger: logger.New(logger.Options{}),
@@ -170,7 +172,7 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 	return nil
 }
 
-func buildKubeClient(host string, token string, crt string, insecure bool) (kubernetes.Interface, error) {
+func buildKubeClient(host string, token string, crt string, insecure bool, qps float32, burst int) (kubernetes.Interface, error) {
 	var tlsconf rest.TLSClientConfig
 	if insecure {
 		tlsconf = rest.TLSClientConfig{
@@ -186,14 +188,18 @@ func buildKubeClient(host string, token string, crt string, insecure bool) (kube
 		Host:            host,
 		BearerToken:     token,
 		TLSClientConfig: tlsconf,
+		QPS:             qps,
+		Burst:           burst,
 	})
 }
 
-func buildKubeInCluster() (kubernetes.Interface, error) {
+func buildKubeInCluster(qps float32, burst int) (kubernetes.Interface, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
 	}
 
+	config.QPS = qps
+	config.Burst = burst
 	return kubernetes.NewForConfig(config)
 }

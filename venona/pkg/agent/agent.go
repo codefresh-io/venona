@@ -48,6 +48,7 @@ type (
 		StatusReportingSecondsInterval time.Duration
 		Monitor                        monitoring.Monitor
 		Concurrency                    int
+		BufferSize                     int
 	}
 
 	// Agent holds all the references from Codefresh
@@ -125,7 +126,7 @@ func New(opts *Options) (*Agent, error) {
 		log:                log,
 		taskPullerTicker:   taskPullerTicker,
 		reportStatusTicker: reportStatusTicker,
-		wfQueue:            queue.New(runtimes, log, wg, opts.Monitor, opts.Concurrency),
+		wfQueue:            queue.New(runtimes, log, wg, opts.Monitor, opts.Concurrency, opts.BufferSize),
 		running:            false,
 		lastStatus:         Status{},
 		wg:                 wg,
@@ -183,10 +184,6 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 		case <-a.taskPullerTicker.C:
 			agentTasks, workflows := a.getTasks(ctx)
 
-			if len(agentTasks) > 0 || len(workflows) > 0 {
-				a.log.Info("received tasks", "agentTasks", len(agentTasks), "workflows", len(workflows))
-			}
-
 			// perform all agentTasks (in goroutine)
 			for i := range agentTasks {
 				a.handleAgentTask(&agentTasks[i])
@@ -195,6 +192,14 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			// send all wfTasks to tasksQueue
 			for i := range workflows {
 				a.wfQueue.Enqueue(workflows[i])
+			}
+
+			if a.wfQueue.Size() > 0 {
+				a.log.Info("done pulling tasks",
+					"agentTasks", len(agentTasks),
+					"workflows", len(workflows),
+					"queueSize", a.wfQueue.Size(),
+				)
 			}
 		}
 	}

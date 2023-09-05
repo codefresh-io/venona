@@ -40,20 +40,18 @@ type (
 	}
 )
 
-const defaultWfTaskBufferSize = 20
-
 var (
 	errRuntimeNotFound = errors.New("Runtime environment not found")
 )
 
 // New creates a new TaskQueue instance
-func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor, concurrency int) *WorkflowQueue {
+func New(runtimes map[string]runtime.Runtime, log logger.Logger, wg *sync.WaitGroup, monitor monitoring.Monitor, concurrency, bufferSize int) *WorkflowQueue {
 	return &WorkflowQueue{
 		runtimes:    runtimes,
 		log:         log,
 		wg:          wg,
 		monitor:     monitor,
-		queue:       make(chan *workflow.Workflow, 1000),
+		queue:       make(chan *workflow.Workflow, bufferSize),
 		concurrency: concurrency,
 		stop:        make([]chan bool, concurrency),
 	}
@@ -75,6 +73,11 @@ func (wfq *WorkflowQueue) Stop() {
 	for i := 0; i < wfq.concurrency; i++ {
 		wfq.stop[i] <- true
 	}
+}
+
+// Size returns the current size of the queue (used for logs)
+func (wfq *WorkflowQueue) Size() int {
+	return len(wfq.queue)
 }
 
 // Enqueue adds another task to be handled, internally using or creating a channel for the task's workflow
