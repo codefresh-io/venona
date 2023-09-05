@@ -16,6 +16,7 @@ package queue
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -25,218 +26,115 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+	"github.com/codefresh-io/go/venona/pkg/workflow"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
-func makePodCreationTask(workflow, pod string) *task.Task {
-	return &task.Task{
-		Type: task.TypeCreatePod,
-		Metadata: task.Metadata{
-			ReName:   "some-rt",
-			Workflow: "wf1",
-		},
-		Spec: &v1.Pod{
-			TypeMeta: metav1.TypeMeta{
-				APIVersion: v1.SchemeGroupVersion.String(),
-				Kind:       "Pod",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "some-namespace",
-				Name:      workflow + "-" + pod,
-			},
-		},
+func makeWorkflow(wfID string, numOfTasks int) *workflow.Workflow {
+	metadata := task.Metadata{
+		Workflow: wfID,
+		ReName:   "some-rt",
 	}
-}
-
-func makePodDeletionTask(workflow, pod string) *task.Task {
-	return &task.Task{
-		Type: task.TypeDeletePod,
-		Metadata: task.Metadata{
-			ReName:   "some-rt",
-			Workflow: workflow,
-		},
-		Spec: map[string]string{
-			"Namespace": "some-namespace",
-			"Name":      workflow + "-" + pod,
-		},
-	}
-}
-
-func checkPodInFakeClientset(client *fake.Clientset, name string) bool {
-	r, err := client.Tracker().Get(v1.SchemeGroupVersion.WithResource("pods"), "some-namespace", name)
-	if err != nil || r == nil {
-		return false
+	wf := workflow.New(metadata)
+	for i := 0; i < numOfTasks; i++ {
+		wf.AddTask(&task.Task{
+			Type:     task.TypeCreatePod,
+			Metadata: metadata,
+			Spec:     fmt.Sprintf("%s-%d", wfID, i),
+		})
 	}
 
-	return true
+	return wf
 }
 
-func TestTaskQueue_Enqueue(t *testing.T) {
-	type taskOrSleep struct {
-		t     *task.Task
+func TestWorkflowQueue_Enqueue(t *testing.T) {
+	type wfOrSleep struct {
+		wf    *workflow.Workflow
 		sleep time.Duration
 	}
 	tests := map[string]struct {
-		tasks   []taskOrSleep
-		afterFn func(t *testing.T, client *fake.Clientset)
+		workflows   []wfOrSleep
+		concurrency int
+		want        []string
+		afterFn     func(t *testing.T, createdPods []string)
 	}{
-		"should create a single pod for a single task": {
-			tasks: []taskOrSleep{
-				{t: makePodCreationTask("wf1", "pod1")},
+		"should create a single workflow with a single task": {
+			workflows: []wfOrSleep{
+				{wf: makeWorkflow("wf1", 1)},
 			},
-			afterFn: func(t *testing.T, client *fake.Clientset) {
-				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1"))
-			},
+			concurrency: 1,
+			want:        []string{"wf1-0"},
 		},
-		"should create and delete the pod": {
-			tasks: []taskOrSleep{
-				{t: makePodCreationTask("wf1", "pod1")},
-				{t: makePodDeletionTask("wf1", "pod1")},
+		"should create a single workflow with several tasks": {
+			workflows: []wfOrSleep{
+				{wf: makeWorkflow("wf1", 3)},
 			},
-			afterFn: func(t *testing.T, client *fake.Clientset) {
-				assert.False(t, checkPodInFakeClientset(client, "pod-wf1"))
-			},
+			concurrency: 1,
+			want:        []string{"wf1-0", "wf1-1", "wf1-2"},
 		},
-		"should create and delete the pod after a sleep": {
-			tasks: []taskOrSleep{
-				{t: makePodCreationTask("wf1", "pod1")},
-				{sleep: time.Millisecond * 100},
-				{t: makePodDeletionTask("wf1", "pod1")},
+		"should create multiple workflows with concurrency 1": {
+			workflows: []wfOrSleep{
+				{wf: makeWorkflow("wf1", 3)},
+				{wf: makeWorkflow("wf2", 3)},
+				{wf: makeWorkflow("wf3", 3)},
 			},
-			afterFn: func(t *testing.T, client *fake.Clientset) {
-				assert.False(t, checkPodInFakeClientset(client, "pod-wf1"))
-			},
+			concurrency: 1,
+			want:        []string{"wf1-0", "wf1-1", "wf1-2", "wf2-0", "wf2-1", "wf2-2", "wf3-0", "wf3-1", "wf3-2"},
 		},
-		"should create multiple pods, sleep, delete some of them, create new ones": {
-			tasks: []taskOrSleep{
-				{t: makePodCreationTask("wf1", "pod1")},
-				{t: makePodCreationTask("wf1", "pod2")},
-				{t: makePodCreationTask("wf2", "pod1")},
-				{sleep: time.Millisecond * 100},
-				{t: makePodDeletionTask("wf1", "pod1")},
-				{t: makePodCreationTask("wf1", "pod1-retry-1")},
-				{t: makePodDeletionTask("wf1", "pod2")},
-				{t: makePodCreationTask("wf1", "pod2-retry-1")},
-				{t: makePodDeletionTask("wf2", "pod1")},
+		"should create multiple workflows with higher concurrency": {
+			workflows: []wfOrSleep{
+				{wf: makeWorkflow("wf1", 2)},
+				{wf: makeWorkflow("wf2", 2)},
+				{wf: makeWorkflow("wf3", 2)},
+				{wf: makeWorkflow("wf4", 2)},
+				{wf: makeWorkflow("wf5", 2)},
+				{wf: makeWorkflow("wf6", 2)},
+				{sleep: 100},
+				{wf: makeWorkflow("wf7", 2)},
+				{wf: makeWorkflow("wf8", 2)},
+				{wf: makeWorkflow("wf9", 2)},
 			},
-			afterFn: func(t *testing.T, client *fake.Clientset) {
-				assert.True(t, checkPodInFakeClientset(client, "wf1-pod1-retry-1"))
-				assert.True(t, checkPodInFakeClientset(client, "wf1-pod2-retry-1"))
-				assert.False(t, checkPodInFakeClientset(client, "wf1-pod"))
-				assert.False(t, checkPodInFakeClientset(client, "wf1-pod2"))
-				assert.False(t, checkPodInFakeClientset(client, "wf2-pod1"))
+			concurrency: 3,
+			want: []string{
+				"wf1-0", "wf1-1", "wf2-0", "wf2-1", "wf3-0", "wf3-1",
+				"wf4-0", "wf4-1", "wf5-0", "wf5-1", "wf6-0", "wf6-1",
+				"wf7-0", "wf7-1", "wf8-0", "wf8-1", "wf9-0", "wf9-1",
 			},
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			client := fake.NewSimpleClientset()
+			createdPods := []string{}
+			testLock := sync.Mutex{}
+			k := &kubernetes.MockKubernetes{}
+			k.On("CreateResource", mock.Anything, mock.AnythingOfType("string")).Return(func(_ context.Context, spec interface{}) error {
+				s, _ := spec.(string)
+				testLock.Lock()
+				createdPods = append(createdPods, s)
+				testLock.Unlock()
+				return nil
+			})
 			runtimes := map[string]runtime.Runtime{
 				"some-rt": runtime.New(runtime.Options{
-					Kubernetes: kubernetes.NewWithClient(client),
+					Kubernetes: k,
 				}),
 			}
 			log := logger.New(logger.Options{})
 			wg := &sync.WaitGroup{}
-			tq := New(runtimes, log, wg, monitoring.NewEmpty())
-			for _, tOrS := range tt.tasks {
-				if tOrS.t != nil {
-					tq.Enqueue(context.Background(), tOrS.t)
+			tq := New(runtimes, log, wg, monitoring.NewEmpty(), tt.concurrency)
+			tq.Start(context.Background())
+			for _, tOrS := range tt.workflows {
+				if tOrS.wf != nil {
+					tq.Enqueue(tOrS.wf)
 				} else {
 					time.Sleep(tOrS.sleep)
 				}
 			}
 
+			tq.Stop()
 			wg.Wait()
-			tt.afterFn(t, client)
+			assert.ElementsMatch(t, createdPods, tt.want)
 		})
 	}
-}
-
-func TestTaskQueue_NoDeadlock(t *testing.T) {
-	type dummySpec struct {
-		workflow string
-		order    int
-	}
-
-	k := &kubernetes.MockKubernetes{}
-	runtimes := map[string]runtime.Runtime{
-		"some-rt": runtime.New(runtime.Options{
-			Kubernetes: k,
-		}),
-	}
-	log := logger.New(logger.Options{})
-	wg := &sync.WaitGroup{}
-	tq := New(runtimes, log, wg, monitoring.NewEmpty())
-
-	doneTasks := make(map[string]int)
-	testLock := sync.Mutex{}
-	wf1Chan := make(chan bool)
-	wf2Chan := make(chan bool)
-	k.On("CreateResource", mock.Anything, mock.AnythingOfType("queue.dummySpec")).Return(func(_ context.Context, spec interface{}) error {
-		s, _ := spec.(dummySpec)
-		testLock.Lock()
-		doneTask := doneTasks[s.workflow]
-		testLock.Unlock()
-		assert.Equal(t, doneTask+1, s.order, "workflow %s", s.workflow)
-		if s.workflow == "wf1" && s.order == 3 {
-			// wait for a signal before continuing with the 3rd wf1 task
-			<-wf1Chan
-		}
-
-		if s.workflow == "wf2" && s.order == 3 {
-			// notify the last wf2 task is done
-			wf2Chan <- true
-		}
-
-		testLock.Lock()
-		doneTasks[s.workflow] = s.order
-		testLock.Unlock()
-		return nil
-	})
-
-	ctx := context.Background()
-	// queue 20 tasks for wf1, to fill up wf1 channel (but not overflow it)
-	// the 3rd will hang until later
-	for i := 1; i < 21; i++ {
-		tq.Enqueue(ctx, &task.Task{
-			Type: task.TypeCreatePod,
-			Metadata: task.Metadata{
-				ReName:   "some-rt",
-				Workflow: "wf1",
-			},
-			Spec: dummySpec{
-				workflow: "wf1",
-				order:    i,
-			},
-		})
-	}
-
-	// and also run 4 more tasks on a different wf
-	for i := 1; i < 4; i++ {
-		tq.Enqueue(ctx, &task.Task{
-			Type: task.TypeCreatePod,
-			Metadata: task.Metadata{
-				ReName:   "some-rt",
-				Workflow: "wf2",
-			},
-			Spec: dummySpec{
-				workflow: "wf2",
-				order:    i,
-			},
-		})
-	}
-
-	// wait for wf2 to finish all 3 tasks
-	<-wf2Chan
-	// signal 3rd task of wf1 to stop hanging
-	wf1Chan <- true
-	// wait until all task queues are empty
-	tq.wg.Wait()
-	assert.Equal(t, doneTasks["wf1"], 20, "wf1 was not completed")
-	assert.Equal(t, doneTasks["wf2"], 3, "wf2 was not completed")
 }

@@ -75,10 +75,9 @@ func Less(task1 Task, task2 Task) bool {
 }
 
 // NewTaskTransaction creates a new transaction with task-specific attributes
-func NewTaskTransaction(monitor monitoring.Monitor, t *Task) monitoring.Transaction {
+func NewTaskTransaction(monitor monitoring.Monitor, m Metadata) monitoring.Transaction {
 	txn := monitor.NewTransaction("runner-tasks-execution")
-	txn.AddAttribute("task-type", t.Type)
-	txn.AddAttribute("tid", t.Metadata.Workflow)
-	txn.AddAttribute("runtime-environment", t.Metadata.ReName)
+	txn.AddAttribute("tid", m.Workflow)
+	txn.AddAttribute("runtime-environment", m.ReName)
 	return txn
 }

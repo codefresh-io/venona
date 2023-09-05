@@ -49,6 +49,7 @@ type startOptions struct {
 	agentID                        string
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
+	concurrency                    int
 	configDir                      string
 	serverPort                     string
 	newrelicLicenseKey             string
@@ -60,6 +61,7 @@ const (
 	defaultCodefreshHost           = "https://g.codefresh.io"
 	defaultTaskPullingInterval     = 3
 	defaultStatusReportingInterval = 10
+	defaultWorkflowConcurrency     = 10
 )
 
 var (
@@ -97,12 +99,18 @@ func init() {
 	dieOnError(viper.BindEnv("verbose", "VERBOSE"))
 	dieOnError(viper.BindEnv("newrelic-license-key", "NEWRELIC_LICENSE_KEY"))
 	dieOnError(viper.BindEnv("newrelic-appname", "NEWRELIC_APPNAME"))
+	dieOnError(viper.BindEnv("task-pulling-interval", "TASK_PULLING_INTERVAL"))
+	dieOnError(viper.BindEnv("status-reporting-interval", "STATUS_REPORTING_INTERVAL"))
+	dieOnError(viper.BindEnv("workflow-concurrency", "WORKFLOW_CONCURRENCY"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("NODE_TLS_REJECT_UNAUTHORIZED", "1")
 	viper.SetDefault("in-cluster-runtime", "")
 	viper.SetDefault("newrelic-appname", AppName)
+	viper.SetDefault("task-pulling-interval", defaultTaskPullingInterval)
+	viper.SetDefault("status-reporting-interval", defaultStatusReportingInterval)
+	viper.SetDefault("workflow-concurrency", defaultWorkflowConcurrency)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
@@ -112,8 +120,9 @@ func init() {
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshToken, "codefresh-token", viper.GetString("codefresh-token"), "Codefresh API token [$CODEFRESH_TOKEN]")
 	startCmd.Flags().StringVar(&startCmdOptions.serverPort, "port", viper.GetString("port"), "The port to start the server [$PORT]")
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
-	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", defaultTaskPullingInterval, "The interval (seconds) to pull new tasks from Codefresh")
-	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", defaultStatusReportingInterval, "The interval (seconds) to report status back to Codefresh")
+	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", viper.GetInt64("task-pulling-interval"), "The interval (seconds) to pull new tasks from Codefresh")
+	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", viper.GetInt64("status-reporting-interval"), "The interval (seconds) to report status back to Codefresh")
+	startCmd.Flags().IntVar(&startCmdOptions.concurrency, "workflow-concurrency", viper.GetInt("workflow-concurrency"), "How many workflow tasks to handle concurrently")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 
@@ -202,6 +211,7 @@ func run(options startOptions) {
 		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
 		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
 		Monitor:                        monitor,
+		Concurrency:                    options.concurrency,
 	})
 	dieOnError(err)
 
