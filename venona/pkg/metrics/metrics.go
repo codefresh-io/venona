@@ -30,7 +30,7 @@ const (
 )
 
 var (
-	retryRegex = regexp.MustCompile(`engine-.*-retry-(\d+)$`)
+	retryRegex = regexp.MustCompile(`(.*)-.*-retry-(\d+)$`)
 
 	agentTasks = prometheus.NewCounter(prometheus.CounterOpts{
 		Namespace: runnerNamespace,
@@ -121,9 +121,13 @@ func UpdateQueueSizes(agentTasksValue, wfTasksValue, queue int) {
 
 func IncWorkflowRetries(podName string) {
 	matches := retryRegex.FindStringSubmatch(podName)
+	if len(matches) < 2 || matches[1] != "engine" {
+		return
+	}
+
 	retry := "0"
-	if len(matches) == 2 {
-		retry = matches[1]
+	if len(matches) == 3 {
+		retry = matches[2]
 	}
 
 	labels := prometheus.Labels{"retry": retry}
