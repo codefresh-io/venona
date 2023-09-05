@@ -14,8 +14,8 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: security
-      description: Updated default COMPOSE_IMAGE tag to `v2.20.3-1.4.0`
+    - kind: changed
+      description: Updated runner image to `1.10.1` (added support for FORCE_DELETE_PVC env var)
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
