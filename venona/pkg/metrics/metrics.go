@@ -121,10 +121,13 @@ func UpdateQueueSizes(agentTasksValue, wfTasksValue, queue int) {
 
 func IncWorkflowRetries(podName string) {
 	matches := retryRegex.FindStringSubmatch(podName)
+	retry := "0"
 	if len(matches) == 2 {
-		labels := prometheus.Labels{"retry": matches[1]}
-		wfTaskRetries.With(labels).Inc()
+		retry = matches[1]
 	}
+
+	labels := prometheus.Labels{"retry": retry}
+	wfTaskRetries.With(labels).Inc()
 }
 
 func ObserveGetTasks(start time.Time) {
