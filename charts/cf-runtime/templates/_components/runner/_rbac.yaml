@@ -22,10 +22,10 @@ metadata:
 rules:
   - apiGroups: [ "" ]
     resources: [ "pods", "persistentvolumeclaims" ]
-    verbs: [ "get", "create", "delete" ]
+    verbs: [ "get", "create", "delete", "patch" ]
   - apiGroups: [ "" ]
     resources: [ "configmaps", "secrets" ]
-    verbs: [ "get", "create", "update", patch ]
+    verbs: [ "get", "create", "update", "patch" ]
   - apiGroups: [ "apps" ]
     resources: [ "deployments" ]
     verbs: [ "get" ]
