@@ -57,15 +57,15 @@ func (_m *MockCodefresh) ReportStatus(ctx context.Context, status AgentStatus) e
 }
 
 // Tasks provides a mock function with given fields: ctx
-func (_m *MockCodefresh) Tasks(ctx context.Context) ([]task.Task, error) {
+func (_m *MockCodefresh) Tasks(ctx context.Context) (task.Tasks, error) {
 	ret := _m.Called(ctx)
 
-	var r0 []task.Task
-	if rf, ok := ret.Get(0).(func(context.Context) []task.Task); ok {
+	var r0 task.Tasks
+	if rf, ok := ret.Get(0).(func(context.Context) task.Tasks); ok {
 		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]task.Task)
+			r0 = ret.Get(0).(task.Tasks)
 		}
 	}
 

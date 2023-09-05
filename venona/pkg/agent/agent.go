@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"sync"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/task"
+
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/stretchr/objx"
 )
@@ -54,6 +56,7 @@ const (
 	defaultStatusReportingInterval = time.Second * 10
 	defaultProxyRequestTimeout     = time.Second * 30
 	defaultProxyRequestRetries     = 3
+	defaultWfTaskBufferSize        = 10
 )
 
 type (
@@ -65,6 +68,7 @@ type (
 		Logger                         logger.Logger
 		TaskPullingSecondsInterval     time.Duration
 		StatusReportingSecondsInterval time.Duration
+		WfTaskBufferSize               int
 		Monitor                        monitoring.Monitor
 	}
 
@@ -77,6 +81,7 @@ type (
 		log                logger.Logger
 		taskPullerTicker   *time.Ticker
 		reportStatusTicker *time.Ticker
+		wfTasksChannel     chan task.Tasks
 		running            bool
 		lastStatus         Status
 		wg                 *sync.WaitGroup
@@ -87,11 +92,6 @@ type (
 	Status struct {
 		Message string    `json:"message"`
 		Time    time.Time `json:"time"`
-	}
-
-	workflowCandidate struct {
-		tasks   []task.Task
-		runtime string
 	}
 )
 
@@ -116,19 +116,27 @@ func New(opt *Options) (*Agent, error) {
 	if opt.TaskPullingSecondsInterval != time.Duration(0) {
 		taskPullingInterval = opt.TaskPullingSecondsInterval
 	}
+
 	statusReportingInterval := defaultStatusReportingInterval
 	if opt.StatusReportingSecondsInterval != time.Duration(0) {
 		statusReportingInterval = opt.StatusReportingSecondsInterval
 	}
+
+	wfTaskBufferSize := defaultWfTaskBufferSize
+	if opt.WfTaskBufferSize != 0 {
+		wfTaskBufferSize = opt.WfTaskBufferSize
+	}
+
 	taskPullerTicker := time.NewTicker(taskPullingInterval)
 	reportStatusTicker := time.NewTicker(statusReportingInterval)
+	wfTasksChannel := make(chan task.Tasks, wfTaskBufferSize)
 	wg := &sync.WaitGroup{}
 
 	if opt.Monitor == nil {
 		opt.Monitor = monitoring.NewEmpty()
 	}
-	httpClient.HTTPClient.Transport = opt.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
 
+	httpClient.HTTPClient.Transport = opt.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
 	return &Agent{
 		id,
 		cf,
@@ -136,6 +144,7 @@ func New(opt *Options) (*Agent, error) {
 		log,
 		taskPullerTicker,
 		reportStatusTicker,
+		wfTasksChannel,
 		false,
 		Status{},
 		wg,
@@ -148,15 +157,18 @@ func (a *Agent) Start(ctx context.Context) error {
 	if a.running {
 		return errAlreadyRunning
 	}
+
 	a.running = true
 	a.log.Info("Starting agent")
 
+	a.wg.Add(3)
 	go a.startTaskPullerRoutine(ctx)
+	go a.startWfTaskHandlerRoutine(ctx)
 	go a.startStatusReporterRoutine(ctx)
 
-	reportStatus(ctx, a.cf, codefresh.AgentStatus{
+	a.reportStatus(ctx, codefresh.AgentStatus{
 		Message: "All good",
-	}, a.log)
+	})
 
 	return nil
 }
@@ -166,10 +178,13 @@ func (a *Agent) Stop() error {
 	if !a.running {
 		return errAlreadyStopped
 	}
+
 	a.running = false
 	a.log.Warn("Received graceful termination request, stopping tasks...")
 	a.reportStatusTicker.Stop()
 	a.taskPullerTicker.Stop()
+	close(a.wfTasksChannel)
+	a.log.Warn("stopped both tickers")
 	a.wg.Wait()
 	return nil
 }
@@ -180,139 +195,177 @@ func (a *Agent) Status() Status {
 }
 
 func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
+	defer func() {
+		a.log.Info("done in startTaskPullerRoutine")
+		a.wg.Done()
+	}()
 	for {
 		select {
 		case <-ctx.Done():
+			a.log.Info("stopping task puller routine")
 			return
-		case <-a.taskPullerTicker.C:
+		case _, ok := <-a.taskPullerTicker.C:
+			if !ok {
+				a.log.Info("Task puller ticker channel closed, stopping task puller")
+				return
+			}
+
 			a.wg.Add(1)
-			go func(client codefresh.Codefresh, runtimes map[string]runtime.Runtime, wg *sync.WaitGroup, logger logger.Logger, monitor monitoring.Monitor) {
-				tasks := pullTasks(ctx, client, logger)
-				startTasks(ctx, tasks, runtimes, logger, monitor)
-				time.Sleep(time.Second * 10)
-				wg.Done()
-			}(a.cf, a.runtimes, a.wg, a.log, a.monitor)
+			go func() {
+				defer a.wg.Done()
+				tasks := a.pullTasks(ctx)
+				if len(tasks) == 0 {
+					return
+				}
+
+				// sort tasks by creationDate
+				sortTasks(tasks)
+				agentTasks, wfTasks := a.splitTasks(tasks)
+
+				// perform all agentTasks (in goroutine)
+				for _, agentTask := range agentTasks {
+					a.handleAgentTask(&agentTask)
+				}
+
+				// send all wfTasks to tasksChannel
+				wfGroups := groupTasks(wfTasks)
+				for _, wfTask := range wfGroups {
+					a.wfTasksChannel <- wfTask
+				}
+			}()
+		}
+	}
+}
+
+func (a *Agent) startWfTaskHandlerRoutine(ctx context.Context) {
+	defer func() {
+		a.log.Info("done in startWfTaskHandlerRoutine")
+		a.wg.Done()
+	}()
+	for {
+		select {
+		case <-ctx.Done():
+			a.log.Info("stopping wf task handler routine")
+			return
+		case tasks, ok := <-a.wfTasksChannel:
+			if !ok {
+				a.log.Info("Wofkrlow tasks channel closed, stopping task handler")
+				return
+			}
+
+			a.handleTasks(ctx, tasks)
+		}
+	}
+}
+
+func (a *Agent) handleTasks(ctx context.Context, tasks task.Tasks) {
+	reName := tasks[0].Metadata.ReName
+	runtime, ok := a.runtimes[reName]
+	wfId := tasks[0].Metadata.Workflow
+	txn := newTransaction(a.monitor, "workflow-tasks", wfId, reName)
+	defer txn.End()
+	if !ok {
+		a.log.Error("Runtime not found", "runtime", reName, "workflow", wfId)
+		txn.NoticeError(errRuntimeNotFound)
+		return
+	}
+
+	a.log.Info("Handling workflow tasks", "runtime", reName, "workflow", wfId)
+	for _, t := range tasks {
+		if err := runtime.HandleTask(ctx, t); err != nil {
+			a.log.Error(err.Error())
+			txn.NoticeError(err)
 		}
 	}
 }
 
 func (a *Agent) startStatusReporterRoutine(ctx context.Context) {
+	defer func() {
+		a.log.Info("done in startStatusReporterRoutine")
+		a.wg.Done()
+	}()
 	for {
 		select {
 		case <-ctx.Done():
+			a.log.Info("stopping status reporter routine")
 			return
 		case <-a.reportStatusTicker.C:
 			a.wg.Add(1)
-			go func(cf codefresh.Codefresh, wg *sync.WaitGroup, log logger.Logger) {
-				reportStatus(ctx, cf, codefresh.AgentStatus{
+			go func() {
+				defer a.wg.Done()
+				a.reportStatus(ctx, codefresh.AgentStatus{
 					Message: "All good",
-				}, log)
-				wg.Done()
-			}(a.cf, a.wg, a.log)
+				})
+			}()
 		}
 	}
 }
 
-func reportStatus(ctx context.Context, client codefresh.Codefresh, status codefresh.AgentStatus, logger logger.Logger) {
-	err := client.ReportStatus(ctx, status)
+func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) {
+	err := a.cf.ReportStatus(ctx, status)
 	if err != nil {
-		logger.Error(err.Error())
+		a.log.Error(err.Error())
 	}
 }
 
-func pullTasks(ctx context.Context, client codefresh.Codefresh, logger logger.Logger) []task.Task {
-	logger.Debug("Requesting tasks from API server")
-	tasks, err := client.Tasks(ctx)
+func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
+	a.log.Debug("Requesting tasks from API server")
+	tasks, err := a.cf.Tasks(ctx)
 	if err != nil {
-		logger.Error(err.Error())
-		return []task.Task{}
+		a.log.Error(err.Error())
+		return task.Tasks{}
 	}
+
 	if len(tasks) == 0 {
-		logger.Debug("No new tasks received")
-		return []task.Task{}
+		a.log.Debug("No new tasks received")
+		return task.Tasks{}
 	}
-	logger.Info("Received new tasks", "len", len(tasks))
+
+	a.log.Info("Received new tasks", "len", len(tasks))
 	return tasks
 }
 
-func startTasks(ctx context.Context, tasks []task.Task, runtimes map[string]runtime.Runtime, logger logger.Logger, monitor monitoring.Monitor) {
-	creationTasks := []task.Task{}
-	deletionTasks := []task.Task{}
-	agentTasks := []task.Task{}
+func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, task.Tasks) {
+	agentTasks := task.Tasks{}
+	wfTasks := task.Tasks{}
 
 	// divide tasks by types
 	for _, t := range tasks {
-		logger.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+		a.log.Debug("Received task", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		switch t.Type {
-		case task.TypeCreatePod, task.TypeCreatePVC:
-			creationTasks = append(creationTasks, t)
-		case task.TypeDeletePod, task.TypeDeletePVC:
-			deletionTasks = append(deletionTasks, t)
 		case task.TypeAgentTask:
 			agentTasks = append(agentTasks, t)
+		case task.TypeCreatePod, task.TypeCreatePVC, task.TypeDeletePod, task.TypeDeletePVC:
+			wfTasks = append(wfTasks, t)
 		default:
-			logger.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+			a.log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
 		}
 	}
 
-	logger.Info("starting tasks", "creation", len(creationTasks), "deletion", len(deletionTasks), "agent", len(agentTasks))
+	return agentTasks, wfTasks
+}
 
-	// process agent tasks
-	for i := range agentTasks {
-		t := agentTasks[i]
-		logger.Info("executing agent task", "tid", t.Metadata.Workflow)
-		txn := newTransaction(monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
-		go func(tid string) {
-			if err := executeAgentTask(&t, logger); err != nil {
-				logger.Error(err.Error())
-				txn.NoticeError(err)
-			}
-			txn.End()
-			logger.Info("finished agent task", "tid", t.Metadata.Workflow)
-		}(t.Metadata.Workflow)
-	}
+func sortTasks(tasks task.Tasks) {
+	sort.SliceStable(tasks, func(i, j int) bool {
+		task1, task2 := tasks[i], tasks[j]
+		return task.Less(task1, task2)
+	})
+}
 
-	// process creation tasks
-	for _, tasks := range groupTasks(creationTasks) {
-		reName := tasks[0].Metadata.ReName
-		runtime, ok := runtimes[reName]
-		txn := newTransaction(monitor, "start-workflow", tasks[0].Metadata.Workflow, reName)
-
-		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-			txn.NoticeError(errRuntimeNotFound)
-			txn.End()
-			continue
-		}
-		logger.Info("Starting workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
-		if err := runtime.StartWorkflow(ctx, tasks); err != nil {
-			logger.Error(err.Error())
+func (a *Agent) handleAgentTask(t *task.Task) {
+	a.log.Info("executing agent task", "tid", t.Metadata.Workflow)
+	txn := newTransaction(a.monitor, t.Type, t.Metadata.Workflow, t.Metadata.ReName)
+	a.wg.Add(1)
+	go func(t *task.Task, wg *sync.WaitGroup, log logger.Logger) {
+		defer wg.Done()
+		if err := executeAgentTask(t, log); err != nil {
+			log.Error(err.Error())
 			txn.NoticeError(err)
 		}
-		txn.End()
-	}
 
-	// process deletion tasks
-	for _, tasks := range groupTasks(deletionTasks) {
-		reName := tasks[0].Metadata.ReName
-		runtime, ok := runtimes[reName]
-		txn := newTransaction(monitor, "terminate-workflow", tasks[0].Metadata.Workflow, reName)
-
-		if !ok {
-			logger.Error("Runtime not found", "workflow", tasks[0].Metadata.Workflow, "runtime", reName)
-			txn.NoticeError(errRuntimeNotFound)
-			txn.End()
-			continue
-		}
-		logger.Info("Terminating workflow", "workflow", tasks[0].Metadata.Workflow, "runtime", reName, "# tasks", len(tasks))
-		if errs := runtime.TerminateWorkflow(ctx, tasks); len(errs) != 0 {
-			for _, err := range errs {
-				logger.Error(err.Error())
-				txn.NoticeError(err)
-			}
-		}
 		txn.End()
-	}
+		log.Info("finished agent task", "tid", t.Metadata.Workflow)
+	}(t, a.wg, a.log)
 }
 
 func executeAgentTask(t *task.Task, log logger.Logger) error {
@@ -353,13 +406,14 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 	if err != nil {
 		return errAgentTaskMalformedParams
 	}
+
 	if json == nil {
 		json = []byte{}
 	}
 
 	req, err := retryablehttp.NewRequest(method, url, bytes.NewReader(json))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed creating new request: %w", err)
 	}
 
 	req.Header.Add("x-req-type", "workflow-request")
@@ -371,17 +425,18 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed sending request: %w", err)
 	}
-	body, _ := io.ReadAll(resp.Body)
 
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
 	log.Info("finished proxy task", "url", url, "method", method, "status", resp.Status, "body", string(body))
 
 	return nil
 }
 
-func groupTasks(tasks []task.Task) map[string][]task.Task {
-	candidates := map[string][]task.Task{}
+func groupTasks(tasks task.Tasks) map[string]task.Tasks {
+	candidates := map[string]task.Tasks{}
 	for _, task := range tasks {
 		name := task.Metadata.Workflow
 		if name == "" {
@@ -389,8 +444,10 @@ func groupTasks(tasks []task.Task) map[string][]task.Task {
 			// Might heppen in older versions on Codefresh
 			name = "_"
 		}
+
 		candidates[name] = append(candidates[name], task)
 	}
+
 	return candidates
 }
 
@@ -414,7 +471,7 @@ func checkOptions(opt *Options) error {
 	return nil
 }
 
-func newTransaction(monitor monitoring.Monitor, taskType, tid, runtime string) monitoring.Transaction {
+func newTransaction(monitor monitoring.Monitor, taskType task.Type, tid, runtime string) monitoring.Transaction {
 	txn := monitor.NewTransaction("runner-tasks-execution")
 	txn.AddAttribute("task-type", taskType)
 	txn.AddAttribute("tid", tid)

@@ -38,6 +38,7 @@ func New(o Options) Logger {
 	if o.Verbose {
 		lvl = log.LvlDebug
 	}
+
 	verboseHandler := log.LvlFilterHandler(lvl, log.StdoutHandler)
 	handlers = append(handlers, verboseHandler)
 	l.SetHandler(log.MultiHandler(handlers...))

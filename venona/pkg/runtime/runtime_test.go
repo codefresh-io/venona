@@ -20,6 +20,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/task"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -33,7 +34,7 @@ func createKubernetesMock() *kubernetes.MockKubernetes {
 
 func Test_runtime_StartWorkflow(t *testing.T) {
 	type args struct {
-		tasks []task.Task
+		tasks task.Tasks
 	}
 	tests := []struct {
 		name    string
@@ -47,7 +48,7 @@ func Test_runtime_StartWorkflow(t *testing.T) {
 				client: createKubernetesMock(),
 			},
 			args: args{
-				tasks: []task.Task{
+				tasks: task.Tasks{
 					{
 						Type: "runtime",
 						Spec: "spec",
@@ -74,7 +75,7 @@ func Test_runtime_StartWorkflow(t *testing.T) {
 
 func Test_runtime_TerminateWorkflow(t *testing.T) {
 	type args struct {
-		tasks []task.Task
+		tasks task.Tasks
 	}
 	tests := []struct {
 		name        string
@@ -89,7 +90,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				client: createKubernetesMock(),
 			},
 			args: args{
-				tasks: []task.Task{
+				tasks: task.Tasks{
 					{
 						Type: "runtime",
 						Spec: map[string]interface{}{
@@ -111,7 +112,7 @@ func Test_runtime_TerminateWorkflow(t *testing.T) {
 				client: createKubernetesMock(),
 			},
 			args: args{
-				tasks: []task.Task{
+				tasks: task.Tasks{
 					{
 						Type: "runtime",
 						Spec: 123,

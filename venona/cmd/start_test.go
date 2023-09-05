@@ -24,6 +24,7 @@ import (
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/mocks"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -80,7 +81,7 @@ func Test_handleSignals(t *testing.T) {
 			serverExit := make(chan struct{}, 1)
 			agentExit := make(chan struct{}, 1)
 
-			handleSignal = func(c chan<- os.Signal, sig ...os.Signal) {
+			handleSignal = func(c chan<- os.Signal, _ ...os.Signal) {
 				sigChan = c
 			}
 
@@ -90,6 +91,7 @@ func Test_handleSignals(t *testing.T) {
 					forcedExit = true
 				case <-time.After(tt.args.stopDelay): // delay exit
 				}
+
 				serverExit <- struct{}{}
 				return nil
 			}

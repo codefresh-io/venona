@@ -33,6 +33,7 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/monitoring/newrelic"
 	"github.com/codefresh-io/go/venona/pkg/runtime"
 	"github.com/codefresh-io/go/venona/pkg/server"
+
 	nr "github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -51,6 +52,7 @@ type startOptions struct {
 	agentID                        string
 	taskPullingSecondsInterval     int64
 	statusReportingSecondsInterval int64
+	wfTaskBufferSize               int
 	configDir                      string
 	serverPort                     string
 	newrelicLicenseKey             string
@@ -64,12 +66,11 @@ var (
 )
 
 var startCmd = &cobra.Command{
-	Use: "start",
-
-	Run: func(cmd *cobra.Command, args []string) {
+	Use:  "start",
+	Long: "Start venona process",
+	Run: func(_ *cobra.Command, _ []string) {
 		run(startCmdOptions)
 	},
-	Long: "Start venona process",
 }
 
 func init() {
@@ -100,6 +101,7 @@ func init() {
 	startCmd.Flags().StringVar(&startCmdOptions.codefreshHost, "codefresh-host", viper.GetString("codefresh-host"), "Codefresh API host default [$CODEFRESH_HOST]")
 	startCmd.Flags().Int64Var(&startCmdOptions.taskPullingSecondsInterval, "task-pulling-interval", 3, "The interval (seconds) to pull new tasks from Codefresh")
 	startCmd.Flags().Int64Var(&startCmdOptions.statusReportingSecondsInterval, "status-reporting-interval", 10, "The interval (seconds) to report status back to Codefresh")
+	startCmd.Flags().IntVar(&startCmdOptions.wfTaskBufferSize, "task-buffer-size", 10, "The size of the workflow tasks channel buffer")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicLicenseKey, "newrelic-license-key", viper.GetString("newrelic-license-key"), "New-Relic license key [$NEWRELIC_LICENSE_KEY]")
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 
@@ -187,6 +189,7 @@ func run(options startOptions) {
 		ID:                             options.agentID,
 		TaskPullingSecondsInterval:     time.Duration(options.taskPullingSecondsInterval) * time.Second,
 		StatusReportingSecondsInterval: time.Duration(options.statusReportingSecondsInterval) * time.Second,
+		WfTaskBufferSize:               options.wfTaskBufferSize,
 		Monitor:                        monitor,
 	})
 	dieOnError(err)
@@ -233,12 +236,14 @@ func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[str
 				log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)
 				continue
 			}
+
 			re := runtime.New(runtime.Options{
 				Kubernetes: k,
 			})
 			runtimes[config.Name] = re
 		}
 	}
+
 	return runtimes
 }
 
@@ -263,15 +268,18 @@ func withSignals(
 				cancel()
 				return
 			}
+
 			go func() {
 				log.Warn("Received shutdown request, stopping agent and server...")
 				// order matters, the process will exit as soon as server is stopped
 				if err := stopAgent(); err != nil {
 					log.Error(err.Error())
 				}
+
 				if err := stopServer(ctx); err != nil {
 					log.Error(err.Error())
 				}
+
 				cancel() // done
 			}()
 		}

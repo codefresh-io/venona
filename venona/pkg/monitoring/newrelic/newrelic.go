@@ -18,11 +18,11 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/codefresh-io/go/venona/pkg/monitoring"
+
 	gorillamux "github.com/gorilla/mux"
 	"github.com/newrelic/go-agent/v3/integrations/nrgorilla"
 	nr "github.com/newrelic/go-agent/v3/newrelic"
-
-	"github.com/codefresh-io/go/venona/pkg/monitoring"
 )
 
 type (
