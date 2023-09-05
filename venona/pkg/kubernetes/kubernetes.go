@@ -147,7 +147,7 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 		}
 
 		if k.forceDeletePvc {
-			_, err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Patch(ctx, opts.Name, types.JSONPatchType, []byte(`{"metadata":{"finalizers":[]}}`), metav1.PatchOptions{})
+			_, err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Patch(ctx, opts.Name, types.JSONPatchType, []byte(`[ { "op": "remove", "path": "/metadata/finalizers" } ]`), metav1.PatchOptions{})
 			if err != nil {
 				return fmt.Errorf("failed removing finalizers from PVC \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 			}
