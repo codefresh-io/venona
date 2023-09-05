@@ -27,8 +27,6 @@ type (
 	// Runtime API client
 	Runtime interface {
 		HandleTask(ctx context.Context, t task.Task) error
-		StartWorkflow(context.Context, task.Tasks) error
-		TerminateWorkflow(context.Context, task.Tasks) []error
 	}
 
 	// Options for runtime
@@ -72,41 +70,9 @@ func (r runtime) HandleTask(ctx context.Context, t task.Task) error {
 		if err = r.client.DeleteResource(ctx, opt); err != nil {
 			return fmt.Errorf("failed deleting resource: %w", err)
 		}
+	default:
+		return fmt.Errorf("unknown task type \"%s\"", t.Type)
 	}
 
 	return nil
-}
-
-func (r runtime) StartWorkflow(ctx context.Context, tasks task.Tasks) error {
-	for _, task := range tasks {
-		err := r.client.CreateResource(ctx, task.Spec)
-		if err != nil {
-		}
-	}
-
-	return nil
-}
-func (r runtime) TerminateWorkflow(ctx context.Context, tasks task.Tasks) []error {
-	errs := make([]error, 0, 3)
-	for _, task := range tasks {
-		opt := kubernetes.DeleteOptions{}
-		opt.Kind = task.Type
-		b, err := json.Marshal(task.Spec)
-		if err != nil {
-			errs = append(errs, fmt.Errorf("failed to marshal task spec"))
-			continue
-		}
-
-		if err := json.Unmarshal(b, &opt); err != nil {
-			errs = append(errs, fmt.Errorf("failed to unmarshal task spec"))
-			continue
-		}
-
-		if err = r.client.DeleteResource(ctx, opt); err != nil {
-			errs = append(errs, err)
-			continue
-		}
-	}
-
-	return errs
 }

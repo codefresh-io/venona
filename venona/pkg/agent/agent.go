@@ -202,28 +202,19 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 		case <-ctx.Done():
 			a.log.Info("stopping task puller routine")
 			return
-		case _, ok := <-a.taskPullerTicker.C:
-			if !ok {
-				a.log.Info("Task puller ticker channel closed, stopping task puller")
-				return
+		case <-a.taskPullerTicker.C:
+			agentTasks, wfTasks := a.getTasks(ctx)
+
+			// perform all agentTasks (in goroutine)
+			for _, agentTask := range agentTasks {
+				a.handleAgentTask(&agentTask)
 			}
 
-			a.wg.Add(1)
-			go func() {
-				defer a.wg.Done()
-				agentTasks, wfTasks := a.getTasks(ctx)
-
-				// perform all agentTasks (in goroutine)
-				for _, agentTask := range agentTasks {
-					a.handleAgentTask(&agentTask)
-				}
-
-				// send all wfTasks to tasksChannel
-				wfGroups := groupTasks(wfTasks)
-				for _, wfTask := range wfGroups {
-					a.wfTasksChannel <- wfTask
-				}
-			}()
+			// send all wfTasks to tasksChannel
+			wfGroups := groupTasks(wfTasks)
+			for _, wfTask := range wfGroups {
+				a.wfTasksChannel <- wfTask
+			}
 		}
 	}
 }
