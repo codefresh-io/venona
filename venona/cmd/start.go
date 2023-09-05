@@ -66,7 +66,7 @@ const (
 	defaultStatusReportingInterval = 10
 	defaultWorkflowConcurrency     = 50
 	defaultWorkflowBufferSize      = 1000
-	defaultK8sClientQps            = 50
+	defaultK8sClientQPS            = 50
 	defaultK8sClientBurst          = 100
 )
 
@@ -137,7 +137,7 @@ func init() {
 	viper.SetDefault("status-reporting-interval", defaultStatusReportingInterval)
 	viper.SetDefault("workflow-concurrency", defaultWorkflowConcurrency)
 	viper.SetDefault("workflow-buffer-size", defaultWorkflowBufferSize)
-	viper.SetDefault("k8s-client-qps", defaultK8sClientQps)
+	viper.SetDefault("k8s-client-qps", defaultK8sClientQPS)
 	viper.SetDefault("k8s-client-burst", defaultK8sClientBurst)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
