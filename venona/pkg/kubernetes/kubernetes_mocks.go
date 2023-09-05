@@ -41,13 +41,13 @@ func (_m *MockKubernetes) CreateResource(ctx context.Context, spec interface{}) 
 	return r0
 }
 
-// DeleteResource provides a mock function with given fields: ctx, opt
-func (_m *MockKubernetes) DeleteResource(ctx context.Context, opt DeleteOptions) error {
-	ret := _m.Called(ctx, opt)
+// DeleteResource provides a mock function with given fields: ctx, opts
+func (_m *MockKubernetes) DeleteResource(ctx context.Context, opts DeleteOptions) error {
+	ret := _m.Called(ctx, opts)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, DeleteOptions) error); ok {
-		r0 = rf(ctx, opt)
+		r0 = rf(ctx, opts)
 	} else {
 		r0 = ret.Error(0)
 	}

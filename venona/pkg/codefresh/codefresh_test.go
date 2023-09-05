@@ -39,28 +39,19 @@ func mustURL(u string) *url.URL {
 }
 
 func TestNew(t *testing.T) {
-	type args struct {
-		opt Options
-	}
-	tests := []struct {
-		name string
-		args args
+	tests := map[string]struct {
+		opts Options
 		want Codefresh
 	}{
-		{
-			name: "Build client with default host",
-			args: args{},
+		"Build client with default host": {
 			want: &cf{
 				host:       defaultHost,
 				httpClient: &http.Client{},
 			},
 		},
-		{
-			name: "Build client with given host",
-			args: args{
-				Options{
-					Host: "http://host.com",
-				},
+		"Build client with given host": {
+			opts: Options{
+				Host: "http://host.com",
 			},
 			want: &cf{
 				host:       "http://host.com",
@@ -68,9 +59,10 @@ func TestNew(t *testing.T) {
 			},
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want.Host(), New(tt.args.opt).Host())
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := New(tt.opts)
+			assert.Equal(t, tt.want.Host(), got.Host())
 		})
 	}
 }
@@ -83,40 +75,28 @@ func Test_cf_prepareURL(t *testing.T) {
 		logger     logger.Logger
 		httpClient RequestDoer
 	}
-	type args struct {
-		paths []string
-	}
-	tests := []struct {
-		name    string
+	tests := map[string]struct {
 		fields  fields
-		args    args
+		paths   []string
 		want    *url.URL
 		wantErr bool
 	}{
-		{
-			name: "Reject when parsing the URL faile",
-			args: args{},
+		"Reject when parsing the URL faile": {
 			fields: fields{
 				host: "123://sdd",
 			},
 			wantErr: true,
 		},
-		{
-			name: "Append path to the host",
-			args: args{
-				paths: []string{"123", "123"},
-			},
+		"Append path to the host": {
+			paths: []string{"123", "123"},
 			fields: fields{
 				host: "http://url",
 			},
 			wantErr: false,
 			want:    mustURL("http://url/123/123"),
 		},
-		{
-			name: "Escape paths",
-			args: args{
-				paths: []string{"docker:desktop/server"},
-			},
+		"Escape paths": {
+			paths: []string{"docker:desktop/server"},
 			fields: fields{
 				host: "http://url",
 			},
@@ -124,8 +104,8 @@ func Test_cf_prepareURL(t *testing.T) {
 			want:    mustURL("http://url/docker:desktop%2Fserver"),
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			c := cf{
 				host:       tt.fields.host,
 				token:      tt.fields.token,
@@ -133,7 +113,7 @@ func Test_cf_prepareURL(t *testing.T) {
 				logger:     tt.fields.logger,
 				httpClient: tt.fields.httpClient,
 			}
-			url, err := c.prepareURL(tt.args.paths...)
+			url, err := c.prepareURL(tt.paths...)
 			if tt.wantErr {
 				assert.Error(t, err)
 			}

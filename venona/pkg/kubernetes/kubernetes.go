@@ -37,7 +37,7 @@ type (
 	// Kubernetes API client
 	Kubernetes interface {
 		CreateResource(ctx context.Context, spec interface{}) error
-		DeleteResource(ctx context.Context, opt DeleteOptions) error
+		DeleteResource(ctx context.Context, opts DeleteOptions) error
 	}
 	// Options for Kubernetes
 	Options struct {
@@ -71,12 +71,12 @@ func NewInCluster() (Kubernetes, error) {
 }
 
 // New build Kubernetes API
-func New(opt Options) (Kubernetes, error) {
-	if opt.Type != "runtime" {
+func New(opts Options) (Kubernetes, error) {
+	if opts.Type != "runtime" {
 		return nil, errNotValidType
 	}
 
-	client, err := buildKubeClient(opt.Host, opt.Token, opt.Cert, opt.Insecure)
+	client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure)
 	return &kube{
 		client: client,
 		logger: logger.New(logger.Options{}),
@@ -98,40 +98,46 @@ func (k kube) CreateResource(ctx context.Context, spec interface{}) error {
 	case *v1.PersistentVolumeClaim:
 		_, err = k.client.CoreV1().PersistentVolumeClaims(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
-			return fmt.Errorf("failed creating persistent volume claims: %w", err)
+			return fmt.Errorf("failed creating persistent volume claims \"%s\\%s\": %w", obj.Namespace, obj.Name, err)
 		}
 
-		k.logger.Info("PersistentVolumeClaim has been created", "name", obj.Name)
+		k.logger.Info("PersistentVolumeClaim has been created", "namespace", obj.Namespace, "name", obj.Name)
 
 	case *v1.Pod:
 		_, err = k.client.CoreV1().Pods(obj.Namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
-			return fmt.Errorf("failed creating pod: %w", err)
+			return fmt.Errorf("failed creating pod \"%s\\%s\": %w", obj.Namespace, obj.Name, err)
 		}
 
-		k.logger.Info("Pod has been created", "name", obj.Name)
+		k.logger.Info("Pod has been created", "namespace", obj.Namespace, "name", obj.Name)
+
+	default:
+		return fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind())
 	}
 
-	return err
+	return nil
 }
 
-func (k kube) DeleteResource(ctx context.Context, opt DeleteOptions) error {
-	switch opt.Kind {
+func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
+	switch opts.Kind {
 	case task.TypeDeletePVC:
-		err := k.client.CoreV1().PersistentVolumeClaims(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
+		err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
-			return fmt.Errorf("failed deleting persistent volume claim: %w", err)
+			return fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 		}
 
-		k.logger.Info("PersistentVolumeClaim has been deleted", "name", opt.Name)
+		k.logger.Info("PersistentVolumeClaim has been deleted", "namespace", opts.Namespace, "name", opts.Name)
 
 	case task.TypeDeletePod:
-		err := k.client.CoreV1().Pods(opt.Namespace).Delete(ctx, opt.Name, metav1.DeleteOptions{})
+		err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
-			return fmt.Errorf("failed deleting pod: %w", err)
+			return fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
 		}
 
-		k.logger.Info("Pod has been deleted", "name", opt.Name)
+		k.logger.Info("Pod has been deleted", "namespace", opts.Namespace, "name", opts.Name)
+
+	default:
+		return fmt.Errorf("failed deleting resource of type %s", opts.Kind)
 	}
 
 	return nil

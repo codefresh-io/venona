@@ -143,17 +143,17 @@ func getLoggerMock() *mocks.Logger {
 
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
-		opt     *Options
+		opts    *Options
 		want    *Agent
 		wantErr string
 	}{
 		"should throw error if options is nil": {
-			opt:     nil,
+			opts:    nil,
 			want:    nil,
 			wantErr: errOptionsRequired.Error(),
 		},
 		"should throw error if ID is not provided": {
-			opt: &Options{
+			opts: &Options{
 				ID:        "",
 				Codefresh: getCodefreshMock(),
 				Runtimes: map[string]runtime.Runtime{
@@ -165,7 +165,7 @@ func TestNew(t *testing.T) {
 			wantErr: errIDRequired.Error(),
 		},
 		"should throw error if runtimes are not provided": {
-			opt: &Options{
+			opts: &Options{
 				ID:        "foobar",
 				Codefresh: getCodefreshMock(),
 				Runtimes:  nil,
@@ -175,7 +175,7 @@ func TestNew(t *testing.T) {
 			wantErr: errRuntimesRequired.Error(),
 		},
 		"should throw error if logger is nil": {
-			opt: &Options{
+			opts: &Options{
 				ID:        "foobar",
 				Codefresh: getCodefreshMock(),
 				Runtimes: map[string]runtime.Runtime{
@@ -189,7 +189,7 @@ func TestNew(t *testing.T) {
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			got, err := New(tt.opt)
+			got, err := New(tt.opts)
 			if err != nil || tt.wantErr != "" {
 				assert.EqualError(t, err, tt.wantErr)
 				return

@@ -104,28 +104,28 @@ var (
 )
 
 // New creates a new Agent instance
-func New(opt *Options) (*Agent, error) {
-	if err := checkOptions(opt); err != nil {
+func New(opts *Options) (*Agent, error) {
+	if err := checkOptions(opts); err != nil {
 		return nil, err
 	}
 
-	id := opt.ID
-	cf := opt.Codefresh
-	runtimes := opt.Runtimes
-	log := opt.Logger
+	id := opts.ID
+	cf := opts.Codefresh
+	runtimes := opts.Runtimes
+	log := opts.Logger
 	taskPullingInterval := defaultTaskPullingInterval
-	if opt.TaskPullingSecondsInterval != time.Duration(0) {
-		taskPullingInterval = opt.TaskPullingSecondsInterval
+	if opts.TaskPullingSecondsInterval != time.Duration(0) {
+		taskPullingInterval = opts.TaskPullingSecondsInterval
 	}
 
 	statusReportingInterval := defaultStatusReportingInterval
-	if opt.StatusReportingSecondsInterval != time.Duration(0) {
-		statusReportingInterval = opt.StatusReportingSecondsInterval
+	if opts.StatusReportingSecondsInterval != time.Duration(0) {
+		statusReportingInterval = opts.StatusReportingSecondsInterval
 	}
 
 	wfTaskBufferSize := defaultWfTaskBufferSize
-	if opt.WfTaskBufferSize != 0 {
-		wfTaskBufferSize = opt.WfTaskBufferSize
+	if opts.WfTaskBufferSize != 0 {
+		wfTaskBufferSize = opts.WfTaskBufferSize
 	}
 
 	taskPullerTicker := time.NewTicker(taskPullingInterval)
@@ -133,11 +133,11 @@ func New(opt *Options) (*Agent, error) {
 	wfTasksChannel := make(chan task.Tasks, wfTaskBufferSize)
 	wg := &sync.WaitGroup{}
 
-	if opt.Monitor == nil {
-		opt.Monitor = monitoring.NewEmpty()
+	if opts.Monitor == nil {
+		opts.Monitor = monitoring.NewEmpty()
 	}
 
-	httpClient.HTTPClient.Transport = opt.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
+	httpClient.HTTPClient.Transport = opts.Monitor.NewRoundTripper(httpClient.HTTPClient.Transport)
 	return &Agent{
 		id,
 		cf,
@@ -149,7 +149,7 @@ func New(opt *Options) (*Agent, error) {
 		false,
 		Status{},
 		wg,
-		opt.Monitor,
+		opts.Monitor,
 	}, nil
 }
 
@@ -206,8 +206,8 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 			agentTasks, wfTasks := a.getTasks(ctx)
 
 			// perform all agentTasks (in goroutine)
-			for _, agentTask := range agentTasks {
-				a.handleAgentTask(&agentTask)
+			for i := range agentTasks {
+				a.handleAgentTask(&agentTasks[i])
 			}
 
 			// send all wfTasks to tasksChannel
@@ -240,16 +240,16 @@ func (a *Agent) startWfTaskHandlerRoutine(ctx context.Context) {
 func (a *Agent) handleTasks(ctx context.Context, tasks task.Tasks) {
 	reName := tasks[0].Metadata.ReName
 	runtime, ok := a.runtimes[reName]
-	wfId := tasks[0].Metadata.Workflow
-	txn := newTransaction(a.monitor, "workflow-tasks", wfId, reName)
+	workflow := tasks[0].Metadata.Workflow
+	txn := newTransaction(a.monitor, "workflow-tasks", workflow, reName)
 	defer txn.End()
 	if !ok {
-		a.log.Error("Runtime not found", "runtime", reName, "workflow", wfId)
+		a.log.Error("Runtime not found", "runtime", reName, "workflow", workflow)
 		txn.NoticeError(errRuntimeNotFound)
 		return
 	}
 
-	a.log.Info("Handling workflow tasks", "runtime", reName, "workflow", wfId)
+	a.log.Info("Handling workflow tasks", "runtime", reName, "workflow", workflow)
 	for _, t := range tasks {
 		if err := runtime.HandleTask(ctx, t); err != nil {
 			a.log.Error(err.Error())
@@ -434,20 +434,20 @@ func groupTasks(tasks task.Tasks) map[string]task.Tasks {
 	return candidates
 }
 
-func checkOptions(opt *Options) error {
-	if opt == nil {
+func checkOptions(opts *Options) error {
+	if opts == nil {
 		return errOptionsRequired
 	}
 
-	if opt.ID == "" {
+	if opts.ID == "" {
 		return errIDRequired
 	}
 
-	if len(opt.Runtimes) == 0 {
+	if len(opts.Runtimes) == 0 {
 		return errRuntimesRequired
 	}
 
-	if opt.Logger == nil {
+	if opts.Logger == nil {
 		return errLoggerRequired
 	}
 
