@@ -79,7 +79,7 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 1.9.17
+    tag: 1.10.1
 
   # -- Init container
   init:
@@ -742,12 +742,13 @@ monitor:
   # -- Set affinity
   affinity: {}
 
-# -- Add serviceMonitor (for dind pods)
+# -- Add serviceMonitor
 # @default -- See below
 serviceMonitor:
   main:
-    # -- Enable service monitor
+    # -- Enable service monitor for dind pods
     enabled: false
+    nameOverride: dind
     selector:
       matchLabels:
         app: dind
@@ -762,14 +763,25 @@ serviceMonitor:
 # @default -- See below
 podMonitor:
   main:
-    # -- Enable service monitor
+    # -- Enable pod monitor for engine pods
     enabled: false
+    nameOverride: engine
     selector:
       matchLabels:
         app: runtime
     podMetricsEndpoints:
     - path: /metrics
       targetPort: 9100
+  runner:
+    # -- Enable pod monitor for runner pod
+    enabled: false
+    nameOverride: runner
+    selector:
+      matchLabels:
+        codefresh.io/application: runner
+    podMetricsEndpoints:
+    - path: /metrics
+      targetPort: 8080
 
 # -- Event exporter parameters
 # @default -- See below

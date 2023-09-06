@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.1.1](https://img.shields.io/badge/Version-6.1.1-informational?style=flat-square)
+![Version: 6.1.2](https://img.shields.io/badge/Version-6.1.2-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -889,13 +889,14 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | monitor.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | nameOverride | string | `""` | String to partially override cf-runtime.fullname template (will maintain the release name) |
 | podMonitor | object | See below | Add podMonitor (for engine pods) |
-| podMonitor.main.enabled | bool | `false` | Enable service monitor |
+| podMonitor.main.enabled | bool | `false` | Enable pod monitor for engine pods |
+| podMonitor.runner.enabled | bool | `false` | Enable pod monitor for runner pod |
 | re | object | `{}` |  |
 | runner | object | See below | Runner parameters |
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.9.17"}` | Set image |
+| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.10.1"}` | Set image |
 | runner.init | object | `{"image":{"registry":"quay.io","repository":"codefresh/cli","tag":"0.85.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
@@ -958,8 +959,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
 | runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
-| serviceMonitor | object | See below | Add serviceMonitor (for dind pods) |
-| serviceMonitor.main.enabled | bool | `false` | Enable service monitor |
+| serviceMonitor | object | See below | Add serviceMonitor |
+| serviceMonitor.main.enabled | bool | `false` | Enable service monitor for dind pods |
 | storage.azuredisk.cachingMode | string | `"None"` |  |
 | storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |
 | storage.backend | string | `"local"` | Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`) |
