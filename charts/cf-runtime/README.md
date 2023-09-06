@@ -889,7 +889,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | monitor.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | nameOverride | string | `""` | String to partially override cf-runtime.fullname template (will maintain the release name) |
 | podMonitor | object | See below | Add podMonitor (for engine pods) |
-| podMonitor.main.enabled | bool | `false` | Enable service monitor |
+| podMonitor.engine.enabled | bool | `false` | Enable pod monitor for engine pods |
+| podMonitor.runner.enabled | bool | `false` | Enable pod monitor for runner pod |
 | re | object | `{}` |  |
 | runner | object | See below | Runner parameters |
 | runner.affinity | object | `{}` | Set affinity |
@@ -958,8 +959,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
 | runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
-| serviceMonitor | object | See below | Add serviceMonitor (for dind pods) |
-| serviceMonitor.main.enabled | bool | `false` | Enable service monitor |
+| serviceMonitor | object | See below | Add serviceMonitor |
+| serviceMonitor.dind.enabled | bool | `false` | Enable service monitor for dind pods |
 | storage.azuredisk.cachingMode | string | `"None"` |  |
 | storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |
 | storage.backend | string | `"local"` | Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`) |
