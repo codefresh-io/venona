@@ -742,11 +742,11 @@ monitor:
   # -- Set affinity
   affinity: {}
 
-# -- Add serviceMonitor (for dind pods)
+# -- Add serviceMonitor
 # @default -- See below
 serviceMonitor:
-  main:
-    # -- Enable service monitor
+  dind:
+    # -- Enable service monitor for dind pods
     enabled: false
     selector:
       matchLabels:
@@ -761,8 +761,8 @@ serviceMonitor:
 # -- Add podMonitor (for engine pods)
 # @default -- See below
 podMonitor:
-  main:
-    # -- Enable service monitor
+  engine:
+    # -- Enable pod monitor for engine pods
     enabled: false
     selector:
       matchLabels:
@@ -770,6 +770,15 @@ podMonitor:
     podMetricsEndpoints:
     - path: /metrics
       targetPort: 9100
+  runner:
+    # -- Enable pod monitor for runner pod
+    enabled: false
+    selector:
+      matchLabels:
+        codefresh.io/application: runner
+    podMetricsEndpoints:
+    - path: /metrics
+      targetPort: 8080
 
 # -- Event exporter parameters
 # @default -- See below
