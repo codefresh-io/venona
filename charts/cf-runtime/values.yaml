@@ -745,7 +745,7 @@ monitor:
 # -- Add serviceMonitor
 # @default -- See below
 serviceMonitor:
-  dind:
+  main:
     # -- Enable service monitor for dind pods
     enabled: false
     nameOverride: dind
@@ -762,7 +762,7 @@ serviceMonitor:
 # -- Add podMonitor (for engine pods)
 # @default -- See below
 podMonitor:
-  engine:
+  main:
     # -- Enable pod monitor for engine pods
     enabled: false
     nameOverride: engine
