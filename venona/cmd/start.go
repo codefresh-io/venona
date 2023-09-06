@@ -60,6 +60,7 @@ type startOptions struct {
 	inClusterRuntime               string
 	qps                            float32
 	burst                          int
+	forceDeletePvc                 bool
 }
 
 const (
@@ -70,6 +71,7 @@ const (
 	defaultWorkflowBufferSize      = 1000
 	defaultK8sClientQPS            = 50
 	defaultK8sClientBurst          = 100
+	defaultForceDeletePvc          = false
 )
 
 var (
@@ -129,6 +131,7 @@ func init() {
 	dieOnError(viper.BindEnv("workflow-buffer-size", "WORKFLOW_BUFFER_SIZE"))
 	dieOnError(viper.BindEnv("k8s-client-qps", "K8S_CLIENT_QPS"))
 	dieOnError(viper.BindEnv("k8s-client-burst", "K8S_CLIENT_BURST"))
+	dieOnError(viper.BindEnv("force-delete-pvc", "FORCE_DELETE_PVC"))
 
 	viper.SetDefault("codefresh-host", defaultCodefreshHost)
 	viper.SetDefault("port", "8080")
@@ -141,6 +144,7 @@ func init() {
 	viper.SetDefault("workflow-buffer-size", defaultWorkflowBufferSize)
 	viper.SetDefault("k8s-client-qps", defaultK8sClientQPS)
 	viper.SetDefault("k8s-client-burst", defaultK8sClientBurst)
+	viper.SetDefault("force-delete-pvc", defaultForceDeletePvc)
 
 	startCmd.Flags().BoolVar(&startCmdOptions.verbose, "verbose", viper.GetBool("verbose"), "Show more logs")
 	startCmd.Flags().BoolVar(&startCmdOptions.rejectTLSUnauthorized, "tls-reject-unauthorized", viper.GetBool("NODE_TLS_REJECT_UNAUTHORIZED"), "Disable certificate validation for TLS connections")
@@ -158,6 +162,7 @@ func init() {
 	startCmd.Flags().StringVar(&startCmdOptions.newrelicAppname, "newrelic-appname", viper.GetString("newrelic-appname"), "New-Relic application name [$NEWRELIC_APPNAME]")
 	startCmd.Flags().Float32Var(&startCmdOptions.qps, "k8s-client-qps", float32(viper.GetFloat64("k8s-client-qps")), "the maximum QPS to the master from this client [$K8S_CLIENT_QPS]")
 	startCmd.Flags().IntVar(&startCmdOptions.burst, "k8s-client-burst", viper.GetInt("k8s-client-burst"), "k8s client maximum burst for throttle [$K8S_CLIENT_BURST]")
+	startCmd.Flags().BoolVar(&startCmdOptions.forceDeletePvc, "force-delete-pvc", viper.GetBool("force-delete-pvc"), "set to true to disable PVC protection [$FORCE_DELETE_PVC]")
 
 	startCmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if viper.IsSet(f.Name) && viper.GetString(f.Name) != "" {
@@ -270,7 +275,7 @@ func run(options startOptions) {
 }
 
 func inClusterRuntimeConfiguration(options startOptions, log logger.Logger) map[string]runtime.Runtime {
-	k, err := kubernetes.NewInCluster(log, options.qps, options.burst)
+	k, err := kubernetes.NewInCluster(log, options.qps, options.burst, options.forceDeletePvc)
 	dieOnError(err)
 	re := runtime.New(runtime.Options{
 		Kubernetes: k,
@@ -284,14 +289,15 @@ func remoteRuntimeConfiguration(options startOptions, log logger.Logger) map[str
 	runtimes := map[string]runtime.Runtime{}
 	for name, config := range configs {
 		k, err := kubernetes.New(kubernetes.Options{
-			Logger:   log,
-			Token:    config.Token,
-			Type:     config.Type,
-			Host:     config.Host,
-			Cert:     config.Cert,
-			Insecure: !options.rejectTLSUnauthorized,
-			QPS:      options.qps,
-			Burst:    options.burst,
+			Logger:         log,
+			Token:          config.Token,
+			Type:           config.Type,
+			Host:           config.Host,
+			Cert:           config.Cert,
+			Insecure:       !options.rejectTLSUnauthorized,
+			QPS:            options.qps,
+			Burst:          options.burst,
+			ForceDeletePvc: options.forceDeletePvc,
 		})
 		if err != nil {
 			log.Error("Failed to load kubernetes", "error", err.Error(), "file", name, "name", config.Name)

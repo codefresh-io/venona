@@ -27,13 +27,11 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 )
-
-var errNotValidType = errors.New("not a valid type")
-var kubeDecode = scheme.Codecs.UniversalDeserializer().Decode
 
 type (
 	// Kubernetes API client
@@ -44,14 +42,15 @@ type (
 
 	// Options for Kubernetes
 	Options struct {
-		Logger   logger.Logger
-		Type     string
-		Cert     string
-		Token    string
-		Host     string
-		Insecure bool
-		QPS      float32
-		Burst    int
+		Logger         logger.Logger
+		Type           string
+		Cert           string
+		Token          string
+		Host           string
+		Insecure       bool
+		QPS            float32
+		Burst          int
+		ForceDeletePvc bool
 	}
 
 	// DeleteOptions to delete resource from the cluster
@@ -62,17 +61,25 @@ type (
 	}
 
 	kube struct {
-		client kubernetes.Interface
-		log    logger.Logger
+		client         kubernetes.Interface
+		log            logger.Logger
+		forceDeletePvc bool
 	}
 )
 
+var (
+	errNotValidType           = errors.New("not a valid type")
+	kubeDecode                = scheme.Codecs.UniversalDeserializer().Decode
+	removeFinalizersJsonPatch = []byte(`[{ "op": "remove", "path": "/metadata/finalizers" }]`)
+)
+
 // NewInCluster build Kubernetes API based on local in cluster runtime
-func NewInCluster(log logger.Logger, qps float32, burst int) (Kubernetes, error) {
+func NewInCluster(log logger.Logger, qps float32, burst int, forceDeletePvc bool) (Kubernetes, error) {
 	client, err := buildKubeInCluster(qps, burst)
 	return &kube{
-		client: client,
-		log:    log,
+		client:         client,
+		log:            log,
+		forceDeletePvc: forceDeletePvc,
 	}, err
 }
 
@@ -84,8 +91,9 @@ func New(opts Options) (Kubernetes, error) {
 
 	client, err := buildKubeClient(opts.Host, opts.Token, opts.Cert, opts.Insecure, opts.QPS, opts.Burst)
 	return &kube{
-		client: client,
-		log:    opts.Logger,
+		client:         client,
+		log:            opts.Logger,
+		forceDeletePvc: opts.ForceDeletePvc,
 	}, err
 }
 
@@ -139,6 +147,13 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 		err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+		}
+
+		if k.forceDeletePvc {
+			_, err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Patch(ctx, opts.Name, types.JSONPatchType, removeFinalizersJsonPatch, metav1.PatchOptions{})
+			if err != nil {
+				return fmt.Errorf("failed removing finalizers from PVC \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+			}
 		}
 	case task.TypeDeletePod:
 		err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
