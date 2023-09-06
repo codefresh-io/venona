@@ -748,6 +748,7 @@ serviceMonitor:
   dind:
     # -- Enable service monitor for dind pods
     enabled: false
+    nameOverride: dind
     selector:
       matchLabels:
         app: dind
@@ -764,6 +765,7 @@ podMonitor:
   engine:
     # -- Enable pod monitor for engine pods
     enabled: false
+    nameOverride: engine
     selector:
       matchLabels:
         app: runtime
@@ -773,6 +775,7 @@ podMonitor:
   runner:
     # -- Enable pod monitor for runner pod
     enabled: false
+    nameOverride: runner
     selector:
       matchLabels:
         codefresh.io/application: runner

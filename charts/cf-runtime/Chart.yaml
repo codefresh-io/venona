@@ -16,8 +16,10 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: Updated runner image to `1.10.1`
-    - kine: added
-      description: Add pod monitor for runner
+    - kind: added
+      description: Add pod monitor for Runner deployment
+    - kind: fixed
+      description: Add default nameOverride to .Values.serviceMonitor and .Values.podMonitor to avoid naming collision
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
