@@ -31,7 +31,7 @@ const (
 
 var (
 	engineRegex = regexp.MustCompile(`engine-.*$`)
-	retryRegex = regexp.MustCompile(`engine-.*-retry-(\d+)$`)
+	retryRegex  = regexp.MustCompile(`engine-.*-retry-(\d+)$`)
 
 	agentTasks = prometheus.NewCounter(prometheus.CounterOpts{
 		Namespace: runnerNamespace,
