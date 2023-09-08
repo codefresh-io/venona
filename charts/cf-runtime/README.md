@@ -527,7 +527,7 @@ volumeProvisioner:
 
 ### Rootless DinD
 
-DinD pod runs a `priviliged` container with rootfull docker. To run the docker daemon as non-root user (rootless mode), change dind image tag:
+DinD pod runs a `priviliged` container with **rootfull** docker. To run the docker daemon as non-root user (**rootless** mode), change dind image tag:
 
 ```yaml
 runtime:
@@ -544,6 +544,7 @@ With the Codefresh Runner, you can run native ARM64v8 builds.
 > You cannot run both amd64 and arm64 images within the same pipeline. As one pipeline can map only to one runtime, you can run either amd64 or arm64 within the same pipeline.
 
 Provide `nodeSelector` and(or) `tolerations` for dind pods:
+
 `values.yaml`
 ```yaml
 runtime:
