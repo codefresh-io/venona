@@ -1,3 +1,6 @@
+### DEPRECATED! ###
+### Use Helm chart to install Codefresh Runner! ###
+
 ###########################################################################################################################
 ### This is a sample values yamls for usage with:                                                                       ###
 ###   venonactl install agent|runtime|monitor|app-proxy --values|-f values.yaml                                         ###
@@ -88,7 +91,7 @@
 ### Pulls and executes tasks from codefresh ###
 ###############################################
 ### Runner image: controls the runner pod image
-# Image: 
+# Image:
 #   Name: codefresh/venona
 #   Tag: 1.4.16 # default s.Version.Current.Version,
 
@@ -112,7 +115,7 @@
 # NodeSelector: app_type=codefresh,cloud.google.com/gke-nodepool=default-pool
 
 ### Tolerations --tolerations: controls runner, dind-volume-provisioner and dind-lv-monitor
-# Tolerations: 
+# Tolerations:
 # - key: codefresh.io
 #   operator: Equal
 #   value: dinds
@@ -140,14 +143,14 @@
 #   Backend: local
 #   StorageClassName: # default is: dind-local-volumes-runner-<namespace>
 #   LocalVolumeParentDir: /var/lib/codefresh/dind-volumes
-#   AvailabilityZone: 
-#   GoogleServiceAccount: 
-#   AwsAccessKeyId: 
+#   AvailabilityZone:
+#   GoogleServiceAccount:
+#   AwsAccessKeyId:
 #   AwsSecretAccessKey:
 #   Encrypted:  # encrypt volume, default is false
 #   VolumeProvisioner:
 #     Image: codefresh/dind-volume-provisioner:1.31.7
-#     NodeSelector: 
+#     NodeSelector:
 #     Tolerations:
 #     resources:
 #       limits:
@@ -159,14 +162,14 @@
 #     ServiceAccount:
 #       Annotations:  # will be set on VolumeProvisioner and LocalVolumeMonitor service account
 #         foo: bar
-#   LocalVolumeMonitor: 
+#   LocalVolumeMonitor:
 #     resources:
 #       limits:
 #         cpu: 400m
 #         memory: 1200Mi
 #       requests:
 #         cpu: 200m
-#         memory: 500Mi  
+#         memory: 500Mi
 
 
 #######################################
@@ -182,8 +185,8 @@
 ### Storage parameters example for gke-local-ssd
 # Storage:
 #   Backend: local
-#   LocalVolumeParentDir: /mnt/disks/ssd0/codefresh-volumes 
-# NodeSelector: cloud.google.com/gke-local-ssd=true 
+#   LocalVolumeParentDir: /mnt/disks/ssd0/codefresh-volumes
+# NodeSelector: cloud.google.com/gke-local-ssd=true
 
 ### Storage parameter example for gke disks
 # Storage:
@@ -200,7 +203,7 @@
 #   AwsAccessKeyId: ABCDF
 #   AwsSecretAccessKey: ZYXWV
 #   Encrypted:  # encrypt volume, default is false
-#   VolumeProvisioner: 
+#   VolumeProvisioner:
 #     NodeSelector: kubernetes.io/role=master
 # NodeSelector: failure-domain.beta.kubernetes.io/zone=us-east-1d
 
@@ -214,7 +217,7 @@
 #   Image:
 #     Name: codefresh/agent
 #     Tag:  stable
-#   resources:  
+#   resources:
 #     limits:
 #       cpu: 400m
 #       memory: 1200Mi
@@ -292,7 +295,7 @@
 #   userVolumes: # will be set for dind pod and will be injcted for each container - https://codefresh.io/docs/docs/administration/codefresh-runner/#custom-volume-mounts
 #     test:
 #       name: test
-#       secret: 
+#       secret:
 #         secretName: test-secret
 
 
