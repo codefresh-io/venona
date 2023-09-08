@@ -527,8 +527,10 @@ volumeProvisioner:
 
 ### Rootless DinD
 
-DinD pod runs a `priviliged` container with **rootfull** docker. To run the docker daemon as non-root user (**rootless** mode), change dind image tag:
+DinD pod runs a `priviliged` container with **rootfull** docker.
+To run the docker daemon as non-root user (**rootless** mode), change dind image tag:
 
+`values.yaml`
 ```yaml
 runtime:
   dind:
