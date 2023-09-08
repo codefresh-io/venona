@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.1.2](https://img.shields.io/badge/Version-6.1.2-informational?style=flat-square)
+![Version: 6.1.3](https://img.shields.io/badge/Version-6.1.3-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -23,6 +23,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
   - [Volume cleaners](#volume-cleaners)
+  - [Rootless DinD](#rootless-dind)
   - [Openshift](#openshift)
   - [On-premise](#on-premise)
 
@@ -521,6 +522,38 @@ volumeProvisioner:
     env:
       KB_USAGE_THRESHOLD: 60  # default 80 (percentage)
       INODE_USAGE_THRESHOLD: 60  # default 80
+```
+
+### Rootless DinD
+
+DinD pod runs a `priviliged` container with rootfull docker. To run the docker daemon as non-root user (rootless mode), change dind image tag:
+
+```yaml
+runtime:
+  dind:
+    image:
+      tag: rootless
+```
+
+### ARM
+
+With the Codefresh Runner, you can run native ARM64v8 builds.
+
+> **Note!**
+> You cannot run both amd64 and arm64 images within the same pipeline. As one pipeline can map only to one runtime, you can run either amd64 or arm64 within the same pipeline.
+
+Provide `nodeSelector` and(or) `tolerations` for dind pods:
+`values.yaml`
+```yaml
+runtime:
+  dind:
+    nodeSelector:
+      arch: arm64
+    tolerations:
+    - key: arch
+      operator: Equal
+      value: arm64
+      effect: NoSchedule
 ```
 
 ### Openshift
