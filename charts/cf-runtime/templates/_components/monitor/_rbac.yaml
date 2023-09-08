@@ -49,7 +49,7 @@ subjects:
     name: {{ include "monitor.serviceAccountName" . }}
     namespace: {{ .Release.Namespace }}
 roleRef:
-  kind: Role
+  kind: {{ .Values.rbac.namespaced | ternary "Role" "ClusterRole" }}
   name: {{ include "monitor.fullname" . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
