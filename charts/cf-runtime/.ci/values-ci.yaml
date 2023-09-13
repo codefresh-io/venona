@@ -22,8 +22,6 @@ runner:
     enabled: true
 runtime:
   dind:
-    image:
-      tag: 20.10.24-1.27.0-rootless
     resources:
       requests:
         cpu: 100m
