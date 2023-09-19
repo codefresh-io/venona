@@ -170,7 +170,7 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.33.3
+    tag: 1.34.0
   # -- Add additional env vars
   env: {}
 
@@ -772,6 +772,7 @@ podMonitor:
     podMetricsEndpoints:
     - path: /metrics
       targetPort: 9100
+
   runner:
     # -- Enable pod monitor for runner pod
     enabled: false
@@ -779,6 +780,17 @@ podMonitor:
     selector:
       matchLabels:
         codefresh.io/application: runner
+    podMetricsEndpoints:
+    - path: /metrics
+      targetPort: 8080
+
+  volume-provisioner:
+    # -- Enable pod monitor for volumeProvisioner pod
+    enabled: false
+    nameOverride: volume-provisioner
+    selector:
+      matchLabels:
+        codefresh.io/application: volume-provisioner
     podMetricsEndpoints:
     - path: /metrics
       targetPort: 8080

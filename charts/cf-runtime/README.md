@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.1.3](https://img.shields.io/badge/Version-6.1.3-informational?style=flat-square)
+![Version: 6.1.4](https://img.shields.io/badge/Version-6.1.4-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -928,6 +928,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | podMonitor | object | See below | Add podMonitor (for engine pods) |
 | podMonitor.main.enabled | bool | `false` | Enable pod monitor for engine pods |
 | podMonitor.runner.enabled | bool | `false` | Enable pod monitor for runner pod |
+| podMonitor.volume-provisioner.enabled | bool | `false` | Enable pod monitor for volumeProvisioner pod |
 | re | object | `{}` |  |
 | runner | object | See below | Runner parameters |
 | runner.affinity | object | `{}` | Set affinity |
@@ -1021,7 +1022,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.33.3"}` | Set image |
+| volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.34.0"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
 | volumeProvisioner.podSecurityContext | object | See below | Set security context for the pod |
