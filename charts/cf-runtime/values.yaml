@@ -784,7 +784,7 @@ podMonitor:
     - path: /metrics
       targetPort: 8080
 
-  volumeProvisioner:
+  volume-provisioner:
     # -- Enable pod monitor for volumeProvisioner pod
     enabled: false
     nameOverride: volume-provisioner
