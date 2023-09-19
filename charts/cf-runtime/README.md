@@ -928,7 +928,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | podMonitor | object | See below | Add podMonitor (for engine pods) |
 | podMonitor.main.enabled | bool | `false` | Enable pod monitor for engine pods |
 | podMonitor.runner.enabled | bool | `false` | Enable pod monitor for runner pod |
-| podMonitor.volumeProvisioner.enabled | bool | `false` | Enable pod monitor for volumeProvisioner pod |
+| podMonitor.volume-provisioner.enabled | bool | `false` | Enable pod monitor for volumeProvisioner pod |
 | re | object | `{}` |  |
 | runner | object | See below | Runner parameters |
 | runner.affinity | object | `{}` | Set affinity |
