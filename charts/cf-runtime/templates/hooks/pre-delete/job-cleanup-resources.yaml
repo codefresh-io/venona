@@ -53,6 +53,10 @@ spec:
           {{- include "runtime.installation-token-env-var-value" . | indent 10}}
         - name: AGENT
           value: {{ .Values.runtime.agent | quote }}
+        - name: AGENT_SECRET_NAME
+          value: {{ include "runner.fullname" . }}
+        - name: DIND_SECRET_NAME
+          value: codefresh-certs-server
           {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 8 }}
       {{- with $values.nodeSelector }}
       nodeSelector:
