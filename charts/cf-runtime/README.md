@@ -934,7 +934,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.10.1"}` | Set image |
+| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.10.2"}` | Set image |
 | runner.init | object | `{"image":{"registry":"quay.io","repository":"codefresh/cli","tag":"0.85.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |

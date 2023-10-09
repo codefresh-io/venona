@@ -79,7 +79,7 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 1.10.1
+    tag: 1.10.2
 
   # -- Init container
   init:
