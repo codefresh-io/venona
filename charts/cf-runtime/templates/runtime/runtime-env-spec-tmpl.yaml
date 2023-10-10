@@ -167,4 +167,9 @@ accountId: {{ .Values.global.accountId }}
 {{- if not .Values.runtime.agent }}
 accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
 {{- end }}
+{{- if .Values.appProxy.enabled }}
+appProxy:
+  externalIP: >-
+    {{ printf "https://%s%s" .Values.appProxy.ingress.host .Values.appProxy.ingress.pathPrefix }}
+{{- end }}
 {{- end }}
