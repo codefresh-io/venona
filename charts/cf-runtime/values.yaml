@@ -621,7 +621,7 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: latest
+    tag: 0.0.45
   # -- Add additional env vars
   env: {}
 
