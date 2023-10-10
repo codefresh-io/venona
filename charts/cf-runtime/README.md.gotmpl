@@ -52,6 +52,7 @@ helm repo update
 global:
   # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
   # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  # Minimal API key scopes: Runner-Installation(read+write), Agent(read+write), Agents(read+write)
   codefreshToken: ""
   # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
   codefreshTokenSecretKeyRef: {}
