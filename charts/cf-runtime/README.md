@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.1.6](https://img.shields.io/badge/Version-6.1.6-informational?style=flat-square)
+![Version: 6.1.7](https://img.shields.io/badge/Version-6.1.7-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -52,6 +52,7 @@ helm repo update
 global:
   # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
   # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  # Minimal API key scopes: Runner-Installation(read+write), Agent(read+write), Agents(read+write)
   codefreshToken: ""
   # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
   codefreshTokenSecretKeyRef: {}
@@ -898,7 +899,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | global.agentToken | string | `""` | DEPRECATED Agent token in plain text. !!! MUST BE provided if migrating from < 6.x chart version |
 | global.agentTokenSecretKeyRef | object | `{}` | DEPRECATED Agent token that references an existing secret containing API key. !!! MUST BE provided if migrating from < 6.x chart version |
 | global.codefreshHost | string | `"https://g.codefresh.io"` | URL of Codefresh Platform (required!) |
-| global.codefreshToken | string | `""` | User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!) Ref: https://g.codefresh.io/user/settings (see API Keys) |
+| global.codefreshToken | string | `""` | User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!) Ref: https://g.codefresh.io/user/settings (see API Keys) Minimal API key scopes: Runner-Installation(read+write), Agent(read+write), Agents(read+write) |
 | global.codefreshTokenSecretKeyRef | object | `{}` | User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!) |
 | global.context | string | `""` | K8s context name (required!) |
 | global.imagePullSecrets | list | `[]` | Global Docker registry secret names as array |

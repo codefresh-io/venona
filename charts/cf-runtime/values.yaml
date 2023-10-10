@@ -15,6 +15,7 @@ global:
   codefreshHost: "https://g.codefresh.io"
   # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
   # Ref: https://g.codefresh.io/user/settings (see API Keys)
+  # Minimal API key scopes: Runner-Installation(read+write), Agent(read+write), Agents(read+write)
   codefreshToken: ""
   # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
   codefreshTokenSecretKeyRef: {}
@@ -110,6 +111,9 @@ runner:
 
   # -- Add additional env vars
   env: {}
+  # E.g.
+  # env:
+  #   WORKFLOW_CONCURRENCY: 50 # The number of workflow creation and termination tasks the Runner can handle in parallel. Defaults to 50
 
   # -- Service Account parameters
   serviceAccount:
@@ -173,6 +177,9 @@ volumeProvisioner:
     tag: 1.34.1
   # -- Add additional env vars
   env: {}
+  # E.g.
+  # env:
+  #   THREADINESS: 4 # The number of PVC requests the dind-volume-provisioner can process in parallel. Defaults to 4
 
   # -- Service Account parameters
   serviceAccount:
