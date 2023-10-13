@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.1.8](https://img.shields.io/badge/Version-6.1.8-informational?style=flat-square)
+![Version: 6.1.9](https://img.shields.io/badge/Version-6.1.9-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -18,7 +18,8 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 6.x](#to-6-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
-  - [EBS backend volume configuration](#ebs-backend-volume-configuration)
+  - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
+  - [Azure Disks backend volume configuration in AKS](#azure-disks-backend-volume-configuration)
   - [Custom volume mounts](#custom-volume-mounts)
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
@@ -382,6 +383,56 @@ runtime:
         mountPath: /home/appuser/.docker/
         readOnly: true
 
+```
+
+### Azure Disks backend volume configuration
+
+`dind-volume-provisioner` should have permissions to create/delete/get Azure Disks
+
+Role definition for `dind-volume-provisioner`
+
+`dind-volume-provisioner-role.json`
+```json
+{
+  "Name": "CodefreshDindVolumeProvisioner",
+  "Description": "Perform create/delete/get disks",
+  "IsCustom": true,
+  "Actions": [
+      "Microsoft.Compute/disks/read",
+      "Microsoft.Compute/disks/write",
+      "Microsoft.Compute/disks/delete"
+
+  ],
+  "AssignableScopes": ["/subscriptions/<YOUR_SUBSCRIPTION_ID>"]
+}
+```
+
+When creating an AKS cluster in Azure there is the option to use a [managed identity](https://learn.microsoft.com/en-us/azure/aks/use-managed-identity) that is assigned to the kubelet. This identity is assigned to the underlying node pool in the AKS cluster and can then be used by the dind-volume-provisioner.
+
+```console
+export ROLE_DEFINITIN_FILE=dind-volume-provisioner-role.json
+export SUBSCRIPTION_ID=$(az account show --query "id" | xargs echo )
+export RESOURCE_GROUP=<YOUR_RESOURCE_GROUP_NAME>
+export AKS_NAME=<YOUR_AKS_NAME>
+export LOCATION=$(az aks show -g $RESOURCE_GROUP -n $AKS_NAME --query location | xargs echo)
+export NODES_RESOURCE_GROUP=MC_${RESOURCE_GROUP}_${AKS_NAME}_${LOCATION}
+export NODE_SERVICE_PRINCIPAL=$(az aks show -g $RESOURCE_GROUP -n $AKS_NAME --query identityProfile.kubeletidentity.objectId | xargs echo)
+
+az role definition create --role-definition @${ROLE_DEFINITIN_FILE}
+az role assignment create --assignee $NODE_SERVICE_PRINCIPAL --scope /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$NODES_RESOURCE_GROUP --role CodefreshDindVolumeProvisioner
+```
+
+Deploy Helm chart with the following values:
+
+`values.yaml`
+```yaml
+storage:
+  backend: azuredisk
+  azuredisk:
+    location: westcentralus
+    resourceGroup: my-resource-group-name
+
+  mountAzureJson: true
 ```
 
 ### Custom global environment variables
@@ -1023,7 +1074,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.34.1"}` | Set image |
+| volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.34.2"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
 | volumeProvisioner.podSecurityContext | object | See below | Set security context for the pod |
