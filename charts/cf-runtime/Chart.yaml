@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.1.8
+version: 6.1.9
 keywords:
   - codefresh
   - runner
@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: fixed
-      description: Fix appProxy in runtime environment spec template
+      description: Fix dind-volume-provisioner label filtering
 dependencies:
   - name: cf-common
     repository: https://chartmuseum.codefresh.io/cf-common
