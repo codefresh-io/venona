@@ -88,16 +88,12 @@ global:
 - Install chart
 
 ```console
-helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace codefresh
+helm upgrade --install cf-runtime oci://quay.io/codefresh/charts/cf-runtime -f values.yaml --create-namespace --namespace codefresh
 ```
 
 ## Chart Configuration
 
-See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
-
-```console
-helm show values cf-runtime/cf-runtime
-```
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing).
 
 ## Upgrade Chart
 
@@ -251,11 +247,7 @@ runner:
 
 ## Configuration
 
-See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
-
-```console
-helm show values cf-runtime/cf-runtime
-```
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing).
 
 ### EBS backend volume configuration
 
