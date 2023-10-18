@@ -1,13 +1,13 @@
 ## Codefresh Runner
 
-![Version: 6.1.11](https://img.shields.io/badge/Version-6.1.11-informational?style=flat-square)
+![Version: 6.2.0](https://img.shields.io/badge/Version-6.2.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
 ## Table of Content
 
 - [Prerequisites](#prerequisites)
-- [Get Repo Info](#get-repo-info)
+- [Get Chart Info](#get-chart-info)
 - [Install Chart](#install-chart)
 - [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
@@ -34,12 +34,12 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - Kubernetes **1.19+**
 - Helm **3.8.0+**
 
-## Get Repo Info
+## Get Chart Info
 
 ```console
-helm repo add cf-runtime http://chartmuseum.codefresh.io/cf-runtime
-helm repo update
+helm show all oci://quay.io/codefresh/charts/cf-runtime
 ```
+See [Use OCI-based registries](https://helm.sh/docs/topics/registries/)
 
 ## Install Chart
 
@@ -47,6 +47,7 @@ helm repo update
 
 - Specify the following mandatory values
 
+`values.yaml`
 ```yaml
 # -- Global parameters
 # @default -- See below
@@ -87,12 +88,7 @@ global:
 - Install chart
 
 ```console
-helm upgrade --install cf-runtime cf-runtime/cf-runtime --create-namespace --namespace codefresh
-```
-
-*Install from OCI-based registry*
-```console
-helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime --create-namespace --namespace codefresh
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace codefresh
 ```
 
 ## Chart Configuration
@@ -890,7 +886,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.15.2 |
+| oci://quay.io/codefresh/charts | cf-common | 0.16.0 |
 
 ## Values
 
