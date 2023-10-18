@@ -37,7 +37,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 ## Get Chart Info
 
 ```console
-helm show all oci://quay.io/codefresh/charts/cf-runtime
+helm show all oci://quay.io/codefresh/cf-runtime
 ```
 See [Use OCI-based registries](https://helm.sh/docs/topics/registries/)
 
@@ -88,7 +88,7 @@ global:
 - Install chart
 
 ```console
-helm upgrade --install cf-runtime oci://quay.io/codefresh/charts/cf-runtime -f values.yaml --create-namespace --namespace codefresh
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace codefresh
 ```
 
 ## Chart Configuration
