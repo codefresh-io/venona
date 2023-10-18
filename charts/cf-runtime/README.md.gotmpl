@@ -34,6 +34,11 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - Kubernetes **1.19+**
 - Helm **3.8.0+**
 
+⚠️⚠️⚠️
+> Since version 6.2.x chart is pushed **only** to OCI registry at `oci://quay.io/codefresh/cf-runtime`
+
+> Versions prior to 6.2.x are still available in ChartMuseum at `http://chartmuseum.codefresh.io/cf-runtime`
+
 ## Get Chart Info
 
 ```console
