@@ -1,13 +1,13 @@
 ## Codefresh Runner
 
-![Version: 6.1.13](https://img.shields.io/badge/Version-6.1.13-informational?style=flat-square)
+![Version: 6.2.2](https://img.shields.io/badge/Version-6.2.2-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
 ## Table of Content
 
 - [Prerequisites](#prerequisites)
-- [Get Repo Info](#get-repo-info)
+- [Get Chart Info](#get-chart-info)
 - [Install Chart](#install-chart)
 - [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
@@ -34,12 +34,17 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - Kubernetes **1.19+**
 - Helm **3.8.0+**
 
-## Get Repo Info
+⚠️⚠️⚠️
+> Since version 6.2.x chart is pushed **only** to OCI registry at `oci://quay.io/codefresh/cf-runtime`
+
+> Versions prior to 6.2.x are still available in ChartMuseum at `http://chartmuseum.codefresh.io/cf-runtime`
+
+## Get Chart Info
 
 ```console
-helm repo add cf-runtime http://chartmuseum.codefresh.io/cf-runtime
-helm repo update
+helm show all oci://quay.io/codefresh/cf-runtime
 ```
+See [Use OCI-based registries](https://helm.sh/docs/topics/registries/)
 
 ## Install Chart
 
@@ -47,6 +52,7 @@ helm repo update
 
 - Specify the following mandatory values
 
+`values.yaml`
 ```yaml
 # -- Global parameters
 # @default -- See below
@@ -87,21 +93,12 @@ global:
 - Install chart
 
 ```console
-helm upgrade --install cf-runtime cf-runtime/cf-runtime --create-namespace --namespace codefresh
-```
-
-*Install from OCI-based registry*
-```console
-helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime --create-namespace --namespace codefresh
+helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.yaml --create-namespace --namespace codefresh
 ```
 
 ## Chart Configuration
 
-See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
-
-```console
-helm show values cf-runtime/cf-runtime
-```
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing).
 
 ## Upgrade Chart
 
@@ -255,11 +252,7 @@ runner:
 
 ## Configuration
 
-See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing). To see all configurable options with detailed comments, visit the chart's [values.yaml](./values.yaml), or run these configuration commands:
-
-```console
-helm show values cf-runtime/cf-runtime
-```
+See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing).
 
 ### EBS backend volume configuration
 
@@ -890,7 +883,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://chartmuseum.codefresh.io/cf-common | cf-common | 0.15.2 |
+| oci://quay.io/codefresh/charts | cf-common | 0.16.0 |
 
 ## Values
 
@@ -1028,7 +1021,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
 | runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.165.2"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:v2.20.3-1.4.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.3","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.10","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.16","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.15","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.13","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.21","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.13.8"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{},"image":{"registry":"quay.io","repository":"codefresh/engine","tag":"1.165.2"},"nodeSelector":{},"podAnnotations":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:v2.20.3-1.4.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.10.3","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.10","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.16","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.15","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.13","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.1.21","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.0","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.14.0"},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userEnvVars":[]}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
 | runtime.engine.env | object | `{}` | Set additional env vars. |
