@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.2.0
+version: 6.2.1
 keywords:
   - codefresh
   - runner
@@ -15,9 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: changed
-      description: Update cf-common lib chart
-    - kind: changed
-      description: Push chart to OCI registry
+      description: Update TEMPLATE_ENGINE image to pikolo:0.14.0
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
