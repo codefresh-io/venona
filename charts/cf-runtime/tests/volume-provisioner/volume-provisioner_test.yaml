@@ -358,3 +358,57 @@ tests:
       - hasDocuments:
           count: 0
         template: templates/volume-provisioner/storageclass.yaml
+
+  - it: Test volume-provisioner with azure disks
+    set:
+      storage.backend: azuredisk
+      storage.azuredisk.location: somewhere
+      storage.azuredisk.resourceGroup: some-rg
+      storage.mountAzureJson: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: AZURE_CREDENTIAL_FILE
+            value: /etc/kubernetes/azure.json
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: CLOUDCONFIG_AZURE
+            value: /etc/kubernetes/azure.json
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          count: 1
+          any: true
+          content:
+            name: azure-json
+            readOnly: true
+            mountPath: "/etc/kubernetes/azure.json"
+        template: templates/volume-provisioner/deployment.yaml
+      - contains:
+          path: spec.template.spec.volumes
+          count: 1
+          any: true
+          content:
+            name: azure-json
+            hostPath:
+              path: /etc/kubernetes/azure.json
+              type: File
+        template: templates/volume-provisioner/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/volume-provisioner/secret.yaml
+      - equal:
+          path: parameters.volumeBackend
+          value: azuredisk
+        template: templates/volume-provisioner/storageclass.yaml
+      - equal:
+          path: parameters.location
+          value: somewhere
+        template: templates/volume-provisioner/storageclass.yaml
+      - equal:
+          path: parameters.resourceGroup
+          value: some-rg
+        template: templates/volume-provisioner/storageclass.yaml

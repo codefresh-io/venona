@@ -37,8 +37,9 @@ AWS_SECRET_ACCESS_KEY:
 GOOGLE_APPLICATION_CREDENTIALS: /etc/dind-volume-provisioner/credentials/google-service-account.json
 {{- end }}
 
-{{- if and .Values.mountAzureJson }}
+{{- if and .Values.storage.mountAzureJson }}
 AZURE_CREDENTIAL_FILE: /etc/kubernetes/azure.json
+CLOUDCONFIG_AZURE: /etc/kubernetes/azure.json
 {{- end }}
 
 {{- end }}
@@ -65,7 +66,7 @@ AZURE_CREDENTIAL_FILE: /etc/kubernetes/azure.json
     secretName: {{ .Values.storage.gcedisk.serviceAccountJsonSecretKeyRef.name }}
     optional: true
   {{- end }}
-  {{- if .Values.mountAzureJson }}
+  {{- if .Values.storage.mountAzureJson }}
 - name: azure-json
   hostPath:
     path: /etc/kubernetes/azure.json
@@ -79,7 +80,7 @@ AZURE_CREDENTIAL_FILE: /etc/kubernetes/azure.json
   readOnly: true
   mountPath: "/etc/dind-volume-provisioner/credentials"
   {{- end }}
-  {{- if .Values.mountAzureJson }}
+  {{- if .Values.storage.mountAzureJson }}
 - name: azure-json
   readOnly: true
   mountPath: "/etc/kubernetes/azure.json"
