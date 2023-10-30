@@ -1,6 +1,7 @@
 {{- $volumeProvisionerContext := deepCopy . }}
 {{- $_ := set $volumeProvisionerContext "Values" (get .Values "volumeProvisioner") }}
 {{- $_ := set $volumeProvisionerContext.Values "global" (get .Values "global") }}
+{{- $_ := set $volumeProvisionerContext.Values "storage" (get .Values "storage") }}
 
 {{- if $volumeProvisionerContext.Values.enabled }}
 {{- include "dind-volume-provisioner.resources.deployment" $volumeProvisionerContext }}
