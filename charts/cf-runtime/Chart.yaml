@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.2.5
+version: 6.2.6
 keywords:
   - codefresh
   - runner
@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: fixed
-      description: Fix build termination issue in engine
+      description: Update volumeProvisioner tag to `1.34.3` (fix volumes sort)
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
