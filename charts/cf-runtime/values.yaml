@@ -525,6 +525,8 @@ runtime:
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11
       PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.0
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.0
+      CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
+      GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
     # -- Set additional env vars.
     env: {}
     # -- Set pod annotations.
