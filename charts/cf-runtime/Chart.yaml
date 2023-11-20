@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.2.7
+version: 6.3.0
 keywords:
   - codefresh
   - runner
@@ -14,8 +14,8 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: Add missing runtime images
+    - kind: added
+      description: Add support for `timeout` flag in pipeline steps
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
