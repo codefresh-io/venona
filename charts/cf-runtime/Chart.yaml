@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.1
+version: 6.3.2
 keywords:
   - codefresh
   - runner
@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: fixed
-      description: Fix metrics for build step that uses docker-container driver and buildx
+      description: Exclude inactive memory from memory metrics
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
