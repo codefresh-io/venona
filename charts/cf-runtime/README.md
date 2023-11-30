@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.3.2](https://img.shields.io/badge/Version-6.3.2-informational?style=flat-square)
+![Version: 6.3.3](https://img.shields.io/badge/Version-6.3.3-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -419,13 +419,25 @@ Deploy Helm chart with the following values:
 
 `values.yaml`
 ```yaml
+volumeProvisioner:
+  podSecurityContext:
+    enabled: true
+    runAsUser: 0
+    runAsGroup: 0
+    fsGroup: 0
+
 storage:
   backend: azuredisk
   azuredisk:
-    location: westcentralus
+    availabilityZone: northeurope-1 # replace with your zone
     resourceGroup: my-resource-group-name
 
   mountAzureJson: true
+
+runtime:
+  dind:
+    nodeSelector:
+      topology.kubernetes.io/zone: northeurope-1
 ```
 
 ### Custom global environment variables

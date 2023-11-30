@@ -37,8 +37,8 @@ parameters:
   skuName: {{ .Values.storage.azuredisk.skuName | default "Premium_LRS" }}
   fsType: {{ .Values.storage.fsType | default "ext4" }}
   cachingMode: {{ .Values.storage.azuredisk.cachingMode | default "None" }}
-  {{- with .Values.storage.azuredisk.location }}
-  location: {{ . | quote }}
+  {{- with .Values.storage.azuredisk.availabilityZone }}
+  availabilityZone: {{ . | quote }}
   {{- end }}
   {{- with .Values.storage.azuredisk.resourceGroup }}
   resourceGroup: {{ . | quote }}
