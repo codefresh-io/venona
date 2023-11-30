@@ -362,7 +362,7 @@ tests:
   - it: Test volume-provisioner with azure disks
     set:
       storage.backend: azuredisk
-      storage.azuredisk.location: somewhere
+      storage.azuredisk.availabilityZone: somewhere
       storage.azuredisk.resourceGroup: some-rg
       storage.mountAzureJson: true
     asserts:
@@ -405,7 +405,7 @@ tests:
           value: azuredisk
         template: templates/volume-provisioner/storageclass.yaml
       - equal:
-          path: parameters.location
+          path: parameters.availabilityZone
           value: somewhere
         template: templates/volume-provisioner/storageclass.yaml
       - equal:
