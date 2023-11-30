@@ -383,7 +383,7 @@ storage:
     # -- Set storage type (`Premium_LRS`)
     skuName: Premium_LRS
     cachingMode: None
-    # location: westcentralus
+    # availabilityZone: northeurope-1
     # resourceGroup:
     # DiskIOPSReadWrite: 500
     # DiskMBpsReadWrite: 100

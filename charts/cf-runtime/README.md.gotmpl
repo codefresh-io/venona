@@ -419,13 +419,25 @@ Deploy Helm chart with the following values:
 
 `values.yaml`
 ```yaml
+volumeProvisioner:
+  podSecurityContext:
+    enabled: true
+    runAsUser: 0
+    runAsGroup: 0
+    fsGroup: 0
+
 storage:
   backend: azuredisk
   azuredisk:
-    location: westcentralus
+    availabilityZone: northeurope-1 # replace with your zone
     resourceGroup: my-resource-group-name
 
   mountAzureJson: true
+
+runtime:
+  dind:
+    nodeSelector:
+      topology.kubernetes.io/zone: northeurope-1
 ```
 
 
