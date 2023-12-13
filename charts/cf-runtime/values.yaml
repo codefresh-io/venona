@@ -497,7 +497,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.168.2
+      tag: 1.168.3
     # -- Set container command.
     command:
       - npm
