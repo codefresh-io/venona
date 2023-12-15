@@ -18,6 +18,8 @@ runtime:
       ALICE: BOB
     podAnnotations:
       karpenter.sh/do-not-evict: "true"
+    podLabels:
+      key: dind
     nodeSelector:
       topology.kubernetes.io/zone: us-east-1a
     affinity:
@@ -82,6 +84,8 @@ runtime:
           key: token
     podAnnotations:
       karpenter.sh/do-not-evict: "true"
+    podLabels:
+      key: value
     nodeSelector:
       topology.kubernetes.io/zone: us-east-1a
     affinity:

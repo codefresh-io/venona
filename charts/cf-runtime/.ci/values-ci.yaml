@@ -24,6 +24,8 @@ runtime:
   dind:
     image:
       tag: 24.0.6-1.28.3-rootless
+    podLabels:
+      key: dind
     resources:
       requests:
         cpu: 100m
@@ -32,6 +34,8 @@ runtime:
         cpu: 1000m
         memory: 1024Mi
   engine:
+    podLabels:
+      key: engine
     resources:
       requests:
         cpu: 100m
