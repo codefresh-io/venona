@@ -65,6 +65,9 @@ runtimeScheduler:
   {{- with $engineContext.podAnnotations }}
   annotations: {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with $engineContext.podLabels }}
+  labels: {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if $engineContext.schedulerName }}
   schedulerName: {{ $engineContext.schedulerName }}
   {{- end }}
@@ -110,6 +113,9 @@ dockerDaemonScheduler:
   {{- end }}
   {{- with $dindContext.podAnnotations }}
   annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $dindContext.podLabels }}
+  labels: {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- if $dindContext.schedulerName }}
   schedulerName: {{ $dindContext.schedulerName }}

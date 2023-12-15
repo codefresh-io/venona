@@ -458,6 +458,8 @@ runtime:
     env: {}
     # -- Set pod annotations.
     podAnnotations: {}
+    # -- Set pod labels.
+    podLabels: {}
     # -- Set node selector.
     nodeSelector: {}
     # -- Set affinity
@@ -531,6 +533,8 @@ runtime:
     env: {}
     # -- Set pod annotations.
     podAnnotations: {}
+    # -- Set pod labels.
+    podLabels: {}
     # -- Set node selector.
     nodeSelector: {}
     # -- Set affinity

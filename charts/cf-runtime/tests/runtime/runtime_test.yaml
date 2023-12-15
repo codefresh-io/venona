@@ -87,6 +87,8 @@ tests:
                   value: engine
               annotations:
                 karpenter.sh/do-not-evict: "true"
+              labels:
+                key: engine
               resources:
                 limits:
                   cpu: 200m
@@ -124,6 +126,8 @@ tests:
                   value: dinds
               annotations:
                 karpenter.sh/do-not-evict: "true"
+              labels:
+                key: dind
               pvcs:
                 - name: dind
                   reuseVolumeSelector: "codefresh-app,io.codefresh.accountName"
