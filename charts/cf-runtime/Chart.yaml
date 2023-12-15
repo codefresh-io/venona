@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.5
+version: 6.3.6
 keywords:
   - codefresh
   - runner
@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: fixed
-      description: Fix memory and CPU metrics for cgroup v2
+      description: Update codefresh/kubectl and codefresh/cf-k8s-agent images
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
