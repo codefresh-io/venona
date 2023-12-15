@@ -85,7 +85,7 @@ runtime:
     podAnnotations:
       karpenter.sh/do-not-evict: "true"
     podLabels:
-      key: value
+      key: engine
     nodeSelector:
       topology.kubernetes.io/zone: us-east-1a
     affinity:
