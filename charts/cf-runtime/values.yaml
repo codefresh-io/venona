@@ -578,7 +578,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.27.2
+      tag: 1.28.4
     rbac:
       enabled: true
     annotations: {}
@@ -708,8 +708,8 @@ monitor:
   # -- Set image
   image:
     registry: quay.io
-    repository: codefresh/agent
-    tag: stable
+    repository: codefresh/cf-k8s-agent
+    tag: 1.3.16
   # -- Add additional env vars
   env: {}
 
