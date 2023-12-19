@@ -15,7 +15,7 @@ maintainers:
 annotations:
   artifacthub.io/changes: |
     - kind: added
-      description: Add support for `strict_fail_fast` field in pipelines
+      description: Add support for strict_fail_fast field in pipelines
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
