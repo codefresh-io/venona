@@ -635,7 +635,7 @@ appProxy:
   # @default -- See below
   ingress:
     # -- Set path prefix for ingress
-    pathPrefix: "/"
+    pathPrefix: ""
     # -- Set ingress class
     class: ""
     # -- Set DNS hostname the ingress will use
