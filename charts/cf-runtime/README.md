@@ -908,7 +908,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
-| appProxy.ingress.pathPrefix | string | `""` | Set path prefix for ingress |
+| appProxy.ingress.pathPrefix | string | `""` | Set path prefix for ingress (keep empty for default `/` path) |
 | appProxy.ingress.tlsSecret | string | `""` | Set k8s tls secret for the ingress object |
 | appProxy.nodeSelector | object | `{}` | Set node selector |
 | appProxy.podAnnotations | object | `{}` | Set pod annotations |
