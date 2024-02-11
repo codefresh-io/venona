@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/logger"
@@ -140,6 +141,8 @@ func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec inter
 	return nil
 }
 
+var engineRegex = regexp.MustCompile(`engine-.*$`)
+
 func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 	start := time.Now()
 	switch opts.Kind {
@@ -156,6 +159,12 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 			}
 		}
 	case task.TypeDeletePod:
+		matches := engineRegex.FindStringSubmatch(opts.Name)
+		if matches != nil {
+			k.log.Info("Skipping deleting engine pod", "name", opts.Name)
+			return nil
+		}
+
 		err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
 			return fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
