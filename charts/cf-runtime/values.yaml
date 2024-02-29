@@ -499,7 +499,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.169.5
+      tag: 1.169.7
     # -- Set container command.
     command:
       - npm
@@ -530,7 +530,11 @@ runtime:
       CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
       GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
     # -- Set additional env vars.
-    env: {}
+    env:
+      # -- Interval to check the exec status in the container-logger
+      CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+      # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
+      LOG_OUTGOING_HTTP_REQUESTS: 'false'
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.

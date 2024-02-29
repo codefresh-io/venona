@@ -37,6 +37,8 @@ tests:
                 - run
                 - start
               envVars:
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
+                LOG_OUTGOING_HTTP_REQUESTS: "false"
                 COMPOSE_IMAGE: "somedomain.io/codefresh/compose:tagoverride"
                 CONTAINER_LOGGER_IMAGE: "somedomain.io/codefresh/cf-container-logger:tagoverride"
                 DOCKER_BUILDER_IMAGE: "somedomain.io/codefresh/cf-docker-builder:tagoverride"
@@ -152,4 +154,3 @@ tests:
           path: spec.template.spec.containers[0].image
           pattern: ^somedomain.io/codefresh/.*$
         template: templates/hooks/post-install/job-gencerts-dind.yaml
-
