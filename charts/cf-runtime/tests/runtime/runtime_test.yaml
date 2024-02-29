@@ -45,7 +45,9 @@ tests:
                 - two
                 - three
               envVars:
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
                 FOO: BAR
+                LOG_OUTGOING_HTTP_REQUESTS: "false"
                 COMPOSE_IMAGE: "quay.io/codefresh/compose:tagoverride"
                 CONTAINER_LOGGER_IMAGE: "quay.io/codefresh/cf-container-logger:tagoverride"
                 DOCKER_BUILDER_IMAGE: "quay.io/codefresh/cf-docker-builder:tagoverride"
