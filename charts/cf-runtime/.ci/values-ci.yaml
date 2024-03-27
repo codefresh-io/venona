@@ -23,7 +23,7 @@ runner:
 runtime:
   dind:
     image:
-      tag: 24.0.6-1.28.3-rootless
+      tag: 25.0.4-1.28.4-rootless
     podLabels:
       key: dind
     resources:

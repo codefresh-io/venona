@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.15
+version: 6.3.16
 keywords:
   - codefresh
   - runner
@@ -13,11 +13,12 @@ maintainers:
   - name: codefresh
     url: https://codefresh-io.github.io/
 annotations:
+  artifacthub.io/containsSecurityUpdates: "true"
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgrade engine to v1.169.8
-    - kind: fixed
-      description: Fix pipeline debug mode
+      description: Upgrade dind to v25.0.4-1.28.4
+    - kind: security
+      description: Fixe some CVE in dind
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
