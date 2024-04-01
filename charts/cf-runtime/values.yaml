@@ -717,7 +717,7 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.16
+    tag: 1.3.17
   # -- Add additional env vars
   env: {}
 
