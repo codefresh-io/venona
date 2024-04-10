@@ -13,7 +13,7 @@ maintainers:
   - name: codefresh
     url: https://codefresh-io.github.io/
 annotations:
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/changes: |
     - kind: fixed
       description: Fix runtime template for dind env vars
