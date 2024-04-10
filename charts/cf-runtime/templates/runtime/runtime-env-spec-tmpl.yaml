@@ -84,7 +84,7 @@ dockerDaemonScheduler:
   userAccess: {{ . }}
   {{- end }}
   {{- with $dindContext.env }}
-  env: {{- toYaml . | nindent 4 }}
+  envVars: {{- toYaml . | nindent 4 }}
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
