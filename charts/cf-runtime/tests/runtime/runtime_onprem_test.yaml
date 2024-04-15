@@ -92,7 +92,7 @@ tests:
               type: DindKubernetesPod
               dindImage: "quay.io/codefresh/dind:tagoverride"
               userAccess: true
-              env:
+              envVars:
                 ALICE: BOB
               cluster:
                 namespace: codefresh
