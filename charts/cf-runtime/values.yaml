@@ -499,7 +499,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.169.8
+      tag: 1.169.9
     # -- Set container command.
     command:
       - npm
@@ -631,7 +631,7 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.45
+    tag: 0.0.47
   # -- Add additional env vars
   env: {}
 
