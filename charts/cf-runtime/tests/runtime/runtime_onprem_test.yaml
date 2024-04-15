@@ -94,6 +94,7 @@ tests:
               userAccess: true
               envVars:
                 ALICE: BOB
+                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override

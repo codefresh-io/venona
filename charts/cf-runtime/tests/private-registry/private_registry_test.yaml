@@ -67,6 +67,8 @@ tests:
               type: DindKubernetesPod
               dindImage: "somedomain.io/codefresh/dind:tagoverride"
               userAccess: true
+              envVars:
+                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine
