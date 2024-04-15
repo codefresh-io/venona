@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.19
+version: 6.3.20
 keywords:
   - codefresh
   - runner
@@ -14,15 +14,13 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgrade engine to v1.169.9
-    - kind: changed
-      description: Upgrade cf-app-proxy to v0.0.47
-    - kind: fixed
-      description: Fix TLS for MongoDB and Redis
+      description: Upgrade dind to 26.0.0-1.28.6
+    - kind: security
+      description: Fix some CVE
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

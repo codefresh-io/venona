@@ -431,7 +431,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 25.0.4-1.28.5  # use `latest-rootless/rootless/25.0.4-1.28.5-rootless` tags for rootless-dind
+      tag: 26.0.0-1.28.6  # use `latest-rootless/rootless/26.0.0-1.28.6-rootless` tags for rootless-dind
     # -- Set dind resources.
     resources:
       requests: null
@@ -455,7 +455,8 @@ runtime:
         reuseVolumeSelector: codefresh-app,io.codefresh.accountName
         reuseVolumeSortOrder: pipeline_id
     # -- Set additional env vars.
-    env: {}
+    env:
+      DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.
