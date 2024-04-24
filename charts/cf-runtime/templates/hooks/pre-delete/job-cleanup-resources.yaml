@@ -40,8 +40,7 @@ spec:
         - "/bin/bash"
         args:
         - -ec
-        - |
-          {{ .Files.Get "files/cleanup-runtime.sh" | nindent 10 }}
+        - | {{ .Files.Get "files/cleanup-runtime.sh" | nindent 10 }}
         env:
         - name: AGENT_NAME
           value: {{ include "runtime.runtime-environment-spec.agent-name" . }}
