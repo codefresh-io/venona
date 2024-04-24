@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.21
+version: 6.3.22
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: Remove extra space in init container command for runner deployment
+      description: Remove extra space in sidecar container (reconcile-runtime) command for runner deployment
+    - kind: changed
+      description: Remove extra space in container commands for jobs (gencerts-dind/cleanup)
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
