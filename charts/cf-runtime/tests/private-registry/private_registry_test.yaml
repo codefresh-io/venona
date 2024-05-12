@@ -39,6 +39,7 @@ tests:
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
                 LOG_OUTGOING_HTTP_REQUESTS: "false"
+                LOGGER_LEVEL: debug
                 COMPOSE_IMAGE: "somedomain.io/codefresh/compose:tagoverride"
                 CONTAINER_LOGGER_IMAGE: "somedomain.io/codefresh/cf-container-logger:tagoverride"
                 DOCKER_BUILDER_IMAGE: "somedomain.io/codefresh/cf-docker-builder:tagoverride"
