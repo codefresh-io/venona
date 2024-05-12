@@ -534,6 +534,8 @@ runtime:
     env:
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+      # -- Level of logging for engine
+      LOGGER_LEVEL: 'debug'
       # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
       LOG_OUTGOING_HTTP_REQUESTS: 'false'
     # -- Set pod annotations.
