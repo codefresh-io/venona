@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.24
+version: 6.3.25
 keywords:
   - codefresh
   - runner
@@ -18,11 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgrade the engine to v1.169.11
-    - kind: added
-      description: Validate pipeline step names
+      description: Upgrade the engine to v1.169.12
     - kind: fixed
-      description: Respect LOGGER_LEVEL variable in the engine
+      description: Fix a bug introduced in the engine v1.169.11, which led to the output of logs in plaintext instead of JSON
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
