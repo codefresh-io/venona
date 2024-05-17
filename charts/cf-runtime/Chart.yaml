@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.25
+version: 6.3.26
 keywords:
   - codefresh
   - runner
@@ -17,10 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: Upgrade the engine to v1.169.12
     - kind: fixed
-      description: Fix a bug introduced in the engine v1.169.11, which led to the output of logs in plaintext instead of JSON
+      description: Fix reconcile-runtime sidecar container drift in runner deployment
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
