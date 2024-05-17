@@ -65,7 +65,10 @@ runtimeScheduler:
   tolerations:  {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $engineContext.podAnnotations }}
-  annotations: {{- toYaml . | nindent 4 }}
+  annotations:
+    {{- range $key, $val := . }}
+    {{ $key }}: {{ $val | squote }}
+    {{- end }}
   {{- end }}
   {{- with $engineContext.podLabels }}
   labels: {{- toYaml . | nindent 4 }}
@@ -117,7 +120,10 @@ dockerDaemonScheduler:
   tolerations: {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $dindContext.podAnnotations }}
-  annotations: {{- toYaml . | nindent 4 }}
+  annotations:
+    {{- range $key, $val := . }}
+    {{ $key }}: {{ $val | squote }}
+    {{- end }}
   {{- end }}
   {{- with $dindContext.podLabels }}
   labels: {{- toYaml . | nindent 4 }}

@@ -17,7 +17,7 @@ runtime:
     env:
       ALICE: BOB
     podAnnotations:
-      karpenter.sh/do-not-evict: "true"
+      karpenter.sh/do-not-evict: 'true'
     podLabels:
       key: dind
     nodeSelector:
@@ -83,7 +83,7 @@ runtime:
           name: alice-secret
           key: token
     podAnnotations:
-      karpenter.sh/do-not-evict: "true"
+      karpenter.sh/do-not-evict: 'true'
     podLabels:
       key: engine
     nodeSelector:

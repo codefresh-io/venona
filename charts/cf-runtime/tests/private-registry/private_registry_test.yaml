@@ -31,26 +31,26 @@ tests:
               agent: true
             runtimeScheduler:
               type: KubernetesPod
-              image: "somedomain.io/codefresh/engine:tagoverride"
+              image: 'somedomain.io/codefresh/engine:tagoverride'
               command:
                 - npm
                 - run
                 - start
               envVars:
-                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
-                LOG_OUTGOING_HTTP_REQUESTS: "false"
-                LOGGER_LEVEL: debug
-                COMPOSE_IMAGE: "somedomain.io/codefresh/compose:tagoverride"
-                CONTAINER_LOGGER_IMAGE: "somedomain.io/codefresh/cf-container-logger:tagoverride"
-                DOCKER_BUILDER_IMAGE: "somedomain.io/codefresh/cf-docker-builder:tagoverride"
-                DOCKER_PULLER_IMAGE: "somedomain.io/codefresh/cf-docker-puller:tagoverride"
-                DOCKER_PUSHER_IMAGE: "somedomain.io/codefresh/cf-docker-pusher:tagoverride"
-                DOCKER_TAG_PUSHER_IMAGE: "somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride"
-                FS_OPS_IMAGE: "somedomain.io/codefresh/fs-ops:tagoverride"
-                GIT_CLONE_IMAGE: "somedomain.io/codefresh/cf-git-cloner:tagoverride"
-                KUBE_DEPLOY: "somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride"
-                PIPELINE_DEBUGGER_IMAGE: "somedomain.io/codefresh/cf-debugger:tagoverride"
-                TEMPLATE_ENGINE: "somedomain.io/codefresh/pikolo:tagoverride"
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                LOGGER_LEVEL: 'debug'
+                LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                COMPOSE_IMAGE: 'somedomain.io/codefresh/compose:tagoverride'
+                CONTAINER_LOGGER_IMAGE: 'somedomain.io/codefresh/cf-container-logger:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'somedomain.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-pusher:tagoverride'
+                DOCKER_TAG_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride'
+                FS_OPS_IMAGE: 'somedomain.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'somedomain.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'somedomain.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'somedomain.io/codefresh/pikolo:tagoverride'
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine
@@ -66,10 +66,10 @@ tests:
                   memory: 128Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: "somedomain.io/codefresh/dind:tagoverride"
+              dindImage: 'somedomain.io/codefresh/dind:tagoverride'
               userAccess: true
               envVars:
-                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
+                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine
@@ -78,7 +78,7 @@ tests:
                   selector: my-context
               pvcs:
                 - name: dind
-                  reuseVolumeSelector: "codefresh-app,io.codefresh.accountName"
+                  reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
                   reuseVolumeSortOrder: pipeline_id
                   storageClassName: dind-local-volumes-runner-codefresh
                   volumeSize: 16Gi
