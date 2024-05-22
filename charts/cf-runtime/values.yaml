@@ -500,7 +500,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.169.13
+      tag: 1.170.0
     # -- Set container command.
     command:
       - npm
@@ -534,6 +534,8 @@ runtime:
     env:
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+      # -- If "true", composition images will be pulled sequentially
+      FORCE_COMPOSE_SERIAL_PULL: 'false'
       # -- Level of logging for engine
       LOGGER_LEVEL: 'debug'
       # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
