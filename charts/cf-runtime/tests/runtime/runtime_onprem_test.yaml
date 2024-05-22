@@ -46,6 +46,7 @@ tests:
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
                 FOO: BAR
+                FORCE_COMPOSE_SERIAL_PULL: "false"
                 LOG_OUTGOING_HTTP_REQUESTS: "false"
                 LOGGER_LEVEL: debug
                 COMPOSE_IMAGE: "quay.io/codefresh/compose:tagoverride"
