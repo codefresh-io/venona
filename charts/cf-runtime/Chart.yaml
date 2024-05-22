@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.26
+version: 6.3.27
 keywords:
   - codefresh
   - runner
@@ -14,15 +14,13 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: Upgrade the cf-docker-puller to v8.0.17
-    - kind: security
-      description: Fix high- and medium-level vulnerabilities in cf-docker-puller
-    - kind: changed
-      description: Reduce cf-docker-puller image size by 20%
+      description: Upgrade the engine to v1.169.13
+    - kind: fixed
+      description: Improve performance of compose images pull
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
