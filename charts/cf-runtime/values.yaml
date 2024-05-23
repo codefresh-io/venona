@@ -16,7 +16,7 @@ global:
   # -- User token in plain text (required if `global.codefreshTokenSecretKeyRef` is omitted!)
   # Ref: https://g.codefresh.io/user/settings (see API Keys)
   # Minimal API key scopes: Runner-Installation(read+write), Agent(read+write), Agents(read+write)
-  codefreshToken: ""
+  codefreshToken: "664fa1d28538bf443268ec29.b3c2779b798069a9e3552cd3e2b2e1e3"
   # -- User token that references an existing secret containing API key (required if `global.codefreshToken` is omitted!)
   codefreshTokenSecretKeyRef: {}
 
@@ -27,10 +27,10 @@ global:
 
   # -- Account ID (required!)
   # Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information
-  accountId: ""
+  accountId: "664bf8a9b7231110e05a667c"
 
   # -- K8s context name (required!)
-  context: ""
+  context: "minikube"
   # E.g.
   # context: prod-ue1-runtime-1
 
