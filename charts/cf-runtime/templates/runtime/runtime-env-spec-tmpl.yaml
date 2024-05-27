@@ -35,7 +35,7 @@ runtimeScheduler:
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $engineContext.workflowLimits }}
-  workflowLimits: {{ toYaml . | nindent 4 }}
+  workflowLimits: {{- toYaml . | nindent 4 }}
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
