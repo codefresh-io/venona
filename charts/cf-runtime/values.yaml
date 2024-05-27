@@ -540,6 +540,26 @@ runtime:
       LOGGER_LEVEL: 'debug'
       # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
       LOG_OUTGOING_HTTP_REQUESTS: 'false'
+    # -- Set workflow limits.
+    workflowLimits:
+      # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
+      MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
+      # -- Maximum time for workflow execution; seconds.
+      MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
+      # -- Maximum time allowed to workflow to spend in "elected" state; seconds.
+      MAXIMUM_ELECTED_STATE_AGE_ALLOWED: 900
+      # -- Maximum retry attempts allowed for workflow.
+      MAXIMUM_RETRY_ATTEMPTS_ALLOWED: 20
+      # -- Maximum time allowed to workflow to spend in "terminating" state until force terminated; seconds.
+      MAXIMUM_TERMINATING_STATE_AGE_ALLOWED: 900
+      # -- Maximum time allowed to workflow to spend in "terminating" state without logs activity until force terminated; seconds.
+      MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE: 300
+      # -- Time since the last health check report after which workflow is terminated; seconds.
+      TIME_ENGINE_INACTIVE_UNTIL_TERMINATION: 300
+      # -- Time since the last health check report after which the engine is considered unhealthy; seconds.
+      TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY: 60
+      # -- Time since the last workflow logs activity after which workflow is terminated; seconds.
+      TIME_INACTIVE_UNTIL_TERMINATION: 2700
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.

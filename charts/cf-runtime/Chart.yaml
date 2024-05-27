@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.28
+version: 6.3.29
 keywords:
   - codefresh
   - runner
@@ -17,10 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: Upgrade the engine to v1.170.0
     - kind: added
-      description: Allows to force sequential pull of compose images by engine
+      description: Add default workflow limits.
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
