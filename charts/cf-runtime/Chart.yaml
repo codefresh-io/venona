@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.29
+version: 6.3.30
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: added
-      description: Add default workflow limits.
+      description: Add pullPolicy for dind and engine
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

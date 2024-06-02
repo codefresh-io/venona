@@ -13,6 +13,7 @@ runtimeScheduler:
   {{- if $engineContext.image }}
   image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) | quote }}
   {{- end }}
+  imagePullPolicy: {{ $engineContext.image.pullPolicy }}
   {{- with $engineContext.command }}
   command: {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -80,6 +81,7 @@ dockerDaemonScheduler:
   {{- if $dindContext.image }}
   dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) | quote }}
   {{- end }}
+  imagePullPolicy: {{ $dindContext.image.pullPolicy }}
   {{- with $dindContext.userAccess }}
   userAccess: {{ . }}
   {{- end }}
