@@ -32,6 +32,7 @@ tests:
             runtimeScheduler:
               type: KubernetesPod
               image: "somedomain.io/codefresh/engine:tagoverride"
+              imagePullPolicy: IfNotPresent
               command:
                 - npm
                 - run
@@ -78,6 +79,7 @@ tests:
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: "somedomain.io/codefresh/dind:tagoverride"
+              imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
                 DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
