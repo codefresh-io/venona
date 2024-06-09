@@ -20,6 +20,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
   - [Azure Disks backend volume configuration in AKS](#azure-disks-backend-volume-configuration)
+  - [GCE Disks backend volume configuration in GKE](#gce-disks-backend-volume-configuration-in-gke)
   - [Custom volume mounts](#custom-volume-mounts)
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
