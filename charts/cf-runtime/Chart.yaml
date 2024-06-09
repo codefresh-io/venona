@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.30
+version: 6.3.31
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,10 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: added
-      description: Add pullPolicy for dind and engine
+    - kind: fixed
+      description: Fix serviceAccountJsonSecretKeyRef for gcedisk
+    - kind: fixed
+      description: Fix google-service-account.json key in volume-provisioner secret template
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

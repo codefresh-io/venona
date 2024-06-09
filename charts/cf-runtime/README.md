@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.3.30](https://img.shields.io/badge/Version-6.3.30-informational?style=flat-square)
+![Version: 6.3.31](https://img.shields.io/badge/Version-6.3.31-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -20,6 +20,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
   - [Azure Disks backend volume configuration in AKS](#azure-disks-backend-volume-configuration)
+  - [GCE Disks backend volume configuration in GKE](#gce-disks-backend-volume-configuration-in-gke)
   - [Custom volume mounts](#custom-volume-mounts)
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
@@ -438,6 +439,113 @@ runtime:
   dind:
     nodeSelector:
       topology.kubernetes.io/zone: northeurope-1
+```
+
+### GCE Disks backend volume configuration in GKE
+
+`dind-volume-provisioner` should have `ComputeEngine.StorageAdmin` permissions
+
+There are three options:
+
+1. Run `dind-volume-provisioner` pod on the node/node-group with IAM Service Account
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: gcedisk
+
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "pd-standard"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-central1-c"
+
+volumeProvisioner:
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set tolerations
+  tolerations: []
+
+# -- Set runtime parameters
+runtime:
+  # -- Parameters for DinD (docker-in-docker) pod
+  dind:
+    # -- Set node selector.
+    nodeSelector:
+      topology.kubernetes.io/zone: us-central1-c
+```
+
+2. Pass static credentials in `.Values.storage.gcedisk.serviceAccountJson` (inline) or `.Values.storage.gcedisk.serviceAccountJsonSecretKeyRef` (from your own secret)
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: gcedisk
+
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "`pd-standard"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-central1-c"
+    # -- Set Google SA JSON key for volume-provisioner (optional)
+    serviceAccountJson: |
+        {
+        "type": "service_account",
+        "project_id": "...",
+        "private_key_id": "...",
+        "private_key": "...",
+        "client_email": "...",
+        "client_id": "...",
+        "auth_uri": "...",
+        "token_uri": "...",
+        "auth_provider_x509_cert_url": "...",
+        "client_x509_cert_url": "..."
+        }
+    # -- Existing secret containing containing Google SA JSON key for volume-provisioner (optional)
+    serviceAccountJsonSecretKeyRef: {}
+    # E.g.:
+    # serviceAccountJsonSecretKeyRef:
+    #   name: gce-service-account
+    #   key: service-account.json
+
+# -- Set runtime parameters
+runtime:
+  # -- Parameters for DinD (docker-in-docker) pod
+  dind:
+    # -- Set node selector.
+    nodeSelector:
+      topology.kubernetes.io/zone: us-central1-c
+```
+
+3. Assign IAM role to `dind-volume-provisioner` service account
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: gcedisk
+
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "`pd-standard"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-central1-c"
+
+volumeProvisioner:
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Additional service account annotations
+    annotations:
+      iam.gke.io/gcp-service-account: <GSA_NAME>@<PROJECT_ID>.iam.gserviceaccount.com
+
+# -- Set runtime parameters
+runtime:
+  # -- Parameters for DinD (docker-in-docker) pod
+  dind:
+    # -- Set node selector.
+    nodeSelector:
+      topology.kubernetes.io/zone: us-central1-c
 ```
 
 ### Custom global environment variables
