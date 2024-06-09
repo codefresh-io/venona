@@ -456,7 +456,7 @@ storage:
 
   gcedisk:
     # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
-    volumeType: "`pd-standard"
+    volumeType: "pd-standard"
     # -- Set GCP volume availability zone
     availabilityZone: "us-central1-c"
 
@@ -475,7 +475,7 @@ runtime:
       topology.kubernetes.io/zone: us-central1-c
 ```
 
-2. Pass static credentials in `.Values.storage.gcedisk.serviceAccountJson` (inlibe) or `.Values.storage.gcedisk.serviceAccountJsonSecretKeyRef` (from your own secret)
+2. Pass static credentials in `.Values.storage.gcedisk.serviceAccountJson` (inline) or `.Values.storage.gcedisk.serviceAccountJsonSecretKeyRef` (from your own secret)
 
 ```yaml
 storage:
@@ -519,7 +519,7 @@ runtime:
 
 3. Assign IAM role to `dind-volume-provisioner` service account
 
-```
+```yaml
 storage:
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: gcedisk
