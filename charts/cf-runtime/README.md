@@ -525,6 +525,9 @@ storage:
   backend: gcedisk
 
   gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "`pd-standard"
+    # -- Set GCP volume availability zone
     availabilityZone: "us-central1-c"
 
 volumeProvisioner:

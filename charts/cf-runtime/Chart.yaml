@@ -20,7 +20,7 @@ annotations:
     - kind: fixed
       description: Fix serviceAccountJsonSecretKeyRef for gcedisk
     - kind: fixed
-      description: Fix google-service-account.json key in volume-provisioner
+      description: Fix google-service-account.json key in volume-provisioner secret template
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
