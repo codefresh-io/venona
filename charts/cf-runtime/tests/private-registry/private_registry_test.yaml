@@ -42,6 +42,7 @@ tests:
                 FORCE_COMPOSE_SERIAL_PULL: "false"
                 LOG_OUTGOING_HTTP_REQUESTS: "false"
                 LOGGER_LEVEL: debug
+                METRICS_PROMETHEUS_ENABLED: "true"
                 COMPOSE_IMAGE: "somedomain.io/codefresh/compose:tagoverride"
                 CONTAINER_LOGGER_IMAGE: "somedomain.io/codefresh/cf-container-logger:tagoverride"
                 DOCKER_BUILDER_IMAGE: "somedomain.io/codefresh/cf-docker-builder:tagoverride"
