@@ -46,10 +46,10 @@ tests:
                 - two
                 - three
               envVars:
-                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
-                FOO: 'BAR'
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
+                FOO: BAR
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
-                LOGGER_LEVEL: 'debug'
+                LOGGER_LEVEL: debug
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 METRICS_PROMETHEUS_ENABLED: 'true'
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
@@ -118,7 +118,7 @@ tests:
               imagePullPolicy: Always
               userAccess: true
               envVars:
-                ALICE: 'BOB'
+                ALICE: BOB
                 DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh

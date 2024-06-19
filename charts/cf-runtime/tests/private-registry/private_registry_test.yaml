@@ -38,9 +38,9 @@ tests:
                 - run
                 - start
               envVars:
-                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
-                LOGGER_LEVEL: 'debug'
+                LOGGER_LEVEL: debug
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 METRICS_PROMETHEUS_ENABLED: 'true'
                 COMPOSE_IMAGE: 'somedomain.io/codefresh/compose:tagoverride'
