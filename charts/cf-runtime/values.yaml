@@ -539,7 +539,7 @@ runtime:
       # -- If "true", composition images will be pulled sequentially
       FORCE_COMPOSE_SERIAL_PULL: false
       # -- Level of logging for engine
-      LOGGER_LEVEL: debug
+      LOGGER_LEVEL: "debug"
       # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
       LOG_OUTGOING_HTTP_REQUESTS: false
       # -- Enable emitting metrics from engine
