@@ -20,6 +20,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
   - [Azure Disks backend volume configuration in AKS](#azure-disks-backend-volume-configuration)
+  - [GCE Disks backend volume configuration in GKE](#gce-disks-backend-volume-configuration-in-gke)
   - [Custom volume mounts](#custom-volume-mounts)
   - [Custom global environment variables](#custom-global-environment-variables)
   - [Volume reuse policy](#volume-reuse-policy)
@@ -438,6 +439,113 @@ runtime:
   dind:
     nodeSelector:
       topology.kubernetes.io/zone: northeurope-1
+```
+
+### GCE Disks backend volume configuration in GKE
+
+`dind-volume-provisioner` should have `ComputeEngine.StorageAdmin` permissions
+
+There are three options:
+
+1. Run `dind-volume-provisioner` pod on the node/node-group with IAM Service Account
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: gcedisk
+
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "pd-standard"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-central1-c"
+
+volumeProvisioner:
+  # -- Set node selector
+  nodeSelector: {}
+  # -- Set tolerations
+  tolerations: []
+
+# -- Set runtime parameters
+runtime:
+  # -- Parameters for DinD (docker-in-docker) pod
+  dind:
+    # -- Set node selector.
+    nodeSelector:
+      topology.kubernetes.io/zone: us-central1-c
+```
+
+2. Pass static credentials in `.Values.storage.gcedisk.serviceAccountJson` (inline) or `.Values.storage.gcedisk.serviceAccountJsonSecretKeyRef` (from your own secret)
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: gcedisk
+
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "`pd-standard"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-central1-c"
+    # -- Set Google SA JSON key for volume-provisioner (optional)
+    serviceAccountJson: |
+        {
+        "type": "service_account",
+        "project_id": "...",
+        "private_key_id": "...",
+        "private_key": "...",
+        "client_email": "...",
+        "client_id": "...",
+        "auth_uri": "...",
+        "token_uri": "...",
+        "auth_provider_x509_cert_url": "...",
+        "client_x509_cert_url": "..."
+        }
+    # -- Existing secret containing containing Google SA JSON key for volume-provisioner (optional)
+    serviceAccountJsonSecretKeyRef: {}
+    # E.g.:
+    # serviceAccountJsonSecretKeyRef:
+    #   name: gce-service-account
+    #   key: service-account.json
+
+# -- Set runtime parameters
+runtime:
+  # -- Parameters for DinD (docker-in-docker) pod
+  dind:
+    # -- Set node selector.
+    nodeSelector:
+      topology.kubernetes.io/zone: us-central1-c
+```
+
+3. Assign IAM role to `dind-volume-provisioner` service account
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: gcedisk
+
+  gcedisk:
+    # -- Set GCP volume backend type (`pd-ssd`/`pd-standard`)
+    volumeType: "`pd-standard"
+    # -- Set GCP volume availability zone
+    availabilityZone: "us-central1-c"
+
+volumeProvisioner:
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Additional service account annotations
+    annotations:
+      iam.gke.io/gcp-service-account: <GSA_NAME>@<PROJECT_ID>.iam.gserviceaccount.com
+
+# -- Set runtime parameters
+runtime:
+  # -- Parameters for DinD (docker-in-docker) pod
+  dind:
+    # -- Set node selector.
+    nodeSelector:
+      topology.kubernetes.io/zone: us-central1-c
 ```
 
 ### Custom global environment variables
@@ -1013,10 +1121,10 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":"true"},"image":{"registry":"quay.io","repository":"codefresh/dind","tag":"26.0.0-1.28.6"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":"true"},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.0.0-1.28.6"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":"true"}` | Set additional env vars. |
-| runtime.dind.image | object | `{"registry":"quay.io","repository":"codefresh/dind","tag":"26.0.0-1.28.6"}` | Set dind image. |
+| runtime.dind.image | object | `{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.0.0-1.28.6"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |
@@ -1051,6 +1159,16 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.serviceAccount | string | `"codefresh-engine"` | Set service account for pod. |
 | runtime.engine.tolerations | list | `[]` | Set tolerations. |
 | runtime.engine.userEnvVars | list | `[]` | Set extra env vars |
+| runtime.engine.workflowLimits | object | `{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}` | Set workflow limits. |
+| runtime.engine.workflowLimits.MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS | int | `600` | Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds. |
+| runtime.engine.workflowLimits.MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION | int | `86400` | Maximum time for workflow execution; seconds. |
+| runtime.engine.workflowLimits.MAXIMUM_ELECTED_STATE_AGE_ALLOWED | int | `900` | Maximum time allowed to workflow to spend in "elected" state; seconds. |
+| runtime.engine.workflowLimits.MAXIMUM_RETRY_ATTEMPTS_ALLOWED | int | `20` | Maximum retry attempts allowed for workflow. |
+| runtime.engine.workflowLimits.MAXIMUM_TERMINATING_STATE_AGE_ALLOWED | int | `900` | Maximum time allowed to workflow to spend in "terminating" state until force terminated; seconds. |
+| runtime.engine.workflowLimits.MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE | int | `300` | Maximum time allowed to workflow to spend in "terminating" state without logs activity until force terminated; seconds. |
+| runtime.engine.workflowLimits.TIME_ENGINE_INACTIVE_UNTIL_TERMINATION | int | `300` | Time since the last health check report after which workflow is terminated; seconds. |
+| runtime.engine.workflowLimits.TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY | int | `60` | Time since the last health check report after which the engine is considered unhealthy; seconds. |
+| runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |

@@ -39,6 +39,7 @@ tests:
             runtimeScheduler:
               type: KubernetesPod
               image: 'quay.io/codefresh/engine:tagoverride'
+              imagePullPolicy: IfNotPresent
               command:
                 - one
                 - two
@@ -46,6 +47,8 @@ tests:
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
                 FOO: 'BAR'
+                FORCE_COMPOSE_SERIAL_PULL: 'false'
+                LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
@@ -59,6 +62,16 @@ tests:
                 KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
                 PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
+              workflowLimits:
+                MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
+                MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
+                MAXIMUM_ELECTED_STATE_AGE_ALLOWED: 900
+                MAXIMUM_RETRY_ATTEMPTS_ALLOWED: 20
+                MAXIMUM_TERMINATING_STATE_AGE_ALLOWED: 900
+                MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE: 300
+                TIME_ENGINE_INACTIVE_UNTIL_TERMINATION: 300
+                TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY: 60
+                TIME_INACTIVE_UNTIL_TERMINATION: 2700
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override
@@ -92,6 +105,7 @@ tests:
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'quay.io/codefresh/dind:tagoverride'
+              imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
                 ALICE: 'BOB'

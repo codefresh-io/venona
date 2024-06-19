@@ -34,7 +34,7 @@ AWS_SECRET_ACCESS_KEY:
 {{- end }}
 
 {{- if or .Values.storage.gcedisk.serviceAccountJson .Values.storage.gcedisk.serviceAccountJsonSecretKeyRef }}
-GOOGLE_APPLICATION_CREDENTIALS: /etc/dind-volume-provisioner/credentials/google-service-account.json
+GOOGLE_APPLICATION_CREDENTIALS: {{ printf "/etc/dind-volume-provisioner/credentials/%s" (.Values.storage.gcedisk.serviceAccountJsonSecretKeyRef.key | default "google-service-account.json") }}
 {{- end }}
 
 {{- if and .Values.storage.mountAzureJson }}
@@ -62,7 +62,7 @@ CLOUDCONFIG_AZURE: /etc/kubernetes/azure.json
     optional: true
   {{- else if .Values.storage.gcedisk.serviceAccountJsonSecretKeyRef }}
 - name: credentials
-  secrete:
+  secret:
     secretName: {{ .Values.storage.gcedisk.serviceAccountJsonSecretKeyRef.name }}
     optional: true
   {{- end }}

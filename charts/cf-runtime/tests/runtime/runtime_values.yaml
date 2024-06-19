@@ -2,6 +2,7 @@ runtime:
   dind:
     image:
       tag: tagoverride
+      pullPolicy: Always
     resources:
       requests: null
       limits:
@@ -51,6 +52,7 @@ runtime:
   engine:
     image:
       tag: tagoverride
+      pullPolicy: Always
     command:
       - one
       - two

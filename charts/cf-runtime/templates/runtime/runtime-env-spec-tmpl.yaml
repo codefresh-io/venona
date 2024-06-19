@@ -13,6 +13,7 @@ runtimeScheduler:
   {{- if $engineContext.image }}
   image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) | squote }}
   {{- end }}
+  imagePullPolicy: {{ $engineContext.image.pullPolicy }}
   {{- with $engineContext.command }}
   command: {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -37,7 +38,7 @@ runtimeScheduler:
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $engineContext.workflowLimits }}
-  workflowLimits: {{ toYaml . | nindent 4 }}
+  workflowLimits: {{- toYaml . | nindent 4 }}
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
@@ -85,6 +86,7 @@ dockerDaemonScheduler:
   {{- if $dindContext.image }}
   dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) | squote }}
   {{- end }}
+  imagePullPolicy: {{ $dindContext.image.pullPolicy }}
   {{- with $dindContext.userAccess }}
   userAccess: {{ . }}
   {{- end }}
