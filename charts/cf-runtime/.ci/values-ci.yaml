@@ -23,7 +23,7 @@ runner:
 runtime:
   dind:
     image:
-      tag: 24.0.6-1.28.3-rootless
+      tag: 26.0.0-1.28.6-rootless
     podLabels:
       key: dind
     resources:
@@ -33,6 +33,8 @@ runtime:
     limits:
         cpu: 1000m
         memory: 1024Mi
+    env:
+      DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: true
   engine:
     podLabels:
       key: engine

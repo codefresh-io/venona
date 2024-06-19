@@ -46,3 +46,6 @@ venona/venona
 
 # coverage
 **/cover
+
+# debug
+**/debug
