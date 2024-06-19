@@ -197,7 +197,7 @@ accounts: {{- toYaml .Values.runtime.accounts | nindent 2 }}
 {{- if .Values.appProxy.enabled }}
 appProxy:
   externalIP: >-
-    {{ printf "https://%s%s" .Values.appProxy.ingress.host .Values.appProxy.ingress.pathPrefix }}
+    {{ printf "https://%s%s" .Values.appProxy.ingress.host (.Values.appProxy.ingress.pathPrefix | default "/") }}
 {{- end }}
 {{- if not .Values.runtime.agent }}
 systemHybrid: true

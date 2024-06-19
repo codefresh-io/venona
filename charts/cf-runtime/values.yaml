@@ -667,8 +667,8 @@ appProxy:
   # Set app-proxy ingress parameters
   # @default -- See below
   ingress:
-    # -- Set path prefix for ingress
-    pathPrefix: "/"
+    # -- Set path prefix for ingress (keep empty for default `/` path)
+    pathPrefix: ""
     # -- Set ingress class
     class: ""
     # -- Set DNS hostname the ingress will use
@@ -679,7 +679,7 @@ appProxy:
     annotations: {}
     # E.g.
     # ingress:
-    #   pathPrefix: "/app-proxy"
+    #   pathPrefix: "/cf-app-proxy"
     #   class: "nginx"
     #   host: "mydomain.com"
     #   tlsSecret: "tls-cert-app-proxy"
