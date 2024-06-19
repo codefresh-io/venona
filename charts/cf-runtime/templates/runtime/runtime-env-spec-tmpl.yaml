@@ -20,7 +20,7 @@ runtimeScheduler:
   envVars:
   {{- with $engineContext.env }}
     {{- range $key, $val := . }}
-      {{- if or (kindIs "bool" $val) }}
+      {{- if or (kindIs "bool" $val) (kindIs "int" $val) (kindIs "float64" $val) }}
     {{ $key }}: {{ $val | squote }}
       {{- else }}
     {{ $key }}: {{ $val }}
@@ -97,7 +97,7 @@ dockerDaemonScheduler:
   {{- with $dindContext.env }}
   envVars:
     {{- range $key, $val := . }}
-      {{- if or (kindIs "bool" $val) }}
+      {{- if or (kindIs "bool" $val) (kindIs "int" $val) (kindIs "float64" $val) }}
     {{ $key }}: {{ $val | squote }}
       {{- else }}
     {{ $key }}: {{ $val }}
