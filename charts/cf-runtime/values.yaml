@@ -543,7 +543,7 @@ runtime:
       # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
       LOG_OUTGOING_HTTP_REQUESTS: false
       # -- Enable emitting metrics from engine
-      METRICS_PROMETHEUS_ENABLED:  true
+      METRICS_PROMETHEUS_ENABLED: true
     # -- Set workflow limits.
     workflowLimits:
       # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
