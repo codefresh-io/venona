@@ -8,7 +8,8 @@ runtime:
   agent: false
   inCluster: true
   description: "some description"
-  runtimeExtends: []
+  runtimeExtends:
+    - system/default
   accounts:
     - 59009117c102763beda7ce71
 

@@ -38,30 +38,30 @@ tests:
               agent: false
             runtimeScheduler:
               type: KubernetesPod
-              image: "quay.io/codefresh/engine:tagoverride"
+              image: 'quay.io/codefresh/engine:tagoverride'
               imagePullPolicy: IfNotPresent
               command:
                 - one
                 - two
                 - three
               envVars:
-                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
                 FOO: BAR
-                FORCE_COMPOSE_SERIAL_PULL: "false"
-                LOG_OUTGOING_HTTP_REQUESTS: "false"
+                FORCE_COMPOSE_SERIAL_PULL: 'false'
                 LOGGER_LEVEL: debug
-                METRICS_PROMETHEUS_ENABLED: "true"
-                COMPOSE_IMAGE: "quay.io/codefresh/compose:tagoverride"
-                CONTAINER_LOGGER_IMAGE: "quay.io/codefresh/cf-container-logger:tagoverride"
-                DOCKER_BUILDER_IMAGE: "quay.io/codefresh/cf-docker-builder:tagoverride"
-                DOCKER_PULLER_IMAGE: "quay.io/codefresh/cf-docker-puller:tagoverride"
-                DOCKER_PUSHER_IMAGE: "quay.io/codefresh/cf-docker-pusher:tagoverride"
-                DOCKER_TAG_PUSHER_IMAGE: "quay.io/codefresh/cf-docker-tag-pusher:tagoverride"
-                FS_OPS_IMAGE: "quay.io/codefresh/fs-ops:tagoverride"
-                GIT_CLONE_IMAGE: "quay.io/codefresh/cf-git-cloner:tagoverride"
-                KUBE_DEPLOY: "quay.io/codefresh/cf-deploy-kubernetes:tagoverride"
-                PIPELINE_DEBUGGER_IMAGE: "quay.io/codefresh/cf-debugger:tagoverride"
-                TEMPLATE_ENGINE: "quay.io/codefresh/pikolo:tagoverride"
+                LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                METRICS_PROMETHEUS_ENABLED: 'true'
+                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
+                CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'quay.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-pusher:tagoverride'
+                DOCKER_TAG_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-tag-pusher:tagoverride'
+                FS_OPS_IMAGE: 'quay.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'quay.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -94,7 +94,7 @@ tests:
                   operator: Equal
                   value: engine
               annotations:
-                karpenter.sh/do-not-evict: "true"
+                karpenter.sh/do-not-evict: 'true'
               resources:
                 limits:
                   cpu: 200m
@@ -104,12 +104,12 @@ tests:
                   memory: 256Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: "quay.io/codefresh/dind:tagoverride"
+              dindImage: 'quay.io/codefresh/dind:tagoverride'
               imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
                 ALICE: BOB
-                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
+                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override
@@ -132,10 +132,10 @@ tests:
                   operator: Equal
                   value: dinds
               annotations:
-                karpenter.sh/do-not-evict: "true"
+                karpenter.sh/do-not-evict: 'true'
               pvcs:
                 - name: dind
-                  reuseVolumeSelector: "codefresh-app,io.codefresh.accountName"
+                  reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
                   reuseVolumeSortOrder: pipeline_id
                   storageClassName: my-custom-storage-class
                   volumeSize: 8Gi
@@ -166,7 +166,8 @@ tests:
                   secret:
                     secretName: codefresh-certs-server
             extends:
-              \[\]
+              - system/default
             description: some description
             accounts:
               - 59009117c102763beda7ce71
+            systemHybrid: true

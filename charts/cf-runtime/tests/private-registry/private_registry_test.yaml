@@ -31,29 +31,29 @@ tests:
               agent: true
             runtimeScheduler:
               type: KubernetesPod
-              image: "somedomain.io/codefresh/engine:tagoverride"
+              image: 'somedomain.io/codefresh/engine:tagoverride'
               imagePullPolicy: IfNotPresent
               command:
                 - npm
                 - run
                 - start
               envVars:
-                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: "1000"
-                FORCE_COMPOSE_SERIAL_PULL: "false"
-                LOG_OUTGOING_HTTP_REQUESTS: "false"
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                FORCE_COMPOSE_SERIAL_PULL: 'false'
                 LOGGER_LEVEL: debug
-                METRICS_PROMETHEUS_ENABLED: "true"
-                COMPOSE_IMAGE: "somedomain.io/codefresh/compose:tagoverride"
-                CONTAINER_LOGGER_IMAGE: "somedomain.io/codefresh/cf-container-logger:tagoverride"
-                DOCKER_BUILDER_IMAGE: "somedomain.io/codefresh/cf-docker-builder:tagoverride"
-                DOCKER_PULLER_IMAGE: "somedomain.io/codefresh/cf-docker-puller:tagoverride"
-                DOCKER_PUSHER_IMAGE: "somedomain.io/codefresh/cf-docker-pusher:tagoverride"
-                DOCKER_TAG_PUSHER_IMAGE: "somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride"
-                FS_OPS_IMAGE: "somedomain.io/codefresh/fs-ops:tagoverride"
-                GIT_CLONE_IMAGE: "somedomain.io/codefresh/cf-git-cloner:tagoverride"
-                KUBE_DEPLOY: "somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride"
-                PIPELINE_DEBUGGER_IMAGE: "somedomain.io/codefresh/cf-debugger:tagoverride"
-                TEMPLATE_ENGINE: "somedomain.io/codefresh/pikolo:tagoverride"
+                LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                METRICS_PROMETHEUS_ENABLED: 'true'
+                COMPOSE_IMAGE: 'somedomain.io/codefresh/compose:tagoverride'
+                CONTAINER_LOGGER_IMAGE: 'somedomain.io/codefresh/cf-container-logger:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'somedomain.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-pusher:tagoverride'
+                DOCKER_TAG_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride'
+                FS_OPS_IMAGE: 'somedomain.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'somedomain.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'somedomain.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'somedomain.io/codefresh/pikolo:tagoverride'
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -79,11 +79,11 @@ tests:
                   memory: 128Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: "somedomain.io/codefresh/dind:tagoverride"
+              dindImage: 'somedomain.io/codefresh/dind:tagoverride'
               imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
-                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: "true"
+                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine
@@ -92,7 +92,7 @@ tests:
                   selector: my-context
               pvcs:
                 - name: dind
-                  reuseVolumeSelector: "codefresh-app,io.codefresh.accountName"
+                  reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
                   reuseVolumeSortOrder: pipeline_id
                   storageClassName: dind-local-volumes-runner-codefresh
                   volumeSize: 16Gi

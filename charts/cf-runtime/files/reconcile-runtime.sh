@@ -31,8 +31,6 @@ while true; do
       -o yaml \
       | yq 'del(.version, .metadata.changedBy, .metadata.creationTime)' > /tmp/runtime.yaml
 
-  sed -i "s/'/\"/g" /tmp/runtime.yaml
-
   kubectl get cm ${CONFIGMAP_NAME} -n ${KUBE_NAMESPACE} -o yaml \
   | yq 'del(.metadata.resourceVersion, .metadata.uid)' \
   | yq eval '.data["runtime.yaml"] = load_str("/tmp/runtime.yaml")' \
