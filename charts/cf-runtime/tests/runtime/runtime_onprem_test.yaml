@@ -46,6 +46,7 @@ tests:
                 - three
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                DOCKER_REQUEST_TIMEOUT_MS: '30000'
                 FOO: BAR
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
                 LOGGER_LEVEL: debug

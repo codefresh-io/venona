@@ -501,7 +501,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.170.0
+      tag: 1.171.3
       pullPolicy: IfNotPresent
     # -- Set container command.
     command:
@@ -536,6 +536,8 @@ runtime:
     env:
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
+      # -- Timeout while doing requests to the Docker daemon
+      DOCKER_REQUEST_TIMEOUT_MS: 30000
       # -- If "true", composition images will be pulled sequentially
       FORCE_COMPOSE_SERIAL_PULL: false
       # -- Level of logging for engine

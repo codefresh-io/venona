@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.35
+version: 6.3.36
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,12 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: changed
+      description: Update engine image to 1.171.3
     - kind: fixed
-      description: Fix app-proxy prefix path
+      description: Fix an issue that prevented compositions above some size limit to be launched
+    - kind: added
+      description: Add support for timeout configuration while doing requests from the engine to the Docker daemon
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
