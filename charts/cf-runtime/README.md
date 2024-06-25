@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.3.37](https://img.shields.io/badge/Version-6.3.37-informational?style=flat-square)
+![Version: 6.3.36](https://img.shields.io/badge/Version-6.3.36-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1121,10 +1121,10 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.0.0-1.28.6"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true}` | Set additional env vars. |
-| runtime.dind.image | object | `{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"}` | Set dind image. |
+| runtime.dind.image | object | `{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.0.0-1.28.6"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |
