@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.38
+version: 6.3.39
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: Downgrade dind image to 26.0.0-1.28.6
+    - kind: added
+      description: Add option to specify extra tags for EBS volumes
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

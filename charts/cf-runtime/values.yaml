@@ -174,7 +174,7 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.34.3
+    tag: featextra-ebs-tags
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -303,6 +303,12 @@ storage:
     encrypted: "false"
     # -- Set KMS encryption key ID (optional)
     kmsKeyId: ""
+    # -- Set additional tags for EBS volumes (optional)
+    extraVolumeTags: {}
+    # E.g.
+    # extraVolumeTags:
+    #   key1: value1
+    #   key2: value2
 
     # -- Set AWS_ACCESS_KEY_ID for volume-provisioner (optional)
     # Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions
