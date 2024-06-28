@@ -31,6 +31,13 @@ parameters:
   {{- with .Values.storage.ebs.throughput }}
   throughput: {{ . | quote }}
   {{- end }}
+  {{- with .Values.storage.ebs.extraVolumeTags }}
+    {{- $index := 1 }}
+    {{- range $key, $val := . }}
+  {{ printf "tagSpecification_%d" $index }}: {{ printf "%s=%s" $key $val | quote }}
+    {{- $index = add $index 1 }}
+    {{- end }}
+  {{- end }}
 {{- else if or (eq .Values.storage.backend "azuredisk") (eq .Values.storage.backend "azuredisk-csi")}}
   volumeBackend: {{ .Values.storage.backend }}
   kind: managed

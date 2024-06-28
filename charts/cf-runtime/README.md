@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.3.38](https://img.shields.io/badge/Version-6.3.38-informational?style=flat-square)
+![Version: 6.3.39](https://img.shields.io/badge/Version-6.3.39-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1189,6 +1189,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | storage.ebs.accessKeyIdSecretKeyRef | object | `{}` | Existing secret containing AWS_ACCESS_KEY_ID. |
 | storage.ebs.availabilityZone | string | `"us-east-1a"` | Set EBS volumes availability zone (required) |
 | storage.ebs.encrypted | string | `"false"` | Enable encryption (optional) |
+| storage.ebs.extraVolumeTags | object | `{}` | Set additional tags for EBS volumes (optional) |
 | storage.ebs.kmsKeyId | string | `""` | Set KMS encryption key ID (optional) |
 | storage.ebs.secretAccessKey | string | `""` | Set AWS_SECRET_ACCESS_KEY for volume-provisioner (optional) Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#dind-volume-provisioner-permissions |
 | storage.ebs.secretAccessKeySecretKeyRef | object | `{}` | Existing secret containing AWS_SECRET_ACCESS_KEY |
