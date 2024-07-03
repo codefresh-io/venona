@@ -501,7 +501,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.171.3
+      tag: 1.173.2
       pullPolicy: IfNotPresent
     # -- Set container command.
     command:
@@ -546,6 +546,12 @@ runtime:
       LOG_OUTGOING_HTTP_REQUESTS: false
       # -- Enable emitting metrics from engine
       METRICS_PROMETHEUS_ENABLED: true
+      # -- Enable collecting process metrics
+      METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS: false
+      # -- Host for Prometheus metrics server
+      METRICS_PROMETHEUS_HOST: '0.0.0.0'
+      # -- Port for Prometheus metrics server
+      METRICS_PROMETHEUS_PORT: 9100
     # -- Set workflow limits.
     workflowLimits:
       # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
