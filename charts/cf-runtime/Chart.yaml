@@ -26,7 +26,7 @@ annotations:
     - kind: changed
       description: "[BREAKING CHANGE] By default, process metrics will not be collected by the engine. Use METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS=true env variable to enable it"
     - kind: deprecated
-      description: "The following engine metrics are deprecated and disabled by default: workflow_step_status, workflow_step_duration, workflow_phase_status, workflow_phase_duration, workflow_status, workflow_duration, workflow_docker_lib_reuse, workflow_cf_volume_reuse. Use METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS=true env variable to enable them. These metrics will be removed in future versions, please consider migrating to new metrics."
+      description: "The following engine metrics are deprecated and disabled by default: workflow_step_status, workflow_step_duration, workflow_phase_status, workflow_phase_duration, workflow_status, workflow_duration, workflow_docker_lib_reuse, workflow_cf_volume_reuse. Use METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS=true env variable to enable them. These metrics will be removed in future versions, please consider migrating to new metrics"
     - kind: added
       description: "New engine metrics are added. Please check the documentation for more details"
       links:
