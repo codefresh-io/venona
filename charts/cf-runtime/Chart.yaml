@@ -32,6 +32,8 @@ annotations:
       links:
         - name: Engine metrics documentation
           url: https://codefresh.io/docs/docs/kb/articles/enable-engine-pod-metrics
+    - kind: fixed
+      description: "Fix Chart.yaml annotations"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
