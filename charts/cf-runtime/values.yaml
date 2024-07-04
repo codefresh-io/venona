@@ -546,6 +546,8 @@ runtime:
       LOG_OUTGOING_HTTP_REQUESTS: false
       # -- Enable emitting metrics from engine
       METRICS_PROMETHEUS_ENABLED: true
+      # -- Enable legacy metrics
+      METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: false
       # -- Enable collecting process metrics
       METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS: false
       # -- Host for Prometheus metrics server
