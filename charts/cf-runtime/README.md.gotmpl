@@ -655,7 +655,7 @@ Set `codefresh.io/volume-retention` for dinds' PVCs:
 runtime:
   dind:
     pvcs:
-      - name: dind
+      dind:
         ...
         annotations:
           codefresh.io/volume-retention: 7d
