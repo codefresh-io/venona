@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.41
+version: 6.3.42
 keywords:
   - codefresh
   - runner
@@ -18,11 +18,13 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "cf-container-logger image updated to version 1.11.5"
-    - kind: changed
-      description: "cf-container-logger image size reduced by 65%"
+      description: "dind image updated to version 26.1.4-1.28.7"
     - kind: security
-      description: "High-level CVE was fixed in cf-container-logger"
+      description: Some vulnerabilities fixed in dind
+    - kind: changed
+      description: "cf-container-logger image updated to version 1.11.6"
+    - kind: fixed
+      description: "Fixed cf-container-logger incompatibility with dind 26.1.4-1.28.7 that caused issues with secret store integrations"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
