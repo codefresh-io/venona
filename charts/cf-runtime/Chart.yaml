@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.43
+version: 6.3.44
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,12 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Fix missing annotations for PVs"
+    - kind: changed
+      description: "engine image upgraded to 1.173.3"
+    - kind: changed
+      description: "Specifying runtime images explicitly is required now for the engine"
+    - kind: security
+      description: "CVE-2024-5535⁠ is fixed in the engine"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
