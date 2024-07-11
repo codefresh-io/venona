@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.45
+version: 6.3.46
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Fixed an issue within the RE template that resulted in the lack of certain runtime images from the engine envs"
+    - kind: security
+      description: "updated dind-volume-provisioner image tag to fix security vulnerabilities"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
