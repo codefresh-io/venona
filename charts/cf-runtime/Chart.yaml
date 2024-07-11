@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.46
+version: 6.3.47
 keywords:
   - codefresh
   - runner
@@ -17,6 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: changed
+      description: "engine image upgraded to 1.173.4"
     - kind: security
       description: "updated dind-volume-provisioner image tag to fix security vulnerabilities"
 dependencies:
