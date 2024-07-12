@@ -1,5 +1,6 @@
 # Values used in `helm-chart-ci` pipeline
 # All placeholders will be set during ci build
+fullnameOverride: cf-runtime-override
 global:
   codefreshToken: placeholder
   accountId: placeholder
