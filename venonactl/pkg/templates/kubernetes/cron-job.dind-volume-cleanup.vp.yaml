@@ -9,12 +9,9 @@ metadata:
 spec:
   schedule: "0,10,20,30,40,50 * * * *"
   concurrencyPolicy: Forbid
-<<<<<<< HEAD
   {{- if eq .Storage.Backend "local" }}
   suspend: true
   {{- end }}
-=======
->>>>>>> master
   jobTemplate:
     spec:
       template:
@@ -23,7 +20,6 @@ spec:
           restartPolicy: Never
           containers:
             - name: dind-volume-cleanup
-<<<<<<< HEAD
               image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeCleaner.Image.Name }}:{{ .Storage.VolumeCleaner.Image.Tag }} {{- else }}{{- .Storage.VolumeCleaner.Image.Name }}:{{ .Storage.VolumeCleaner.Image.Tag }} {{- end}}
               env:
               - name: PROVISIONED_BY
@@ -32,7 +28,4 @@ spec:
             fsGroup: 3000
             runAsGroup: 3000
             runAsUser: 3000
-=======
-              image: codefresh/dind-volume-cleanup
->>>>>>> master
 {{- end }}

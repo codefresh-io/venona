@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: {{ .AppName }}
-    version: {{ .Version }}
+    version: {{ .Version }} 
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 spec:
@@ -24,14 +24,10 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
-<<<<<<< HEAD
       volumes:
         - name: runnerconf
           secret:
             secretName: runnerconf
-=======
-      serviceAccountName: {{ .AppName }}
->>>>>>> master
       {{ if ne .NodeSelector "" }}
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
@@ -67,7 +63,6 @@ spec:
           value: {{ .Mode }}
         - name: AGENT_NAME
           value: {{ .AppName }}
-<<<<<<< HEAD
         - name: "AGENT_ID"
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
@@ -100,9 +95,6 @@ spec:
         - name: runnerconf
           mountPath: "/etc/secrets"
           readOnly: true
-=======
-        image: {{ .Image.Name }}:{{ .Image.Tag }}
->>>>>>> master
         imagePullPolicy: Always
         name: {{ .AppName }}
         resources:

@@ -16,7 +16,6 @@ telepresence.log
 venonactl/dist/*
 venonactl-linux
 venonalog.json
-<<<<<<< HEAD
 .venonaconf
 .cover
 configdir
@@ -50,5 +49,3 @@ venona/venona
 
 # debug
 **/debug
-=======
->>>>>>> master

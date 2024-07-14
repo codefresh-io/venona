@@ -176,10 +176,6 @@ func ParseTemplates(templatesMap map[string]string, data interface{}, pattern st
 		if nonEmptyParsedTemplateFunc(tplEx) {
 			parsedTemplates[n] = tplEx
 		}
-<<<<<<< HEAD
-=======
-		
->>>>>>> master
 	}
 	return parsedTemplates, nil
 }

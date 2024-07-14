@@ -17,11 +17,8 @@ import (
 type (
 	Kube interface {
 		BuildClient() (*kubernetes.Clientset, error)
-<<<<<<< HEAD
 		BuildConfig() (*rest.Config, error)
 		EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error
-=======
->>>>>>> master
 	}
 
 	kube struct {
@@ -57,21 +54,10 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 	if k.inCluster {
 		config, err = rest.InClusterConfig()
 	} else {
-<<<<<<< HEAD
 		config, err = k.BuildConfig()
 		if err != nil { // if cannot create from kubeConfigPath, try in-cluster config
 			config, err = rest.InClusterConfig()
 		}
-=======
-		config, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: k.pathToKubeConfig},
-			&clientcmd.ConfigOverrides{
-				CurrentContext: k.contextName,
-				Context: clientcmdapi.Context{
-					Namespace: k.namespace,
-				},
-			}).ClientConfig()
->>>>>>> master
 	}
 	if err != nil {
 		return nil, err
@@ -87,7 +73,6 @@ func (k *kube) BuildClient() (*kubernetes.Clientset, error) {
 
 	return cs, nil
 }
-<<<<<<< HEAD
 
 func (k *kube) EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error {
 	if k.dryRun {
@@ -122,5 +107,3 @@ func (k *kube) BuildConfig() (*rest.Config, error) {
 	return cc, nil
 
 }
-=======
->>>>>>> master

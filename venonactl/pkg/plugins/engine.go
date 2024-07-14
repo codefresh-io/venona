@@ -91,11 +91,7 @@ func (u *enginePlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v V
 		matchPattern:   engineFilesPattern,
 		operatorType:   EnginePluginType,
 	}
-<<<<<<< HEAD
 	return uninstall(ctx, opt)
-=======
-	return delete(opt)
->>>>>>> master
 }
 
 func (u *enginePlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {

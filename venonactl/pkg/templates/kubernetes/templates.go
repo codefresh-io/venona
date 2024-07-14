@@ -130,12 +130,9 @@ metadata:
 spec:
   schedule: "0,10,20,30,40,50 * * * *"
   concurrencyPolicy: Forbid
-<<<<<<< HEAD
   {{- if eq .Storage.Backend "local" }}
   suspend: true
   {{- end }}
-=======
->>>>>>> master
   jobTemplate:
     spec:
       template:
@@ -144,7 +141,6 @@ spec:
           restartPolicy: Never
           containers:
             - name: dind-volume-cleanup
-<<<<<<< HEAD
               image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeCleaner.Image.Name }}:{{ .Storage.VolumeCleaner.Image.Tag }} {{- else }}{{- .Storage.VolumeCleaner.Image.Name }}:{{ .Storage.VolumeCleaner.Image.Tag }} {{- end}}
               env:
               - name: PROVISIONED_BY
@@ -153,9 +149,6 @@ spec:
             fsGroup: 3000
             runAsGroup: 3000
             runAsUser: 3000
-=======
-              image: codefresh/dind-volume-cleanup
->>>>>>> master
 {{- end }}`
 
 	templatesMap["daemonset.dind-lv-monitor.vp.yaml"] = `{{- if eq .Storage.Backend "local" -}}
@@ -244,7 +237,6 @@ spec:
       - name: dind-volume-dir
         hostPath:
           path: {{ $localVolumeParentDir }}
-<<<<<<< HEAD
 {{- end -}}
 `
 
@@ -324,9 +316,6 @@ spec:
           successThreshold: 1
           failureThreshold: 5
 `
-=======
-{{- end -}}`
->>>>>>> master
 
 	templatesMap["deployment.dind-volume-provisioner.vp.yaml"] = `apiVersion: apps/v1
 kind: Deployment
@@ -365,22 +354,10 @@ spec:
 
       containers:
       - name: dind-volume-provisioner
-<<<<<<< HEAD
         resources:
 {{ toYaml .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
-=======
-        image: {{ .Storage.VolumeProvisioner.Image }}
-        imagePullPolicy: Always
-        resources:
-          requests:
-            cpu: "200m"
-            memory: "200Mi"
-          limits:
-            cpu: "1000m"
-            memory: "6000Mi"
->>>>>>> master
         command:
           - /usr/local/bin/dind-volume-provisioner
           - -v=4
@@ -394,7 +371,6 @@ spec:
         {{- end}}
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-<<<<<<< HEAD
         {{- if ne .DockerRegistry "" }}
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
@@ -419,8 +395,6 @@ spec:
           value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory  }}
           {{- end }}
         {{- end }}
-=======
->>>>>>> master
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -438,7 +412,6 @@ spec:
       {{- if .Storage.GoogleServiceAccount }}
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /etc/dind-volume-provisioner/credentials/google-service-account.json
-<<<<<<< HEAD
       {{- end }}
       {{- if .Storage.VolumeProvisioner.MountAzureJson }}
         - name: AZURE_CREDENTIAL_FILE
@@ -463,18 +436,10 @@ spec:
             type: File          
       {{- end }}
       {{- if .Storage.GoogleServiceAccount }}
-=======
-        volumeMounts:
-        - name: credentials
-          readOnly: true
-          mountPath: "/etc/dind-volume-provisioner/credentials"
-      volumes:
->>>>>>> master
       - name: credentials
         secret:
           secretName: dind-volume-provisioner-{{ .AppName }}
       {{- end }}
-<<<<<<< HEAD
 `
 
 	templatesMap["deployment.monitor.yaml"] = `{{- if .Monitor.Enabled }}
@@ -558,8 +523,6 @@ spec:
           successThreshold: 1
           failureThreshold: 5
 {{- end }}          
-=======
->>>>>>> master
 `
 
 	templatesMap["deployment.venona.yaml"] = `apiVersion: apps/v1
@@ -567,7 +530,7 @@ kind: Deployment
 metadata:
   labels:
     app: {{ .AppName }}
-    version: {{ .Version }}
+    version: {{ .Version }} 
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 spec:
@@ -588,14 +551,10 @@ spec:
         app: {{ .AppName }}
         version: {{ .Version }}
     spec:
-<<<<<<< HEAD
       volumes:
         - name: runnerconf
           secret:
             secretName: runnerconf
-=======
-      serviceAccountName: {{ .AppName }}
->>>>>>> master
       {{ if ne .NodeSelector "" }}
       nodeSelector:
 {{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
@@ -631,7 +590,6 @@ spec:
           value: {{ .Mode }}
         - name: AGENT_NAME
           value: {{ .AppName }}
-<<<<<<< HEAD
         - name: "AGENT_ID"
           value: {{ .AgentId }}
         - name: VENONA_CONFIG_DIR
@@ -664,9 +622,6 @@ spec:
         - name: runnerconf
           mountPath: "/etc/secrets"
           readOnly: true
-=======
-        image: {{ .Image.Name }}:{{ .Image.Tag }}
->>>>>>> master
         imagePullPolicy: Always
         name: {{ .AppName }}
         resources:
@@ -722,7 +677,6 @@ spec:
 
 `
 
-<<<<<<< HEAD
 	templatesMap["ingress.app-proxy.yaml"] = `apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -819,23 +773,19 @@ roleRef:
 	templatesMap["role-binding.re.yaml"] = `{{- if .CreateRbac }}
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
-=======
-	templatesMap["role-binding.venona.yaml"] = `kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
->>>>>>> master
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 subjects:
 - kind: ServiceAccount
   name: {{ .AppName }}
+  namespace: {{ .Namespace }}
 roleRef:
   kind: Role
   name: {{ .AppName }}
   apiGroup: rbac.authorization.k8s.io
 {{- end  }}`
 
-<<<<<<< HEAD
 	templatesMap["role.engine.yaml"] = `{{- if .CreateRbac }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -901,10 +851,6 @@ rules:
 	templatesMap["role.re.yaml"] = `{{- if .CreateRbac }}
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
-=======
-	templatesMap["role.venona.yaml"] = `kind: Role
-apiVersion: rbac.authorization.k8s.io/v1beta1
->>>>>>> master
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
@@ -1004,32 +950,16 @@ data:
   aws_secret_access_key: {{ .Storage.AwsSecretAccessKey | b64enc }}
 {{- end }}`
 
-	templatesMap["secret.dind-volume-provisioner.vp.yaml"] = `{{- if not (eq .Storage.Backend "local") }}
-apiVersion: v1
+	templatesMap["secret.runtime-attach.yaml"] = `apiVersion: v1
 kind: Secret
 type: Opaque
 metadata:
-  name: dind-volume-provisioner-{{ .AppName }}
+  name: {{ .AppName }}conf
   namespace: {{ .Namespace }}
-  labels:
-    app: dind-volume-provisioner
 data:
-<<<<<<< HEAD
 {{ range $key, $value := .runnerConf }}
   {{ $key }}: {{ $value }}
 {{ end }}`
-=======
-{{- if .Storage.GoogleServiceAccount }}
-  google-service-account.json: {{ .Storage.GoogleServiceAccount | b64enc }}
-{{- end }}
-{{- if .Storage.AwsAccessKeyId }}
-  aws_access_key_id: {{ .Storage.AwsAccessKeyId | b64enc }}
-{{- end }}
-{{- if .Storage.AwsSecretAccessKey }}
-  aws_secret_access_key: {{ .Storage.AwsSecretAccessKey | b64enc }}
-{{- end }}
-{{- end }}`
->>>>>>> master
 
 	templatesMap["secret.venona.yaml"] = `apiVersion: v1
 kind: Secret
@@ -1087,7 +1017,6 @@ metadata:
 {{- end }}
 `
 
-<<<<<<< HEAD
 	templatesMap["service-account.monitor.yaml"] = `{{- if .CreateRbac }}
 {{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
 apiVersion: v1
@@ -1108,16 +1037,12 @@ metadata:
 
 	templatesMap["service-account.re.yaml"] = `{{- if .CreateRbac }}
 apiVersion: v1
-=======
-	templatesMap["service-account.venona.yaml"] = `apiVersion: v1
->>>>>>> master
 kind: ServiceAccount
 metadata:
   name: {{ .AppName }}
   namespace: {{ .Namespace }}
 {{- end }}`
 
-<<<<<<< HEAD
 	templatesMap["service.app-proxy.yaml"] = `apiVersion: v1
 kind: Service
 metadata:
@@ -1157,48 +1082,6 @@ spec:
 `
 
 	templatesMap["storageclass.dind-volume-provisioner.vp.yaml"] = `{{- if .Storage.CreateStorageClass }}
-=======
-	templatesMap["storageclass.dind-aws-ebs.vp.yaml"] = `{{- if or (eq .Storage.Backend "ebs") (eq .Storage.Backend "ebs-csi") }}
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: dind-{{ .Storage.Backend }}-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
-  labels:
-    app: dind-volume-provisioner
-provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-parameters:
-  # ebs or ebs-csi
-  volumeBackend: {{ .Storage.Backend }}
-  #  gp2 or io1
-  VolumeType: {{ .Storage.VolumeType | default "gp2" }}
-  # Valid zone in aws (us-east-1c, ...)
-  AvailabilityZone: {{ .Storage.AvailabilityZone }}
-  # ext4 or xfs (default to ext4 )
-  fsType: {{ .Storage.FsType | default "ext4" }}
-{{- end }}`
-
-	templatesMap["storageclass.dind-gcedisk.vp.yaml"] = `{{- if eq .Storage.Backend "gcedisk" }}
----
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: dind-gcedisk-{{.Storage.AvailabilityZone}}-{{ .AppName }}-{{ .Namespace }}
-  labels:
-    app: dind-volume-provisioner
-provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
-parameters:
-  volumeBackend: {{ .Storage.Backend }}
-  #  pd-ssd or pd-standard
-  type: {{ .Storage.VolumeType | default "pd-ssd" }}
-  # Valid zone in GCP
-  zone: {{ .Storage.AvailabilityZone }}
-  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
-  fsType: {{ .Storage.FsType | default "ext4" }}
-{{- end }}`
-
-	templatesMap["storageclass.dind-local-volume-provisioner.vp.yaml"] = `{{- if eq .Storage.Backend "local" }}
->>>>>>> master
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -1215,7 +1098,6 @@ parameters:
 {{- if eq .Storage.Backend "local" }}
   volumeBackend: local
   volumeParentDir: {{ .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" }}
-<<<<<<< HEAD
 {{- else if eq .Storage.Backend "gcedisk" }}
   volumeBackend: {{ .Storage.Backend }}
   #  pd-ssd or pd-standard
@@ -1268,9 +1150,6 @@ data:
 {{ range $key, $value := .runnerConf }}
   {{ $key }}: {{ $value }}
 {{ end }}`
-=======
-{{- end }}`
->>>>>>> master
 
 	return templatesMap
 }

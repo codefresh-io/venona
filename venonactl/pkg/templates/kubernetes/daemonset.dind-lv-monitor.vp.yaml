@@ -84,8 +84,4 @@ spec:
       - name: dind-volume-dir
         hostPath:
           path: {{ $localVolumeParentDir }}
-<<<<<<< HEAD
 {{- end -}}
-=======
-{{- end -}}
->>>>>>> master

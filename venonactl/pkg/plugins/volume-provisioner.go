@@ -74,7 +74,7 @@ func (u *volumeProvisionerPlugin) Delete(ctx context.Context, deleteOpt *DeleteO
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
-		return nil
+		return err
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
@@ -85,11 +85,7 @@ func (u *volumeProvisionerPlugin) Delete(ctx context.Context, deleteOpt *DeleteO
 		matchPattern:   volumeProvisionerFilesPattern,
 		operatorType:   VolumeProvisionerPluginType,
 	}
-<<<<<<< HEAD
 	return uninstall(ctx, opt)
-=======
-	return delete(opt)
->>>>>>> master
 }
 
 func (u *volumeProvisionerPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {

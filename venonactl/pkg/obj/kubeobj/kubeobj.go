@@ -55,16 +55,6 @@ func CreateObject(ctx context.Context, clientset *kubernetes.Clientset, obj runt
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.NetworkingV1().Ingresses(namespace).Create(ctx, objT, metav1.CreateOptions{})
 
-	case *batchv1.Job:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1().Jobs(namespace).Create(objT)
-
-	case *batchv1beta1.CronJob:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1beta1().CronJobs(namespace).Create(objT)
-
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
@@ -192,16 +182,6 @@ func CheckObject(ctx context.Context, clientset *kubernetes.Clientset, obj runti
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.NetworkingV1().Ingresses(namespace).Get(ctx, name, metav1.GetOptions{})
-
-	case *batchv1.Job:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1().Jobs(namespace).Get(name, metav1.GetOptions{})
-
-	case *batchv1beta1.CronJob:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1beta1().CronJobs(namespace).Get(name, metav1.GetOptions{})
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
@@ -338,20 +318,6 @@ func DeleteObject(ctx context.Context, clientset *kubernetes.Clientset, obj runt
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		err = clientset.NetworkingV1().Ingresses(namespace).Delete(ctx, name, metav1.DeleteOptions{
-			PropagationPolicy: &propagationPolicy,
-		})
-
-	case *batchv1.Job:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		err = clientset.BatchV1().Jobs(namespace).Delete(name, &metav1.DeleteOptions{
-			PropagationPolicy: &propagationPolicy,
-		})
-
-	case *batchv1beta1.CronJob:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		err = clientset.BatchV1beta1().CronJobs(namespace).Delete(name, &metav1.DeleteOptions{
 			PropagationPolicy: &propagationPolicy,
 		})
 
@@ -517,16 +483,6 @@ func ReplaceObject(ctx context.Context, clientset *kubernetes.Clientset, obj run
 		name = objT.ObjectMeta.Name
 		kind = objT.TypeMeta.Kind
 		_, err = clientset.NetworkingV1().Ingresses(namespace).Update(ctx, objT, metav1.UpdateOptions{})
-
-	case *batchv1.Job:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1().Jobs(namespace).Update(objT)
-
-	case *batchv1beta1.CronJob:
-		name = objT.ObjectMeta.Name
-		kind = objT.TypeMeta.Kind
-		_, err = clientset.BatchV1beta1().CronJobs(namespace).Update(objT)
 
 	case *rbacv1.ClusterRole:
 		name = objT.ObjectMeta.Name
