@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.47
+version: 6.3.48
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Fix templates when fullnameOverride is set"
+    - kind: changed
+      description: "engine image upgraded to 1.173.4"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
