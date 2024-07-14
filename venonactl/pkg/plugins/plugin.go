@@ -10,7 +10,10 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+<<<<<<< HEAD
 	"k8s.io/client-go/rest"
+=======
+>>>>>>> master
 )
 
 const (
@@ -19,10 +22,14 @@ const (
 	MonitorAgentPluginType        = "monitor-agent"
 	VolumeProvisionerPluginType   = "volume-provisioner"
 	EnginePluginType              = "engine"
+<<<<<<< HEAD
 	DefaultStorageClassNamePrefix = "dind-local-volumes-runner"
 	RuntimeAttachType             = "runtime-attach"
 	AppProxyPluginType            = "app-proxy"
 	NetworkTesterPluginType       = "network-tester"
+=======
+	DefaultStorageClassNamePrefix = "dind-local-volumes-venona"
+>>>>>>> master
 )
 
 type (
@@ -39,10 +46,6 @@ type (
 	PluginBuilder interface {
 		Add(string) PluginBuilder
 		Get() []Plugin
-	}
-
-	KubeClientBuilder interface {
-		BuildClient() (*kubernetes.Clientset, error)
 	}
 
 	pb struct {
@@ -65,6 +68,7 @@ type (
 		IsDefaultStorageClass bool
 		KubeBuilder           interface {
 			BuildClient() (*kubernetes.Clientset, error)
+<<<<<<< HEAD
 			BuildConfig() (*rest.Config, error)
 			EnsureNamespaceExists(ctx context.Context, cs *kubernetes.Clientset) error
 		}
@@ -80,12 +84,20 @@ type (
 		RuntimeServiceAccount string
 		RestartAgent          bool
 		Insecure              bool
+=======
+		}
+		DryRun               bool
+		KubernetesRunnerType bool
+		BuildNodeSelector    map[string]string
+		Annotations          map[string]string
+>>>>>>> master
 	}
 
 	DeleteOptions struct {
 		KubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
+<<<<<<< HEAD
 		AgentKubeBuilder interface {
 			BuildClient() (*kubernetes.Clientset, error)
 		}
@@ -93,6 +105,9 @@ type (
 		AgentNamespace     string // agent
 		RuntimeEnvironment string
 		RestartAgent       bool
+=======
+		ClusterNamespace string
+>>>>>>> master
 	}
 
 	UpgradeOptions struct {
@@ -213,6 +228,7 @@ func build(t string, logger logger.Logger) Plugin {
 		}
 	}
 
+<<<<<<< HEAD
 	if t == RuntimeAttachType {
 		return &runtimeAttachPlugin{
 			logger: logger.New("installer", RuntimeAttachType),
@@ -237,6 +253,8 @@ func build(t string, logger logger.Logger) Plugin {
 		}
 	}
 
+=======
+>>>>>>> master
 	return nil
 }
 
@@ -308,7 +326,11 @@ func status(ctx context.Context, opt *statusOptions) ([][]string, error) {
 	return rows, nil
 }
 
+<<<<<<< HEAD
 func uninstall(ctx context.Context, opt *deleteOptions) error {
+=======
+func delete(opt *deleteOptions) error {
+>>>>>>> master
 
 	kubeObjects, err := KubeObjectsFromTemplates(opt.templates, opt.templateValues, opt.matchPattern, opt.logger)
 	if err != nil {

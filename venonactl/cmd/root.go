@@ -27,6 +27,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "venona",
 	Short: "A command line application for Codefresh",
+	Deprecated: "Venona binary has been deprecated, please use codefresh cli  https://codefresh.io/docs/docs/administration/codefresh-runner ",
 }
 
 // Execute - execute the root command

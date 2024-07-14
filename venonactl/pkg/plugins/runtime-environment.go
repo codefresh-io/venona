@@ -69,6 +69,24 @@ func (u *runtimeEnvironmentPlugin) Install(ctx context.Context, opt *InstallOpti
 		cfOpt.StorageClass = storageParams["StorageClassName"].(string)
 	}
 
+	// Set storage Class by backend
+	if cfOpt.IsDefaultStorageClass {
+		storageParams := v["Storage"].(map[string]interface{})
+		if storageBackend, storageBackendParamsSet := storageParams["Backend"]; storageBackendParamsSet {
+
+			switch storageBackend {
+			case "local":
+				cfOpt.StorageClass = fmt.Sprintf("dind-local-volumes-%s-%s", v["AppName"], v["Namespace"])
+			case "gcedisk":
+				cfOpt.StorageClass = fmt.Sprintf("dind-gcedisk-%s-%s-%s", storageParams["AvailabilityZone"], v["AppName"], v["Namespace"])
+			case "ebs":
+				cfOpt.StorageClass = fmt.Sprintf("dind-ebs-%s-%s-%s", storageParams["AvailabilityZone"], v["AppName"], v["Namespace"])
+			case "ebs-csi":
+				cfOpt.StorageClass = fmt.Sprintf("dind-ebs-csi-%s-%s-%s", storageParams["AvailabilityZone"], v["AppName"], v["Namespace"])
+			}
+		}
+	}
+
 	cf := codefresh.NewCodefreshAPI(cfOpt)
 	cert, err := cf.Sign()
 	if err != nil {
@@ -84,8 +102,12 @@ func (u *runtimeEnvironmentPlugin) Install(ctx context.Context, opt *InstallOpti
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	v["RuntimeEnvironment"] = opt.RuntimeEnvironment
 	err = install(ctx, &installOptions{
+=======
+	err = install(&installOptions{
+>>>>>>> master
 		logger:         u.logger,
 		templates:      templates.TemplatesMap(),
 		templateValues: v,
@@ -98,6 +120,12 @@ func (u *runtimeEnvironmentPlugin) Install(ctx context.Context, opt *InstallOpti
 	if err != nil {
 		return nil, err
 	}
+
+	re, err := cf.Register()
+	if err != nil {
+		return nil, err
+	}
+	v["RuntimeEnvironment"] = re.Metadata.Name
 
 	return v, nil
 }
@@ -124,7 +152,7 @@ func (u *runtimeEnvironmentPlugin) Delete(ctx context.Context, deleteOpt *Delete
 	cs, err := deleteOpt.KubeBuilder.BuildClient()
 	if err != nil {
 		u.logger.Error(fmt.Sprintf("Cannot create kubernetes clientset: %v ", err))
-		return err
+		return nil
 	}
 	opt := &deleteOptions{
 		templates:      templates.TemplatesMap(),
@@ -135,7 +163,11 @@ func (u *runtimeEnvironmentPlugin) Delete(ctx context.Context, deleteOpt *Delete
 		operatorType:   RuntimeEnvironmentPluginType,
 		logger:         u.logger,
 	}
+<<<<<<< HEAD
 	return uninstall(ctx, opt)
+=======
+	return delete(opt)
+>>>>>>> master
 }
 
 func (u *runtimeEnvironmentPlugin) Upgrade(_ context.Context, _ *UpgradeOptions, v Values) (Values, error) {

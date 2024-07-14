@@ -36,6 +36,7 @@ type (
 
 		KubernetesAPI *KubernetesAPI
 
+<<<<<<< HEAD
 		Runner Runner
 
 		VolumeProvisioner VolumeProvisioner
@@ -48,6 +49,8 @@ type (
 
 		AgentAPI *AgentAPI
 
+=======
+>>>>>>> master
 		ClusterInCodefresh string
 
 		DryRun bool
@@ -60,6 +63,7 @@ type (
 
 		Version *Version
 
+<<<<<<< HEAD
 		ClusterId string
 
 		Helm3 bool
@@ -68,6 +72,8 @@ type (
 		UseNamespaceWithRole bool
 
 		AdditionalEnvVars map[string]string
+=======
+>>>>>>> master
 	}
 
 	KubernetesAPI struct {
@@ -86,11 +92,14 @@ type (
 		BuildNodeSelector map[string]string
 	}
 
+<<<<<<< HEAD
 	AgentAPI struct {
 		Token string
 		Id    string
 	}
 
+=======
+>>>>>>> master
 	Image struct {
 		Name string
 		Tag  string
@@ -146,6 +155,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Name": "codefresh/venona",
 			"Tag":  s.Version.Current.Version,
 		},
+<<<<<<< HEAD
 		"AdditionalEnvVars": s.AdditionalEnvVars,
 		"Namespace":         s.KubernetesAPI.Namespace,
 		"ConfigPath":        s.KubernetesAPI.ConfigPath,
@@ -155,11 +165,18 @@ func (s *Values) BuildValues() map[string]interface{} {
 		"Tolerations":       s.KubernetesAPI.Tolerations,
 		"AgentToken":        s.AgentAPI.Token,
 		"AgentId":           s.AgentAPI.Id,
+=======
+		"Namespace":    s.KubernetesAPI.Namespace,
+		"NodeSelector": s.KubernetesAPI.NodeSelector,
+		"Tolerations":  s.KubernetesAPI.Tolerations,
+		"AgentToken":   "",
+>>>>>>> master
 		"ServerCert": map[string]string{
 			"Cert": "",
 			"Key":  "",
 			"Ca":   "",
 		},
+<<<<<<< HEAD
 		"Runner": map[string]interface{}{
 			"Resources": s.Runner.Resources,
 		},
@@ -226,6 +243,19 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"Image": map[string]string{
 				"Name": "codefresh/cf-venona-network-tester",
 				"Tag":  "latest",
+=======
+		"Storage": map[string]interface{}{
+			"Backend": "local",
+			"LocalVolumeParentDir": "/var/lib/codefresh/dind-volumes",
+			"AvailabilityZone": "",
+			"GoogleServiceAccount": "",
+			"AwsAccessKeyId": "",
+			"AwsSecretAccessKey": "",
+			"VolumeProvisioner": map[string]interface{}{
+				"Image": "codefresh/dind-volume-provisioner:v21",
+				"NodeSelector": s.KubernetesAPI.NodeSelector,
+				"Tolerations":  s.KubernetesAPI.Tolerations,
+>>>>>>> master
 			},
 		},
 	}

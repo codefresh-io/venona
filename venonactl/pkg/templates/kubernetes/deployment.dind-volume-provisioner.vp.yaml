@@ -35,10 +35,22 @@ spec:
 
       containers:
       - name: dind-volume-provisioner
+<<<<<<< HEAD
         resources:
 {{ toYaml .Storage.VolumeProvisioner.Resources | indent 10 }}
         image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.VolumeProvisioner.Image }} {{- else }} {{- .Storage.VolumeProvisioner.Image }} {{- end}}
         imagePullPolicy: Always
+=======
+        image: {{ .Storage.VolumeProvisioner.Image }}
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "200Mi"
+          limits:
+            cpu: "1000m"
+            memory: "6000Mi"
+>>>>>>> master
         command:
           - /usr/local/bin/dind-volume-provisioner
           - -v=4
@@ -52,6 +64,7 @@ spec:
         {{- end}}
         - name: PROVISIONER_NAME
           value: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+<<<<<<< HEAD
         {{- if ne .DockerRegistry "" }}
         - name: DOCKER_REGISTRY
           value: {{ .DockerRegistry }}
@@ -76,6 +89,8 @@ spec:
           value: {{ .Storage.VolumeProvisioner.CreateDindVolDirResouces.Requests.Memory  }}
           {{- end }}
         {{- end }}
+=======
+>>>>>>> master
         {{- if .Storage.AwsAccessKeyId }}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
@@ -93,6 +108,7 @@ spec:
       {{- if .Storage.GoogleServiceAccount }}
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /etc/dind-volume-provisioner/credentials/google-service-account.json
+<<<<<<< HEAD
       {{- end }}
       {{- if .Storage.VolumeProvisioner.MountAzureJson }}
         - name: AZURE_CREDENTIAL_FILE
@@ -117,6 +133,13 @@ spec:
             type: File          
       {{- end }}
       {{- if .Storage.GoogleServiceAccount }}
+=======
+        volumeMounts:
+        - name: credentials
+          readOnly: true
+          mountPath: "/etc/dind-volume-provisioner/credentials"
+      volumes:
+>>>>>>> master
       - name: credentials
         secret:
           secretName: dind-volume-provisioner-{{ .AppName }}

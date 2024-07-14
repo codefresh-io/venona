@@ -6,11 +6,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
-	"time"
 
-	"encoding/json"
-
-	"github.com/briandowns/spinner"
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
 	"github.com/codefresh-io/venona/venonactl/pkg/certs"
@@ -19,12 +15,6 @@ import (
 	"github.com/codefresh-io/venona/venonactl/pkg/plugins"
 	"github.com/codefresh-io/venona/venonactl/pkg/store"
 	"github.com/olekukonko/tablewriter"
-	k8sApi "k8s.io/api/core/v1"
-	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/stretchr/objx"
-	cliValues "helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/getter"
 )
 
 var (
@@ -183,138 +173,4 @@ func createLogger(command string, verbose bool, logFormatter string) logger.Logg
 		LogToFile:    logFile,
 		LogFormatter: logFormatter,
 	})
-}
-
-func createSpinner(prefix, suffix string) *spinner.Spinner {
-	s := spinner.New([]string{"   ", ".  ", ".. ", "..."}, 520*time.Millisecond)
-	s.Suffix = suffix
-	s.Prefix = prefix
-	return s
-}
-
-func loadTolerationsFromFile(filename string) string {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		dieOnError(err)
-	}
-
-	return string(data)
-}
-
-func parseTolerations(s string) ([]k8sApi.Toleration, error) {
-	if s == "" {
-		return nil, nil
-	}
-	var data []k8sApi.Toleration
-	err := json.Unmarshal([]byte(s), &data)
-	if err != nil {
-		return nil, fmt.Errorf("can not parse tolerations: %s", err)
-	}
-	return data, err
-}
-
-func fillKubernetesAPI(lgr logger.Logger, context string, namespace string, inCluster bool) {
-
-	s := store.GetStore()
-	if context == "" {
-		config := clientcmd.GetConfigFromFileOrDie(s.KubernetesAPI.ConfigPath)
-		context = config.CurrentContext
-		lgr.Debug("Kube Context is not set, using current context", "Kube-Context-Name", context)
-	}
-	if namespace == "" {
-		namespace = "default"
-	}
-
-	s.KubernetesAPI.InCluster = inCluster
-	s.KubernetesAPI.ContextName = context
-	s.KubernetesAPI.Namespace = namespace
-
-}
-
-func extendStoreWithAgentAPI(logger logger.Logger, token string, agentID string) {
-	s := store.GetStore()
-	logger.Debug("Using agent's token", "Token", token)
-	s.AgentAPI = &store.AgentAPI{
-		Token: token,
-		Id:    agentID,
-	}
-}
-
-// Parsing helpers --set-value , --set-file
-// by https://github.com/helm/helm/blob/ec1d1a3d3eb672232f896f9d3b3d0797e4f519e3/pkg/cli/values/options.go#L41
-
-// templateValuesToMap - processes cmd --values <values-file.yaml> --set-value k=v --set-file v=<context-of-file>
-// using helm libraries
-func templateValuesToMap(templateValueFiles, templateValues, templateFileValues []string) (map[string]interface{}, error) {
-	valueOpts := &cliValues.Options{}
-	if len(templateValueFiles) > 0 {
-		for _, v := range templateValueFiles {
-			valueOpts.ValueFiles = append(valueOpts.ValueFiles, v)
-		}
-	}
-
-	if len(templateValues) > 0 {
-		for _, v := range templateValues {
-			valueOpts.Values = append(valueOpts.Values, v)
-		}
-	}
-
-	if len(templateFileValues) > 0 {
-		for _, v := range templateFileValues {
-			valueOpts.FileValues = append(valueOpts.FileValues, v)
-		}
-	}
-	valuesMap, err := valueOpts.MergeValues(getter.Providers{})
-	return valuesMap, err
-}
-
-func mergeMaps(a, b map[string]interface{}) map[string]interface{} {
-	out := make(map[string]interface{}, len(a))
-	for k, v := range a {
-		out[k] = v
-	}
-	for k, v := range b {
-		if v, ok := v.(map[string]interface{}); ok {
-			if bv, ok := out[k]; ok {
-				if bv, ok := bv.(map[string]interface{}); ok {
-					out[k] = mergeMaps(bv, v)
-					continue
-				}
-			}
-		}
-		out[k] = v
-	}
-	return out
-}
-
-// mergeValueStr - for merging cli parameters with mapped parameters
-func mergeValueStr(valuesMap map[string]interface{}, key string, param *string, defaultValue ...string) {
-	mapX := objx.New(valuesMap)
-	if param != nil && *param != "" {
-		mapX.Set(key, *param)
-		return
-	}
-	val := mapX.Get(key).Str(defaultValue...)
-	*param = val
-}
-
-// mergeValueBool - for merging cli parameters with mapped parameters
-func mergeValueBool(valuesMap map[string]interface{}, key string, param *bool) {
-	mapX := objx.New(valuesMap)
-	if param != nil || *param == true {
-		mapX.Set(key, *param)
-		return
-	}
-	val := mapX.Get(key).Bool()
-	*param = val
-}
-
-func mergeValueMSI(valuesMap map[string]interface{}, key string, param *map[string]interface{}, defaultValue ...map[string]interface{}) {
-	mapX := objx.New(valuesMap)
-	if param != nil && len(*param) > 0 {
-		mapX.Set(key, *param)
-		return
-	}
-	val := mapX.Get(key).MSI(defaultValue...)
-	*param = val
 }

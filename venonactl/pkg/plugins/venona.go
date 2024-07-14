@@ -49,19 +49,27 @@ const (
 )
 
 // Install venona agent
+<<<<<<< HEAD
 func (u *venonaPlugin) Install(ctx context.Context, opt *InstallOptions, v Values) (Values, error) {
 	if v["AgentToken"] == "" {
 		u.logger.Debug("Generating token for agent")
 		tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
 		u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
+=======
+func (u *venonaPlugin) Install(opt *InstallOptions, v Values) (Values, error) {
+	u.logger.Debug("Generating token for agent")
+	tokenName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
+	u.logger.Debug(fmt.Sprintf("Token candidate name: %s", tokenName))
+>>>>>>> master
 
-		client := codefresh.New(&codefresh.ClientOptions{
-			Auth: codefresh.AuthOptions{
-				Token: opt.CodefreshToken,
-			},
-			Host: opt.CodefreshHost,
-		})
+	client := codefresh.New(&codefresh.ClientOptions{
+		Auth: codefresh.AuthOptions{
+			Token: opt.CodefreshToken,
+		},
+		Host: opt.CodefreshHost,
+	})
 
+<<<<<<< HEAD
 		token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
 		if err != nil {
 			return nil, err
@@ -71,6 +79,16 @@ func (u *venonaPlugin) Install(ctx context.Context, opt *InstallOptions, v Value
 		if err != nil {
 			return nil, err
 		}
+=======
+	token, err := client.Tokens().Create(tokenName, v["RuntimeEnvironment"].(string))
+	if err != nil {
+		return nil, err
+	}
+	u.logger.Debug("Token created")
+	v["AgentToken"] = base64.StdEncoding.EncodeToString([]byte(token.Value))
+	if err != nil {
+		return nil, err
+>>>>>>> master
 	}
 
 	cs, err := opt.KubeBuilder.BuildClient()
@@ -130,7 +148,11 @@ func (u *venonaPlugin) Delete(ctx context.Context, deleteOpt *DeleteOptions, v V
 		matchPattern:   venonaFilesPattern,
 		operatorType:   VenonaPluginType,
 	}
+<<<<<<< HEAD
 	return uninstall(ctx, opt)
+=======
+	return delete(opt)
+>>>>>>> master
 }
 
 func (u *venonaPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Values) (Values, error) {
@@ -184,7 +206,11 @@ func (u *venonaPlugin) Upgrade(ctx context.Context, opt *UpgradeOptions, v Value
 				matchPattern:   fileName,
 				operatorType:   VenonaPluginType,
 			}
+<<<<<<< HEAD
 			err := uninstall(ctx, delOpt)
+=======
+			err := delete(delOpt)
+>>>>>>> master
 			if err != nil {
 				return nil, err
 			}
