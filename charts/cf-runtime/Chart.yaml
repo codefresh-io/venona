@@ -19,8 +19,6 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: "engine image upgraded to 1.173.4"
-    - kind: security
-      description: "updated dind-volume-provisioner image tag to fix security vulnerabilities"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
