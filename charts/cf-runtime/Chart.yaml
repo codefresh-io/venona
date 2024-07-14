@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.47
+version: 6.3.48
 keywords:
   - codefresh
   - runner
