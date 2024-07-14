@@ -1056,7 +1056,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.tolerations | list | `[]` | Set tolerations |
 | event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
 | extraResources | list | `[]` | Array of extra objects to deploy with the release |
-| fullNameOverride | string | `""` | String to fully override cf-runtime.fullname template |
+| fullnameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters |
 | global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
 | global.agentName | string | `""` | Agent Name (optional!) If omitted, the following format will be used `{{ .Values.global.context }}_{{ .Release.Namespace }}` |

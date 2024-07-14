@@ -1,7 +1,7 @@
 # -- String to partially override cf-runtime.fullname template (will maintain the release name)
 nameOverride: ""
 # -- String to fully override cf-runtime.fullname template
-fullNameOverride: ""
+fullnameOverride: ""
 
 # -- Global parameters
 # @default -- See below
