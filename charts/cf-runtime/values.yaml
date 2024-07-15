@@ -526,7 +526,7 @@ runtime:
     runtimeImages:
       COMPOSE_IMAGE: quay.io/codefresh/compose:v2.20.3-1.4.0
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.6
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.11
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.12
       DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.17
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.15
       DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.13
