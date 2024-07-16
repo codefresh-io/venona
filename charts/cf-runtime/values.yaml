@@ -524,17 +524,17 @@ runtime:
     # -- Set system(base) runtime images.
     # @default -- See below.
     runtimeImages:
-      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.20.3-1.4.0
+      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.28.1-1.5.0
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.6
       DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.12
       DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.17
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.15
-      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.13
+      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.14
       FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3
       GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.1.26
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11
       PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.0
-      TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.0
+      TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.1
       CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
       GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
     # -- Set additional env vars.
