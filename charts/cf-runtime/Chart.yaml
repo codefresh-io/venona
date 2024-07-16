@@ -18,11 +18,11 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "fixed critical vulnerabilities in compose, upgraded to v2.28.1-1.5.0"
+      description: "fixed critical vulnerabilities in compose upgraded to v2.28.1-1.5.0"
     - kind: security
-      description: "fixed critical vulnerabilities in pikolo, upgraded to 0.14.1"
+      description: "fixed critical vulnerabilities in pikolo upgraded to 0.14.1"
     - kind: security
-      description: "fixed critical vulnerabilities in docker-tag-pusher, upgraded to 1.3.14"
+      description: "fixed critical vulnerabilities in docker-tag-pusher upgraded to 1.3.14"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
