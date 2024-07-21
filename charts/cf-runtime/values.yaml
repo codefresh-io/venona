@@ -394,9 +394,9 @@ storage:
 # @default -- See below
 
 runtime:
-  # Set runtime as rootless
-  # - sets codefresh/dind and codefresh/dind-volume-utils images with `-rootless` tag suffix
-  # - injects IS_ROOTLESS env var into codefresh/dind-volume-provisioner
+  # -- Set runtime as rootless:
+  # sets codefresh/dind and codefresh/dind-volume-utils images with `-rootless` tag suffix
+  # injects IS_ROOTLESS env var into codefresh/dind-volume-provisioner
   rootless: false
 
   # -- Set annotation on engine Service Account
