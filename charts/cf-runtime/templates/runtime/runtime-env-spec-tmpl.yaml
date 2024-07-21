@@ -1,4 +1,17 @@
+{{- define "runtime.runtime-environment-spec.presets" }}
+  {{- if .Values.runtime.rootless }}
+userVolumeMounts:
+  dind:
+    name: dind
+    mountPath: /home/rootless/.local/share/docker
+  {{- else }}
+userVolumeMounts: {}
+  {{- end }}
+{{- end }}
+
 {{- define "runtime.runtime-environment-spec.template" }}
+{{- $presets := include "runtime.runtime-environment-spec.presets" . | fromYaml }}
+{{- $_ := set $presets "userVolumeMounts" (mergeOverwrite $presets.userVolumeMounts .Values.runtime.dind.userVolumeMounts) -}}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
 {{- $kubeconfigFilePath := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $name := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
@@ -171,7 +184,7 @@ dockerDaemonScheduler:
   {{- with $dindContext.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
   {{- end }}
-  {{- with $dindContext.userVolumeMounts }}
+  {{- with $presets.userVolumeMounts }}
   userVolumeMounts: {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $dindContext.userVolumes }}
