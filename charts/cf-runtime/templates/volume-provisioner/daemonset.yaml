@@ -6,6 +6,10 @@
 {{- $_ := set $volumeProvisionerContext.Values "nameOverride" (get .Values "nameOverride") }}
 {{- $_ := set $volumeProvisionerContext.Values "fullnameOverride" (get .Values "fullnameOverride") }}
 
+{{- if .Values.runtime.rootless }}
+{{- $_ := set $volumeProvisionerContext.Values.image "tag" (printf "%s-rootless" $volumeProvisionerContext.Values.image.tag ) }}
+{{- end }}
+
 {{- if and $volumeProvisionerContext.Values.enabled .Values.volumeProvisioner.enabled }}
 {{- include "dind-volume-provisioner.resources.daemonset" $volumeProvisionerContext }}
 {{- end }}

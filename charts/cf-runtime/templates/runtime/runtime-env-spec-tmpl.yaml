@@ -5,6 +5,9 @@
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
 {{- $imageRegistry := .Values.global.imageRegistry -}}
+{{- if .Values.runtime.rootless }}
+{{- $_ := set .Values.runtime.dind.image "tag" (printf "%s-rootless" .Values.runtime.dind.image.tag) }}
+{{- end }}
 metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
