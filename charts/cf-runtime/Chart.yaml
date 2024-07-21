@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "engine image upgraded to 1.173.6 (ignore "container.start" error 304)"
+      description: "engine image upgraded to 1.173.6 (ignore 'container.start' error 304)"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
