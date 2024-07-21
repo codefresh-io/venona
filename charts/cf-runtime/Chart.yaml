@@ -18,9 +18,11 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "dind-volume-provisioner image upgraded to 1.35.1 (added IS_ROOTLESS env var)"
+      description: "dind-volume-provisioner image upgraded to 1.35.2 (added IS_ROOTLESS env var)"
     - kind: changed
       description: "dind-volume-utils image upgraded to 1.30.0 (added rootfull and *-rootless flavors)"
+    - kind: changed
+      description: "Update runtime environment template when .Values.runtime.rootless=true"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
