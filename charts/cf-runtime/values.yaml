@@ -174,7 +174,7 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.35.0
+    tag: 1.35.1
   # -- Add additional env vars
   env: {}
   # E.g.
