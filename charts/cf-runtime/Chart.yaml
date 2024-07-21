@@ -20,7 +20,7 @@ annotations:
     - kind: changed
       description: "dind-volume-provisioner image upgraded to 1.35.1 (added IS_ROOTLESS env var)"
     - kind: changed
-      description: "dind-volume-utils" image upgraded to 1.30.0 (added rootfull and *-rootless flavors)
+      description: "dind-volume-utils image upgraded to 1.30.0 (added rootfull and *-rootless flavors)"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
