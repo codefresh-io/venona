@@ -693,14 +693,12 @@ volumeProvisioner:
 ### Rootless DinD
 
 DinD pod runs a `priviliged` container with **rootfull** docker.
-To run the docker daemon as non-root user (**rootless** mode), change dind image tag:
+To run the docker daemon as non-root user (**rootless** mode), set `.Values.runtime.rootless=true`:
 
 `values.yaml`
 ```yaml
 runtime:
-  dind:
-    image:
-      tag: rootless
+  rootless: true
 ```
 
 ### ARM
@@ -1183,6 +1181,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
+| runtime.rootless | bool | `false` | Set runtime as rootless: sets codefresh/dind and codefresh/dind-volume-utils images with `-rootless` tag suffix injects IS_ROOTLESS env var into codefresh/dind-volume-provisioner |
 | runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
 | serviceMonitor | object | See below | Add serviceMonitor |
