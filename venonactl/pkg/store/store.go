@@ -174,7 +174,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AwsAccessKeyId":       "",
 			"AwsSecretAccessKey":   "",
 			"VolumeProvisioner": map[string]interface{}{
-				"Image":          "codefresh/dind-volume-provisioner:1.34.3",
+				"Image":          "codefresh/dind-volume-provisioner:1.35.1",
 				"NodeSelector":   s.KubernetesAPI.NodeSelector,
 				"Resources":      s.VolumeProvisioner.Resources,
 				"MountAzureJson": false,
@@ -183,7 +183,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 				"Resources": s.LocalVolumeMonitor.Resources,
 				"Image": map[string]string{
 					"Name": "codefresh/dind-volume-utils",
-					"Tag":  "1.29.4",
+					"Tag":  "1.30.0",
 				},
 			},
 			"VolumeCleaner": map[string]interface{}{
