@@ -226,7 +226,7 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.29.4
+      tag: 1.30.0
     podAnnotations: {}
     podSecurityContext:
       enabled: true
