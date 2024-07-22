@@ -4,6 +4,9 @@ userVolumeMounts:
   dind:
     name: dind
     mountPath: /home/rootless/.local/share/docker
+  dind-config:
+    name: dind-config
+    mountPath: ~/.config/docker/daemon.json
   {{- else }}
 userVolumeMounts: {}
   {{- end }}

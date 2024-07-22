@@ -1,10 +1,12 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  {{- /* has to be a constant */}}
-  name: codefresh-dind-config
-  labels:
-    {{- include "runtime.labels" . | nindent 4 }}
-data:
-  daemon.json: |
-{{ coalesce .Values.re.dindDaemon .Values.runtime.dindDaemon | toPrettyJson | indent 4 }}
+{{- $dindContext := deepCopy . }}
+{{- $_ := set $dindContext.Values "dindDaemon" (get .Values.runtime "dindDaemon") }}
+{{- $_ := set $dindContext.Values "nameOverride" (get .Values "nameOverride") }}
+{{- $_ := set $dindContext.Values "fullnameOverride" (get .Values "fullnameOverride") }}
+
+{{- if .Values.runtime.rootless }}
+{{ $hosts := rest $dindContext.Values.dindDaemon.hosts }}
+{{ $hosts := prepend $hosts "unix:///run/user/1000/docker.sock" }}
+{{ $_ := set $dindContext.Values.dindDaemon "hosts" $hosts }}
+{{- end }}
+
+{{- include "runtime.dind.configmap" $dindContext }}
