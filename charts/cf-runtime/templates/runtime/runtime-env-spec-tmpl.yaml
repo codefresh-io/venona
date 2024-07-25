@@ -7,14 +7,20 @@ userVolumeMounts:
   dind-config:
     name: dind-config
     mountPath: ~/.config/docker/daemon.json
+securityContext:
+  privileged: true
+  fsGroup: 1000
   {{- else }}
 userVolumeMounts: {}
+securityContext:
+  privileged: true
   {{- end }}
 {{- end }}
 
 {{- define "runtime.runtime-environment-spec.template" }}
 {{- $presets := include "runtime.runtime-environment-spec.presets" . | fromYaml }}
 {{- $_ := set $presets "userVolumeMounts" (mergeOverwrite $presets.userVolumeMounts .Values.runtime.dind.userVolumeMounts) -}}
+{{- $_ := set $presets "securityContext" $presets.securityContext -}}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
 {{- $kubeconfigFilePath := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $name := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
@@ -205,6 +211,9 @@ dockerDaemonScheduler:
       name: codefresh-certs-server
       secret:
         secretName: codefresh-certs-server
+  {{- end }}
+  {{- with $presets.securityContext }}
+  securityContext: {{- toYaml . | nindent 4 }}
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}
