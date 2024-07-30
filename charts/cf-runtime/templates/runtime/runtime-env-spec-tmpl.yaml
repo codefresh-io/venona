@@ -1,4 +1,5 @@
 {{- define "runtime.runtime-environment-spec.presets" }}
+{{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
   {{- if .Values.runtime.rootless }}
 userVolumeMounts:
   dind:
@@ -6,22 +7,36 @@ userVolumeMounts:
     mountPath: /home/rootless/.local/share/docker/
   dind-config:
     name: dind-config
-    mountPath: ~/.config/docker/daemon.json
-securityContext:
+    mountPath: /home/rootless/.config/docker/daemon.json
+    subPath: daemon.json
+containerSecurityContext:
   privileged: true
+podSecurityContext:
   fsGroup: 1000
+initContainers:
+    {{- if .Values.runtime.dind.volumePermissions.enabled }}
+  - name: volume-permissions
+    image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" .Values.runtime.dind.volumePermissions.image "context" .) }}
+    command: ["sh", "-c", "chown -R 1000:1000 /home/rootless/.local/share/docker/"]
+    securityContext: {{ .Values.runtime.dind.volumePermissions.securityContext | toYaml | nindent 6 }}
+    resources: {{ .Values.runtime.dind.volumePermissions.resources | toYaml | nindent 6 }}
+    volumeMounts:
+      - name: dind
+        mountPath: /home/rootless/.local/share/docker/
+    {{- end }}
   {{- else }}
 userVolumeMounts: {}
-securityContext:
+containerSecurityContext:
   privileged: true
+initContainers: []
   {{- end }}
 {{- end }}
 
 {{- define "runtime.runtime-environment-spec.template" }}
+{{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
 {{- $presets := include "runtime.runtime-environment-spec.presets" . | fromYaml }}
 {{- $_ := set $presets "userVolumeMounts" (mergeOverwrite $presets.userVolumeMounts .Values.runtime.dind.userVolumeMounts) -}}
 {{- $_ := set $presets "securityContext" $presets.securityContext -}}
-{{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
 {{- $kubeconfigFilePath := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $name := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
@@ -212,8 +227,14 @@ dockerDaemonScheduler:
       secret:
         secretName: codefresh-certs-server
   {{- end }}
-  {{- with $presets.securityContext }}
-  securityContext: {{- toYaml . | nindent 4 }}
+  {{- with $presets.podSecurityContext }}
+  podSecurityContext: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $presets.containerSecurityContext }}
+  containerSecurityContext: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $presets.initContainers }}
+  initContainers: {{- toYaml . | nindent 4 }}
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}

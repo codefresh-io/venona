@@ -174,7 +174,7 @@ tests:
                   name: cert
                   secret:
                     secretName: tls-secret
-              securityContext:
+              containerSecurityContext:
                 privileged: true
             extends:
               - system/default/hybrid/k8s_low_limits

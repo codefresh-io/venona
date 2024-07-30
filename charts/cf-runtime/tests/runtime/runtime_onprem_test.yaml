@@ -172,7 +172,7 @@ tests:
                   name: codefresh-certs-server
                   secret:
                     secretName: codefresh-certs-server
-              securityContext:
+              containerSecurityContext:
                 privileged: true
             extends:
               - system/default

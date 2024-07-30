@@ -505,6 +505,15 @@ runtime:
     #     name: regctl-docker-registry
     #     mountPath: /home/appuser/.docker/
     #     readOnly: true
+    volumePermissions:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: alpine
+        tag: 3.18
+      resources: {}
+      securityContext:
+        runAsUser: 0
 
   # -- Parameters for Engine pod (aka "pipeline" orchestrator).
   engine:
