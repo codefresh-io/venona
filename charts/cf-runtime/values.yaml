@@ -507,7 +507,7 @@ runtime:
       image:
         registry: docker.io
         repository: alpine
-        tag: 3.18
+        tag: edge
       resources: {}
       securityContext:
         runAsUser: 0
