@@ -17,7 +17,16 @@ initContainers:
     {{- if .Values.runtime.dind.volumePermissions.enabled }}
   - name: volume-permissions
     image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" .Values.runtime.dind.volumePermissions.image "context" .) }}
-    command: ["sh", "-c", "chown -R 1000:1000 /home/rootless/.local/share/docker/"]
+    command:
+    - /bin/sh
+    - -c
+    - |
+      DIRECTORY=/home/rootless/.local/share/docker/
+      OWNER=$(stat -c "%u" "$DIRECTORY")
+      GROUP=$(stat -c "%g" "$DIRECTORY")
+      if [ "$OWNER" -ne 1000 ] || [ "$GROUP" -ne 1000 ]; then
+       chown -R 1000:1000 "$DIRECTORY"
+      fi
     securityContext: {{ .Values.runtime.dind.volumePermissions.securityContext | toYaml | nindent 6 }}
     resources: {{ .Values.runtime.dind.volumePermissions.resources | toYaml | nindent 6 }}
     volumeMounts:

@@ -133,9 +133,15 @@ tests:
                 privileged: true
               initContainers:
                 - command:
-                  - sh
+                  - /bin/sh
                   - -c
-                  - chown -R 1000:1000 /home/rootless/.local/share/docker/
+                  - |
+                    DIRECTORY=/home/rootless/.local/share/docker/
+                    OWNER=$(stat -c "%u" "$DIRECTORY")
+                    GROUP=$(stat -c "%g" "$DIRECTORY")
+                    if [ "$OWNER" -ne 1000 ] || [ "$GROUP" -ne 1000 ]; then
+                    chown -R 1000:1000 "$DIRECTORY"
+                    fi
                   image: docker.io/alpine:3.18
                   name: volume-permissions
                   resources: {}
