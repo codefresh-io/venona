@@ -49,10 +49,24 @@ tests:
     template: templates/volume-provisioner/daemonset.yaml
     set:
       storage.backend: local
+      runtime.rootless: true
       volumeProvisioner:
         dind-lv-monitor:
           volumePermissions:
             enabled: true
     asserts:
       - isNotNull:
+          path: spec.template.spec.initContainers
+
+
+  - it: Test dind-lv-monitor initContainer
+    template: templates/volume-provisioner/daemonset.yaml
+    set:
+      storage.backend: local
+      volumeProvisioner:
+        dind-lv-monitor:
+          volumePermissions:
+            enabled: true
+    asserts:
+      - isNull:
           path: spec.template.spec.initContainers

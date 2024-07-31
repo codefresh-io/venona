@@ -27,7 +27,7 @@ spec:
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if .Values.volumePermissions.enabled }}
+      {{- if and .Values.volumePermissions.enabled .Values.runtime.rootless }}
       initContainers:
       - name: volume-permissions
         image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" .Values.volumePermissions.image "context" .) }}

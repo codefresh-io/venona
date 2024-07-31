@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: dind-lv-monitor rootless test
+values:
+  - ../values.yaml
+templates:
+  - templates/volume-provisioner/daemonset.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test dind-lv-monitor with -rootless image tag suffix
+    template: templates/volume-provisioner/daemonset.yaml
+    set:
+      runtime:
+        rootless: true
+      storage:
+        backend: local
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^.*-rootless$
+
+  - it: Test dind-lv-monitor without -rootless image tag suffix
+    template: templates/volume-provisioner/daemonset.yaml
+    set:
+      runtime:
+        rootless: false
+      storage:
+        backend: local
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^.*-rootless$

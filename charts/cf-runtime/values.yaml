@@ -174,7 +174,7 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.35.0
+    tag: 1.35.2
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -226,7 +226,7 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.29.4
+      tag: 1.30.0
     podAnnotations: {}
     podSecurityContext:
       enabled: true
@@ -394,6 +394,9 @@ storage:
 # @default -- See below
 
 runtime:
+  # -- Set runtime as rootless:
+  rootless: false
+
   # -- Set annotation on engine Service Account
   # Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster
   serviceAccount:
@@ -499,6 +502,15 @@ runtime:
     #     name: regctl-docker-registry
     #     mountPath: /home/appuser/.docker/
     #     readOnly: true
+    volumePermissions:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: alpine
+        tag: edge
+      resources: {}
+      securityContext:
+        runAsUser: 0
 
   # -- Parameters for Engine pod (aka "pipeline" orchestrator).
   engine:

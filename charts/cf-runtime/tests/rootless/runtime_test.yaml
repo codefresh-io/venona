@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
-suite: runtime test
+suite: rootless runtime test
 values:
   - ../values.yaml
 templates:
@@ -15,7 +15,7 @@ chart:
   version: 1.0.0
   appVersion: 1.0.0
 tests:
-  - it: Test default runtime spec metadata
+  - it: Test rootless runtime spec metadata
     template: templates/hooks/post-install/cm-update-runtime.yaml
     asserts:
       - hasDocuments:
@@ -27,6 +27,9 @@ tests:
 
   - it: Test runtime spec override
     template: templates/hooks/post-install/cm-update-runtime.yaml
+    set:
+      runtime:
+        rootless: true
     values:
       - ../values.yaml
       - ./runtime_values.yaml
@@ -40,15 +43,14 @@ tests:
             runtimeScheduler:
               type: KubernetesPod
               image: 'quay.io/codefresh/engine:tagoverride'
-              imagePullPolicy: Always
+              imagePullPolicy: IfNotPresent
               command:
-                - one
-                - two
-                - three
+                - npm
+                - run
+                - start
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
                 DOCKER_REQUEST_TIMEOUT_MS: '30000'
-                FOO: BAR
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
                 LOGGER_LEVEL: debug
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
@@ -70,12 +72,6 @@ tests:
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
                 CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
-              userEnvVars:
-                - name: ALICE
-                  valueFrom:
-                    secretKeyRef:
-                      key: token
-                      name: alice-secret
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -88,94 +84,75 @@ tests:
                 TIME_INACTIVE_UNTIL_TERMINATION: 2700
               cluster:
                 namespace: codefresh
-                serviceAccount: service-account-override
+                serviceAccount: codefresh-engine
                 clusterProvider:
                   accountId: 7890
                   selector: my-context
-                nodeSelector:
-                  topology.kubernetes.io/zone: us-east-1a
-              affinity:
-                nodeAffinity:
-                  requiredDuringSchedulingIgnoredDuringExecution:
-                    nodeSelectorTerms:
-                    - matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                        - engine
-              tolerations:
-                - effect: NoSchedule
-                  key: codefresh.io
-                  operator: Equal
-                  value: engine
-              annotations:
-                karpenter.sh/do-not-evict: 'true'
-              labels:
-                key: engine
               resources:
                 limits:
-                  cpu: 200m
-                  memory: 256Mi
+                  cpu: 1000m
+                  memory: 2048Mi
                 requests:
-                  cpu: 200m
-                  memory: 256Mi
+                  cpu: 100m
+                  memory: 128Mi
             dockerDaemonScheduler:
               type: DindKubernetesPod
-              dindImage: 'quay.io/codefresh/dind:tagoverride'
-              imagePullPolicy: Always
+              dindImage: 'quay.io/codefresh/dind:tagoverride-rootless'
+              imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
-                ALICE: BOB
                 DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh
-                serviceAccount: service-account-override
+                serviceAccount: codefresh-engine
                 clusterProvider:
                   accountId: 7890
                   selector: my-context
-                nodeSelector:
-                  topology.kubernetes.io/zone: us-east-1a
-              affinity:
-                nodeAffinity:
-                  requiredDuringSchedulingIgnoredDuringExecution:
-                    nodeSelectorTerms:
-                    - matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                        - dind
-              tolerations:
-                - effect: NoSchedule
-                  key: codefresh.io
-                  operator: Equal
-                  value: dinds
-              annotations:
-                karpenter.sh/do-not-evict: 'true'
-              labels:
-                key: dind
               pvcs:
                 - name: dind
                   reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
                   reuseVolumeSortOrder: pipeline_id
-                  storageClassName: my-custom-storage-class
-                  volumeSize: 8Gi
+                  storageClassName: dind-local-volumes-runner-codefresh
+                  volumeSize: 16Gi
               defaultDindResources:
                 limits:
-                  cpu: 1000m
-                  memory: 2048Mi
+                  cpu: 400m
+                  memory: 800Mi
                 requests: null
               userVolumeMounts:
-                my-cert:
-                  mountPath: /etc/ssl/cert
-                  name: cert
-                  readOnly: true
-              userVolumes:
-                my-cert:
-                  name: cert
-                  secret:
-                    secretName: tls-secret
+                dind:
+                  mountPath: /home/rootless/.local/share/docker/
+                  name: dind
+                dind-config:
+                  mountPath: /home/rootless/.config/docker/daemon.json
+                  name: dind-config
+                  subPath: daemon.json
+              podSecurityContext:
+                fsGroup: 1000
               containerSecurityContext:
                 privileged: true
+              initContainers:
+                - command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    set -eou xtrace
+                    DIRECTORY=/home/rootless/.local/share/docker/
+                    OWNER=$(stat -c "%u" "$DIRECTORY")
+                    GROUP=$(stat -c "%g" "$DIRECTORY")
+                    if [ "$OWNER" -ne 1000 ] || [ "$GROUP" -ne 1000 ]; then
+                    chown -R 1000:1000 "$DIRECTORY"
+                    else
+                      exit 0
+                    fi
+                  image: docker.io/alpine:3.18
+                  name: volume-permissions
+                  resources: {}
+                  securityContext:
+                    runAsUser: 0
+                  volumeMounts:
+                  - mountPath: /home/rootless/.local/share/docker/
+                    name: dind
             extends:
               - system/default/hybrid/k8s_low_limits
             description: null

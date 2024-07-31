@@ -1,0 +1,12 @@
+{{- define "runtime.dind.configmap" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  {{- /* has to be a constant */}}
+  name: codefresh-dind-config
+  labels:
+    {{- include "runtime.labels" . | nindent 4 }}
+data:
+  daemon.json: |
+{{ coalesce .Values.dindDaemon | toPrettyJson | indent 4 }}
+{{- end }}

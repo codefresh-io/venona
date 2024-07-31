@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: dind test
+values:
+  - ../values.yaml
+templates:
+  - templates/runtime/cm-dind-daemon.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  version: 1.0.0
+  appVersion: 1.0.0
+tests:
+  - it: Test default dind config map
+    template: templates/runtime/cm-dind-daemon.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - isNotEmpty:
+          path: data["daemon.json"]
+      - equal:
+          path: data["daemon.json"]
+          value: |
+            {
+              "experimental": true,
+              "hosts": [
+                "unix:///var/run/docker.sock",
+                "tcp://0.0.0.0:1300"
+              ],
+              "insecure-registries": [
+                "192.168.99.100:5000"
+              ],
+              "metrics-addr": "0.0.0.0:9323",
+              "tls": true,
+              "tlscacert": "/etc/ssl/cf-client/ca.pem",
+              "tlscert": "/etc/ssl/cf/server-cert.pem",
+              "tlskey": "/etc/ssl/cf/server-key.pem",
+              "tlsverify": true
+            }
+
+  - it: Test rootless dind config map
+    template: templates/runtime/cm-dind-daemon.yaml
+    set:
+      runtime.rootless: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: ConfigMap
+      - isNotEmpty:
+          path: data["daemon.json"]
+      - equal:
+          path: data["daemon.json"]
+          value: |
+            {
+              "experimental": true,
+              "hosts": [
+                "unix:///run/user/1000/docker.sock",
+                "tcp://0.0.0.0:1300"
+              ],
+              "insecure-registries": [
+                "192.168.99.100:5000"
+              ],
+              "metrics-addr": "0.0.0.0:9323",
+              "tls": true,
+              "tlscacert": "/etc/ssl/cf-client/ca.pem",
+              "tlscert": "/etc/ssl/cf/server-cert.pem",
+              "tlskey": "/etc/ssl/cf/server-key.pem",
+              "tlsverify": true
+            }
