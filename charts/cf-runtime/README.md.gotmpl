@@ -704,10 +704,10 @@ runtime:
 ```
 
 `.Values.runtime.rootless=true` applies the following changes:
-- sets `codefresh/dind` and `codefresh/dind-volume-utils`` images with `-rootless` tag suffix
-- injects `IS_ROOTLESS` env var into `codefresh/dind-volume-provisioner` pod
-- sets `/home/rootless/.local/share/docker` (instead of `/var/lib/docker`) as volume mount for codefresh/dind
-- sets `/home/rootless/.config/docker/daemon.json` (instead of `/etc/docker/daemon.json`) as volume mount for codefresh/dind
+- sets `codefresh/dind` and `codefresh/dind-volume-utils` images with `-rootless` tag suffix
+- injects `IS_ROOTLESS` env var into dind-volume-provisioner pod
+- sets `/home/rootless/.local/share/docker` (instead of `/var/lib/docker`) as volume mount for dind pod
+- sets `/home/rootless/.config/docker/daemon.json` (instead of `/etc/docker/daemon.json`) as volume mount for dind pod
 - adds an optional initContainer (.Values.runtime.dind.volumePermissions) to set correct permissions for `/home/rootless/.local/share/docker``
 - sets `securityContext.fsGroup=1000` for dind pod
 
