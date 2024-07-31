@@ -136,11 +136,14 @@ tests:
                   - /bin/sh
                   - -c
                   - |
+                    set -eou xtrace
                     DIRECTORY=/home/rootless/.local/share/docker/
                     OWNER=$(stat -c "%u" "$DIRECTORY")
                     GROUP=$(stat -c "%g" "$DIRECTORY")
                     if [ "$OWNER" -ne 1000 ] || [ "$GROUP" -ne 1000 ]; then
                     chown -R 1000:1000 "$DIRECTORY"
+                    else
+                      exit 0
                     fi
                   image: docker.io/alpine:3.18
                   name: volume-permissions
