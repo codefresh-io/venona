@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.3.53](https://img.shields.io/badge/Version-6.3.53-informational?style=flat-square)
+![Version: 6.4.0](https://img.shields.io/badge/Version-6.4.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -703,6 +703,14 @@ runtime:
   rootless: true
 ```
 
+`.Values.runtime.rootless=true` applies the following changes:
+- sets `codefresh/dind` and `codefresh/dind-volume-utils`` images with `-rootless` tag suffix
+- injects `IS_ROOTLESS` env var into `codefresh/dind-volume-provisioner` pod
+- sets `/home/rootless/.local/share/docker` (instead of `/var/lib/docker`) as volume mount for codefresh/dind
+- sets `/home/rootless/.config/docker/daemon.json` (instead of `/etc/docker/daemon.json`) as volume mount for codefresh/dind
+- adds an optional initContainer (.Values.runtime.dind.volumePermissions) to set correct permissions for `/home/rootless/.local/share/docker``
+- sets `securityContext.fsGroup=1000` for dind pod
+
 ### ARM
 
 With the Codefresh Runner, you can run native ARM64v8 builds.
@@ -1183,7 +1191,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
-| runtime.rootless | bool | `false` | Set runtime as rootless: 1. sets codefresh/dind and codefresh/dind-volume-utils images with `-rootless` tag suffix 2. injects IS_ROOTLESS env var into codefresh/dind-volume-provisioner 3. sets /home/rootless/.local/share/docker as a volume mount for codefresh/dind |
+| runtime.rootless | bool | `false` | Set runtime as rootless: |
 | runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
 | serviceMonitor | object | See below | Add serviceMonitor |
@@ -1226,4 +1234,3 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | volumeProvisioner.serviceAccount.name | string | `""` | Override service account name |
 | volumeProvisioner.tolerations | list | `[]` | Set tolerations |
 | volumeProvisioner.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
-

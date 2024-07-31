@@ -395,9 +395,6 @@ storage:
 
 runtime:
   # -- Set runtime as rootless:
-  # 1. sets codefresh/dind and codefresh/dind-volume-utils images with `-rootless` tag suffix
-  # 2. injects IS_ROOTLESS env var into codefresh/dind-volume-provisioner
-  # 3. sets /home/rootless/.local/share/docker as a volume mount for codefresh/dind
   rootless: false
 
   # -- Set annotation on engine Service Account
