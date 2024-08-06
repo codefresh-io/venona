@@ -23,13 +23,7 @@ initContainers:
     - |
       set -eou xtrace
       DIRECTORY=/home/rootless/.local/share/docker/
-      OWNER=$(stat -c "%u" "$DIRECTORY")
-      GROUP=$(stat -c "%g" "$DIRECTORY")
-      if [ "$OWNER" -ne 1000 ] || [ "$GROUP" -ne 1000 ]; then
-       chown -R 1000:1000 "$DIRECTORY"
-      else
-        exit 0
-      fi
+      chown 1000:1000 "$DIRECTORY"
     securityContext: {{ .Values.runtime.dind.volumePermissions.securityContext | toYaml | nindent 6 }}
     resources: {{ .Values.runtime.dind.volumePermissions.resources | toYaml | nindent 6 }}
     volumeMounts:
