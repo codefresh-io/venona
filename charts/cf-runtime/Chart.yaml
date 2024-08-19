@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.54
+version: 6.3.55
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: security
-      description: "cf-docker-pusher image upgraded to 6.0.16 with security fixes"
+    - kind: changed
+      description: "support for cosign in buildstep"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

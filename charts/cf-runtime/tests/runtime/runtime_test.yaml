@@ -70,6 +70,7 @@ tests:
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
                 CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
+                COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
               userEnvVars:
                 - name: ALICE
                   valueFrom:
