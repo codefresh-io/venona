@@ -537,7 +537,7 @@ runtime:
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.1
       CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
       GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
-      COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.1'
+      COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.2'
     # -- Set additional env vars.
     env:
       # -- Interval to check the exec status in the container-logger
