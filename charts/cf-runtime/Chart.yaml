@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.59
+version: 6.3.60
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "engine image upgraded to v1.174.9 to fix handling of variables with boolean values"
+      description: "engine image upgraded to v1.174.11 to fix access step variables within parallel step"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
