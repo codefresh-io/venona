@@ -603,6 +603,7 @@ runtime:
     #     secretKeyRef:
     #       name: github-token
     #       key: token
+    terminationGracePeriodSeconds: 30
 
   # -- Parameters for `runtime-patch` post-upgrade/install hook
   # @default -- See below
