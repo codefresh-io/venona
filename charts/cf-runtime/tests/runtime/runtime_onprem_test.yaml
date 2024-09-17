@@ -110,6 +110,7 @@ tests:
                 requests:
                   cpu: 200m
                   memory: 256Mi
+              terminationGracePeriodSeconds: 180
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'quay.io/codefresh/dind:tagoverride'
@@ -152,6 +153,7 @@ tests:
                   cpu: 1000m
                   memory: 2048Mi
                 requests: null
+              terminationGracePeriodSeconds: 30
               userVolumeMounts:
                 my-cert:
                   mountPath: /etc/ssl/cert
