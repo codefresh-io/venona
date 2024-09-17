@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.3.61
+version: 6.4.0
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "engine image upgraded to v1.174.12 with fix to codefresh run --local command"
+    - kind: added
+      description: "Added support for terminationGracePeriodSeconds configuration for dind and engine"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

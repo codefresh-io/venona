@@ -88,6 +88,9 @@ runtimeScheduler:
   {{- if $engineContext.resources}}
   {{- toYaml $engineContext.resources | nindent 4 }}
   {{- end }}
+  {{- with $engineContext.terminationGracePeriodSeconds }}
+  terminationGracePeriodSeconds: {{ . }}
+  {{- end }}
 dockerDaemonScheduler:
   type: DindKubernetesPod
   {{- if $dindContext.image }}
