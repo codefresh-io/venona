@@ -85,6 +85,7 @@ tests:
                 requests:
                   cpu: 100m
                   memory: 128Mi
+              terminationGracePeriodSeconds: 180
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'somedomain.io/codefresh/dind:tagoverride'
@@ -109,6 +110,7 @@ tests:
                   cpu: 400m
                   memory: 800Mi
                 requests: null
+              terminationGracePeriodSeconds: 30
             extends:
               - system/default/hybrid/k8s_low_limits
             description: null

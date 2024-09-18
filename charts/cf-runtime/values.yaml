@@ -439,6 +439,8 @@ runtime:
       limits:
         cpu: 400m
         memory: 800Mi
+    # -- Set termination grace period.
+    terminationGracePeriodSeconds: 30
     # -- PV claim spec parametes.
     pvcs:
       # -- Default dind PVC parameters
@@ -521,6 +523,8 @@ runtime:
       limits:
         cpu: 1000m
         memory: 2048Mi
+    # -- Set termination grace period.
+    terminationGracePeriodSeconds: 180
     # -- Set system(base) runtime images.
     # @default -- See below.
     runtimeImages:
