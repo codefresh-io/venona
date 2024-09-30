@@ -537,7 +537,7 @@ runtime:
       FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3
       GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.1.28
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11
-      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.0
+      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.6
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.1
       CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
       GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
