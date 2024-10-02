@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: security
-      description: "updating cf-debugger"
+    - kind: added
+      description: "updating cf-git-cloner image, adding SKIP_TAGS_ON_UPDATE env var to skip tags on update"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
