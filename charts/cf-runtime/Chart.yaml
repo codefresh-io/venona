@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: added
-      description: "add changelog into release"
+    - kind: fixed
+      description: "updated docker-builder version to allow users to specify the qemu image on docker builds"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
