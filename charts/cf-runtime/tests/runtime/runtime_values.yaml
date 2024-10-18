@@ -17,6 +17,8 @@ runtime:
         reuseVolumeSortOrder: pipeline_id
     env:
       ALICE: BOB
+      INT_AS_STRING: "123"
+      FLOAT: 12.34
     podAnnotations:
       karpenter.sh/do-not-evict: 'true'
     podLabels:
@@ -79,6 +81,8 @@ runtime:
       COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:tagoverride
     env:
       FOO: BAR
+      INT_AS_STRING: "123"
+      FLOAT: 12.34
     userEnvVars:
     - name: ALICE
       valueFrom:
