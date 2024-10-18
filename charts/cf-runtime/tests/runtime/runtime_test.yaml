@@ -48,14 +48,16 @@ tests:
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
                 DOCKER_REQUEST_TIMEOUT_MS: '30000'
-                FOO: BAR
+                FOO: 'BAR'
+                INT_AS_STRING: '123'
+                FLOAT: '12.34'
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
-                LOGGER_LEVEL: debug
+                LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS: 'false'
                 METRICS_PROMETHEUS_ENABLED: 'true'
                 METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: 'false'
-                METRICS_PROMETHEUS_HOST: 0.0.0.0
+                METRICS_PROMETHEUS_HOST: '0.0.0.0'
                 METRICS_PROMETHEUS_PORT: '9100'
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
@@ -127,7 +129,9 @@ tests:
               imagePullPolicy: Always
               userAccess: true
               envVars:
-                ALICE: BOB
+                ALICE: 'BOB'
+                INT_AS_STRING: "123"
+                FLOAT: '12.34'
                 DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh
