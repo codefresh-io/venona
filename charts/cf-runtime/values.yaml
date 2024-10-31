@@ -508,7 +508,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.174.12
+      tag: 1.174.13
       pullPolicy: IfNotPresent
     # -- Set container command.
     command:
@@ -529,9 +529,9 @@ runtime:
     # @default -- See below.
     runtimeImages:
       COMPOSE_IMAGE: quay.io/codefresh/compose:v2.28.1-1.5.0
-      CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.6
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.13
-      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.17
+      CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.7
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.14
+      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.18
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.16
       DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.14
       FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3
