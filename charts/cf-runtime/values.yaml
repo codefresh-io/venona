@@ -535,7 +535,7 @@ runtime:
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.16
       DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.14
       FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3
-      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.1.28
+      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.2.0
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11
       PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.6
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.1
