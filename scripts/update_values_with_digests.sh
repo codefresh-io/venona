@@ -3,7 +3,7 @@ set -eou xtrace
 
 MYDIR=$(dirname $0)
 CHARTDIR="${MYDIR}/../charts/cf-runtime"
-VALUES_FILE="${CHARTDIR}/values-copy.yaml"
+VALUES_FILE="${CHARTDIR}/values.yaml"
 
 runtime_images=$(yq e '.runtime.engine.runtimeImages' $VALUES_FILE)
 
