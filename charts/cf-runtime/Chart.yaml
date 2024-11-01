@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 6.4.8
+version: 6.4.9
 keywords:
   - codefresh
   - runner
@@ -18,8 +18,8 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: added
-      description: "updating cf-git-cloner image, adding SKIP_TAGS_ON_UPDATE env var to skip tags on update"
+      description: "Added digests for images"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
-    version: 0.16.0
+    version: 0.21.0
