@@ -3,15 +3,15 @@ set -eou xtrace
 
 MYDIR=$(dirname $0)
 CHARTDIR="${MYDIR}/../charts/cf-runtime"
-VALUES_FILE="${MYDIR}/values.yaml"
+VALUES_FILE="${CHARTDIR}/values.yaml"
 
-runtime_images=$(yq e '.runtime.engine.runtimeImages' $CHARTDIR/values.yaml)
+runtime_images=$(yq e '.runtime.engine.runtimeImages' $VALUES_FILE)
 
 while read -r line; do
     key=${line%%:*}
     image=${line#*:}
     digest=$(regctl manifest digest $image)
-    yq e -i ".runtime.engine.runtimeImages.$key |= . + \"$digest\"" $CHARTDIR/values.yaml
+    yq e -i ".runtime.engine.runtimeImages.$key |= . + \"$digest\"" $VALUES_FILE)
 done <<< "$runtime_images"
 
 
@@ -30,15 +30,15 @@ get_image_digest() {
   fi
 }
 
-yq eval-all '. as $item ireduce ({}; . * $item) | .. | select(has("image")) | path | join(".")' "$input_file" | \
+yq eval-all '. as $item ireduce ({}; . * $item) | .. | select(has("image")) | path | join(".")' "$VALUES_FILE" | \
 while read -r path; do
-  registry=$(yq eval ".$path.image.registry" "$input_file")
-  repository=$(yq eval ".$path.image.repository" "$input_file")
-  tag=$(yq eval ".$path.image.tag" "$input_file")
+  registry=$(yq eval ".$path.image.registry" "$VALUES_FILE")
+  repository=$(yq eval ".$path.image.repository" "$VALUES_FILE")
+  tag=$(yq eval ".$path.image.tag" "$VALUES_FILE")
 
   digest=$(get_image_digest "$registry" "$repository" "$tag")
 
   if [[ -n "$digest" ]]; then
-    yq eval -i ".$path.image.digest = \"$digest\"" "$input_file"
+    yq eval -i ".$path.image.digest = \"$digest\"" "$VALUES_FILE"
   fi
 done
