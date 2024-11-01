@@ -11,7 +11,7 @@ while read -r line; do
     key=${line%%:*}
     image=${line#*:}
     digest=$(regctl manifest digest $image)
-    yq e -i ".runtime.engine.runtimeImages.$key |= . + \"$digest\"" $VALUES_FILE)
+    yq e -i ".runtime.engine.runtimeImages.$key |= . + \"@$digest\"" $VALUES_FILE
 done <<< "$runtime_images"
 
 
@@ -39,6 +39,6 @@ while read -r path; do
   digest=$(get_image_digest "$registry" "$repository" "$tag")
 
   if [[ -n "$digest" ]]; then
-    yq eval -i ".$path.image.digest = \"$digest\"" "$VALUES_FILE"
+    yq eval -i ".$path.image.digest = \"@$digest\"" "$VALUES_FILE"
   fi
 done
