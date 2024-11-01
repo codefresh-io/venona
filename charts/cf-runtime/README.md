@@ -1118,8 +1118,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
-| runtime.accounts | for On-Premise only | `[]` | Assign accounts to runtime (list of account ids) |
-| runtime.agent | for On-Premise only | `true` | Enable agent |
+| runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
+| runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
 | runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
@@ -1180,7 +1180,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.workflowLimits.TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY | int | `60` | Time since the last health check report after which the engine is considered unhealthy; seconds. |
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
-| runtime.inCluster | for On-Premise only | `true` | Set inCluster runtime |
+| runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
