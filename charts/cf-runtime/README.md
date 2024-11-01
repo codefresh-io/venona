@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 6.4.8](https://img.shields.io/badge/Version-6.4.8-informational?style=flat-square)
+![Version: 6.4.9](https://img.shields.io/badge/Version-6.4.9-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1003,7 +1003,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://quay.io/codefresh/charts | cf-common | 0.16.0 |
+| oci://quay.io/codefresh/charts | cf-common | 0.21.0 |
 
 ## Values
 
@@ -1118,8 +1118,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
-| runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
-| runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
+| runtime.accounts | for On-Premise only | `[]` | Assign accounts to runtime (list of account ids) |
+| runtime.agent | for On-Premise only | `true` | Enable agent |
 | runtime.description | string | `""` | Runtime description |
 | runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
@@ -1144,7 +1144,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
 | runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{"CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS":false,"METRICS_PROMETHEUS_ENABLED":true,"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS":false,"METRICS_PROMETHEUS_HOST":"0.0.0.0","METRICS_PROMETHEUS_PORT":9100},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.174.13"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:v2.28.1-1.5.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.11.7","COSIGN_IMAGE_SIGNER_IMAGE":"quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.2","CR_6177_FIXER":"quay.io/codefresh/alpine:edge","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.14","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.18","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.16","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.14","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GC_BUILDER_IMAGE":"quay.io/codefresh/cf-gc-builder:0.5.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.2.0","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.6","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.14.1"},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":180,"tolerations":[],"userEnvVars":[],"workflowLimits":{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{"CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS":false,"METRICS_PROMETHEUS_ENABLED":true,"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS":false,"METRICS_PROMETHEUS_HOST":"0.0.0.0","METRICS_PROMETHEUS_PORT":9100},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.174.13"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:v2.28.1-1.5.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.11.7","COSIGN_IMAGE_SIGNER_IMAGE":"quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.2","CR_6177_FIXER":"alpine:edge","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.14","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.18","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.16","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.14","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GC_BUILDER_IMAGE":"quay.io/codefresh/cf-gc-builder:0.5.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.2.0","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.6","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.14.1"},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":180,"tolerations":[],"userEnvVars":[],"workflowLimits":{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
 | runtime.engine.env | object | `{"CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS":false,"METRICS_PROMETHEUS_ENABLED":true,"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS":false,"METRICS_PROMETHEUS_HOST":"0.0.0.0","METRICS_PROMETHEUS_PORT":9100}` | Set additional env vars. |
@@ -1180,7 +1180,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.workflowLimits.TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY | int | `60` | Time since the last health check report after which the engine is considered unhealthy; seconds. |
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
-| runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
+| runtime.inCluster | for On-Premise only | `true` | Set inCluster runtime |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
