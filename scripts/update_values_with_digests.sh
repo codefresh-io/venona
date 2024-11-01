@@ -39,6 +39,6 @@ while read -r path; do
   digest=$(get_image_digest "$registry" "$repository" "$tag")
 
   if [[ -n "$digest" ]]; then
-    yq eval -i ".$path.image.digest = \"@$digest\"" "$VALUES_FILE"
+    yq eval -i ".$path.image.digest = \"$digest\"" "$VALUES_FILE"
   fi
 done
