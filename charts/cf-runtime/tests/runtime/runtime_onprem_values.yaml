@@ -16,6 +16,7 @@ runtime:
   dind:
     image:
       tag: tagoverride
+      digest: ""
     resources:
       requests: null
       limits:
@@ -65,6 +66,7 @@ runtime:
   engine:
     image:
       tag: tagoverride
+      digest: ""
     command:
       - one
       - two
@@ -88,6 +90,8 @@ runtime:
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:tagoverride
       PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:tagoverride
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:tagoverride
+      CR_6177_FIXER: alpine:tagoverride
+      GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:tagoverride      
       COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:tagoverride
     env:
       FOO: BAR
