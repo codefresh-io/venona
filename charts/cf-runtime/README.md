@@ -1012,7 +1012,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | appProxy.affinity | object | `{}` | Set affinity |
 | appProxy.enabled | bool | `false` | Enable app-proxy |
 | appProxy.env | object | `{}` | Add additional env vars |
-| appProxy.image | object | `{"registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.47"}` | Set image |
+| appProxy.image | object | `{"digest":"sha256:324a9b89924152cce195c7239ddd8501c8aa5f901d19bc4d9f3936cbe5dac14f","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.47"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
@@ -1040,7 +1040,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.affinity | object | `{}` | Set affinity |
 | event-exporter.enabled | bool | `false` | Enable event-exporter |
 | event-exporter.env | object | `{}` | Add additional env vars |
-| event-exporter.image | object | `{"registry":"docker.io","repository":"codefresh/k8s-event-exporter","tag":"latest"}` | Set image |
+| event-exporter.image | object | `{"digest":"sha256:cf52048f1378fb6659dffd1394d68fdf23a7ea709585dc14b5007f3e5a1b7584","registry":"docker.io","repository":"codefresh/k8s-event-exporter","tag":"latest"}` | Set image |
 | event-exporter.nodeSelector | object | `{}` | Set node selector |
 | event-exporter.podAnnotations | object | `{}` | Set pod annotations |
 | event-exporter.podSecurityContext | object | See below | Set security context for the pod |
@@ -1072,7 +1072,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.image | object | `{"registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.18"}` | Set image |
+| monitor.image | object | `{"digest":"sha256:4e010ef4a0792b0953f97959a4ebfdc71d05446b8b19d5007a51ab57a011e19b","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.18"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
 | monitor.podSecurityContext | object | `{}` |  |
@@ -1099,8 +1099,8 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"registry":"quay.io","repository":"codefresh/venona","tag":"1.10.2"}` | Set image |
-| runner.init | object | `{"image":{"registry":"quay.io","repository":"codefresh/cli","tag":"0.85.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
+| runner.image | object | `{"digest":"sha256:f7768390d3368aff0843519368c10a0a97cf98a98f2753a89509cf8f6c9798e1","registry":"quay.io","repository":"codefresh/venona","tag":"1.10.2"}` | Set image |
+| runner.init | object | `{"image":{"digest":"sha256:27281df44814d837fbcc41ba53ee8010ce5496eb758c29f775958d713c79c41a","registry":"quay.io","repository":"codefresh/cli","tag":"0.85.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
 | runner.podSecurityContext | object | See below | Set security context for the pod |
@@ -1114,17 +1114,17 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | runner.serviceAccount.create | bool | `true` | Create service account |
 | runner.serviceAccount.name | string | `""` | Override service account name |
-| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.2"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
+| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"digest":"sha256:1f2d1f9effa751601a004e69bc9059a848b7428df379d2ef0c3e7858dc5989d0","registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.2"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"digest":"sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.env | object | `{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true}` | Set additional env vars. |
-| runtime.dind.image | object | `{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"}` | Set dind image. |
+| runtime.dind.image | object | `{"digest":"sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |
@@ -1144,7 +1144,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
 | runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{"CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS":false,"METRICS_PROMETHEUS_ENABLED":true,"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS":false,"METRICS_PROMETHEUS_HOST":"0.0.0.0","METRICS_PROMETHEUS_PORT":9100},"image":{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.174.13"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:v2.28.1-1.5.0","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.11.7","COSIGN_IMAGE_SIGNER_IMAGE":"quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.2","CR_6177_FIXER":"alpine:edge","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.14","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.18","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.16","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.14","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3","GC_BUILDER_IMAGE":"quay.io/codefresh/cf-gc-builder:0.5.3","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.2.0","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.6","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.14.1"},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":180,"tolerations":[],"userEnvVars":[],"workflowLimits":{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["npm","run","start"],"env":{"CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS":false,"METRICS_PROMETHEUS_ENABLED":true,"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS":false,"METRICS_PROMETHEUS_HOST":"0.0.0.0","METRICS_PROMETHEUS_PORT":9100},"image":{"digest":"sha256:cc152545999f7df33e72e454823ac12f2ec1748f361b0bba1c9b39b3133cbea3","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.174.13"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"COMPOSE_IMAGE":"quay.io/codefresh/compose:v2.28.1-1.5.0@sha256:362977564c096b7c2c007b8478ec87cac13d781839adc271d858290213bd89f2","CONTAINER_LOGGER_IMAGE":"quay.io/codefresh/cf-container-logger:1.11.7@sha256:1e7bcee65203f9fdfc7ee5231cb4d29b179479d70dd42ec9855d20c57ab43c48","COSIGN_IMAGE_SIGNER_IMAGE":"quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.2@sha256:5e0993207aa809c25ed70cf89af444d9720892fb4a29deb82db45618b0cae4a9","CR_6177_FIXER":"alpine:edge@sha256:b93f4f6834d5c6849d859a4c07cc88f5a7d8ce5fb8d2e72940d8edd8be343c04","DOCKER_BUILDER_IMAGE":"quay.io/codefresh/cf-docker-builder:1.3.14@sha256:e61f0694fb7477244014be971a0bad724242e4fdefe810f38e58990d7db6bdc5","DOCKER_PULLER_IMAGE":"quay.io/codefresh/cf-docker-puller:8.0.18@sha256:1a15c3ae0952d3986de7866a3def8ac7e3e39f668fe87fd46c63d886ca06c6d7","DOCKER_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-pusher:6.0.16@sha256:05efc1af8b1196f1b9b3f0781b4dcc1aa2cdd0ffc1347ee5fa81b16d029ec5c2","DOCKER_TAG_PUSHER_IMAGE":"quay.io/codefresh/cf-docker-tag-pusher:1.3.14@sha256:801caf9100218c9ed638fb5ca205fcc133f54d00468ed81093b22a4f0a0ffae9","FS_OPS_IMAGE":"quay.io/codefresh/fs-ops:1.2.3@sha256:57374ccd5275325fc36b237fb38c77dd1f65c84d5aebfe88c9ea0e434ea20fc9","GC_BUILDER_IMAGE":"quay.io/codefresh/cf-gc-builder:0.5.3@sha256:33ac914e6b844909f188a208cf90e569358cafa5aaa60f49848f49d99bcaf875","GIT_CLONE_IMAGE":"quay.io/codefresh/cf-git-cloner:10.2.0@sha256:a3ec854823f17d0fd817d978219122e644b1abd6db778fd835688fcb6d88c515","KUBE_DEPLOY":"quay.io/codefresh/cf-deploy-kubernetes:16.1.11@sha256:b6b3fc6cc5fad3ba9e36055278ce99a74a86876be116574503c6fbb4c1b4aa76","PIPELINE_DEBUGGER_IMAGE":"quay.io/codefresh/cf-debugger:1.3.6@sha256:4892d72afc0e27718134eff2cb3c1276f731f3d2a41fd76cd73b500310326e47","TEMPLATE_ENGINE":"quay.io/codefresh/pikolo:0.14.1@sha256:fb7173cfed7536f7de68e75996106e2ce3a0a204e6c5609cba0d7eb62c9db9e1"},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":180,"tolerations":[],"userEnvVars":[],"workflowLimits":{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["npm","run","start"]` | Set container command. |
 | runtime.engine.env | object | `{"CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS":false,"METRICS_PROMETHEUS_ENABLED":true,"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS":false,"METRICS_PROMETHEUS_HOST":"0.0.0.0","METRICS_PROMETHEUS_PORT":9100}` | Set additional env vars. |
@@ -1158,7 +1158,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.env.METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS | bool | `false` | Enable legacy metrics |
 | runtime.engine.env.METRICS_PROMETHEUS_HOST | string | `"0.0.0.0"` | Host for Prometheus metrics server |
 | runtime.engine.env.METRICS_PROMETHEUS_PORT | int | `9100` | Port for Prometheus metrics server |
-| runtime.engine.image | object | `{"pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.174.13"}` | Set image. |
+| runtime.engine.image | object | `{"digest":"sha256:cc152545999f7df33e72e454823ac12f2ec1748f361b0bba1c9b39b3133cbea3","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.174.13"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |
 | runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.engine.podLabels | object | `{}` | Set pod labels. |
@@ -1212,7 +1212,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.35.0"}` | Set image |
+| volumeProvisioner.image | object | `{"digest":"sha256:c036ad717391debdf43f8da337b81b5df0e79de274d2d9af1425c675b0296dda","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.35.0"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
 | volumeProvisioner.podSecurityContext | object | See below | Set security context for the pod |
