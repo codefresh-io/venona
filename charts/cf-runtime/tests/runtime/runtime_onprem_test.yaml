@@ -69,8 +69,8 @@ tests:
                 KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
                 PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
-                CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
-                GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
+                CR_6177_FIXER: 'alpine:tagoverride'
+                GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
