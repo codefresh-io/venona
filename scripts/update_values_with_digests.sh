@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -eou xtrace
 
 MYDIR=$(dirname $0)
