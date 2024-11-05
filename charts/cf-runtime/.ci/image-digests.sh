@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -eux
 MYDIR=$(dirname $0)
 REPO_ROOT="${MYDIR}/../../.."
