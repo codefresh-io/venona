@@ -9,11 +9,11 @@ runtime_images=$(yq e '.runtime.engine.runtimeImages' $VALUES_FILE)
 
 while read -r line; do
     key=${line%%:*}
-    image=${line#*:}
+    full_image=${line#*: }
+    image=${full_image%%@*}
     digest=$(regctl manifest digest $image)
-    yq e -i ".runtime.engine.runtimeImages.$key |= . + \"@$digest\"" $VALUES_FILE
+    yq e -i ".runtime.engine.runtimeImages.$key = \"$image@$digest\"" $VALUES_FILE
 done <<< "$runtime_images"
-
 
 get_image_digest() {
   local registry=$1

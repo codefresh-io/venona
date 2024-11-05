@@ -9,6 +9,6 @@ docker run \
     -u $(id -u) \
     --rm \
     --entrypoint /bin/sh \
-    regclient/regctl:v0.7.2-alpine \
+    quay.io/codefresh/codefresh-shell:0.0.20 \
     -c \
     cd /venona && ./scripts/update_values_with_digests.sh
