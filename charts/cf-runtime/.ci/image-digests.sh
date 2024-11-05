@@ -11,4 +11,4 @@ docker run \
     --entrypoint /bin/sh \
     quay.io/codefresh/codefresh-shell:0.0.20 \
     -c \
-    cd /venona && ./scripts/update_values_with_digests.sh
+    /venona/scripts/update_values_with_digests.sh
