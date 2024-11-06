@@ -481,7 +481,7 @@ runtime:
       repository: codefresh/engine
       tag: 1.174.15
       pullPolicy: IfNotPresent
-      digest: sha256:cc152545999f7df33e72e454823ac12f2ec1748f361b0bba1c9b39b3133cbea3
+      digest: sha256:d547c2044c1488e911ff726462cc417adf2dda731cafd736493c4de4eb9e357b
     # -- Set container command.
     command:
       - npm
