@@ -251,7 +251,7 @@ runner:
 
 ⚠️⚠️⚠️ BREAKING CHANGE ⚠️⚠️⚠️
 
-7.0.0 release adds image digests to all images in default values, for example
+7.0.0 release adds image digests to all images in default values, for example:
 
 ```yaml
 runtime:
@@ -264,7 +264,8 @@ runtime:
       digest: sha256:d547c2044c1488e911ff726462cc417adf2dda731cafd736493c4de4eb9e357b
 ```
 
-Which means any overrides for tags won't be used and underlying Kubernetes runtime will pull the image by the digest. See [Pull an image by digest (immutable identifier)](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier)
+Which means any overrides for tags won't be used and underlying Kubernetes runtime will pull the image by the digest.
+See [Pull an image by digest (immutable identifier)](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier)
 
 ## Architecture
 
