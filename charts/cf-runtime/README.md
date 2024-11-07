@@ -250,7 +250,7 @@ runner:
 
 ### To 7.x
 
-⚠️⚠️⚠️ BREAKING CHANGE ⚠️⚠️⚠️
+⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
 
 7.0.0 release adds image digests to all images in default values, for example:
 
@@ -266,6 +266,7 @@ runtime:
 ```
 
 Which means any overrides for tags won't be used and underlying Kubernetes runtime will pull the image by the digest.
+
 See [Pull an image by digest (immutable identifier)](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier)
 
 ## Architecture
