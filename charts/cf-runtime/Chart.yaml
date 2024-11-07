@@ -19,6 +19,10 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: "BREAKING: adding images digests"
+    - kind: fixed
+      description: "fix of variable replacement in arguments of typed steps (Engine 1.174.14)"
+    - kind: fixed
+      description: "fix of debugger timeout (Engine 1.174.15)"      
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
