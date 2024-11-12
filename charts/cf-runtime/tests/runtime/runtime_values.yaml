@@ -3,6 +3,7 @@ runtime:
     image:
       tag: tagoverride
       pullPolicy: Always
+      digest: ""
     resources:
       requests: null
       limits:
@@ -17,6 +18,8 @@ runtime:
         reuseVolumeSortOrder: pipeline_id
     env:
       ALICE: BOB
+      INT_AS_STRING: "123"
+      FLOAT: 12.34
     podAnnotations:
       karpenter.sh/do-not-evict: 'true'
     podLabels:
@@ -53,6 +56,7 @@ runtime:
     image:
       tag: tagoverride
       pullPolicy: Always
+      digest: ""
     command:
       - one
       - two
@@ -76,8 +80,13 @@ runtime:
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:tagoverride
       PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:tagoverride
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:tagoverride
+      CR_6177_FIXER: alpine:tagoverride
+      GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:tagoverride    
+      COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:tagoverride
     env:
       FOO: BAR
+      INT_AS_STRING: "123"
+      FLOAT: 12.34
     userEnvVars:
     - name: ALICE
       valueFrom:

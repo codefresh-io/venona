@@ -47,14 +47,16 @@ tests:
               envVars:
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
                 DOCKER_REQUEST_TIMEOUT_MS: '30000'
-                FOO: BAR
+                FLOAT_AS_STRING: '12.34'
+                FOO: 'BAR'
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
-                LOGGER_LEVEL: debug
+                INT: '123'
+                LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS: 'false'
                 METRICS_PROMETHEUS_ENABLED: 'true'
                 METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: 'false'
-                METRICS_PROMETHEUS_HOST: 0.0.0.0
+                METRICS_PROMETHEUS_HOST: '0.0.0.0'
                 METRICS_PROMETHEUS_PORT: '9100'
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
@@ -67,8 +69,9 @@ tests:
                 KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
                 PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
-                CR_6177_FIXER: 'quay.io/codefresh/alpine:edge'
-                GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:0.5.3'
+                CR_6177_FIXER: 'alpine:tagoverride'
+                GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
+                COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -109,14 +112,17 @@ tests:
                 requests:
                   cpu: 200m
                   memory: 256Mi
+              terminationGracePeriodSeconds: 180
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'quay.io/codefresh/dind:tagoverride'
               imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
-                ALICE: BOB
+                ALICE: 'BOB'
                 DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
+                FLOAT_AS_STRING: '12.34'
+                INT: '123'
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override
@@ -151,6 +157,7 @@ tests:
                   cpu: 1000m
                   memory: 2048Mi
                 requests: null
+              terminationGracePeriodSeconds: 30
               userVolumeMounts:
                 my-cert:
                   mountPath: /etc/ssl/cert
