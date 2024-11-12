@@ -22,13 +22,13 @@ initContainers:
     - -c
     - |
       set -eou xtrace
-      DIRECTORY=/home/rootless/.local/share/docker/
+      DIRECTORY=/home/rootless
       chown -R 1000:1000 "$DIRECTORY"
     securityContext: {{ .Values.runtime.dind.volumePermissions.securityContext | toYaml | nindent 6 }}
     resources: {{ .Values.runtime.dind.volumePermissions.resources | toYaml | nindent 6 }}
     volumeMounts:
       - name: dind
-        mountPath: /home/rootless/.local/share/docker/
+        mountPath: /home/rootless
     {{- end }}
   {{- else }}
 userVolumeMounts: {}
