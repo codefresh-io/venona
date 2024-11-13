@@ -38,17 +38,17 @@ func Test_groupTasks(t *testing.T) {
 			tasks: task.Tasks{
 				{
 					Metadata: task.Metadata{
-						Workflow: "1",
+						WorkflowId: "1",
 					},
 				},
 				{
 					Metadata: task.Metadata{
-						Workflow: "2",
+						WorkflowId: "2",
 					},
 				},
 				{
 					Metadata: task.Metadata{
-						Workflow: "1",
+						WorkflowId: "1",
 					},
 				},
 			},
@@ -56,19 +56,19 @@ func Test_groupTasks(t *testing.T) {
 				"1": {
 					{
 						Metadata: task.Metadata{
-							Workflow: "1",
+							WorkflowId: "1",
 						},
 					},
 					{
 						Metadata: task.Metadata{
-							Workflow: "1",
+							WorkflowId: "1",
 						},
 					},
 				},
 				"2": {
 					{
 						Metadata: task.Metadata{
-							Workflow: "2",
+							WorkflowId: "2",
 						},
 					},
 				},

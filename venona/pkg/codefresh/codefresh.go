@@ -34,6 +34,7 @@ type (
 	// Codefresh API client
 	Codefresh interface {
 		Tasks(ctx context.Context) (task.Tasks, error)
+		ReportTaskStatus(ctx context.Context, id task.Id, status task.TaskStatus) error
 		ReportStatus(ctx context.Context, status AgentStatus) error
 		Host() string
 	}
@@ -90,6 +91,20 @@ func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
 	}
 
 	return tasks, nil
+}
+
+func (c cf) ReportTaskStatus(ctx context.Context, id task.Id, status task.TaskStatus) error {
+	s, err := status.Marshal()
+	if err != nil {
+		return fmt.Errorf("failed marshalling when reporting task status: %w", err)
+	}
+
+	_, err = c.doRequest(ctx, "POST", bytes.NewBuffer(s), "api", "agent", c.agentID, "tasks", string(id), "statuses")
+	if err != nil {
+		return fmt.Errorf("failed sending request when reporting task status: %w", err)
+	}
+
+	return nil
 }
 
 // Host returns the host

@@ -33,8 +33,8 @@ import (
 
 func makeWorkflow(wfID string, numOfTasks int) *workflow.Workflow {
 	metadata := task.Metadata{
-		Workflow: wfID,
-		ReName:   "some-rt",
+		WorkflowId: wfID,
+		ReName:     "some-rt",
 	}
 	wf := workflow.New(metadata)
 	for i := 0; i < numOfTasks; i++ {
