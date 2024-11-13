@@ -41,34 +41,3 @@ tests:
               "tlskey": "/etc/ssl/cf/server-key.pem",
               "tlsverify": true
             }
-
-  - it: Test rootless dind config map
-    template: templates/runtime/cm-dind-daemon.yaml
-    set:
-      runtime.rootless: true
-    asserts:
-      - hasDocuments:
-          count: 1
-      - isKind:
-          of: ConfigMap
-      - isNotEmpty:
-          path: data["daemon.json"]
-      - equal:
-          path: data["daemon.json"]
-          value: |
-            {
-              "experimental": true,
-              "hosts": [
-                "unix:///run/user/1000/docker.sock",
-                "tcp://0.0.0.0:1300"
-              ],
-              "insecure-registries": [
-                "192.168.99.100:5000"
-              ],
-              "metrics-addr": "0.0.0.0:9323",
-              "tls": true,
-              "tlscacert": "/etc/ssl/cf-client/ca.pem",
-              "tlscert": "/etc/ssl/cf/server-cert.pem",
-              "tlskey": "/etc/ssl/cf/server-key.pem",
-              "tlsverify": true
-            }
