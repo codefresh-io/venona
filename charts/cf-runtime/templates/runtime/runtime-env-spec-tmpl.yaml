@@ -182,6 +182,7 @@ dockerDaemonScheduler:
       name: codefresh-certs-server
       secret:
         secretName: codefresh-certs-server
+  {{- end }}
   {{- with $dindContext.podSecurityContext }}
   podSecurityContext: {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -190,7 +191,6 @@ dockerDaemonScheduler:
   {{- end }}
   {{- if $dindContext.volumePermissions.enabled }}
   initContainers: {{- toYaml . | nindent 4 }}
-  {{- end }}
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}
