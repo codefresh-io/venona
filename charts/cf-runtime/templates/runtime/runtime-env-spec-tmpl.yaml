@@ -189,7 +189,7 @@ dockerDaemonScheduler:
   {{- with $dindContext.containerSecurityContext }}
   containerSecurityContext: {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if $dindContext.volumePermissions.enabled }}
+  {{- if $dindContext.initContainers }}
   initContainers: {{- toYaml . | nindent 4 }}
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
