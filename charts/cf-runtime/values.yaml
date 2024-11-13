@@ -159,8 +159,8 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.35.0
-    digest: sha256:c036ad717391debdf43f8da337b81b5df0e79de274d2d9af1425c675b0296dda
+    tag: 1.35.2
+    digest: sha256:ede6f663c912a08b7d335b5ec5518ccc266b27c431d0854d22971005992adc5d
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -208,8 +208,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.29.4
-      digest: sha256:42e5b032b743e191a1ee1077b8096d6ee298859d4593d3f4fa06fe7fa60061eb
+      tag: 1.30.0
+      digest: sha256:506915ccb63481cd6b249e9068235100ea2ae39d4c811c3e49851c20cbe5ee6f
     podAnnotations: {}
     podSecurityContext:
       enabled: true
@@ -473,6 +473,16 @@ runtime:
     #     name: regctl-docker-registry
     #     mountPath: /home/appuser/.docker/
     #     readOnly: true
+    volumePermissions:
+      enabled: false
+      image:
+        registry: docker.io
+        repository: alpine
+        tag: edge
+        digest: sha256:8431297eedca8df8f1e6144803c6d7e057ecff2408aa6861213cb9e507acadf8
+      resources: {}
+      securityContext:
+        runAsUser: 0
   # -- Parameters for Engine pod (aka "pipeline" orchestrator).
   engine:
     # -- Set image.
