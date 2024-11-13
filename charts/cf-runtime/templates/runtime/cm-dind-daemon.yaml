@@ -3,10 +3,4 @@
 {{- $_ := set $dindContext.Values "nameOverride" (get .Values "nameOverride") }}
 {{- $_ := set $dindContext.Values "fullnameOverride" (get .Values "fullnameOverride") }}
 
-{{- if .Values.runtime.rootless }}
-{{ $hosts := rest $dindContext.Values.dindDaemon.hosts }}
-{{ $hosts := prepend $hosts "unix:///run/user/1000/docker.sock" }}
-{{ $_ := set $dindContext.Values.dindDaemon "hosts" $hosts }}
-{{- end }}
-
 {{- include "runtime.dind.configmap" $dindContext }}

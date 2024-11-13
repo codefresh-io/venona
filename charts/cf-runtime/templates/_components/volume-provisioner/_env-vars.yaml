@@ -42,10 +42,6 @@ AZURE_CREDENTIAL_FILE: /etc/kubernetes/azure.json
 CLOUDCONFIG_AZURE: /etc/kubernetes/azure.json
 {{- end }}
 
-{{- if .Values.runtime.rootless }}
-IS_ROOTLESS: true
-{{- end }}
-
 {{- end }}
 
 {{- define "dind-volume-provisioner.environment-variables" }}
