@@ -13,6 +13,10 @@ volumeProvisioner:
       enabled: true
 
 runtime:
+  dindDaemon:
+    hosts:
+      - unix:///run/user/1000/docker.sock
+      - tcp://0.0.0.0:1300
   dind:
     image:
       tag: 26.1.4-1.28.9-rootless
