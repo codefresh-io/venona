@@ -10,7 +10,7 @@ volumeProvisioner:
       runAsUser: 1000
       fsGroup: 1000
     volumePermissions:
-      enabled: false
+      enabled: true
 
 runtime:
   dind:
@@ -29,4 +29,4 @@ runtime:
       fsGroup: 1000
       fsGroupChangePolicy: "OnRootMismatch"
     volumePermissions:
-      enabled: false
+      enabled: true
