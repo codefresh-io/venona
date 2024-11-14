@@ -715,14 +715,45 @@ volumeProvisioner:
 ### Rootless DinD
 
 DinD pod runs a `priviliged` container with **rootfull** docker.
-To run the docker daemon as non-root user (**rootless** mode), change dind image tag:
+To run the docker daemon as non-root user (**rootless** mode), refer to `values-rootless.yaml`:
 
-`values.yaml`
 ```yaml
+volumeProvisioner:
+  env:
+    IS_ROOTLESS: true
+  dind-lv-monitor:
+    image:
+      tag: 1.30.0-rootless
+      digest: ""
+    podSecurityContext:
+      enabled: true
+      runAsUser: 1000
+      fsGroup: 1000
+    volumePermissions:
+      enabled: false
+
 runtime:
+  dindDaemon:
+    hosts:
+      - unix:///run/user/1000/docker.sock
+      - tcp://0.0.0.0:1300
   dind:
     image:
-      tag: rootless
+      tag: 26.1.4-1.28.9-rootless
+      digest: ""
+    userVolumeMounts:
+      dind:
+        name: dind
+        mountPath: /home/rootless/
+    containerSecurityContext:
+      privileged: true
+    podSecurityContext:
+      enabled: true
+      runAsUser: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: "OnRootMismatch"
+    volumePermissions:
+      enabled: false
 ```
 
 ### ARM
