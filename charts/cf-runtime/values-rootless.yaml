@@ -4,7 +4,7 @@ volumeProvisioner:
   dind-lv-monitor:
     image:
       tag: 1.30.0-rootless
-      digest: ""
+      digest: sha256:712e549e6e843b04684647f17e0973f8047e0d60e6e8b38a693ea64dc75b0479
     podSecurityContext:
       enabled: true
       runAsUser: 1000
@@ -20,7 +20,7 @@ runtime:
   dind:
     image:
       tag: 26.1.4-1.28.9-rootless
-      digest: ""
+      digest: sha256:2c8cdf6a3bae0c4936f56058a685e05194b3eb32a79d7cd8a53575a04dca571b
     userVolumeMounts:
       dind:
         name: dind
