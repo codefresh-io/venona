@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "updating engine"
+      description: "updated engine"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
