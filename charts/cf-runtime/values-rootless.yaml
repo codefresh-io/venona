@@ -1,11 +1,21 @@
 volumeProvisioner:
   env:
     IS_ROOTLESS: true
+  dind-lv-monitor:
+    image:
+      tag: 1.30.0-rootless
+      digest: ""
+    podSecurityContext:
+      enabled: true
+      runAsUser: 1000
+      fsGroup: 1000
+    volumePermissions:
+      enabled: true
 
 runtime:
   dind:
     image:
-      tag: latest-rootless
+      tag: 26.1.4-1.28.9-rootless
       digest: ""
     userVolumeMounts:
       dind:
