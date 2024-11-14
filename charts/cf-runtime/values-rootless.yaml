@@ -1,0 +1,22 @@
+volumeProvisioner:
+  env:
+    IS_ROOTLESS: true
+
+runtime:
+  dind:
+    image:
+      tag: latest-rootless
+      digest: ""
+    userVolumeMounts:
+      dind:
+        name: dind
+        mountPath: /home/rootless/
+    containerSecurityContext:
+      privileged: true
+    podSecurityContext:
+      enabled: true
+      runAsUser: 1000
+      fsGroup: 1000
+      fsGroupChangePolicy: "OnRootMismatch"
+    volumePermissions:
+      enabled: false

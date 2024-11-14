@@ -189,8 +189,27 @@ dockerDaemonScheduler:
   {{- with $dindContext.containerSecurityContext }}
   containerSecurityContext: {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if $dindContext.initContainers }}
-  initContainers: {{- toYaml . | nindent 4 }}
+  {{- if $dindContext.volumePermissions.enabled }}
+  initContainers:
+  - name: volume-permissions
+    image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.volumePermissions.image "context" .) }}
+    imagePullPolicy: {{ $dindContext.volumePermissions.image.pullPolicy | default "Always" }}
+    command:
+      - /bin/sh
+    args:
+      - -ec
+      - |
+        chown -R {{ $dindContext.podSecurityContext.runAsUser }}:{{ $dindContext.podSecurityContext.fsGroup }} /home/rootless/
+    volumeMounts:
+    - mountPath: /home/rootless/
+      name: dind
+    {{- if eq ( toString ( $dindContext.volumePermissions.securityContext.runAsUser )) "auto" }}
+    securityContext: {{- omit $dindContext.volumePermissions.securityContext "runAsUser" | toYaml | nindent 6 }}
+    {{- else }}
+    securityContext: {{- $dindContext.volumePermissions.securityContext | toYaml | nindent 6 }}
+    {{- end }}
+    resources:
+      {{- toYaml $dindContext.volumePermissions.resources | nindent 6 }}
   {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}

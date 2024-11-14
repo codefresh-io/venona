@@ -212,7 +212,7 @@ volumeProvisioner:
       digest: sha256:506915ccb63481cd6b249e9068235100ea2ae39d4c811c3e49851c20cbe5ee6f
     podAnnotations: {}
     podSecurityContext:
-      enabled: true
+      enabled: false
       runAsUser: 1000
       fsGroup: 1000
     containerSecurityContext: {}
@@ -224,7 +224,7 @@ volumeProvisioner:
         operator: 'Exists'
         effect: 'NoSchedule'
     volumePermissions:
-      enabled: true
+      enabled: false
       image:
         registry: docker.io
         repository: alpine
@@ -478,11 +478,11 @@ runtime:
       image:
         registry: docker.io
         repository: alpine
-        tag: edge
-        digest: sha256:8431297eedca8df8f1e6144803c6d7e057ecff2408aa6861213cb9e507acadf8
+        tag: 3.18
+        digest: sha256:2995c82e8e723d9a5c8585cb8e901d1c50e3c2759031027d3bff577449435157
       resources: {}
       securityContext:
-        runAsUser: 0
+        runAsUser: 0 # auto
   # -- Parameters for Engine pod (aka "pipeline" orchestrator).
   engine:
     # -- Set image.
