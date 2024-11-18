@@ -724,6 +724,7 @@ To run the docker daemon as non-root user (**rootless** mode), refer to `values-
 volumeProvisioner:
   env:
     IS_ROOTLESS: true
+  # -- Only if local volumes are used as backend storage (ignored for ebs/ebs-csi disks)
   dind-lv-monitor:
     image:
       tag: 1.30.0-rootless
@@ -732,6 +733,7 @@ volumeProvisioner:
       enabled: true
       runAsUser: 1000
       fsGroup: 1000
+    # -- Enable initContainer to run chmod for /var/lib/codefresh/dind-volumes on host nodes
     volumePermissions:
       enabled: false
 
@@ -750,7 +752,9 @@ runtime:
       enabled: true
       runAsUser: 1000
       fsGroup: 1000
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#configure-volume-permission-and-ownership-change-policy-for-pods
       fsGroupChangePolicy: "OnRootMismatch"
+    # -- Enable initContainer to run chmod for /home/rootless in DinD pod
     volumePermissions:
       enabled: false
 ```

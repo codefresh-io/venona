@@ -18,9 +18,13 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "(rootless runtime) Update dind-volume-provisioner and dind-volume-utils"
+      description: "(rootless runtime) Update dind-volume-provisioner and dind-volume-utils images"
     - kind: added
-      description: "(rootless runtime) Add values-rootless.yaml example "
+      description: "(rootless runtime) Add values-rootless.yaml example"
+    - kind: changed
+      description: "(dind) Update runtime environment spec to allow specifying podSecurityContext and containerSecurityContext for dind"
+    - kind: fixed
+      description: "Update helm unittests"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

@@ -447,6 +447,10 @@ runtime:
     affinity: {}
     # -- Set tolerations.
     tolerations: []
+    # -- Set security context for the pod.
+    podSecurityContext: {}
+    # -- Set container security context.
+    containerSecurityContext: {}
     # -- Set scheduler name.
     schedulerName: ""
     # -- Set service account for pod.
