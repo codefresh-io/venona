@@ -199,7 +199,7 @@ dockerDaemonScheduler:
     args:
       - -ec
       - |
-        chown -R {{ $dindContext.podSecurityContext.runAsUser }}:{{ $dindContext.podSecurityContext.fsGroup }} /home/rootless/.local/share/docker
+        chown -R {{ $dindContext.containerSecurityContext.runAsUser }}:{{ $dindContext.podSecurityContext.fsGroup }} /home/rootless/.local/share/docker
     volumeMounts:
     - mountPath: /home/rootless/.local/share/docker
       name: dind
