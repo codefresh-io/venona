@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.0.1](https://img.shields.io/badge/Version-7.0.1-informational?style=flat-square)
+![Version: 7.1.0](https://img.shields.io/badge/Version-7.1.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -715,14 +715,48 @@ volumeProvisioner:
 ### Rootless DinD
 
 DinD pod runs a `priviliged` container with **rootfull** docker.
-To run the docker daemon as non-root user (**rootless** mode), change dind image tag:
 
-`values.yaml`
+To run the docker daemon as non-root user (**rootless** mode), refer to `values-rootless.yaml`:
+
 ```yaml
+volumeProvisioner:
+  env:
+    IS_ROOTLESS: true
+  # -- Only if local volumes are used as backend storage (ignored for ebs/ebs-csi disks)
+  dind-lv-monitor:
+    image:
+      tag: 1.30.0-rootless
+      digest: sha256:712e549e6e843b04684647f17e0973f8047e0d60e6e8b38a693ea64dc75b0479
+    containerSecurityContext:
+      runAsUser: 1000
+    podSecurityContext:
+      fsGroup: 1000
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#configure-volume-permission-and-ownership-change-policy-for-pods
+      fsGroupChangePolicy: "OnRootMismatch"
+    # -- Enable initContainer to run chmod for /var/lib/codefresh/dind-volumes on host nodes
+    volumePermissions:
+      enabled: false
+
 runtime:
   dind:
     image:
-      tag: rootless
+      tag: 26.1.4-1.28.10-rootless
+      digest: sha256:59dfc004eb22a8f09c8a3d585271a055af9df4591ab815bca418c24a2077f5c8
+    userVolumeMounts:
+      dind:
+        name: dind
+        mountPath: /home/rootless/.local/share/docker
+    containerSecurityContext:
+      privileged: true
+      runAsUser: 1000
+    podSecurityContext:
+      fsGroup: 1000
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#configure-volume-permission-and-ownership-change-policy-for-pods
+      fsGroupChangePolicy: "OnRootMismatch"
+    # -- Enable initContainer to run chmod for /home/rootless in DinD pod
+    # !!! Will slow down dind pod startup
+    volumePermissions:
+      enabled: true
 ```
 
 ### ARM
@@ -1143,13 +1177,15 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"digest":"sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"digest":"sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:2995c82e8e723d9a5c8585cb8e901d1c50e3c2759031027d3bff577449435157","registry":"docker.io","repository":"alpine","tag":3.18},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
+| runtime.dind.containerSecurityContext | object | `{}` | Set container security context. |
 | runtime.dind.env | object | `{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true}` | Set additional env vars. |
 | runtime.dind.image | object | `{"digest":"sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.7"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |
+| runtime.dind.podSecurityContext | object | `{}` | Set security context for the pod. |
 | runtime.dind.pvcs | object | `{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}}` | PV claim spec parametes. |
 | runtime.dind.pvcs.dind | object | `{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}` | Default dind PVC parameters |
 | runtime.dind.pvcs.dind.annotations | object | `{}` | PV annotations. |
@@ -1234,7 +1270,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"digest":"sha256:c036ad717391debdf43f8da337b81b5df0e79de274d2d9af1425c675b0296dda","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.35.0"}` | Set image |
+| volumeProvisioner.image | object | `{"digest":"sha256:ede6f663c912a08b7d335b5ec5518ccc266b27c431d0854d22971005992adc5d","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.35.2"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
 | volumeProvisioner.podSecurityContext | object | See below | Set security context for the pod |

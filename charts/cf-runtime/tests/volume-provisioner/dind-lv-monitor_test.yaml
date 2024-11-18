@@ -3,14 +3,13 @@ suite: dind-lv-monitor test
 values:
   - ../values.yaml
 templates:
-  - templates/volume-provisioner/daemonset.yaml
+  - templates/**.yaml
 release:
   name: cf-runtime
   namespace: codefresh
   revision: 1
   upgrade: true
 chart:
-  version: 1.0.0
   appVersion: 1.0.0
 tests:
   - it: Test dind-lv-monitor default metadata
@@ -24,14 +23,12 @@ tests:
           of: DaemonSet
       - isNull:
           path: metadata.annotations
-      - equal:
+      - isSubset:
           path: metadata.labels
-          value:
+          content:
             app.kubernetes.io/instance: cf-runtime
             app.kubernetes.io/managed-by: Helm
             app.kubernetes.io/name: cf-runtime
-            app.kubernetes.io/version: 1.0.0
-            helm.sh/chart: cf-runtime-1.0.0
             codefresh.io/application: lv-monitor
       - equal:
           path: metadata.name
