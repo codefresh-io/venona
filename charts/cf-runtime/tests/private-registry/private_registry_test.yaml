@@ -4,21 +4,15 @@ values:
   - ../values.yaml
   - ../values-private-registry.yaml
 templates:
-  - templates/hooks/post-install/cm-update-runtime.yaml
-  - templates/runner/deployment.yaml
-  - templates/volume-provisioner/deployment.yaml
-  - templates/volume-provisioner/daemonset.yaml
-  - templates/volume-provisioner/cronjob.yaml
-  - templates/monitor/deployment.yaml
-  - templates/app-proxy/deployment.yaml
+  - templates/**.yaml
 release:
   name: cf-runtime
   namespace: codefresh
   revision: 1
   upgrade: true
-chart:
-  version: 1.0.0
-  appVersion: 1.0.0
+# chart:
+#   version: 1.0.0
+#   appVersion: 1.0.0
 tests:
   - it: Test private registry in runtime spec
     template: templates/hooks/post-install/cm-update-runtime.yaml

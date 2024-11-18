@@ -37,7 +37,7 @@ spec:
         args:
          - -ec
          - |
-           chown -R {{ .Values.podSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} {{ $localVolumeParentDir }}
+           chown -R {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} {{ $localVolumeParentDir }}
         volumeMounts:
         - mountPath: {{ $localVolumeParentDir }}
           name: dind-volume-dir
