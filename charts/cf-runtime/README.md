@@ -745,7 +745,7 @@ runtime:
     userVolumeMounts:
       dind:
         name: dind
-        mountPath: /home/rootless/
+        mountPath: /home/rootless/.local/share/docker
     containerSecurityContext:
       privileged: true
       runAsUser: 1000

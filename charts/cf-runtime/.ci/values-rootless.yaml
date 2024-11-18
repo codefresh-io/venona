@@ -5,10 +5,11 @@ volumeProvisioner:
     image:
       tag: 1.30.0-rootless
       digest: sha256:712e549e6e843b04684647f17e0973f8047e0d60e6e8b38a693ea64dc75b0479
-    podSecurityContext:
-      enabled: true
+    containerSecurityContext:
       runAsUser: 1000
+    podSecurityContext:
       fsGroup: 1000
+      fsGroupChangePolicy: "OnRootMismatch"
     volumePermissions:
       enabled: true
 
@@ -20,12 +21,11 @@ runtime:
     userVolumeMounts:
       dind:
         name: dind
-        mountPath: /home/rootless/
+        mountPath: /home/rootless/.local/share/docker
     containerSecurityContext:
       privileged: true
-    podSecurityContext:
-      enabled: true
       runAsUser: 1000
+    podSecurityContext:
       fsGroup: 1000
       fsGroupChangePolicy: "OnRootMismatch"
     volumePermissions:
