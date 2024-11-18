@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.1.0
+version: 7.1.1
 keywords:
   - codefresh
   - runner
@@ -17,14 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: "(rootless runtime) Update dind-volume-provisioner and dind-volume-utils images"
-    - kind: added
-      description: "(rootless runtime) Add values-rootless.yaml example"
-    - kind: changed
-      description: "(dind) Update runtime environment spec to allow specifying podSecurityContext and containerSecurityContext for dind"
-    - kind: fixed
-      description: "Update helm unittests"
+    - kind: security
+      description: "updating engine"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
