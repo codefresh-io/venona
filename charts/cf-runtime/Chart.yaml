@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Misc security update (kubectl/codefresh-shell)"
+      description: "Misc security updates (kubectl and codefresh-shell images)"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
