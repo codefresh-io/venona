@@ -95,8 +95,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/codefresh-shell
-      tag: 0.0.2
-      digest: sha256:1f2d1f9effa751601a004e69bc9059a848b7428df379d2ef0c3e7858dc5989d0
+      tag: 0.0.21
+      digest: sha256:e60e9e57979b0f02dc850b25b4808e72dda90c6a50eb40deadce0590f8ad1845
     env:
       RECONCILE_INTERVAL: 300
     resources: {}
@@ -620,8 +620,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.28.4
-      digest: sha256:753e434a8e51c58d3f5daca2dff88073bc7b3bde3a45e0f00d74181176302e37
+      tag: 1.31.2
+      digest: sha256:ee724ff89b68f06c36b44f01b4feac3f2cfde5aa7ae9bad11577d82a9fcd48ab
     rbac:
       enabled: true
     annotations: {}
