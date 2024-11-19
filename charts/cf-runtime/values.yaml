@@ -402,9 +402,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 26.1.4-1.28.7 # use `latest-rootless/rootless/26.1.4-1.28.7-rootless` tags for rootless-dind
+      tag: 26.1.4-1.28.8 # use `latest-rootless/rootless/26.1.4-1.28.8-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7
+      digest: sha256:33c343dd01e8a24f0b4a872bbe62884320719f9d9dc27b7a8fed9f7e9fc7e80e
     # -- Set dind resources.
     resources:
       requests: null
