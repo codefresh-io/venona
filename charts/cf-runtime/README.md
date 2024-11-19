@@ -1170,7 +1170,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | runner.serviceAccount.create | bool | `true` | Create service account |
 | runner.serviceAccount.name | string | `""` | Override service account name |
-| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"digest":"sha256:1f2d1f9effa751601a004e69bc9059a848b7428df379d2ef0c3e7858dc5989d0","registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.21"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
+| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"digest":"sha256:e60e9e57979b0f02dc850b25b4808e72dda90c6a50eb40deadce0590f8ad1845","registry":"quay.io","repository":"codefresh/codefresh-shell","tag":"0.0.21"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
