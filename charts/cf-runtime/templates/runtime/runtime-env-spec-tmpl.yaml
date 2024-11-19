@@ -183,6 +183,34 @@ dockerDaemonScheduler:
       secret:
         secretName: codefresh-certs-server
   {{- end }}
+  {{- with $dindContext.podSecurityContext }}
+  podSecurityContext: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $dindContext.containerSecurityContext }}
+  containerSecurityContext: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if $dindContext.volumePermissions.enabled }}
+  initContainers:
+  - name: volume-permissions
+    image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.volumePermissions.image "context" .) }}
+    imagePullPolicy: {{ $dindContext.volumePermissions.image.pullPolicy | default "Always" }}
+    command:
+      - /bin/sh
+    args:
+      - -ec
+      - |
+        chown -R {{ $dindContext.containerSecurityContext.runAsUser }}:{{ $dindContext.podSecurityContext.fsGroup }} /home/rootless/.local/share/docker
+    volumeMounts:
+    - mountPath: /home/rootless/.local/share/docker
+      name: dind
+    {{- if eq ( toString ( $dindContext.volumePermissions.securityContext.runAsUser )) "auto" }}
+    securityContext: {{- omit $dindContext.volumePermissions.securityContext "runAsUser" | toYaml | nindent 6 }}
+    {{- else }}
+    securityContext: {{- $dindContext.volumePermissions.securityContext | toYaml | nindent 6 }}
+    {{- end }}
+    resources:
+      {{- toYaml $dindContext.volumePermissions.resources | nindent 6 }}
+  {{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}
 description: {{ .Values.runtime.description }}

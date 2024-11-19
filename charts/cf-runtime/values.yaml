@@ -95,8 +95,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/codefresh-shell
-      tag: 0.0.2
-      digest: sha256:1f2d1f9effa751601a004e69bc9059a848b7428df379d2ef0c3e7858dc5989d0
+      tag: 0.0.21
+      digest: sha256:e60e9e57979b0f02dc850b25b4808e72dda90c6a50eb40deadce0590f8ad1845
     env:
       RECONCILE_INTERVAL: 300
     resources: {}
@@ -159,8 +159,8 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.35.0
-    digest: sha256:c036ad717391debdf43f8da337b81b5df0e79de274d2d9af1425c675b0296dda
+    tag: 1.35.2
+    digest: sha256:ede6f663c912a08b7d335b5ec5518ccc266b27c431d0854d22971005992adc5d
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -208,11 +208,11 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.29.4
-      digest: sha256:42e5b032b743e191a1ee1077b8096d6ee298859d4593d3f4fa06fe7fa60061eb
+      tag: 1.30.0
+      digest: sha256:506915ccb63481cd6b249e9068235100ea2ae39d4c811c3e49851c20cbe5ee6f
     podAnnotations: {}
     podSecurityContext:
-      enabled: true
+      enabled: false
       runAsUser: 1000
       fsGroup: 1000
     containerSecurityContext: {}
@@ -224,7 +224,7 @@ volumeProvisioner:
         operator: 'Exists'
         effect: 'NoSchedule'
     volumePermissions:
-      enabled: true
+      enabled: false
       image:
         registry: docker.io
         repository: alpine
@@ -447,6 +447,10 @@ runtime:
     affinity: {}
     # -- Set tolerations.
     tolerations: []
+    # -- Set security context for the pod.
+    podSecurityContext: {}
+    # -- Set container security context.
+    containerSecurityContext: {}
     # -- Set scheduler name.
     schedulerName: ""
     # -- Set service account for pod.
@@ -473,15 +477,25 @@ runtime:
     #     name: regctl-docker-registry
     #     mountPath: /home/appuser/.docker/
     #     readOnly: true
+    volumePermissions:
+      enabled: false
+      image:
+        registry: docker.io
+        repository: alpine
+        tag: 3.18
+        digest: sha256:2995c82e8e723d9a5c8585cb8e901d1c50e3c2759031027d3bff577449435157
+      resources: {}
+      securityContext:
+        runAsUser: 0 # auto
   # -- Parameters for Engine pod (aka "pipeline" orchestrator).
   engine:
     # -- Set image.
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.174.15
+      tag: 1.174.17
       pullPolicy: IfNotPresent
-      digest: sha256:d547c2044c1488e911ff726462cc417adf2dda731cafd736493c4de4eb9e357b
+      digest: sha256:f143e55206aa08068b4558b2e31aeaa84035b6fa05b2500d1d4b472b12a314d2
     # -- Set container command.
     command:
       - npm
@@ -606,8 +620,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.28.4
-      digest: sha256:753e434a8e51c58d3f5daca2dff88073bc7b3bde3a45e0f00d74181176302e37
+      tag: 1.31.2
+      digest: sha256:ee724ff89b68f06c36b44f01b4feac3f2cfde5aa7ae9bad11577d82a9fcd48ab
     rbac:
       enabled: true
     annotations: {}

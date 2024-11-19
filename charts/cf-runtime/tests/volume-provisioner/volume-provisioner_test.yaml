@@ -3,17 +3,13 @@ suite: volume-provisioner test
 values:
   - ../values.yaml
 templates:
-  - templates/volume-provisioner/deployment.yaml
-  - templates/volume-provisioner/rbac.yaml
-  - templates/volume-provisioner/secret.yaml
-  - templates/volume-provisioner/storageclass.yaml
+  - templates/**.yaml
 release:
   name: cf-runtime
   namespace: codefresh
   revision: 1
   upgrade: true
 chart:
-  version: 1.0.0
   appVersion: 1.0.0
 tests:
   - it: Test volume-provisioner default metadata
@@ -25,14 +21,12 @@ tests:
           of: Deployment
       - isNull:
           path: metadata.annotations
-      - equal:
+      - isSubset:
           path: metadata.labels
-          value:
+          content:
             app.kubernetes.io/instance: cf-runtime
             app.kubernetes.io/managed-by: Helm
             app.kubernetes.io/name: cf-runtime
-            app.kubernetes.io/version: 1.0.0
-            helm.sh/chart: cf-runtime-1.0.0
             codefresh.io/application: volume-provisioner
       - equal:
           path: metadata.name
