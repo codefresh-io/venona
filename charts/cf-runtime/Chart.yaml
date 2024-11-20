@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Allow on-prem customers to define which QEMU images are trusted for docker buildx builds"
+      description: "Allow on-prem customers to define which QEMU images are trusted for docker buildx builds rather than allowing all QEMU images"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
