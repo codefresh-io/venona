@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.1.6
+version: 7.1.7
 keywords:
   - codefresh
   - runner
@@ -17,10 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: security
-      description: "Allow on-prem customers to define which QEMU images are trusted for docker buildx builds rather than allowing all QEMU images"
-    - kind: security
-      description: "Stop the engine from printing out the contents of the environment variables file which can contain secrets"
+    - kind: changed
+      description: "Update engine. Allow service compositions version 3.0"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
