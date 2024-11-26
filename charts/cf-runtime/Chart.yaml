@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.1.7
+version: 7.1.8
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Upgrade `venona` to the latest version with multiple security fixes"
+      description: "Upgrade `docker-tag-pusher` to the latest version with multiple security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
