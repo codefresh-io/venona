@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Upgrade `docker-tag-pusher` to the latest version with multiple security fixes"
+      description: "Upgrade docker-tag-pusher to the latest version with multiple security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
