@@ -4,21 +4,15 @@ values:
   - ../values.yaml
   - ../values-private-registry.yaml
 templates:
-  - templates/hooks/post-install/cm-update-runtime.yaml
-  - templates/runner/deployment.yaml
-  - templates/volume-provisioner/deployment.yaml
-  - templates/volume-provisioner/daemonset.yaml
-  - templates/volume-provisioner/cronjob.yaml
-  - templates/monitor/deployment.yaml
-  - templates/app-proxy/deployment.yaml
+  - templates/**.yaml
 release:
   name: cf-runtime
   namespace: codefresh
   revision: 1
   upgrade: true
-chart:
-  version: 1.0.0
-  appVersion: 1.0.0
+# chart:
+#   version: 1.0.0
+#   appVersion: 1.0.0
 tests:
   - it: Test private registry in runtime spec
     template: templates/hooks/post-install/cm-update-runtime.yaml
@@ -48,6 +42,7 @@ tests:
                 METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: 'false'
                 METRICS_PROMETHEUS_HOST: '0.0.0.0'
                 METRICS_PROMETHEUS_PORT: '9100'
+                TRUSTED_QEMU_IMAGES: ''
                 COMPOSE_IMAGE: 'somedomain.io/codefresh/compose:tagoverride'
                 CONTAINER_LOGGER_IMAGE: 'somedomain.io/codefresh/cf-container-logger:tagoverride'
                 DOCKER_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-docker-builder:tagoverride'

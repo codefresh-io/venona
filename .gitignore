@@ -42,10 +42,10 @@ venona/venona
 **/*.tgz
 **/charts/**/charts
 **/dry-run.yaml
-**/values-dev.yaml
+**/values-dev**.yaml
 
 # coverage
 **/cover
 
 # debug
-**/debug
+**/.debug

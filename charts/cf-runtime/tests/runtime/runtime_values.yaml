@@ -87,6 +87,7 @@ runtime:
       FOO: BAR
       INT_AS_STRING: "123"
       FLOAT: 12.34
+      TRUSTED_QEMU_IMAGES: 'my-registry/tonistiigi/binfmt'
     userEnvVars:
     - name: ALICE
       valueFrom:

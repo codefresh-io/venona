@@ -1,16 +1,13 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
 suite: runtime onprem test
 templates:
-  - templates/hooks/post-install/job-update-runtime.yaml
-  - templates/hooks/post-install/cm-update-runtime.yaml
-  - templates/runtime/secret.yaml
+  - templates/**.yaml
 release:
   name: cf-runtime
   namespace: codefresh
   revision: 1
   upgrade: true
 chart:
-  version: 1.0.0
   appVersion: 1.0.0
 tests:
   - it: Test default runtime spec metadata
@@ -58,6 +55,7 @@ tests:
                 METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: 'false'
                 METRICS_PROMETHEUS_HOST: '0.0.0.0'
                 METRICS_PROMETHEUS_PORT: '9100'
+                TRUSTED_QEMU_IMAGES: ''
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
                 DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
