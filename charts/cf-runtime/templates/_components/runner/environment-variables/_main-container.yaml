@@ -16,6 +16,7 @@ CODEFRESH_TOKEN:
       name: {{ include "runner.fullname" . }}
       key: agent-codefresh-token
 DOCKER_REGISTRY: {{ .Values.global.imageRegistry }}
+RUNTIME_VERSION: {{ .Chart.Version }}
 {{- end }}
 
 {{- define "runner.environment-variables" }}
