@@ -79,8 +79,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.85.0-rootless
-      digest: sha256:27281df44814d837fbcc41ba53ee8010ce5496eb758c29f775958d713c79c41a
+      tag: 0.88.4-rootless
+      digest: sha256:b256d150ff8a636851ddc1d5fb0490114d5036cc5bff357eac6a9899fea87562
     resources:
       limits:
         memory: 512Mi
@@ -602,8 +602,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.85.0-rootless
-      digest: sha256:27281df44814d837fbcc41ba53ee8010ce5496eb758c29f775958d713c79c41a
+      tag: 0.88.4-rootless
+      digest: sha256:b256d150ff8a636851ddc1d5fb0490114d5036cc5bff357eac6a9899fea87562
     rbac:
       enabled: true
     annotations: {}
