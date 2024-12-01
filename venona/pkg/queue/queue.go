@@ -165,23 +165,12 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 	for i := range wf.Tasks {
 		taskDef := wf.Tasks[i]
 		err := runtime.HandleTask(ctx, taskDef)
-		status := task.TaskStatus{
-			OccurredAt:     time.Now(),
-			StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
-		}
 		if err != nil {
 			wfq.log.Error("failed handling task", "error", err, "workflow", workflow)
 			txn.NoticeError(errRuntimeNotFound)
-			status.Status = task.StatusError
-			status.Reason = err.Error()
-			status.IsRetriable = true // TODO: make this configurable depending on the error
-		} else {
-			status.Status = task.StatusSuccess
 		}
-		statusErr := wfq.cf.ReportTaskStatus(ctx, taskDef.Id, status)
-		if statusErr != nil {
-			wfq.log.Error("failed reporting task status", "error", statusErr, "task", taskDef.Id, "workflow", workflow)
-			txn.NoticeError(statusErr)
+		if taskDef.Metadata.ShouldReportStatus {
+			wfq.reportTaskStatus(ctx, *taskDef, err)
 		}
 	}
 
@@ -194,4 +183,23 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 		"processing time", processed,
 	)
 	metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)
+}
+
+func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {
+	status := task.TaskStatus{
+		OccurredAt:     time.Now(),
+		StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
+	}
+	if err != nil {
+		status.Status = task.StatusError
+		status.Reason = err.Error()
+		status.IsRetriable = true // TODO: make this configurable depending on the error
+	} else {
+		status.Status = task.StatusSuccess
+	}
+
+	statusErr := wfq.cf.ReportTaskStatus(ctx, taskDef.Id, status)
+	if statusErr != nil {
+		wfq.log.Error("failed reporting task status", "error", statusErr, "task", taskDef.Id, "workflow", taskDef.Metadata.WorkflowId)
+	}
 }

@@ -193,7 +193,7 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 
 			// perform all agentTasks (in goroutine)
 			for i := range agentTasks {
-				a.handleAgentTask(&agentTasks[i])
+				a.handleAgentTask(ctx, &agentTasks[i])
 			}
 
 			// send all wfTasks to tasksQueue
@@ -242,10 +242,22 @@ func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) 
 	}
 }
 
-func (a *Agent) reportTaskStatus(ctx context.Context, id task.Id, status task.TaskStatus) {
-	err := a.cf.ReportTaskStatus(ctx, id, status)
+func (a *Agent) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {
+	status := task.TaskStatus{
+		OccurredAt:     time.Now(),
+		StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
+	}
 	if err != nil {
-		a.log.Error("Failed reporting task status", "error", err)
+		status.Status = task.StatusError
+		status.Reason = err.Error()
+		status.IsRetriable = true // TODO: make this configurable depending on the error
+	} else {
+		status.Status = task.StatusSuccess
+	}
+
+	statusErr := a.cf.ReportTaskStatus(ctx, taskDef.Id, status)
+	if statusErr != nil {
+		a.log.Error("failed reporting task status", "error", statusErr, "task", taskDef.Id, "workflow", taskDef.Metadata.WorkflowId)
 	}
 }
 
@@ -321,14 +333,14 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 	return agentTasks, workflows
 }
 
-func (a *Agent) handleAgentTask(t *task.Task) {
+func (a *Agent) handleAgentTask(ctx context.Context, t *task.Task) {
 	a.log.Info("executing agent task", "tid", t.Metadata.WorkflowId)
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
 		txn := task.NewTaskTransaction(a.monitor, t.Metadata)
 		defer txn.End()
-		err := a.executeAgentTask(t)
+		err := a.executeAgentTask(ctx, t)
 
 		if err != nil {
 			a.log.Error(err.Error())
@@ -338,7 +350,7 @@ func (a *Agent) handleAgentTask(t *task.Task) {
 	}()
 }
 
-func (a *Agent) executeAgentTask(t *task.Task) error {
+func (a *Agent) executeAgentTask(ctx context.Context, t *task.Task) error {
 	t.Timeline.Started = time.Now()
 	specJSON, err := json.Marshal(t.Spec)
 	if err != nil {
@@ -356,6 +368,9 @@ func (a *Agent) executeAgentTask(t *task.Task) error {
 	}
 
 	err = e(&spec, a.log)
+	if t.Metadata.ShouldReportStatus {
+		a.reportTaskStatus(ctx, *t, err)
+	}
 	sinceCreation, inRunner, processed := t.GetLatency()
 	a.log.Info("Done handling agent task",
 		"tid", t.Metadata.WorkflowId,

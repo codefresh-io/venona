@@ -66,6 +66,7 @@ type (
 		ReName                string `json:"reName"`
 		WorkflowId            string `json:"workflowId"`
 		CurrentStatusRevision int    `json:"currentStatusRevision"`
+		ShouldReportStatus    bool   `json:"shouldReportStatus"`
 	}
 
 	// Timeline values
@@ -85,7 +86,7 @@ type (
 		OccurredAt     time.Time `json:"occurredAt"`
 		StatusRevision int       `json:"statusRevision"`
 		IsRetriable    bool      `json:"isRetriable"`
-		Reason         string    `json:"reason"`
+		Reason         string    `json:"reason,omitempty"`
 	}
 )
 
