@@ -185,7 +185,7 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 	metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)
 }
 
-func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {
+func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err *runtime.HandleTaskError) {
 	status := task.TaskStatus{
 		OccurredAt:     time.Now(),
 		StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
@@ -193,7 +193,7 @@ func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task,
 	if err != nil {
 		status.Status = task.StatusError
 		status.Reason = err.Error()
-		status.IsRetriable = true // TODO: make this configurable depending on the error
+		status.IsRetriable = err.IsRetriable
 	} else {
 		status.Status = task.StatusSuccess
 	}
