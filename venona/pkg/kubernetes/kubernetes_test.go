@@ -16,13 +16,16 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	ierrors "github.com/codefresh-io/go/venona/pkg/errors"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -209,6 +212,76 @@ func Test_kube_DeleteResource(t *testing.T) {
 			}
 
 			tt.afterFn(t, tt.client)
+		})
+	}
+}
+
+func Test_NewK8sError(t *testing.T) {
+	nonRetriableErrors := []k8serrors.StatusError{
+		*k8serrors.NewBadRequest("reason"),
+		*k8serrors.NewForbidden(v1.Resource("pods"), "some-pod", errors.New("reason")),
+		*k8serrors.NewMethodNotSupported(v1.Resource("pods"), "some-pod"),
+		*k8serrors.NewRequestEntityTooLargeError("reason"),
+		*k8serrors.NewUnauthorized("reason"),
+	}
+
+	for _, e := range nonRetriableErrors {
+		t.Run("should return a non-retriable error regardless of the operation", func(t *testing.T) {
+			err0 := NewK8sError(&e, TypeK8sCreateResource)
+			assert.False(t, ierrors.IsRetriable(err0))
+			err1 := NewK8sError(&e, TypeK8sDeleteResource)
+			assert.False(t, ierrors.IsRetriable(err1))
+		})
+	}
+}
+
+func Test_NewK8sError_CreateResource(t *testing.T) {
+	nonRetriableErrors := []k8serrors.StatusError{
+		*k8serrors.NewAlreadyExists(v1.Resource("pods"), "some-pod"),
+	}
+
+	for _, e := range nonRetriableErrors {
+		t.Run("should return a non-retriable error for create resource operation", func(t *testing.T) {
+			err := NewK8sError(&e, TypeK8sCreateResource)
+			assert.False(t, ierrors.IsRetriable(err))
+		})
+	}
+
+	retriableErrors := []k8serrors.StatusError{
+		*k8serrors.NewInternalError(errors.New("reason")),
+		*k8serrors.NewTimeoutError("reason", 1),
+	}
+
+	for _, e := range retriableErrors {
+		t.Run("should return a retriable error for create resource operation", func(t *testing.T) {
+			err := NewK8sError(&e, TypeK8sCreateResource)
+			assert.True(t, ierrors.IsRetriable(err))
+		})
+	}
+}
+
+func Test_NewK8sError_DeleteResource(t *testing.T) {
+	nonRetriableErrors := []k8serrors.StatusError{
+		*k8serrors.NewNotFound(v1.Resource("pods"), "some-pod"),
+		*k8serrors.NewGone("reason"),
+	}
+
+	for _, e := range nonRetriableErrors {
+		t.Run("should return a non-retriable error for delete resource operation", func(t *testing.T) {
+			err := NewK8sError(&e, TypeK8sDeleteResource)
+			assert.False(t, ierrors.IsRetriable(err))
+		})
+	}
+
+	retriableErrors := []k8serrors.StatusError{
+		*k8serrors.NewInternalError(errors.New("reason")),
+		*k8serrors.NewTimeoutError("reason", 1),
+	}
+
+	for _, e := range retriableErrors {
+		t.Run("should return a retriable error for delete resource operation", func(t *testing.T) {
+			err := NewK8sError(&e, TypeK8sDeleteResource)
+			assert.True(t, ierrors.IsRetriable(err))
 		})
 	}
 }
