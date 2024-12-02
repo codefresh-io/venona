@@ -167,7 +167,7 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 		taskDef := wf.Tasks[i]
 		err := runtime.HandleTask(ctx, taskDef)
 		if err != nil {
-			wfq.log.Error("failed handling task", "error", err, "workflow", workflow)
+			wfq.log.Error("failed handling task", "error", err, "workflow", workflow, "task", taskDef.Id)
 			txn.NoticeError(errRuntimeNotFound)
 		}
 		if taskDef.Metadata.ShouldReportStatus {
