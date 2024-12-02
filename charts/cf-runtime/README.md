@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.1.8](https://img.shields.io/badge/Version-7.1.8-informational?style=flat-square)
+![Version: 7.3.0](https://img.shields.io/badge/Version-7.3.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1155,7 +1155,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"digest":"sha256:2327a1af2b8ad13e9685e7e577c2aa0d23580657c8da001f436f803280879eab","registry":"quay.io","repository":"codefresh/venona","tag":"1.10.8"}` | Set image |
+| runner.image | object | `{"digest":"sha256:2327a1af2b8ad13e9685e7e577c2aa0d23580657c8da001f436f803280879eab","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.0"}` | Set image |
 | runner.init | object | `{"image":{"digest":"sha256:27281df44814d837fbcc41ba53ee8010ce5496eb758c29f775958d713c79c41a","registry":"quay.io","repository":"codefresh/cli","tag":"0.85.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |

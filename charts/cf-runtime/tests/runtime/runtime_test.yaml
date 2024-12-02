@@ -71,6 +71,7 @@ tests:
                 CR_6177_FIXER: 'alpine:tagoverride'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
+                RUNTIME_CHART_VERSION: 7.2.0
               userEnvVars:
                 - name: ALICE
                   valueFrom:
