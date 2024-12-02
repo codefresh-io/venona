@@ -42,8 +42,8 @@ const (
 type (
 	// Kubernetes API client
 	Kubernetes interface {
-		CreateResource(ctx context.Context, taskType task.Type, spec interface{}) *K8sError
-		DeleteResource(ctx context.Context, opts DeleteOptions) *K8sError
+		CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error
+		DeleteResource(ctx context.Context, opts DeleteOptions) error
 	}
 
 	// Options for Kubernetes
@@ -76,7 +76,7 @@ type (
 
 	K8sError struct {
 		error
-		IsRetriable bool
+		isRetriable bool
 	}
 )
 
@@ -86,7 +86,11 @@ var (
 	removeFinalizersJsonPatch = []byte(`[{ "op": "remove", "path": "/metadata/finalizers" }]`)
 )
 
-func NewK8sError(err error, operation K8sOperation) *K8sError {
+func (e K8sError) IsRetriable() bool {
+	return e.isRetriable
+}
+
+func NewK8sError(err error, operation K8sOperation) error {
 	isNotRetriable := k8serrors.IsBadRequest(err) ||
 		k8serrors.IsForbidden(err) ||
 		k8serrors.IsMethodNotSupported(err) ||
@@ -99,7 +103,7 @@ func NewK8sError(err error, operation K8sOperation) *K8sError {
 
 	return &K8sError{
 		error:       err,
-		IsRetriable: !isNotRetriable,
+		isRetriable: !isNotRetriable,
 	}
 }
 
@@ -127,7 +131,7 @@ func New(opts Options) (Kubernetes, error) {
 	}, err
 }
 
-func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec interface{}) *K8sError {
+func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec interface{}) error {
 	start := time.Now()
 	bytes, err := json.Marshal(spec)
 	if err != nil {
@@ -170,7 +174,7 @@ func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec inter
 	return nil
 }
 
-func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) *K8sError {
+func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 	start := time.Now()
 	switch opts.Kind {
 	case task.TypeDeletePVC:

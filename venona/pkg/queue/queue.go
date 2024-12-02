@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/codefresh"
+	ierrors "github.com/codefresh-io/go/venona/pkg/errors"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -185,7 +186,7 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 	metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)
 }
 
-func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err *runtime.HandleTaskError) {
+func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {
 	status := task.TaskStatus{
 		OccurredAt:     time.Now(),
 		StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
@@ -193,7 +194,7 @@ func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task,
 	if err != nil {
 		status.Status = task.StatusError
 		status.Reason = err.Error()
-		status.IsRetriable = err.IsRetriable
+		status.IsRetriable = ierrors.IsRetriable(err)
 	} else {
 		status.Status = task.StatusSuccess
 	}

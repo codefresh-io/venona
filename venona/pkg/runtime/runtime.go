@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	ierrors "github.com/codefresh-io/go/venona/pkg/errors"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/task"
 )
@@ -26,7 +27,7 @@ import (
 type (
 	// Runtime API client
 	Runtime interface {
-		HandleTask(ctx context.Context, t *task.Task) *HandleTaskError
+		HandleTask(ctx context.Context, t *task.Task) error
 	}
 
 	// Options for runtime
@@ -40,14 +41,18 @@ type (
 
 	HandleTaskError struct {
 		error
-		IsRetriable bool
+		isRetriable bool
 	}
 )
 
-func NewHandleTaskError(err error, isRetriable bool) *HandleTaskError {
+func (e HandleTaskError) IsRetriable() bool {
+	return e.isRetriable
+}
+
+func NewHandleTaskError(err error, isRetriable bool) error {
 	return &HandleTaskError{
 		error:       err,
-		IsRetriable: isRetriable,
+		isRetriable: isRetriable,
 	}
 }
 
@@ -58,12 +63,12 @@ func New(opts Options) Runtime {
 	}
 }
 
-func (r runtime) HandleTask(ctx context.Context, t *task.Task) *HandleTaskError {
+func (r runtime) HandleTask(ctx context.Context, t *task.Task) error {
 	switch t.Type {
 	case task.TypeCreatePVC, task.TypeCreatePod:
 		err := r.client.CreateResource(ctx, t.Type, t.Spec)
 		if err != nil {
-			return NewHandleTaskError(fmt.Errorf("failed creating resource: %w", err), err.IsRetriable) // TODO: Return already executed tasks in order to terminate them
+			return NewHandleTaskError(fmt.Errorf("failed creating resource: %w", err), ierrors.IsRetriable(err)) // TODO: Return already executed tasks in order to terminate them
 		}
 	case task.TypeDeletePVC, task.TypeDeletePod:
 		opts := kubernetes.DeleteOptions{}
@@ -78,7 +83,7 @@ func (r runtime) HandleTask(ctx context.Context, t *task.Task) *HandleTaskError 
 		}
 
 		if err := r.client.DeleteResource(ctx, opts); err != nil {
-			return NewHandleTaskError(fmt.Errorf("failed deleting resource: %w", err), err.IsRetriable)
+			return NewHandleTaskError(fmt.Errorf("failed deleting resource: %w", err), ierrors.IsRetriable(err))
 		}
 	default:
 		return NewHandleTaskError(fmt.Errorf("unknown task type \"%s\"", t.Type), false)

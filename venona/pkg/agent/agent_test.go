@@ -259,7 +259,7 @@ func Test_executeAgentTask(t *testing.T) {
 			a := &Agent{
 				log: logger.New(logger.Options{}),
 			}
-			err := a.executeAgentTask(tt.task)
+			err := a.executeAgentTask(context.Background(), tt.task)
 			if err != nil || tt.wantErr != "" {
 				assert.EqualError(t, err, tt.wantErr)
 			}
