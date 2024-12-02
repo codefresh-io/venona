@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: added
-      description: "`venona` now reports task statuses back to the platform"
+      description: "Chart version exposed to the `venona` and `engine` pods"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

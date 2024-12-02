@@ -70,7 +70,7 @@ tests:
                 CR_6177_FIXER: 'alpine:tagoverride'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
-                RUNTIME_CHART_VERSION: 7.2.0
+                RUNTIME_CHART_VERSION: [\w.-]+
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
