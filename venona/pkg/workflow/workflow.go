@@ -52,8 +52,8 @@ func New(metadata task.Metadata) *Workflow {
 
 // AddTask adds a specific task to its matching parent worklow
 func (wf *Workflow) AddTask(t *task.Task) error {
-	if wf.Metadata.ReName != t.Metadata.ReName || wf.Metadata.Workflow != t.Metadata.Workflow {
-		return fmt.Errorf("mismatch runtime or workflow id, %s/%s is different from %s/%s", wf.Metadata.ReName, wf.Metadata.Workflow, t.Metadata.ReName, t.Metadata.Workflow)
+	if wf.Metadata.ReName != t.Metadata.ReName || wf.Metadata.WorkflowId != t.Metadata.WorkflowId {
+		return fmt.Errorf("mismatch runtime or workflow id, %s/%s is different from %s/%s", wf.Metadata.ReName, wf.Metadata.WorkflowId, t.Metadata.ReName, t.Metadata.WorkflowId)
 	}
 
 	if wf.Metadata.CreatedAt > t.Metadata.CreatedAt {

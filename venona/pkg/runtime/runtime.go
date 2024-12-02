@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	ierrors "github.com/codefresh-io/go/venona/pkg/errors"
 	"github.com/codefresh-io/go/venona/pkg/kubernetes"
 	"github.com/codefresh-io/go/venona/pkg/task"
 )
@@ -37,7 +38,23 @@ type (
 	runtime struct {
 		client kubernetes.Kubernetes
 	}
+
+	HandleTaskError struct {
+		error
+		isRetriable bool
+	}
 )
+
+func (e HandleTaskError) IsRetriable() bool {
+	return e.isRetriable
+}
+
+func NewHandleTaskError(err error, isRetriable bool) error {
+	return &HandleTaskError{
+		error:       err,
+		isRetriable: isRetriable,
+	}
+}
 
 // New creates new Runtime client
 func New(opts Options) Runtime {
@@ -47,31 +64,29 @@ func New(opts Options) Runtime {
 }
 
 func (r runtime) HandleTask(ctx context.Context, t *task.Task) error {
-	var err error
-
 	switch t.Type {
 	case task.TypeCreatePVC, task.TypeCreatePod:
-		err = r.client.CreateResource(ctx, t.Type, t.Spec)
+		err := r.client.CreateResource(ctx, t.Type, t.Spec)
 		if err != nil {
-			return fmt.Errorf("failed creating resource: %w", err) // TODO: Return already executed tasks in order to terminate them
+			return NewHandleTaskError(fmt.Errorf("failed creating resource: %w", err), ierrors.IsRetriable(err)) // TODO: Return already executed tasks in order to terminate them
 		}
 	case task.TypeDeletePVC, task.TypeDeletePod:
 		opts := kubernetes.DeleteOptions{}
 		opts.Kind = t.Type
 		b, err := json.Marshal(t.Spec)
 		if err != nil {
-			return fmt.Errorf("failed to marshal task spec: %w", err)
+			return NewHandleTaskError(fmt.Errorf("failed to marshal task spec: %w", err), false)
 		}
 
 		if err := json.Unmarshal(b, &opts); err != nil {
-			return fmt.Errorf("failed to unmarshal task spec: %w", err)
+			return NewHandleTaskError(fmt.Errorf("failed to unmarshal task spec: %w", err), false)
 		}
 
-		if err = r.client.DeleteResource(ctx, opts); err != nil {
-			return fmt.Errorf("failed deleting resource: %w", err)
+		if err := r.client.DeleteResource(ctx, opts); err != nil {
+			return NewHandleTaskError(fmt.Errorf("failed deleting resource: %w", err), ierrors.IsRetriable(err))
 		}
 	default:
-		return fmt.Errorf("unknown task type \"%s\"", t.Type)
+		return NewHandleTaskError(fmt.Errorf("unknown task type \"%s\"", t.Type), false)
 	}
 
 	return nil

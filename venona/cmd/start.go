@@ -230,9 +230,13 @@ func run(options startOptions) {
 
 		httpClient.Transport = monitor.NewRoundTripper(httpClient.Transport)
 
+		userAgent := fmt.Sprintf("cf-classic-runner/%s", version)
+		if runtimeVersion := os.Getenv("RUNTIME_CHART_VERSION"); runtimeVersion != "" {
+			userAgent += fmt.Sprintf(" cf-classic-runtime/%s", runtimeVersion)
+		}
 		httpHeaders := http.Header{}
 		{
-			httpHeaders.Add("User-Agent", fmt.Sprintf("codefresh-runner-%s", version))
+			httpHeaders.Add("User-Agent", userAgent)
 		}
 
 		cf = codefresh.New(codefresh.Options{
