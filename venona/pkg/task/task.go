@@ -43,15 +43,12 @@ type (
 	// Type of the task
 	Type string
 
-	// Task Id
-	Id string
-
 	// Task status
 	Status string
 
 	// Task options
 	Task struct {
-		Id       Id          `json:"_id"`
+		Id       string      `json:"_id"`
 		Type     Type        `json:"type"`
 		Metadata Metadata    `json:"metadata"`
 		Spec     interface{} `json:"spec"`
