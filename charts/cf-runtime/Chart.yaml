@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.2.1
+version: 7.2.2
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: security
-      description: "updated engine, container-logger, pipeline-debugger, docker-builder with security fixes"
+    - kind: changed
+      description: "`engine` upgraded to v1.175.3 which changes its User-Agent to `cf-classic-engine/<version> cf-classic-runtime/<chart-version>`"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
