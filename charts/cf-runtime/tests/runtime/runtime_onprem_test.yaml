@@ -55,6 +55,7 @@ tests:
                 METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: 'false'
                 METRICS_PROMETHEUS_HOST: '0.0.0.0'
                 METRICS_PROMETHEUS_PORT: '9100'
+                TRUSTED_QEMU_IMAGES: ''
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
                 DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
@@ -69,6 +70,7 @@ tests:
                 CR_6177_FIXER: 'alpine:tagoverride'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
+                RUNTIME_CHART_VERSION: [\w.-]+
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400

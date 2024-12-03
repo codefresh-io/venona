@@ -72,15 +72,15 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 1.10.2
-    digest: sha256:f7768390d3368aff0843519368c10a0a97cf98a98f2753a89509cf8f6c9798e1
+    tag: 1.10.8
+    digest: sha256:2327a1af2b8ad13e9685e7e577c2aa0d23580657c8da001f436f803280879eab
   # -- Init container
   init:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.85.0-rootless
-      digest: sha256:27281df44814d837fbcc41ba53ee8010ce5496eb758c29f775958d713c79c41a
+      tag: 0.88.4-rootless
+      digest: sha256:b256d150ff8a636851ddc1d5fb0490114d5036cc5bff357eac6a9899fea87562
     resources:
       limits:
         memory: 512Mi
@@ -94,9 +94,9 @@ runner:
     enabled: false
     image:
       registry: quay.io
-      repository: codefresh/codefresh-shell
-      tag: 0.0.2
-      digest: sha256:1f2d1f9effa751601a004e69bc9059a848b7428df379d2ef0c3e7858dc5989d0
+      repository: codefresh/kubectl
+      tag: 1.31.2
+      digest: sha256:a30a8810dde249d0198f67792ed9696363f15c8cecbac955ee9bd267b5454ee7
     env:
       RECONCILE_INTERVAL: 300
     resources: {}
@@ -402,9 +402,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 26.1.4-1.28.7 # use `latest-rootless/rootless/26.1.4-1.28.7-rootless` tags for rootless-dind
+      tag: 26.1.4-1.28.8 # use `latest-rootless/rootless/26.1.4-1.28.8-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:ccaf26ab24db0e00760beba79ce1810a12aef5be296f538ceab416af9ec481f7
+      digest: sha256:33c343dd01e8a24f0b4a872bbe62884320719f9d9dc27b7a8fed9f7e9fc7e80e
     # -- Set dind resources.
     resources:
       requests: null
@@ -493,9 +493,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.174.17
+      tag: 1.174.19
       pullPolicy: IfNotPresent
-      digest: sha256:f143e55206aa08068b4558b2e31aeaa84035b6fa05b2500d1d4b472b12a314d2
+      digest: sha256:7d3b21beec1da9bc2edc2087678aa0e8fc91a28ea4e197452a4430f8e98cf27e
     # -- Set container command.
     command:
       - npm
@@ -516,10 +516,10 @@ runtime:
     runtimeImages:
       COMPOSE_IMAGE: quay.io/codefresh/compose:v2.28.1-1.5.0@sha256:362977564c096b7c2c007b8478ec87cac13d781839adc271d858290213bd89f2
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.7@sha256:1e7bcee65203f9fdfc7ee5231cb4d29b179479d70dd42ec9855d20c57ab43c48
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.14@sha256:e61f0694fb7477244014be971a0bad724242e4fdefe810f38e58990d7db6bdc5
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.3.16@sha256:142288b34c4af9abad44f304f00b109825df0894853a66a77a09f3ebf507d176
       DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.18@sha256:1a15c3ae0952d3986de7866a3def8ac7e3e39f668fe87fd46c63d886ca06c6d7
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.16@sha256:05efc1af8b1196f1b9b3f0781b4dcc1aa2cdd0ffc1347ee5fa81b16d029ec5c2
-      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.14@sha256:801caf9100218c9ed638fb5ca205fcc133f54d00468ed81093b22a4f0a0ffae9
+      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.15@sha256:3a3e90cd10801c7ec0d3cf3816d0dcc90894d5d1771448c43f67215d90da5eca
       FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.3@sha256:57374ccd5275325fc36b237fb38c77dd1f65c84d5aebfe88c9ea0e434ea20fc9
       GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.2.0@sha256:a3ec854823f17d0fd817d978219122e644b1abd6db778fd835688fcb6d88c515
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11@sha256:b6b3fc6cc5fad3ba9e36055278ce99a74a86876be116574503c6fbb4c1b4aa76
@@ -550,6 +550,8 @@ runtime:
       METRICS_PROMETHEUS_HOST: '0.0.0.0'
       # -- Port for Prometheus metrics server
       METRICS_PROMETHEUS_PORT: 9100
+      # -- Trusted QEMU images used for docker builds - when left blank only 'tonistiigi/binfmt' is trusted.
+      TRUSTED_QEMU_IMAGES: ''
     # -- Set workflow limits.
     workflowLimits:
       # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
@@ -600,8 +602,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.85.0-rootless
-      digest: sha256:27281df44814d837fbcc41ba53ee8010ce5496eb758c29f775958d713c79c41a
+      tag: 0.88.4-rootless
+      digest: sha256:b256d150ff8a636851ddc1d5fb0490114d5036cc5bff357eac6a9899fea87562
     rbac:
       enabled: true
     annotations: {}
@@ -620,8 +622,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.28.4
-      digest: sha256:753e434a8e51c58d3f5daca2dff88073bc7b3bde3a45e0f00d74181176302e37
+      tag: 1.31.2
+      digest: sha256:a30a8810dde249d0198f67792ed9696363f15c8cecbac955ee9bd267b5454ee7
     rbac:
       enabled: true
     annotations: {}

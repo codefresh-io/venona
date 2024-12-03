@@ -20,6 +20,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/codefresh-io/go/venona/pkg/codefresh"
+	ierrors "github.com/codefresh-io/go/venona/pkg/errors"
 	"github.com/codefresh-io/go/venona/pkg/logger"
 	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/monitoring"
@@ -45,6 +47,7 @@ type (
 		Monitor     monitoring.Monitor
 		Concurrency int
 		BufferSize  int
+		Codefresh   codefresh.Codefresh
 	}
 
 	wfQueueImpl struct {
@@ -57,6 +60,7 @@ type (
 		stop            []chan bool
 		activeWorkflows map[string]struct{}
 		mutex           sync.Mutex
+		cf              codefresh.Codefresh
 	}
 )
 
@@ -73,6 +77,7 @@ func New(opts *Options) WorkflowQueue {
 		concurrency:     opts.Concurrency,
 		stop:            make([]chan bool, opts.Concurrency),
 		activeWorkflows: make(map[string]struct{}),
+		cf:              opts.Codefresh,
 	}
 }
 
@@ -116,22 +121,22 @@ func (wfq *wfQueueImpl) handleChannel(ctx context.Context, stopChan chan bool, i
 			ctxCancelled = true
 		case wf := <-wfq.queue:
 			wfq.mutex.Lock()
-			if _, ok := wfq.activeWorkflows[wf.Metadata.Workflow]; ok {
+			if _, ok := wfq.activeWorkflows[wf.Metadata.WorkflowId]; ok {
 				// Workflow is already being handled, enqueue it again and skip processing
 				wfq.mutex.Unlock()
-				wfq.log.Info("Workflow", wf.Metadata.Workflow, " is already being handled, enqueue it again and skip processing")
+				wfq.log.Info("Workflow", wf.Metadata.WorkflowId, " is already being handled, enqueue it again and skip processing")
 				time.Sleep(100 * time.Millisecond)
 				wfq.Enqueue(wf)
 				continue
 			}
 			// Mark the workflow as active
-			wfq.activeWorkflows[wf.Metadata.Workflow] = struct{}{}
+			wfq.activeWorkflows[wf.Metadata.WorkflowId] = struct{}{}
 			wfq.mutex.Unlock()
 
-			wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.Workflow)
+			wfq.log.Info("handling workflow", "handlerId", id, "workflow", wf.Metadata.WorkflowId)
 			wfq.handleWorkflow(ctx, wf)
 			wfq.mutex.Lock()
-			delete(wfq.activeWorkflows, wf.Metadata.Workflow)
+			delete(wfq.activeWorkflows, wf.Metadata.WorkflowId)
 			wfq.mutex.Unlock()
 		default:
 			if ctxCancelled {
@@ -149,7 +154,7 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 	txn := task.NewTaskTransaction(wfq.monitor, wf.Metadata)
 	defer txn.End()
 
-	workflow := wf.Metadata.Workflow
+	workflow := wf.Metadata.WorkflowId
 	reName := wf.Metadata.ReName
 	runtime, ok := wfq.runtimes[reName]
 	if !ok {
@@ -159,20 +164,43 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 	}
 
 	for i := range wf.Tasks {
-		err := runtime.HandleTask(ctx, wf.Tasks[i])
+		taskDef := wf.Tasks[i]
+		err := runtime.HandleTask(ctx, taskDef)
 		if err != nil {
-			wfq.log.Error("failed handling task", "error", err, "workflow", workflow)
+			wfq.log.Error("failed handling task", "error", err, "workflow", workflow, "task", taskDef.Id)
 			txn.NoticeError(errRuntimeNotFound)
+		}
+		if taskDef.Metadata.ShouldReportStatus {
+			wfq.reportTaskStatus(ctx, *taskDef, err)
 		}
 	}
 
 	sinceCreation, inRunner, processed := wf.GetLatency()
 	wfq.log.Info("Done handling workflow",
-		"workflow", wf.Metadata.Workflow,
+		"workflow", wf.Metadata.WorkflowId,
 		"runtime", wf.Metadata.ReName,
 		"time since creation", sinceCreation,
 		"time in runner", inRunner,
 		"processing time", processed,
 	)
 	metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)
+}
+
+func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {
+	status := task.TaskStatus{
+		OccurredAt:     time.Now(),
+		StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
+	}
+	if err != nil {
+		status.Status = task.StatusError
+		status.Reason = err.Error()
+		status.IsRetriable = ierrors.IsRetriable(err)
+	} else {
+		status.Status = task.StatusSuccess
+	}
+
+	statusErr := wfq.cf.ReportTaskStatus(ctx, taskDef.Id, status)
+	if statusErr != nil {
+		wfq.log.Error("failed reporting task status", "error", statusErr, "task", taskDef.Id, "workflow", taskDef.Metadata.WorkflowId)
+	}
 }

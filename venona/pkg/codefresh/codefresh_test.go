@@ -69,6 +69,7 @@ func Test_cf_prepareURL(t *testing.T) {
 	tests := map[string]struct {
 		fields  args
 		paths   []string
+		query   map[string]string
 		want    *url.URL
 		wantErr bool
 	}{
@@ -94,6 +95,29 @@ func Test_cf_prepareURL(t *testing.T) {
 			wantErr: false,
 			want:    mustURL("http://url/docker:desktop%2Fserver"),
 		},
+		"Append query": {
+			query: map[string]string{
+				"key":    "value",
+				"keyTwo": "valueTwo",
+			},
+			paths: []string{"docker:desktop/server"},
+			fields: args{
+				host: "http://url",
+			},
+			wantErr: false,
+			want:    mustURL("http://url/docker:desktop%2Fserver?key=value&keyTwo=valueTwo"),
+		},
+		"Escape query": {
+			query: map[string]string{
+				"ke+y": "va+lu=e",
+			},
+			paths: []string{"docker:desktop/server"},
+			fields: args{
+				host: "http://url",
+			},
+			wantErr: false,
+			want:    mustURL("http://url/docker:desktop%2Fserver?ke%2By=va%2Blu%3De"),
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -103,7 +127,7 @@ func Test_cf_prepareURL(t *testing.T) {
 				agentID:    tt.fields.agentID,
 				httpClient: tt.fields.httpClient,
 			}
-			url, err := c.prepareURL(tt.paths...)
+			url, err := c.prepareURL(tt.query, tt.paths...)
 			if tt.wantErr {
 				assert.Error(t, err)
 			}

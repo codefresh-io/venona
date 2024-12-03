@@ -26,11 +26,17 @@ import (
 	"github.com/codefresh-io/go/venona/pkg/task"
 
 	v1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+)
+
+const (
+	TypeK8sCreateResource K8sOperation = "CreateResource"
+	TypeK8sDeleteResource K8sOperation = "DeleteResource"
 )
 
 type (
@@ -65,6 +71,13 @@ type (
 		log            logger.Logger
 		forceDeletePvc bool
 	}
+
+	K8sOperation string
+
+	K8sError struct {
+		error
+		isRetriable bool
+	}
 )
 
 var (
@@ -72,6 +85,27 @@ var (
 	kubeDecode                = scheme.Codecs.UniversalDeserializer().Decode
 	removeFinalizersJsonPatch = []byte(`[{ "op": "remove", "path": "/metadata/finalizers" }]`)
 )
+
+func (e K8sError) IsRetriable() bool {
+	return e.isRetriable
+}
+
+func NewK8sError(err error, operation K8sOperation) error {
+	isNotRetriable := k8serrors.IsBadRequest(err) ||
+		k8serrors.IsForbidden(err) ||
+		k8serrors.IsMethodNotSupported(err) ||
+		k8serrors.IsRequestEntityTooLargeError(err) ||
+		k8serrors.IsNotAcceptable(err) ||
+		k8serrors.IsUnsupportedMediaType(err) ||
+		k8serrors.IsUnauthorized(err) ||
+		(operation == TypeK8sCreateResource && k8serrors.IsAlreadyExists(err)) ||
+		(operation == TypeK8sDeleteResource && (k8serrors.IsNotFound(err) || k8serrors.IsGone(err)))
+
+	return &K8sError{
+		error:       err,
+		isRetriable: !isNotRetriable,
+	}
+}
 
 // NewInCluster build Kubernetes API based on local in cluster runtime
 func NewInCluster(log logger.Logger, qps float32, burst int, forceDeletePvc bool) (Kubernetes, error) {
@@ -101,12 +135,12 @@ func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec inter
 	start := time.Now()
 	bytes, err := json.Marshal(spec)
 	if err != nil {
-		return fmt.Errorf("failed marshalling when creating resource: %w", err)
+		return NewK8sError(fmt.Errorf("failed marshalling when creating resource: %w", err), TypeK8sCreateResource)
 	}
 
 	obj, _, err := kubeDecode(bytes, nil, nil)
 	if err != nil {
-		return fmt.Errorf("failed decoding when creating resource: %w", err)
+		return NewK8sError(fmt.Errorf("failed decoding when creating resource: %w", err), TypeK8sCreateResource)
 	}
 
 	var namespace, name string
@@ -115,18 +149,18 @@ func (k kube) CreateResource(ctx context.Context, taskType task.Type, spec inter
 		namespace, name = obj.Namespace, obj.Name
 		_, err = k.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
-			return fmt.Errorf("failed creating persistent volume claims \"%s\\%s\": %w", namespace, obj.Name, err)
+			return NewK8sError(fmt.Errorf("failed creating persistent volume claims \"%s\\%s\": %w", namespace, obj.Name, err), TypeK8sCreateResource)
 		}
 	case *v1.Pod:
 		namespace, name = obj.Namespace, obj.Name
 		_, err = k.client.CoreV1().Pods(namespace).Create(ctx, obj, metav1.CreateOptions{})
 		if err != nil {
-			return fmt.Errorf("failed creating pod \"%s\\%s\": %w", namespace, obj.Name, err)
+			return NewK8sError(fmt.Errorf("failed creating pod \"%s\\%s\": %w", namespace, obj.Name, err), TypeK8sCreateResource)
 		}
 
 		metrics.IncWorkflowRetries(name)
 	default:
-		return fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind())
+		return NewK8sError(fmt.Errorf("failed creating resource of type %s", obj.GetObjectKind().GroupVersionKind()), TypeK8sCreateResource)
 	}
 
 	processed := time.Since(start)
@@ -146,22 +180,22 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 	case task.TypeDeletePVC:
 		err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
-			return fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+			return NewK8sError(fmt.Errorf("failed deleting persistent volume claim \"%s\\%s\": %w", opts.Namespace, opts.Name, err), TypeK8sDeleteResource)
 		}
 
 		if k.forceDeletePvc {
 			_, err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Patch(ctx, opts.Name, types.JSONPatchType, removeFinalizersJsonPatch, metav1.PatchOptions{})
 			if err != nil {
-				return fmt.Errorf("failed removing finalizers from PVC \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+				return NewK8sError(fmt.Errorf("failed removing finalizers from PVC \"%s\\%s\": %w", opts.Namespace, opts.Name, err), TypeK8sDeleteResource)
 			}
 		}
 	case task.TypeDeletePod:
 		err := k.client.CoreV1().Pods(opts.Namespace).Delete(ctx, opts.Name, metav1.DeleteOptions{})
 		if err != nil {
-			return fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err)
+			return NewK8sError(fmt.Errorf("failed deleting pod \"%s\\%s\": %w", opts.Namespace, opts.Name, err), TypeK8sDeleteResource)
 		}
 	default:
-		return fmt.Errorf("failed deleting resource of type %s", opts.Kind)
+		return NewK8sError(fmt.Errorf("failed deleting resource of type %s", opts.Kind), TypeK8sDeleteResource)
 	}
 
 	processed := time.Since(start)

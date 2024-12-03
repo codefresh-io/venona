@@ -31,6 +31,11 @@ const (
 	TypeAgentTask Type = "AgentTask"
 )
 
+const (
+	StatusSuccess Status = "Success"
+	StatusError   Status = "Error"
+)
+
 type (
 	// Tasks array
 	Tasks []Task
@@ -38,8 +43,12 @@ type (
 	// Type of the task
 	Type string
 
+	// Task status
+	Status string
+
 	// Task options
 	Task struct {
+		Id       string      `json:"_id"`
 		Type     Type        `json:"type"`
 		Metadata Metadata    `json:"metadata"`
 		Spec     interface{} `json:"spec"`
@@ -50,9 +59,11 @@ type (
 
 	// Metadata options
 	Metadata struct {
-		CreatedAt string `json:"createdAt"`
-		ReName    string `json:"reName"`
-		Workflow  string `json:"workflow"`
+		CreatedAt             string `json:"createdAt"`
+		ReName                string `json:"reName"`
+		WorkflowId            string `json:"workflowId"`
+		CurrentStatusRevision int    `json:"currentStatusRevision"`
+		ShouldReportStatus    bool   `json:"shouldReportStatus"`
 	}
 
 	// Timeline values
@@ -65,6 +76,14 @@ type (
 	AgentTask struct {
 		Type   string                 `json:"type"`
 		Params map[string]interface{} `json:"params"`
+	}
+
+	TaskStatus struct {
+		Status         Status    `json:"status"`
+		OccurredAt     time.Time `json:"occurredAt"`
+		StatusRevision int       `json:"statusRevision"`
+		IsRetriable    bool      `json:"isRetriable"`
+		Reason         string    `json:"reason,omitempty"`
 	}
 )
 
@@ -80,6 +99,10 @@ func (r *Tasks) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
+func (r *TaskStatus) Marshal() ([]byte, error) {
+	return json.Marshal(r)
+}
+
 // Less compares two tasks by their CreatedAt values
 func Less(task1 Task, task2 Task) bool {
 	return task1.Metadata.CreatedAt < task2.Metadata.CreatedAt
@@ -88,7 +111,7 @@ func Less(task1 Task, task2 Task) bool {
 // NewTaskTransaction creates a new transaction with task-specific attributes
 func NewTaskTransaction(monitor monitoring.Monitor, m Metadata) monitoring.Transaction {
 	txn := monitor.NewTransaction("runner-tasks-execution")
-	txn.AddAttribute("tid", m.Workflow)
+	txn.AddAttribute("tid", m.WorkflowId)
 	txn.AddAttribute("runtime-environment", m.ReName)
 	return txn
 }

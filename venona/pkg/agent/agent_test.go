@@ -38,17 +38,17 @@ func Test_groupTasks(t *testing.T) {
 			tasks: task.Tasks{
 				{
 					Metadata: task.Metadata{
-						Workflow: "1",
+						WorkflowId: "1",
 					},
 				},
 				{
 					Metadata: task.Metadata{
-						Workflow: "2",
+						WorkflowId: "2",
 					},
 				},
 				{
 					Metadata: task.Metadata{
-						Workflow: "1",
+						WorkflowId: "1",
 					},
 				},
 			},
@@ -56,19 +56,19 @@ func Test_groupTasks(t *testing.T) {
 				"1": {
 					{
 						Metadata: task.Metadata{
-							Workflow: "1",
+							WorkflowId: "1",
 						},
 					},
 					{
 						Metadata: task.Metadata{
-							Workflow: "1",
+							WorkflowId: "1",
 						},
 					},
 				},
 				"2": {
 					{
 						Metadata: task.Metadata{
-							Workflow: "2",
+							WorkflowId: "2",
 						},
 					},
 				},
@@ -259,7 +259,7 @@ func Test_executeAgentTask(t *testing.T) {
 			a := &Agent{
 				log: logger.New(logger.Options{}),
 			}
-			err := a.executeAgentTask(tt.task)
+			err := a.executeAgentTask(context.Background(), tt.task)
 			if err != nil || tt.wantErr != "" {
 				assert.EqualError(t, err, tt.wantErr)
 			}

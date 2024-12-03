@@ -125,6 +125,7 @@ func New(opts *Options) (*Agent, error) {
 		Monitor:     opts.Monitor,
 		Concurrency: opts.Concurrency,
 		BufferSize:  opts.BufferSize,
+		Codefresh:   opts.Codefresh,
 	})
 	return &Agent{
 		id:                 id,
@@ -192,7 +193,7 @@ func (a *Agent) startTaskPullerRoutine(ctx context.Context) {
 
 			// perform all agentTasks (in goroutine)
 			for i := range agentTasks {
-				a.handleAgentTask(&agentTasks[i])
+				a.handleAgentTask(ctx, &agentTasks[i])
 			}
 
 			// send all wfTasks to tasksQueue
@@ -241,6 +242,25 @@ func (a *Agent) reportStatus(ctx context.Context, status codefresh.AgentStatus) 
 	}
 }
 
+func (a *Agent) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {
+	status := task.TaskStatus{
+		OccurredAt:     time.Now(),
+		StatusRevision: taskDef.Metadata.CurrentStatusRevision + 1,
+	}
+	if err != nil {
+		status.Status = task.StatusError
+		status.Reason = err.Error()
+		status.IsRetriable = true // TODO: make this configurable depending on the error
+	} else {
+		status.Status = task.StatusSuccess
+	}
+
+	statusErr := a.cf.ReportTaskStatus(ctx, taskDef.Id, status)
+	if statusErr != nil {
+		a.log.Error("failed reporting task status", "error", statusErr, "task", taskDef.Id, "workflow", taskDef.Metadata.WorkflowId)
+	}
+}
+
 func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow) {
 	tasks := a.pullTasks(ctx)
 	return a.splitTasks(tasks)
@@ -276,10 +296,10 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 			t.Timeline.Pulled = pullTime
 			agentTasks = append(agentTasks, t)
 		case task.TypeCreatePod, task.TypeCreatePVC, task.TypeDeletePod, task.TypeDeletePVC:
-			wf, ok := wfMap[t.Metadata.Workflow]
+			wf, ok := wfMap[t.Metadata.WorkflowId]
 			if !ok {
 				wf = workflow.New(t.Metadata)
-				wfMap[t.Metadata.Workflow] = wf
+				wfMap[t.Metadata.WorkflowId] = wf
 			}
 
 			err := wf.AddTask(&t)
@@ -287,7 +307,7 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 				a.log.Error("failed adding task to workflow", "error", err)
 			}
 		default:
-			a.log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.Workflow, "runtime", t.Metadata.ReName)
+			a.log.Error("unrecognized task type", "type", t.Type, "tid", t.Metadata.WorkflowId, "runtime", t.Metadata.ReName)
 		}
 	}
 
@@ -313,14 +333,14 @@ func (a *Agent) splitTasks(tasks task.Tasks) (task.Tasks, []*workflow.Workflow) 
 	return agentTasks, workflows
 }
 
-func (a *Agent) handleAgentTask(t *task.Task) {
-	a.log.Info("executing agent task", "tid", t.Metadata.Workflow)
+func (a *Agent) handleAgentTask(ctx context.Context, t *task.Task) {
+	a.log.Info("executing agent task", "tid", t.Metadata.WorkflowId)
 	a.wg.Add(1)
 	go func() {
 		defer a.wg.Done()
 		txn := task.NewTaskTransaction(a.monitor, t.Metadata)
 		defer txn.End()
-		err := a.executeAgentTask(t)
+		err := a.executeAgentTask(ctx, t)
 
 		if err != nil {
 			a.log.Error(err.Error())
@@ -330,7 +350,7 @@ func (a *Agent) handleAgentTask(t *task.Task) {
 	}()
 }
 
-func (a *Agent) executeAgentTask(t *task.Task) error {
+func (a *Agent) executeAgentTask(ctx context.Context, t *task.Task) error {
 	t.Timeline.Started = time.Now()
 	specJSON, err := json.Marshal(t.Spec)
 	if err != nil {
@@ -348,9 +368,12 @@ func (a *Agent) executeAgentTask(t *task.Task) error {
 	}
 
 	err = e(&spec, a.log)
+	if t.Metadata.ShouldReportStatus {
+		a.reportTaskStatus(ctx, *t, err)
+	}
 	sinceCreation, inRunner, processed := t.GetLatency()
 	a.log.Info("Done handling agent task",
-		"tid", t.Metadata.Workflow,
+		"tid", t.Metadata.WorkflowId,
 		"time since creation", sinceCreation,
 		"time in runner", inRunner,
 		"processing time", processed,
@@ -410,7 +433,7 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 func groupTasks(tasks task.Tasks) map[string]task.Tasks {
 	candidates := map[string]task.Tasks{}
 	for _, task := range tasks {
-		name := task.Metadata.Workflow
+		name := task.Metadata.WorkflowId
 		if name == "" {
 			// If for some reason the task is not related to any workflow
 			// Might heppen in older versions on Codefresh

@@ -37,6 +37,7 @@ runtimeScheduler:
     CR_6177_FIXER: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.CR_6177_FIXER) | squote }}
     GC_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.GC_BUILDER_IMAGE) | squote }}
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.COSIGN_IMAGE_SIGNER_IMAGE) | squote }}
+    RUNTIME_CHART_VERSION: {{ .Chart.Version }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}

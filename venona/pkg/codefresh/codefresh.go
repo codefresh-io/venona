@@ -34,6 +34,7 @@ type (
 	// Codefresh API client
 	Codefresh interface {
 		Tasks(ctx context.Context) (task.Tasks, error)
+		ReportTaskStatus(ctx context.Context, id string, status task.TaskStatus) error
 		ReportStatus(ctx context.Context, status AgentStatus) error
 		Host() string
 	}
@@ -79,7 +80,10 @@ func New(opts Options) Codefresh {
 
 // Tasks get from Codefresh all latest tasks
 func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
-	res, err := c.doRequest(ctx, "GET", nil, "api", "agent", c.agentID, "tasks")
+	query := map[string]string{
+		"waitForStatusReport": "true",
+	}
+	res, err := c.doRequest(ctx, "GET", nil, query, "api", "agent", c.agentID, "tasks")
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +94,20 @@ func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
 	}
 
 	return tasks, nil
+}
+
+func (c cf) ReportTaskStatus(ctx context.Context, id string, status task.TaskStatus) error {
+	s, err := status.Marshal()
+	if err != nil {
+		return fmt.Errorf("failed marshalling when reporting task status: %w", err)
+	}
+
+	_, err = c.doRequest(ctx, "POST", bytes.NewBuffer(s), nil, "api", "agent", c.agentID, "tasks", string(id), "statuses")
+	if err != nil {
+		return fmt.Errorf("failed sending request when reporting task status: %w", err)
+	}
+
+	return nil
 }
 
 // Host returns the host
@@ -104,7 +122,7 @@ func (c cf) ReportStatus(ctx context.Context, status AgentStatus) error {
 		return fmt.Errorf("failed marshalling when reporting status: %w", err)
 	}
 
-	_, err = c.doRequest(ctx, "PUT", bytes.NewBuffer(s), "api", "agent", c.agentID, "status")
+	_, err = c.doRequest(ctx, "PUT", bytes.NewBuffer(s), nil, "api", "agent", c.agentID, "status")
 	if err != nil {
 		return fmt.Errorf("failed sending request when reporting status: %w", err)
 	}
@@ -119,7 +137,7 @@ func (c cf) buildErrorFromResponse(status int, body []byte) error {
 	}
 }
 
-func (c cf) prepareURL(paths ...string) (*url.URL, error) {
+func (c cf) prepareURL(query map[string]string, paths ...string) (*url.URL, error) {
 	u, err := url.Parse(c.host)
 	if err != nil {
 		return nil, err
@@ -135,11 +153,18 @@ func (c cf) prepareURL(paths ...string) (*url.URL, error) {
 
 	u.Path = path.Join(accPath...)
 	u.RawPath = path.Join(accRawPath...)
+
+	rawQuery := url.Values{}
+	for k, v := range query {
+		rawQuery.Set(k, v)
+	}
+	u.RawQuery = rawQuery.Encode()
+
 	return u, nil
 }
 
-func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http.Request, error) {
-	u, err := c.prepareURL(apis...)
+func (c cf) prepareRequest(method string, data io.Reader, query map[string]string, apis ...string) (*http.Request, error) {
+	u, err := c.prepareURL(query, apis...)
 	if err != nil {
 		return nil, err
 	}
@@ -158,8 +183,8 @@ func (c cf) prepareRequest(method string, data io.Reader, apis ...string) (*http
 	return req, nil
 }
 
-func (c cf) doRequest(ctx context.Context, method string, body io.Reader, apis ...string) ([]byte, error) {
-	req, err := c.prepareRequest(method, body, apis...)
+func (c cf) doRequest(ctx context.Context, method string, body io.Reader, query map[string]string, apis ...string) ([]byte, error) {
+	req, err := c.prepareRequest(method, body, query, apis...)
 	if err != nil {
 		return nil, err
 	}
