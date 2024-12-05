@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.2.2
+version: 7.3.0
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update engine (--cache-to support in build step)"
+      description: "Upgraded `venona` with improved resource cleanup after build finish"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
