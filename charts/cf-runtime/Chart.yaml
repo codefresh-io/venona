@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.3.1
+version: 7.3.2
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Fix TLS secret in ingress template for app-proxy"
+    - kind: changed
+      description: "Update docker-builder (--cache-to support in build step)"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
