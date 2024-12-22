@@ -56,11 +56,16 @@ var (
 		Name:      "queue_size",
 		Help:      "Current number of waiting tasks",
 	})
-	getTasksDuration = prometheus.NewHistogram(prometheus.HistogramOpts{
+	getTasksDuration = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: runnerNamespace,
 		Name:      "get_tasks_duration_sec",
 		Help:      "How long each GetTasks request takes (seconds)",
-		Buckets:   []float64{0.25, 0.5, 1, 2, 3, 6},
+		Buckets:   []float64{0.25, 0.5, 1, 2, 3, 6, 12, 30, 60},
+	}, []string{"status"})
+	getTasksRequests = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: runnerNamespace,
+		Name:      "get_tasks_requests",
+		Help:      "Number of GetTasks requests",
 	})
 	handlingTimeSinceCreation = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: runnerNamespace,
@@ -136,10 +141,15 @@ func IncWorkflowRetries(podName string) {
 	wfTaskRetries.With(labels).Inc()
 }
 
-func ObserveGetTasks(start time.Time) {
+func ObserveGetTasks(start time.Time, status string) {
 	end := time.Now()
 	diff := end.Sub(start)
-	getTasksDuration.Observe(diff.Seconds())
+	labels := prometheus.Labels{"status": status}
+	getTasksDuration.With(labels).Observe(diff.Seconds())
+}
+
+func IncGetTasksRequests() {
+	getTasksRequests.Inc()
 }
 
 func ObserveAgentTaskMetrics(agentType string, sinceCreation, inRunner, processed time.Duration) {
