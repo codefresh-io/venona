@@ -262,7 +262,6 @@ func (a *Agent) reportTaskStatus(ctx context.Context, taskDef task.Task, err err
 }
 
 func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow) {
-	metrics.IncGetTasksRequests()
 	tasks := a.pullTasks(ctx)
 	return a.splitTasks(tasks)
 }
