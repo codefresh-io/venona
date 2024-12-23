@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"path"
 
+	"github.com/codefresh-io/go/venona/pkg/metrics"
 	"github.com/codefresh-io/go/venona/pkg/task"
 )
 
@@ -80,6 +81,7 @@ func New(opts Options) Codefresh {
 
 // Tasks get from Codefresh all latest tasks
 func (c cf) Tasks(ctx context.Context) (task.Tasks, error) {
+	metrics.IncGetTasksRequests()
 	query := map[string]string{
 		"waitForStatusReport": "true",
 	}
