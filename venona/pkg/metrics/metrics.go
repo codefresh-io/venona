@@ -111,6 +111,7 @@ func Register(reg *prometheus.Registry) {
 		wfTaskRetries,
 		queueSize,
 		getTasksDuration,
+		getTasksRequests,
 		handlingTimeSinceCreation,
 		handlingTimeInRunner,
 		agentProcessingTime,
