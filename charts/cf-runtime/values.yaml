@@ -514,9 +514,9 @@ runtime:
     # -- Set system(base) runtime images.
     # @default -- See below.
     runtimeImages:
-      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.28.1-1.5.0@sha256:362977564c096b7c2c007b8478ec87cac13d781839adc271d858290213bd89f2
+      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.32.1-1.5.1@sha256:c57c66edfdbfec5218b36d587f108501b3d9756893af04a2e8045b4f2d6fae94
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.8@sha256:db1e1e7f038262cb6051b01c20cde276150ae731479e5d1e0aef39d08fc72ae5
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.4.0@sha256:5ca40cfffc0aeb7d06e964cc084f67d9acb678ee3bf60cab0abbe73f056cf7ff
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.4.1@sha256:d0e4b679ac83d092bc9424d49741ac6153521b4ab72bf6f7603b70de4b7afd12
       DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.18@sha256:1a15c3ae0952d3986de7866a3def8ac7e3e39f668fe87fd46c63d886ca06c6d7
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.16@sha256:05efc1af8b1196f1b9b3f0781b4dcc1aa2cdd0ffc1347ee5fa81b16d029ec5c2
       DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.15@sha256:3a3e90cd10801c7ec0d3cf3816d0dcc90894d5d1771448c43f67215d90da5eca
