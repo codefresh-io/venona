@@ -269,7 +269,11 @@ func (a *Agent) getTasks(ctx context.Context) (task.Tasks, []*workflow.Workflow)
 func (a *Agent) pullTasks(ctx context.Context) task.Tasks {
 	start := time.Now()
 	tasks, err := a.cf.Tasks(ctx)
-	metrics.ObserveGetTasks(start)
+	status := "success"
+	if err != nil {
+		status = "error"
+	}
+	metrics.ObserveGetTasks(start, status)
 
 	if err != nil {
 		a.log.Error("Failed pulling tasks", "error", err)
