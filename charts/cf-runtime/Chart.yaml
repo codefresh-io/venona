@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.3.3
+version: 7.3.4
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "fixed yaml pre-processor within engine (`fail_fast` flag for post-hooks)"
+    - kind: security
+      description: "updating 'fs-ops' 'docker-builder' 'compose' with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
