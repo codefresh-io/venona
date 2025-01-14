@@ -514,7 +514,7 @@ runtime:
     # -- Set system(base) runtime images.
     # @default -- See below.
     runtimeImages:
-      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.32.1-1.5.1@sha256:c57c66edfdbfec5218b36d587f108501b3d9756893af04a2e8045b4f2d6fae94
+      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.32.2-1.5.2@sha256:9177054614f6db006a3500d2b9b8d2cafac4073ce891929d93e117714fccbd4b
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.11.8@sha256:db1e1e7f038262cb6051b01c20cde276150ae731479e5d1e0aef39d08fc72ae5
       DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.4.1@sha256:d0e4b679ac83d092bc9424d49741ac6153521b4ab72bf6f7603b70de4b7afd12
       DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.18@sha256:1a15c3ae0952d3986de7866a3def8ac7e3e39f668fe87fd46c63d886ca06c6d7
