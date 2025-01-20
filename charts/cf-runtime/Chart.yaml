@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.4.0
+version: 7.4.1
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: added
-      description: "added monitoring for the docker images with manifest v1 Schema"
+    - kind: fixed
+      description: "Set `METRICS_PROMETHEUS_SCRAPE_TIMEOUT` to 15000 ms"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
