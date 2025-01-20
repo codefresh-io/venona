@@ -1216,7 +1216,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.env.METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS | bool | `false` | Enable legacy metrics |
 | runtime.engine.env.METRICS_PROMETHEUS_HOST | string | `"0.0.0.0"` | Host for Prometheus metrics server |
 | runtime.engine.env.METRICS_PROMETHEUS_PORT | int | `9100` | Port for Prometheus metrics server |
-| runtime.engine.env.METRICS_PROMETHEUS_SCRAPE_TIMEOUT | string | `"15000"` | The timeout till the engine waits for Prometheus to pull the latest metrics before engine shuts down |
+| runtime.engine.env.METRICS_PROMETHEUS_SCRAPE_TIMEOUT | string | `"15000"` | The timeout till the engine waits for Prometheus to pull the latest metrics before engine shuts down (in milliseconds) |
 | runtime.engine.env.TRUSTED_QEMU_IMAGES | string | `""` | Trusted QEMU images used for docker builds - when left blank only 'tonistiigi/binfmt' is trusted. |
 | runtime.engine.image | object | `{"digest":"sha256:b1c7ab96aeaf4a092315045cd205b580aece9a565d0852a5d2a055a0b09b33a7","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.176.4"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |

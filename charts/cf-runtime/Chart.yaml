@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "the default `METRICS_PROMETHEUS_SCRAPE_TIMEOUT` value"
+      description: "Set `METRICS_PROMETHEUS_SCRAPE_TIMEOUT` to 15000 ms"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
