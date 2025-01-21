@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.4.1
+version: 7.4.2
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "Set `METRICS_PROMETHEUS_SCRAPE_TIMEOUT` to 15000 ms"
+      description: "reverted engine version back to 1.176.3"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
