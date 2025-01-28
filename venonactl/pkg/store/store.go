@@ -202,7 +202,7 @@ func (s *Values) BuildValues() map[string]interface{} {
 			"AppName":     MonitorApplicationName,
 			"Image": map[string]string{
 				"Name": "codefresh/cf-k8s-agent",
-				"Tag":  "1.3.19",
+				"Tag":  "1.3.20",
 			},
 			"Resources": s.Monitor.Resources,
 		},
