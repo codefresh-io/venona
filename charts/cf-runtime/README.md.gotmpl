@@ -11,6 +11,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Install Chart](#install-chart)
 - [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
+  - [⚠️ Known issues](#⚠️-known-issues)
   - [To 2.x](#to-2-x)
   - [To 3.x](#to-3-x)
   - [To 4.x](#to-4-x)
@@ -103,6 +104,12 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing).
 
 ## Upgrade Chart
+
+### ⚠️ Known issues
+
+Please check the following known issues before upgrading the chart:
+
+- Charts **7.1.1–7.4.3** have a bug because of which the following feature does not work: [“Secret Store — Kubernetes-Runtime Secret”](https://codefresh.io/docs/docs/integrations/secret-storage/#secret-store-setup-for-codefresh-runner-installation).
 
 ### To 2.x
 
@@ -1062,4 +1069,3 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 {{ template "chart.requirementsSection" . }}
 
 {{ template "chart.valuesSection" . }}
-
