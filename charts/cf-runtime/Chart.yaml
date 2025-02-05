@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.5.0
+version: 7.5.1
 keywords:
   - codefresh
   - runner
@@ -14,15 +14,11 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: added
-      description: "New metric codefresh_engine_deprecated_images_pulled_total{account_name, pipeline_id, workflow, image_name} has been added to the engine to track pulling of deprecated Docker images with manifest v1 Schema. It's recommended to increase the value of \"METRICS_PROMETHEUS_SCRAPE_TIMEOUT\" to \"90000\" for that."
-    - kind: added
-      description: "Report full error stack for step errors to the platform"
-    - kind: fixed
-      description: "Fixed an error on fetching secrets from Kubernetes-Runtime Secret Store"
+    - kind: security
+      description: "updated cf-docker-builder with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
