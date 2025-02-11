@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.5.2
+version: 7.5.3
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "updated engine with security fixes"
-    - kind: fixed
-      description: "Fixed resolving ECR credentials from service account during build step"
+      description: "updated template_engine(pikolo) with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
