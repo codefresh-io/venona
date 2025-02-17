@@ -229,7 +229,7 @@ volumeProvisioner:
         registry: docker.io
         repository: alpine
         tag: 3.18
-        digest: sha256:dd60c75fba961ecc5e918961c713f3c42dd5665171c58f9b2ef5aafe081ad5a0
+        digest: sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f
       resources: {}
       securityContext:
         runAsUser: 0 # auto
@@ -483,7 +483,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: 3.18
-        digest: sha256:dd60c75fba961ecc5e918961c713f3c42dd5665171c58f9b2ef5aafe081ad5a0
+        digest: sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f
       resources: {}
       securityContext:
         runAsUser: 0 # auto
@@ -667,8 +667,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.47
-    digest: sha256:324a9b89924152cce195c7239ddd8501c8aa5f901d19bc4d9f3936cbe5dac14f
+    tag: 0.0.50
+    digest: sha256:cc5054ec572a33bb3545cb065c2082ecf988113efffe8235e57ed93d27b861a6
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
@@ -745,8 +745,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.20
-    digest: sha256:ae33e516c8c78bed0f18fd27f2986f4cdaa55eab6f0fe54e7c842a385dde16dc
+    tag: 1.3.21
+    digest: sha256:3cc7b3d41f841604133197a44f016db499f3e91e26448da36ce739a0b1171d05
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
