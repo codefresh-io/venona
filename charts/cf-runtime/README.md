@@ -111,6 +111,8 @@ Please check the following known issues before upgrading the chart:
 
 - Charts **7.1.1–7.4.3** have a bug because of which the following feature does not work: [“Secret Store — Kubernetes-Runtime Secret”](https://codefresh.io/docs/docs/integrations/secret-storage/#secret-store-setup-for-codefresh-runner-installation).
 
+- There is [known issue](https://github.com/hashicorp/consul/issues/20722) of **hashicorp/consul** behaviour. If consul fails with the error `refusing to rejoin cluster because the server has been offline for more than the configured server_rejoin_age_max - consider wiping your data dir` after runtime upgrade, try to wipe out the consul volume with config data.
+
 ### To 2.x
 
 This major release renames and deprecated several values in the chart. Most of the workload templates have been refactored.
