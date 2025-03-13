@@ -56,7 +56,7 @@ tests:
                 METRICS_PROMETHEUS_HOST: '0.0.0.0'
                 METRICS_PROMETHEUS_PORT: '9100'
                 METRICS_PROMETHEUS_SCRAPE_TIMEOUT: '15000'
-                TRUSTED_QEMU_IMAGES: ''
+                TRUSTED_QEMU_IMAGES: 'tonistiigi/binfmt'
                 COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverride'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
                 DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'

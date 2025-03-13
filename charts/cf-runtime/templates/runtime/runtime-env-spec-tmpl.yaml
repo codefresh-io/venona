@@ -25,6 +25,7 @@ runtimeScheduler:
   {{- end }}
     COMPOSE_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.COMPOSE_IMAGE) | squote }}
     CONTAINER_LOGGER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.CONTAINER_LOGGER_IMAGE) | squote }}
+    DEFAULT_QEMU_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.DEFAULT_QEMU_IMAGE) | squote }}
     DOCKER_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_BUILDER_IMAGE) | squote }}
     DOCKER_PULLER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PULLER_IMAGE) | squote }}
     DOCKER_PUSHER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PUSHER_IMAGE) | squote }}
