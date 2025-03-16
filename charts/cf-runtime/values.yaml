@@ -492,8 +492,8 @@ runtime:
     # -- Set image.
     image:
       registry: quay.io
-      repository: codefresh/dev/engine
-      tag: featcr-27843
+      repository: codefresh/engine
+      tag: 1.177.5
       pullPolicy: IfNotPresent
       digest: sha256:33575331eb97c608ceecf7a80af92b93d395cc859dc869065c668a63a1f1ff9d
     # -- Set container command.
@@ -516,7 +516,7 @@ runtime:
     runtimeImages:
       COMPOSE_IMAGE: quay.io/codefresh/compose:v2.32.2-1.5.2@sha256:9177054614f6db006a3500d2b9b8d2cafac4073ce891929d93e117714fccbd4b
       CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.12.2@sha256:b3cbe2088f8fd0c48a0fa6df6c9ab8ad9d1d3c840a57f2c89520a655e2a8c116
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/dev/cf-docker-builder:featcr-27843@sha256:cf9b5a70448af54d00642790dd46d6c19a084b96ee26b40ad6dabfc1c1b780d5
+      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.4.3@sha256:cf9b5a70448af54d00642790dd46d6c19a084b96ee26b40ad6dabfc1c1b780d5
       DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.18@sha256:1a15c3ae0952d3986de7866a3def8ac7e3e39f668fe87fd46c63d886ca06c6d7
       DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:6.0.16@sha256:05efc1af8b1196f1b9b3f0781b4dcc1aa2cdd0ffc1347ee5fa81b16d029ec5c2
       DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:1.3.15@sha256:3a3e90cd10801c7ec0d3cf3816d0dcc90894d5d1771448c43f67215d90da5eca
