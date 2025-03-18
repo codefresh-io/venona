@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.5.7
+version: 7.5.8
 keywords:
   - codefresh
   - runner
@@ -14,11 +14,13 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: "QEMU image for buildx was pinned to qemu-v9.2.2 instead of using latest tag"
+    - kind: security
+      description: "updated cf-app-proxy with security fixes"
+    - kind: security
+      description: "updated cf-cosign with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
