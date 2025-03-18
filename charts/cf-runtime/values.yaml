@@ -527,7 +527,7 @@ runtime:
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.2@sha256:97874aefc46b58caf5b9d0edcfd2d6742db247e671424433363a1367020a8a65
       CR_6177_FIXER: alpine:edge@sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
       GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:0.5.3@sha256:33ac914e6b844909f188a208cf90e569358cafa5aaa60f49848f49d99bcaf875
-      COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:2.4.0-cf.2@sha256:5e0993207aa809c25ed70cf89af444d9720892fb4a29deb82db45618b0cae4a9
+      COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:2.4.3-cf.1@sha256:667352652fa6d26053b504b85e885a6d8a28f884fdeb80e5704cdf73e6586146
       DEFAULT_QEMU_IMAGE: tonistiigi/binfmt:qemu-v9.2.2@sha256:1b804311fe87047a4c96d38b4b3ef6f62fca8cd125265917a9e3dc3c996c39e6
     # -- Set additional env vars.
     env:
@@ -668,8 +668,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.50
-    digest: sha256:cc5054ec572a33bb3545cb065c2082ecf988113efffe8235e57ed93d27b861a6
+    tag: 0.0.51
+    digest: sha256:aa8e19fafc10d9901604ec4e307d4190614d4900802ec636b3c31103aece4b35
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
