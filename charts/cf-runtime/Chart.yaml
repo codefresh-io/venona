@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "downgraded cf-app-proxy version because of a bug in retrieving the list of repositories for Bitbucket"
+      description: "fixed a bug in retrieving the list of repositories for Bitbucket through cf-app-proxy"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
