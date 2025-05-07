@@ -159,8 +159,8 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 1.35.2
-    digest: sha256:ede6f663c912a08b7d335b5ec5518ccc266b27c431d0854d22971005992adc5d
+    tag: 1.35.4
+    digest: sha256:94323807949da518a051fc8d95947da32f9276bfb78388cb133b2f38de818838
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -493,9 +493,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.177.6
+      tag: 1.177.7
       pullPolicy: IfNotPresent
-      digest: sha256:a7494db18df5f7541b32b9747c920dba4db3e11e6317de9827342d34ae32f6af
+      digest: sha256:b933b17a6cd79c861c170eb6d9ddc0695e34954651530136355d3592f2e8874c
     # -- Set container command.
     command:
       - npm
