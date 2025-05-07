@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.5.11
+version: 7.5.12
 keywords:
   - codefresh
   - runner
@@ -18,17 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "updated k8s-agent with security fixes"
+      description: "updated engine with security fixes"
     - kind: security
-      description: "updated docker-builder with security fixes"
-    - kind: security
-      description: "updated docker-puller with security fixes"
-    - kind: security
-      description: "updated docker-pusher with security fixes"
-    - kind: security
-      description: "updated template-engine with security fixes"
-    - kind: security
-      description: "updated kubectl with security fixes"
+      description: "updated dind-volume-provisioner with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
