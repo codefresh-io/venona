@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.5.12](https://img.shields.io/badge/Version-7.5.12-informational?style=flat-square)
+![Version: 7.6.0](https://img.shields.io/badge/Version-7.6.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1098,6 +1098,17 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | appProxy.serviceAccount.namespaced | bool | `true` | Use Role(true)/ClusterRole(true) |
 | appProxy.tolerations | list | `[]` | Set tolerations |
 | appProxy.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
+| ballast | object | See below | Ballast parameters |
+| ballast.dind.image | object | `{"digest":"sha256:ee6521f290b2168b6e0935a181d4cff9be1ac3f505666ef0e3c98fae8199917a","registry":"registry.k8s.io","repository":"pause","tag":3.1}` | Set image |
+| ballast.dind.podAnnotations | object | `{}` | Set pod annotations |
+| ballast.dind.podSecurityContext | object | `{}` | Add additional env vars |
+| ballast.dind.replicasCount | int | `1` | Set number of pods |
+| ballast.dind.resources | object | `{}` | Set resources |
+| ballast.engine.image | object | `{"digest":"sha256:ee6521f290b2168b6e0935a181d4cff9be1ac3f505666ef0e3c98fae8199917a","registry":"registry.k8s.io","repository":"pause","tag":3.1}` | Set image |
+| ballast.engine.podAnnotations | object | `{}` | Set pod annotations |
+| ballast.engine.podSecurityContext | object | `{}` | Add additional env vars |
+| ballast.engine.replicasCount | int | `1` | Set number of pods |
+| ballast.engine.resources | object | `{}` | Set resources |
 | dockerRegistry | string | `""` |  |
 | event-exporter | object | See below | Event exporter parameters |
 | event-exporter.affinity | object | `{}` | Set affinity |
@@ -1118,7 +1129,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.serviceAccount.name | string | `""` | Override service account name |
 | event-exporter.tolerations | list | `[]` | Set tolerations |
 | event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
-| extraResources | list | `[]` | Array of extra objects to deploy with the release |
+| extraResources | list | `[]` |  |
 | fullnameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters |
 | global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |

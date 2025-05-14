@@ -878,7 +878,41 @@ event-exporter:
   tolerations: []
   # -- Set affinity
   affinity: {}
-# -- Array of extra objects to deploy with the release
+# -- Ballast parameters
+# @default -- See below
+ballast:
+  dind:
+    enabled: false
+    # -- Set number of pods
+    replicasCount: 1
+    # -- Set pod annotations
+    podAnnotations: {}
+    # -- Set image
+    image:
+      registry: registry.k8s.io
+      repository: pause
+      tag: 3.10
+      digest: sha256:ee6521f290b2168b6e0935a181d4cff9be1ac3f505666ef0e3c98fae8199917a
+    # -- Add additional env vars
+    podSecurityContext: {}
+    # -- Set resources
+    resources: {}
+  engine:
+    enabled: false
+    # -- Set number of pods
+    replicasCount: 1
+    # -- Set pod annotations
+    podAnnotations: {}
+    # -- Set image
+    image:
+      registry: registry.k8s.io
+      repository: pause
+      tag: 3.10
+      digest: sha256:ee6521f290b2168b6e0935a181d4cff9be1ac3f505666ef0e3c98fae8199917a
+    # -- Add additional env vars
+    podSecurityContext: {}
+    # -- Set resources
+    resources: {}
 extraResources: []
 # E.g.
 # extraResources:
