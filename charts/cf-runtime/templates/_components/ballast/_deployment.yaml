@@ -23,6 +23,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      priorityClassName: cf-ballast
       {{- include (printf "%s.image.pullSecrets" $cfCommonTplSemver) . | nindent 8 }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
