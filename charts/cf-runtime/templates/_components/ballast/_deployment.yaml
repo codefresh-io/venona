@@ -24,6 +24,9 @@ spec:
       {{- end }}
     spec:
       priorityClassName: cf-ballast
+      {{- if .Values.schedulerName }}
+      schedulerName: {{ .Values.schedulerName }}
+      {{- end }}
       {{- include (printf "%s.image.pullSecrets" $cfCommonTplSemver) . | nindent 8 }}
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}

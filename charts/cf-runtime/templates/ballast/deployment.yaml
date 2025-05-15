@@ -9,6 +9,7 @@
     {{- $_ := set $ballastContext.Values "nodeSelector" (get (index $ "Values" "runtime" $key) "nodeSelector") }}
     {{- $_ := set $ballastContext.Values "affinity"     (get (index $ "Values" "runtime" $key) "affinity") }}
     {{- $_ := set $ballastContext.Values "tolerations"  (get (index $ "Values" "runtime" $key) "tolerations") }}
+    {{- $_ := set $ballastContext.Values "schedulerName" (get (index $ "Values" "runtime" $key) "schedulerName") }}
 
     {{- if $ballastContext.Values.enabled }}
     {{- include "ballast.resources.deployment" $ballastContext }}
