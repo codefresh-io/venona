@@ -913,6 +913,7 @@ ballast:
     podSecurityContext: {}
     # -- Set resources
     resources: {}
+# -- Array of extra objects to deploy with the release
 extraResources: []
 # E.g.
 # extraResources:
