@@ -32,7 +32,7 @@ spec:
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       containers:
-      - name: wait
+      - name: pause
         image: {{ include (printf "%s.image.name" $cfCommonTplSemver) (dict "image" .Values.image "context" .) }}
         imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
         resources:
