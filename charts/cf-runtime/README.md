@@ -1129,7 +1129,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.serviceAccount.name | string | `""` | Override service account name |
 | event-exporter.tolerations | list | `[]` | Set tolerations |
 | event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
-| extraResources | list | `[]` |  |
+| extraResources | list | `[]` | Array of extra objects to deploy with the release |
 | fullnameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters |
 | global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
