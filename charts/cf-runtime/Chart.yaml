@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.6.1
+version: 7.7.0
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: "update engine, fs-ops, logger, debugger with cache optimization"
+    - kind: added
+      description: 'Now cf_export command with "--mask" option hides secret values in all further steps of pipelines.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
