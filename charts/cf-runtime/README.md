@@ -1236,7 +1236,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.env.METRICS_PROMETHEUS_PORT | int | `9100` | Port for Prometheus metrics server |
 | runtime.engine.env.METRICS_PROMETHEUS_SCRAPE_TIMEOUT | string | `"15000"` | The timeout till the engine waits for Prometheus to pull the latest metrics before engine shuts down (in milliseconds) |
 | runtime.engine.env.TRUSTED_QEMU_IMAGES | string | `"tonistiigi/binfmt"` | Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.DEFAULT_QEMU_IMAGE value |
-| runtime.engine.image | object | `{"digest":"sha256:b933b17a6cd79c861c170eb6d9ddc0695e34954651530136355d3592f2e8874c","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.177.7"}` | Set image. |
+| runtime.engine.image | object | `{"digest":"sha256:a00c29cb523c18896b0e069624e8cc32f84450e495330a409620dbbcf1339c8e","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"1.178.0"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |
 | runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.engine.podLabels | object | `{}` | Set pod labels. |

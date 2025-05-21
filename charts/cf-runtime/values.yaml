@@ -493,9 +493,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.177.7
+      tag: 1.178.0
       pullPolicy: IfNotPresent
-      digest: sha256:b933b17a6cd79c861c170eb6d9ddc0695e34954651530136355d3592f2e8874c
+      digest: sha256:a00c29cb523c18896b0e069624e8cc32f84450e495330a409620dbbcf1339c8e
     # -- Set container command.
     command:
       - npm
@@ -523,7 +523,7 @@ runtime:
       FS_OPS_IMAGE: quay.io/codefresh/fs-ops:1.2.8@sha256:dc05888d84a959787a738caef914f83aa7392ff49c16767e612a29e180826f35
       GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:10.2.0@sha256:a3ec854823f17d0fd817d978219122e644b1abd6db778fd835688fcb6d88c515
       KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:16.1.11@sha256:b6b3fc6cc5fad3ba9e36055278ce99a74a86876be116574503c6fbb4c1b4aa76
-      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.7@sha256:3391822b7ad9835cc2a3a0ce5aaa55774ca110a8682d9512205dea24f438718a
+      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:1.3.9@sha256:37975653b4ef5378bd1e38d453c7dac4721cba1c1977a5ca6118a67b98a47925
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:0.14.3@sha256:7f11960d65cbc63cdb444bfa6ccb5b5eb29cfc517a1290be3998ea5444087e1f
       CR_6177_FIXER: alpine:edge@sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
       GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:0.5.3@sha256:33ac914e6b844909f188a208cf90e569358cafa5aaa60f49848f49d99bcaf875
