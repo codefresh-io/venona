@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.7.0
+version: 7.7.1
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,10 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: added
-      description: 'Now cf_export command with "--mask" option hides secret values in all further steps of pipelines.'
+    - kind: security
+      description: "updated cf-docker-builder with security fixes"
+    - kind: security
+      description: "updated docker-tag-pusher with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
