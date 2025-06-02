@@ -668,8 +668,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.54
-    digest: sha256:140117c0e6ac41d64f80a537080ae134b21922e97f346e67237b72f07ffd0320
+    tag: 0.0.55
+    digest: sha256:47e56203a2b091986bce51bed5395aaccd8c4ec6e1a8f60060919f4f5fc0ab66
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
