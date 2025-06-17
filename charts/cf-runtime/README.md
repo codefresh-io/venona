@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.7.3](https://img.shields.io/badge/Version-7.7.3-informational?style=flat-square)
+![Version: 7.7.4](https://img.shields.io/badge/Version-7.7.4-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1259,6 +1259,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
+| runtime.kubeconfigName | string | `""` | (for On-Premise only) Set kubeconfig name |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
