@@ -1,6 +1,6 @@
 {{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
-{{- $kubeconfigFilePath := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
+{{- $kubeconfigFilePath := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $name := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}

@@ -394,6 +394,8 @@ runtime:
   agent: true
   # -- (for On-Premise only) Set inCluster runtime
   inCluster: true
+  # -- (for On-Premise only) Set kubeconfig name
+  kubeconfigName: ""
   # -- (for On-Premise only) Assign accounts to runtime (list of account ids)
   accounts: []
   # -- Parameters for DinD (docker-in-docker) pod (aka "runtime" pod).
