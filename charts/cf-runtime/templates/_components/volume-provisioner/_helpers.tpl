@@ -15,11 +15,11 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{- define "dind-volume-cleanup.fullname" -}}
-    {{- coalesce (index "Values" "dind-volume-cleanup" "fullnameOverride") (printf "%s-%s" (include "cf-runtime.fullname" .) "volume-cleanup" | trunc 52 | trimSuffix "-") }}
+    {{- coalesce (index "Values" "fullnameOverride") (printf "%s-%s" (include "cf-runtime.fullname" .) "volume-cleanup" | trunc 52 | trimSuffix "-") }}
 {{- end }}
 
 {{- define "dind-lv-monitor.fullname" -}}
-    {{- coalesce (index "Values" "dind-lv-monitor" "fullnameOverride") (printf "%s-%s" (include "cf-runtime.fullname" .) "lv-monitor" | trunc 63 | trimSuffix "-") }}
+    {{- coalesce (index "Values" "fullnameOverride") (printf "%s-%s" (include "cf-runtime.fullname" .) "lv-monitor" | trunc 63 | trimSuffix "-") }}
 {{- end }}
 
 {{/*
