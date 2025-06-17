@@ -1,6 +1,6 @@
 {{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
-{{- $kubeconfigFilePath := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
+{{- $kubeconfigFilePath := coalesce .Values.runtime.kubeconfigFilePath (printf "/etc/kubeconfig/%s" (include "runtime.runtime-environment-spec.runtime-name" .)) -}}
 {{- $name := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
@@ -58,7 +58,7 @@ runtimeScheduler:
     kubeconfigFilePath: null
       {{- else }}
     name: {{ $name }}
-    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+    kubeconfigFilePath: {{ $kubeconfigFilePath }}
       {{- end }}
     {{- end }}
     {{- with $engineContext.nodeSelector }}
@@ -117,7 +117,7 @@ dockerDaemonScheduler:
     kubeconfigFilePath: null
       {{- else }}
     name: {{ $name }}
-    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+    kubeconfigFilePath: {{ $kubeconfigFilePath }}
       {{- end }}
     {{- end }}
     {{- with $dindContext.nodeSelector }}

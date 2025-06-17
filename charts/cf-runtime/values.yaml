@@ -400,7 +400,8 @@ runtime:
   agent: true
   # -- (for On-Premise only) Set inCluster runtime
   inCluster: true
-  # -- (for On-Premise only) Set kubeconfig name
+  # -- (for On-Premise only) Set kubeconfig name and path
+  kubeconfigFilePath: ""
   kubeconfigName: ""
   # -- (for On-Premise only) Assign accounts to runtime (list of account ids)
   accounts: []

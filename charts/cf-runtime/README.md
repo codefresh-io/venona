@@ -17,7 +17,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 4.x](#to-4-x)
   - [To 5.x](#to-5-x)
   - [To 6.x](#to-6-x)
-  - [To 7.x](#to-7-x) 
+  - [To 7.x](#to-7-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -980,7 +980,7 @@ clusters:
     certificate-authority-data: ${CLUSTER_CA}
     server: ${CLUSTER_SERVER}
 users:
-- name: ${CLUSTER_NAME}
+- name: codefresh-runtime-user
   user:
     token: ${USER_TOKEN_VALUE}
 EOF
@@ -1259,7 +1259,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
-| runtime.kubeconfigName | string | `""` | (for On-Premise only) Set kubeconfig name |
+| runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
