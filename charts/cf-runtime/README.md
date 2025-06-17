@@ -1286,6 +1286,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
 | storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
 | storage.mountAzureJson | bool | `false` |  |
+| storage.storageClassName | string | `""` | Override storage class name |
 | volumeProvisioner | object | See below | Volume Provisioner parameters |
 | volumeProvisioner.affinity | object | `{}` | Set affinity |
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
