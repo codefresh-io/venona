@@ -11,15 +11,15 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "dind-volume-provisioner.fullname" -}}
-    {{- coalesce .Values.fullnameOverride (printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-") }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "dind-volume-cleanup.fullname" -}}
-    {{- coalesce (index "Values" "fullnameOverride") (printf "%s-%s" (include "cf-runtime.fullname" .) "volume-cleanup" | trunc 52 | trimSuffix "-") }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-cleanup" | trunc 52 | trimSuffix "-" }}
 {{- end }}
 
 {{- define "dind-lv-monitor.fullname" -}}
-    {{- coalesce (index "Values" "fullnameOverride") (printf "%s-%s" (include "cf-runtime.fullname" .) "lv-monitor" | trunc 63 | trimSuffix "-") }}
+    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "lv-monitor" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
