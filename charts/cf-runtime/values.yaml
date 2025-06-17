@@ -148,6 +148,8 @@ runner:
 volumeProvisioner:
   # -- Enable volume-provisioner
   enabled: true
+  # -- Override name
+  fullnameOverride: ""
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
@@ -205,6 +207,7 @@ volumeProvisioner:
   # @default -- See below
   dind-lv-monitor:
     enabled: true
+    fullnameOverride: ""
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
@@ -238,6 +241,7 @@ volumeProvisioner:
   # @default -- See below
   dind-volume-cleanup:
     enabled: true
+    fullnameOverride: ""
     image:
       registry: quay.io
       repository: codefresh/dind-volume-cleanup

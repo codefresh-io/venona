@@ -1292,6 +1292,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
+| volumeProvisioner.fullnameOverride | string | `""` | Override name |
 | volumeProvisioner.image | object | `{"digest":"sha256:94323807949da518a051fc8d95947da32f9276bfb78388cb133b2f38de818838","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.35.4"}` | Set image |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
