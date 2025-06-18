@@ -133,6 +133,17 @@ Codefresh Engine Service Account Name
 {{- end }}
 {{- end }}
 
+{{/*
+Codefresh Dind Service Account Name
+*/}}
+{{- define "runtime.dind-service-account-name" }}
+{{- if and (not .Values.runtime.dind.serviceAccount) }}
+  {{- printf "%s-engine" (include "runtime.fullname" .) }}
+{{- else }}
+  {{- printf "%s" .Values.runtime.dind.serviceAccount }}
+{{- end }}
+{{- end }}
+
 
 {{/*
 Dind daemon configmap name
