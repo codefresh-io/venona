@@ -250,7 +250,7 @@ volumeProvisioner:
     env: {}
     concurrencyPolicy: Forbid
     schedule: "*/10 * * * *"
-    successfulJobsHistory: 3
+    successfulJobsHistory: 1
     failedJobsHistory: 1
     suspend: false
     podAnnotations: {}
