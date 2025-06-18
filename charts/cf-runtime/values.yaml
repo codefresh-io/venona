@@ -627,8 +627,9 @@ runtime:
     ttlSecondsAfterFinished: 180
     env:
       HOME: /tmp
+    # -- CronJob to update the runtime on schedule
     cronjob:
-      enabled: true
+      enabled: false
       schedule: "0/5 * * * *" # Every 5 minutes
   # -- Parameters for `gencerts-dind` post-upgrade/install hook
   # @default -- See below
