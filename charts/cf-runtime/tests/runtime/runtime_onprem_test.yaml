@@ -171,15 +171,24 @@ tests:
                     secretName: tls-secret
               clientCertPath: /etc/ssl/cf/
               volumeMounts:
+                dind-config:
+                  name: dind-config
+                  mountPath: /etc/docker/daemon.json
+                  subPath: daemon.json
+                  readOnly: true
                 codefresh-certs-server:
                   name: codefresh-certs-server
                   mountPath: /etc/ssl/cf
-                  readOnly: false
+                  readOnly: true
               volumes:
                 codefresh-certs-server:
                   name: codefresh-certs-server
                   secret:
-                    secretName: codefresh-certs-server
+                    secretName: cf-runtime-dind-certs
+                dind-config:
+                  name: dind-config
+                  configMap:
+                    name: cf-runtime-dind-config
             extends:
               - system/default
             description: some description

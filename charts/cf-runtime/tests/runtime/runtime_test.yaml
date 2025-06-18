@@ -172,6 +172,16 @@ tests:
                   memory: 2048Mi
                 requests: null
               terminationGracePeriodSeconds: 30
+              userVolumeMounts:
+                my-cert:
+                  mountPath: /etc/ssl/cert
+                  name: cert
+                  readOnly: true
+              userVolumes:
+                my-cert:
+                  name: cert
+                  secret:
+                    secretName: tls-secret
               clientCertPath: /etc/ssl/cf/
               volumeMounts:
                 dind-config:
@@ -192,16 +202,6 @@ tests:
                   name: dind-config
                   configMap:
                     name: cf-runtime-dind-config
-              userVolumeMounts:
-                my-cert:
-                  mountPath: /etc/ssl/cert
-                  name: cert
-                  readOnly: true
-              userVolumes:
-                my-cert:
-                  name: cert
-                  secret:
-                    secretName: tls-secret
             extends:
               - system/default/hybrid/k8s_low_limits
             description: null
