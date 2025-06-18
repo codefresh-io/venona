@@ -55,7 +55,7 @@ tests:
           value: "Forbid"
       - equal:
           path: spec.successfulJobsHistoryLimit
-          value: 3
+          value: 1
       - equal:
           path: spec.failedJobsHistoryLimit
           value: 1
