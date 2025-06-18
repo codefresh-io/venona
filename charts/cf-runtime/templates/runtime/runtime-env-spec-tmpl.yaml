@@ -47,7 +47,7 @@ runtimeScheduler:
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
-    serviceAccount: {{ $engineContext.serviceAccount }}
+    serviceAccount: {{ include "runtime.engine-service-account-name" . }}
     {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
