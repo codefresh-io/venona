@@ -109,6 +109,25 @@ tests:
                   memory: 800Mi
                 requests: null
               terminationGracePeriodSeconds: 30
+              volumeMounts:
+                dind-config:
+                  name: dind-config
+                  mountPath: /etc/docker/daemon.json
+                  subPath: daemon.json
+                  readOnly: true
+                codefresh-certs-server:
+                  name: codefresh-certs-server
+                  mountPath: /etc/ssl/cf
+                  readOnly: true
+              volumes:
+                codefresh-certs-server:
+                  name: codefresh-certs-server
+                  secret:
+                    secretName: cf-runtime-dind-certs
+                dind-config:
+                  name: dind-config
+                  configMap:
+                    name: cf-runtime-dind-config
             extends:
               - system/default/hybrid/k8s_low_limits
             description: null
