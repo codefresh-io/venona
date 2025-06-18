@@ -109,6 +109,7 @@ tests:
                   memory: 800Mi
                 requests: null
               terminationGracePeriodSeconds: 30
+              clientCertPath: /etc/ssl/cf/
               volumeMounts:
                 dind-config:
                   name: dind-config
