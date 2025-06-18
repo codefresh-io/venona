@@ -11,7 +11,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "dind-volume-provisioner.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
+    {{- coalesce .Values.fullnameOverride (printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-") }}
 {{- end }}
 
 {{- define "dind-volume-cleanup.fullname" -}}
