@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: codefresh-dind-config
+  name: {{ include "runtime.dind-daemon-configmap-name" . }}
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
 data:
