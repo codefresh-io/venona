@@ -84,7 +84,7 @@ CF_SRV_TLS_CERT=${CERTS_DIR}/cf-server-cert.pem
 CF_SRV_TLS_CA_CERT=${CERTS_DIR}/cf-ca.pem
 mkdir -p $TMPDIR $CERTS_DIR
 
-K8S_CERT_SECRET_NAME=codefresh-certs-server
+K8S_CERT_SECRET_NAME=${K8S_CERT_SECRET_NAME:-codefresh-certs-server}
 echo -e "\n------------------\nGenerating server tls certificates ... "
 
 SERVER_CERT_CN=${SERVER_CERT_CN:-"docker.codefresh.io"}

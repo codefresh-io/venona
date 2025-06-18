@@ -140,3 +140,10 @@ Dind daemon configmap name
 {{- define "runtime.dind-daemon-configmap-name" }}
 {{- printf "%s-dind-config" (include "runtime.fullname" .) -}}
 {{- end }}
+
+{{/*
+Dind daemon certs secrets name
+*/}}
+{{- define "runtime.dind-daemon-certs-secret-name" }}
+{{- printf "%s-dind-certs" (include "runtime.fullname" .) -}}
+{{- end }}

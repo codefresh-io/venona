@@ -187,7 +187,7 @@ dockerDaemonScheduler:
     codefresh-certs-server:
       name: codefresh-certs-server
       secret:
-        secretName: codefresh-certs-server
+        secretName: {{ include "runtime.dind-daemon-certs-secret-name" . }}
     dind-config:
       name: dind-config
       configMap:
