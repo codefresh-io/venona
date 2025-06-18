@@ -32,7 +32,6 @@ spec:
       {{- with $values.ttlSecondsAfterFinished }}
       ttlSecondsAfterFinished: {{ . }}
       {{- end }}
-      restartPolicy: Never
       template:
         metadata:
           name: {{ include "runtime.fullname" . }}-patch
@@ -84,4 +83,5 @@ spec:
           - name: config
             configMap:
               name: {{ include "runtime.fullname" . }}-spec
+          restartPolicy: Never
     {{- end }}
