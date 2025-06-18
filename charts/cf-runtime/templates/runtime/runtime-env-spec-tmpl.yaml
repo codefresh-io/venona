@@ -106,7 +106,7 @@ dockerDaemonScheduler:
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
-    serviceAccount: {{ $dindContext.serviceAccount }}
+    serviceAccount: {{ include "runtime.engine-service-account-name" . }}
     {{- if .Values.runtime.agent }}
     clusterProvider:
       accountId: {{ .Values.global.accountId }}
