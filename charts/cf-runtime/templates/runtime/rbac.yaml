@@ -4,8 +4,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  {{- /* has to be a constant */}}
-  name: codefresh-engine
+  name: {{ include "runtime.engine-service-account-name" . }}
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
   {{- with $values.serviceAccount.annotations }}
@@ -18,7 +17,7 @@ metadata:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: codefresh-engine
+  name: {{ include "runtime.engine-service-account-name" . }}
   labels:
     {{- include "runner.labels" . | nindent 4 }}
 rules:
@@ -34,15 +33,14 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: codefresh-engine
+  name: {{ include "runtime.engine-service-account-name" . }}
   labels:
     {{- include "runner.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: codefresh-engine
+    name: {{ include "runtime.engine-service-account-name" . }}
 roleRef:
   kind: Role
-  name: codefresh-engine
+  name: {{ include "runtime.engine-service-account-name" . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
-

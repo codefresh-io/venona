@@ -121,3 +121,14 @@ Print context
   {{- printf "%s" .Values.global.context }}
 {{- end }}
 {{- end }}
+
+{{/*
+Codefresh Engine Service Account Name
+*/}}
+{{- define "runtime.engine-service-account-name" }}
+{{- if and (not .Values.runtime.engine.serviceAccount) }}
+  {{- printf "%s-engine" (include "runtime.fullname" .) }}
+{{- else }}
+  {{- printf "%s" .Values.runtime.engine.serviceAccount }}
+{{- end }}
+{{- end }}
