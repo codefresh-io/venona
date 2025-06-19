@@ -39,14 +39,7 @@ spec:
         args:
         - -ec
         - |
-          codefresh auth create-context --api-key $API_KEY --url $API_HOST
-          cat /usr/share/extras/runtime.yaml
-          codefresh get re
-{{- if .Values.runtime.agent }}
-          codefresh patch re -f /usr/share/extras/runtime.yaml
-{{- else }}
-          codefresh patch sys-re -f /usr/share/extras/runtime.yaml
-{{- end }}
+          {{ .Files.Get "files/patch-runtime.sh" | nindent 10 }}
         env:
         - name: API_KEY
           {{- include "runtime.installation-token-env-var-value" . | indent 10}}
