@@ -57,11 +57,11 @@ spec:
               value: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
               {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 12 }}
             - name: AGENT
-              value: {{ .Values.runtime.agent }}
+              value: {{ .Values.runtime.agent | quote }}
             - name: ACCOUNTS
               value: {{ .Values.runtime.accounts | toJson | squote }}
             - name: RUNTIME_NAME_ENCODED
-              value: {{ .Values.global.runtimeName | urlquery }}
+              value: {{ .Values.global.runtimeName | urlquery | quote }}
             volumeMounts:
             - name: config
               mountPath: /usr/share/extras/runtime.yaml
