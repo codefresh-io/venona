@@ -12,10 +12,9 @@ RUNTIME_NAME_ENCODED=${RUNTIME_NAME_ENCODED:-""}
 cat /usr/share/extras/runtime.yaml
 
 if [[ $AGENT == "true" ]]; then
-    echo "Patching runtime with agent"
-    # codefresh patch re -f /usr/share/extras/runtime.yaml
+    codefresh patch re -f /usr/share/extras/runtime.yaml
 else
-    # codefresh patch sys-re -f /usr/share/extras/runtime.yaml
+    codefresh patch sys-re -f /usr/share/extras/runtime.yaml
     if [[ -n $ACCOUNTS ]]; then
         PAYLOAD=$(echo $ACCOUNTS | jq '{accounts: .}')
         set +x
