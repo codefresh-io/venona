@@ -394,6 +394,9 @@ runtime:
   agent: true
   # -- (for On-Premise only) Set inCluster runtime
   inCluster: true
+    # -- (for On-Premise only) Set kubeconfig name and path
+  kubeconfigFilePath: ""
+  kubeconfigName: ""
   # -- (for On-Premise only) Assign accounts to runtime (list of account ids)
   accounts: []
   # -- Parameters for DinD (docker-in-docker) pod (aka "runtime" pod).
@@ -605,8 +608,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.88.4-rootless
-      digest: sha256:b256d150ff8a636851ddc1d5fb0490114d5036cc5bff357eac6a9899fea87562
+      tag: 0.89.0-rootless
+      digest: sha256:0ea571fd0d4b2f787baad48c1216100cfe4fb598dda6fc550fc120855e5684a1
     rbac:
       enabled: true
     annotations: {}
@@ -618,6 +621,10 @@ runtime:
     ttlSecondsAfterFinished: 180
     env:
       HOME: /tmp
+    # -- CronJob to update the runtime on schedule
+    cronjob:
+      enabled: true
+      schedule: "0/5 * * * *" # Every 5 minutes
   # -- Parameters for `gencerts-dind` post-upgrade/install hook
   # @default -- See below
   gencerts:
@@ -950,3 +957,5 @@ extraResources: []
 #     namespace: "{{ .Release.Namespace }}"
 #     annotations:
 #       kubernetes.io/service-account.name: "codefresh-user"
+# -- Extra runtimes to create
+extraRuntimes: {}
