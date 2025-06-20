@@ -9,7 +9,7 @@ API_KEY=${API_KEY:-""}
 (set +x; codefresh auth create-context --api-key $API_KEY --url $API_HOST)
 
 RUNTIME_NAME=$(yq '.metadata.name' /opt/codefresh/runtime.yaml)
-if [[ "$RUNTIME_NAME" =~ ^system/ ]]; then
+if [[ "$RUNTIME_NAME" =~ "^system/" ]]; then
     patch_type="sys-re"
 else
     patch_type="re"
