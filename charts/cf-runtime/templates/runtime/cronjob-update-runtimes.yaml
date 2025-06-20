@@ -47,7 +47,7 @@ spec:
             command:
             - "/bin/bash"
             args:
-            - -ec
+            - -c
             - |
               {{ .Files.Get "files/patch-runtime.sh" | nindent 14 }}
             env:
