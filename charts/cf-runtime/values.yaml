@@ -261,6 +261,8 @@ volumeProvisioner:
 # Storage parameters for volume-provisioner
 # @default -- See below
 storage:
+  # -- Override storage class name for dind volumes
+  storageClassNameOverride: ""
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: local
   # -- Set filesystem type (`ext4`/`xfs`)

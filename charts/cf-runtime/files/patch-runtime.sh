@@ -7,6 +7,7 @@ API_HOST=${API_HOST:-""}
 API_KEY=${API_KEY:-""}
 
 (set +x; codefresh auth create-context --api-key $API_KEY --url $API_HOST)
+cat /opt/codefresh/runtime.yaml
 codefresh patch re -f /opt/codefresh/runtime.yaml
 
 for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
