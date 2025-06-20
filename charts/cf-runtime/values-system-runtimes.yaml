@@ -1,0 +1,54 @@
+global:
+  codefreshHost: "https://g.codefresh.io"
+  codefreshTokenSecretKeyRef:
+    name: codefresh-api-token
+    key: token
+  runtimeName: system/linux-non-paying-plan-test
+
+runtime:
+  agent: false
+  inCluster: false
+  kubeconfigFilePath: /opt/codefresh/kubeconfigs/prod-ue1-runtime-free-1/kubeconfig
+  kubeconfigName: prod-ue1-runtime-free-1
+
+  dind:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+extraRuntimes:
+  system/linux_non_paying_plan-test-per-trigger-selector: #.runtime
+    runtimeName: system/linux_non_paying_plan-test-per-trigger-selector
+    runtimeExtends:
+      - system/linux_non_paying_plan-test
+    dind:
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 1
+          memory: 1Gi
+      env:
+        F00: BAR
+      pvcs:
+        dind:
+          reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName,pipeline_id,trigger'
+    engine:
+      env:
+        LOGGER_LEVEL: info
+  system/linux_non_paying_plan-test-10Gi:
+    runtimeName: system/linux_non_paying_plan-test-10Gi
+    runtimeExtends:
+      - system/linux_non_paying_plan-test
+    dind:
+      pvcs:
+        dind:
+          volumeSize: 10Gi
+    engine:
+      env:
+        LOGGER_LEVEL: info

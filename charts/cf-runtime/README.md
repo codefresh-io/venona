@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.7.4](https://img.shields.io/badge/Version-7.7.4-informational?style=flat-square)
+![Version: 7.8.0](https://img.shields.io/badge/Version-7.8.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -17,7 +17,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 4.x](#to-4-x)
   - [To 5.x](#to-5-x)
   - [To 6.x](#to-6-x)
-  - [To 7.x](#to-7-x) 
+  - [To 7.x](#to-7-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -953,7 +953,7 @@ NAMESPACE=cf-runtime
 CLUSTER_NAME=prod-ue1-some-cluster-name
 CURRENT_CONTEXT=$(kubectl config current-context)
 
-USER_TOKEN_VALUE=$(kubectl -n cf-runtime get secret/codefresh-runtime-user-token -o=go-template='{{.data.token}}' | base64 --decode)
+USER_TOKEN_VALUE=$(kubectl -n $NAMESPACE get secret/codefresh-runtime-user-token -o=go-template='{{.data.token}}' | base64 --decode)
 CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
 CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}')
 CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}')
@@ -980,7 +980,7 @@ clusters:
     certificate-authority-data: ${CLUSTER_CA}
     server: ${CLUSTER_SERVER}
 users:
-- name: ${CLUSTER_NAME}
+- name: codefresh-runtime-user
   user:
     token: ${USER_TOKEN_VALUE}
 EOF
@@ -1130,6 +1130,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | event-exporter.tolerations | list | `[]` | Set tolerations |
 | event-exporter.updateStrategy | object | `{"type":"Recreate"}` | Upgrade strategy |
 | extraResources | list | `[]` | Array of extra objects to deploy with the release |
+| extraRuntimes | object | `{}` | Extra runtimes to create |
 | fullnameOverride | string | `""` | String to fully override cf-runtime.fullname template |
 | global | object | See below | Global parameters |
 | global.accountId | string | `""` | Account ID (required!) Can be obtained here https://g.codefresh.io/2.0/account-settings/account-information |
@@ -1259,7 +1260,9 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
+| runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
+| runtime.patch.cronjob | object | `{"enabled":true,"schedule":"0/5 * * * *"}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
@@ -1285,6 +1288,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | storage.gcedisk.volumeType | string | `"pd-ssd"` | Set GCP volume backend type (`pd-ssd`/`pd-standard`) |
 | storage.local.volumeParentDir | string | `"/var/lib/codefresh/dind-volumes"` | Set volume path on the host filesystem |
 | storage.mountAzureJson | bool | `false` |  |
+| storage.storageClassNameOverride | string | `""` | Override storage class name for dind volumes |
 | volumeProvisioner | object | See below | Volume Provisioner parameters |
 | volumeProvisioner.affinity | object | `{}` | Set affinity |
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |

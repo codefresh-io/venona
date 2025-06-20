@@ -11,7 +11,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "dind-volume-provisioner.fullname" -}}
-    {{- printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-" }}
+    {{- coalesce .Values.fullnameOverride (printf "%s-%s" (include "cf-runtime.fullname" .) "volume-provisioner" | trunc 63 | trimSuffix "-") }}
 {{- end }}
 
 {{- define "dind-volume-cleanup.fullname" -}}
@@ -89,5 +89,5 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "dind-volume-provisioner.storageClassName" }}
-{{- printf "dind-local-volumes-runner-%s" .Release.Namespace }}
+{{- coalesce .Values.storage.storageClassNameOverride (printf "dind-local-volumes-runner-%s" .Release.Namespace) }}
 {{- end }}
