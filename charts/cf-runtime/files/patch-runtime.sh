@@ -8,7 +8,7 @@ API_KEY=${API_KEY:-""}
 
 (set +x; codefresh auth create-context --api-key $API_KEY --url $API_HOST)
 
-RUNTIME_NAME=$(yq eval /opt/codefresh/runtime.yaml '.metadata.name')
+RUNTIME_NAME=$(yq '.metadata.name' /opt/codefresh/runtime.yaml)
 if [[ $RUNTIME_NAME =~ "^system/" ]]; then
     patch_type="sys-re"
 else
@@ -20,8 +20,8 @@ codefresh patch $patch_type -f /opt/codefresh/runtime.yaml
 for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
     if [[ -f $runtime ]]; then
         codefresh patch sys-re -f $runtime
-        ACCOUNTS=$(yq eval '.accounts' $runtime)
-        RUNTIME_NAME_ENCODED=$(yq eval $runtime '.metadata.name' | jq -Rr @uri)
+        ACCOUNTS=$(yq $runtime '.accounts')
+        RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -Rr @uri)
         if [[ -n $ACCOUNTS ]]; then
             PAYLOAD=$(echo $ACCOUNTS | jq '{accounts: .}')
                 set +x
