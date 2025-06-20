@@ -58,7 +58,7 @@ runtimeScheduler:
     kubeconfigFilePath: null
       {{- else }}
     name: {{ $name }}
-    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+    kubeconfigFilePath: {{ $kubeconfigFilePath }}
       {{- end }}
     {{- end }}
     {{- with $engineContext.nodeSelector }}
@@ -117,7 +117,7 @@ dockerDaemonScheduler:
     kubeconfigFilePath: null
       {{- else }}
     name: {{ $name }}
-    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+    kubeconfigFilePath: {{ $kubeconfigFilePath }}
       {{- end }}
     {{- end }}
     {{- with $dindContext.nodeSelector }}
@@ -175,15 +175,24 @@ dockerDaemonScheduler:
   {{- if and (not .Values.runtime.agent)  }}
   clientCertPath: /etc/ssl/cf/
   volumeMounts:
+    dind-config:
+      name: dind-config
+      mountPath: /etc/docker/daemon.json
+      subPath: daemon.json
+      readOnly: true
     codefresh-certs-server:
       name: codefresh-certs-server
       mountPath: /etc/ssl/cf
-      readOnly: false
+      readOnly: true
   volumes:
     codefresh-certs-server:
       name: codefresh-certs-server
       secret:
         secretName: codefresh-certs-server
+    dind-config:
+      name: dind-config
+      configMap:
+        name: dind-config
   {{- end }}
   {{- with $dindContext.podSecurityContext }}
   podSecurityContext: {{- toYaml . | nindent 4 }}
