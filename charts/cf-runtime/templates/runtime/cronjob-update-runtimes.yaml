@@ -63,7 +63,7 @@ spec:
               mountPath: /opt/codefresh/runtime.yaml
               subPath: runtime.yaml
             {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
-            - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
+            - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
               mountPath: /opt/codefresh/runtime.d/system/{{ printf "%s.yaml" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
               subPath: {{ printf "%s.yaml" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
             {{- end }}
@@ -84,7 +84,7 @@ spec:
             configMap:
               name: {{ include "runtime.fullname" . }}-spec
           {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
-          - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
+          - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
             configMap:
                 name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
           {{- end }}
