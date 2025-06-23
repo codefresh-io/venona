@@ -27,7 +27,7 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ printf "%s-runtime-spec" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "/" ) }}
+  name: {{ printf "%s-runtime-spec" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
   labels:
     {{- include "runtime.labels" $ | nindent 4 }}
 data:
