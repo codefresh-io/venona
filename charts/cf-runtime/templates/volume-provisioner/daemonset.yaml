@@ -4,7 +4,7 @@
 {{- $_ := set $volumeProvisionerContext.Values "global" (get .Values "global") }}
 {{- $_ := set $volumeProvisionerContext.Values "storage" (get .Values "storage") }}
 {{- $_ := set $volumeProvisionerContext.Values "fullnameOverride" (get .Values "fullnameOverride") }}
-{{- $_ := set $volumeProvisionerContext.Values "name" (index .Values "volumeProvisioner" "name") }}
+{{- $_ := set $volumeProvisionerContext.Values "name" (index .Values "volumeProvisioner" "dind-lv-monitor" "name") }}
 
 {{- if and $volumeProvisionerContext.Values.enabled .Values.volumeProvisioner.enabled }}
 {{- include "dind-volume-provisioner.resources.daemonset" $volumeProvisionerContext }}
