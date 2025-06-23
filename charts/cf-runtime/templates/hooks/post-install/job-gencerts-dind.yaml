@@ -5,7 +5,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "runtime.fullname" . }}-gencerts-dind
+  name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
   annotations:
@@ -24,12 +24,12 @@ spec:
   {{- end }}
   template:
     metadata:
-      name: {{ include "runtime.fullname" . }}-gencerts-dind
+      name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
       labels:
         {{- include "runtime.labels" . | nindent 8 }}
     spec:
       {{- if $values.rbac.enabled }}
-      serviceAccountName: {{ template "runtime.fullname" . }}-gencerts-dind
+      serviceAccountName: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
       {{- end }}
       securityContext:
         {{- toYaml $values.podSecurityContext | nindent 8 }}

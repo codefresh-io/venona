@@ -648,6 +648,7 @@ runtime:
   # @default -- See below
   gencerts:
     enabled: true
+    name: dind-gencerts
     image:
       registry: quay.io
       repository: codefresh/kubectl
