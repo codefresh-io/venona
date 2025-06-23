@@ -20,7 +20,7 @@ for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
     if [[ -f $runtime ]]; then
         codefresh patch sys-re -f $runtime
         ACCOUNTS=$(yq '.accounts' $runtime)
-        RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -Rr @uri)
+        RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -r @uri)
         if [[ -n $ACCOUNTS ]]; then
             PAYLOAD=$(echo $ACCOUNTS | jq '{accounts: .}')
                 set +x
