@@ -5,7 +5,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "runtime.fullname" . }}-runtime-patch
+  name: {{ coalesce .Values.runtime.patch.fullnameOverride (printf "%s-runtime-patch" (include "runtime.fullname" .)) }}
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
   annotations:
@@ -34,7 +34,7 @@ spec:
       {{- end }}
       template:
         metadata:
-          name: {{ include "runtime.fullname" . }}-runtime-patch
+          name: {{ coalesce .Values.runtime.patch.fullnameOverride (printf "%s-runtime-patch" (include "runtime.fullname" .)) }}
           labels:
             {{- include "runtime.labels" . | nindent 12 }}
         spec:
@@ -63,9 +63,9 @@ spec:
               mountPath: /opt/codefresh/runtime.yaml
               subPath: runtime.yaml
             {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
-            - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
+            - name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
               mountPath: /opt/codefresh/runtime.d/system/{{ printf "%s.yaml" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
-              subPath: {{ printf "%s.yaml" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
+              subPath: {{ printf "%s.yaml" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
             {{- end }}
           {{- with $values.nodeSelector }}
           nodeSelector:
