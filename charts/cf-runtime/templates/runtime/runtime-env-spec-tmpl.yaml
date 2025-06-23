@@ -175,8 +175,8 @@ dockerDaemonScheduler:
   {{- if and (not .Values.runtime.agent)  }}
   clientCertPath: /etc/ssl/cf/
   volumeMounts:
-    dind-config:
-      name: dind-config
+    codefresh-dind-config:
+      name: codefresh-dind-config
       mountPath: /etc/docker/daemon.json
       subPath: daemon.json
       readOnly: true
@@ -189,10 +189,10 @@ dockerDaemonScheduler:
       name: codefresh-certs-server
       secret:
         secretName: codefresh-certs-server
-    dind-config:
-      name: dind-config
+    codefresh-dind-config:
+      name: codefresh-dind-config
       configMap:
-        name: dind-config
+        name: codefresh-dind-config
   {{- end }}
   {{- with $dindContext.podSecurityContext }}
   podSecurityContext: {{- toYaml . | nindent 4 }}
