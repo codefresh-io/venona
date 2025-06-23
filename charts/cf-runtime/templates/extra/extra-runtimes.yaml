@@ -22,7 +22,7 @@
   {{- fail "extra runtime name must start with 'system/'" }}
 {{- end }}
 
-{{- $runtimeFile := printf "%s.yaml" (trimPrefix "system/" $runtimeItem.runtimeName) }}
+{{- $runtimeFile := printf "%s.yaml" (include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName)) }}
 
 kind: ConfigMap
 apiVersion: v1

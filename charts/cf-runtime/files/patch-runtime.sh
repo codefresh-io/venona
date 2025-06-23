@@ -18,6 +18,7 @@ codefresh patch $patch_type -f /opt/codefresh/runtime.yaml
 
 for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
     if [[ -f $runtime ]]; then
+        cat $runtime
         codefresh patch sys-re -f $runtime
         ACCOUNTS=$(yq '.accounts' $runtime)
         RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -r @uri)
