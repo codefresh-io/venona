@@ -86,7 +86,7 @@ spec:
           {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
           - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
             configMap:
-                name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
+                name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-") }}
           {{- end }}
           restartPolicy: Never
     {{- end }}
