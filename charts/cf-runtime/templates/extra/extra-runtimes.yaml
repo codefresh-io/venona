@@ -32,5 +32,5 @@ metadata:
     {{- include "runtime.labels" $ | nindent 4 }}
 data:
   {{ $runtimeFile }}: |
-    {{ include "runtime.runtime-environment-spec.template" $rootContext | toYaml | nindent 4 }}
+    {{ include "runtime.runtime-environment-spec.template" $rootContext | nindent 4 | trim }}
 {{- end -}}
