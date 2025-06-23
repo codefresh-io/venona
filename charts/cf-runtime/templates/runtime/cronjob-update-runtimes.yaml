@@ -1,6 +1,6 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := .Values.runtime.patch }}
-{{- if and $values.enabled $values.cronjob.enabled }}
+{{ $values := .Values.runtime.patch.cronjob }}
+{{- if and .Values.runtime.patch.enabled $values.enabled }}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -13,15 +13,15 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  schedule: {{ $values.cronjob.schedule | default "0 0 * * *" }}
-  successfulJobsHistoryLimit: {{ $values.cronjob.successfulJobsHistoryLimit | default 1 }}
-  failedJobsHistoryLimit: {{ $values.cronjob.failedJobsHistoryLimit | default 1 }}
-  concurrencyPolicy: {{ $values.cronjob.concurrencyPolicy | default "Forbid" }}
-  suspend: {{ $values.cronjob.suspend | default false }}
-  {{- with $values.cronjob.startingDeadlineSeconds }}
+  schedule: {{ $values.schedule | default "0 0 * * *" }}
+  successfulJobsHistoryLimit: {{ $values.successfulJobsHistoryLimit | default 1 }}
+  failedJobsHistoryLimit: {{ $values.failedJobsHistoryLimit | default 1 }}
+  concurrencyPolicy: {{ $values.concurrencyPolicy | default "Forbid" }}
+  suspend: {{ $values.suspend | default false }}
+  {{- with $values.startingDeadlineSeconds }}
   startingDeadlineSeconds: {{ . | int }}
   {{- end }}
-  {{- with $values.cronjob.activeDeadlineSeconds }}
+  {{- with $values.activeDeadlineSeconds }}
   activeDeadlineSeconds: {{ . | int }}
   {{- end }}
   {{- with $values.completions }}
@@ -29,7 +29,7 @@ spec:
   {{- end }}
   jobTemplate:
     spec:
-      {{- with $values.cronjob.ttlSecondsAfterFinished }}
+      {{- with $values.ttlSecondsAfterFinished }}
       ttlSecondsAfterFinished: {{ . }}
       {{- end }}
       template:
@@ -84,9 +84,9 @@ spec:
             configMap:
               name: {{ include "runtime.fullname" . }}-spec
           {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
-          - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
+          - name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
             configMap:
-                name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-") }}
+                name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
           {{- end }}
           restartPolicy: Never
     {{- end }}

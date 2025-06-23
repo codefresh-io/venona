@@ -1,5 +1,5 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := .Values.runtime.patch }}
+{{ $values := .Values.runtime.patch.hook }}
 {{- if and $values.enabled }}
 ---
 apiVersion: batch/v1

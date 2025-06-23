@@ -1,6 +1,6 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := .Values.runtime.patch }}
-{{- if $values.enabled }}
+{{ $values := .Values.runtime.patch.hook }}
+{{- if and .Values.runtime.patch.enabled $values.enabled }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -74,9 +74,9 @@ spec:
         configMap:
           name: {{ include "runtime.fullname" . }}-spec
       {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
-      - name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
+      - name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
         configMap:
-            name: {{ printf "%s-runtime-config" ( trimPrefix "system/" $runtimeItem.runtimeName | replace "_" "-" ) }}
+            name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
       {{- end }}
       restartPolicy: OnFailure
 {{- end }}

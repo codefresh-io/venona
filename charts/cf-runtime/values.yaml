@@ -607,26 +607,40 @@ runtime:
   # @default -- See below
   patch:
     enabled: true
-    image:
-      registry: quay.io
-      repository: codefresh/cli
-      tag: 0.89.0-rootless
-      digest: sha256:0ea571fd0d4b2f787baad48c1216100cfe4fb598dda6fc550fc120855e5684a1
-    rbac:
+    hook:
       enabled: true
-    annotations: {}
-    affinity: {}
-    nodeSelector: {}
-    podSecurityContext: {}
-    resources: {}
-    tolerations: []
-    ttlSecondsAfterFinished: 180
-    env:
-      HOME: /tmp
+      image:
+        registry: quay.io
+        repository: codefresh/cli
+        tag: 0.89.0-rootless
+        digest: sha256:0ea571fd0d4b2f787baad48c1216100cfe4fb598dda6fc550fc120855e5684a1
+      rbac:
+        enabled: true
+      annotations: {}
+      affinity: {}
+      nodeSelector: {}
+      podSecurityContext: {}
+      resources: {}
+      tolerations: []
+      ttlSecondsAfterFinished: 180
+      env:
+        HOME: /tmp
     # -- CronJob to update the runtime on schedule
     cronjob:
       enabled: true
       schedule: "0/5 * * * *" # Every 5 minutes
+      successfulJobsHistory: 1
+      failedJobsHistory: 1
+      image:
+        registry: quay.io
+        repository: codefresh/cli
+        tag: 0.89.0-rootless
+        digest: sha256:0ea571fd0d4b2f787baad48c1216100cfe4fb598dda6fc550fc120855e5684a1
+      affinity: {}
+      nodeSelector: {}
+      podSecurityContext: {}
+      resources: {}
+      tolerations: []
   # -- Parameters for `gencerts-dind` post-upgrade/install hook
   # @default -- See below
   gencerts:
