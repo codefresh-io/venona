@@ -5,7 +5,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ coalesce .Values.runtime.patch.fullnameOverride (printf "%s-runtime-patch" (include "runtime.fullname" .)) }}
+  name: {{ coalesce .Values.runtime.patch.name (printf "%s-runtime-patch" (include "runtime.fullname" .)) }}
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
   annotations:
@@ -24,7 +24,7 @@ spec:
   {{- end }}
   template:
     metadata:
-      name: {{ coalesce .Values.runtime.patch.fullnameOverride (printf "%s-runtime-patch" (include "runtime.fullname" .)) }}
+      name: {{ coalesce .Values.runtime.patch.name (printf "%s-runtime-patch" (include "runtime.fullname" .)) }}
       labels:
         {{- include "runtime.labels" . | nindent 8 }}
     spec:

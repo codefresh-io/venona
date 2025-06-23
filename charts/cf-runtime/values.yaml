@@ -609,7 +609,7 @@ runtime:
   # @default -- See below
   patch:
     enabled: true
-    fullnameOverride: ""
+    name: ""
     hook:
       enabled: true
       image:

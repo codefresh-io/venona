@@ -1,8 +1,8 @@
 {{- $eventExporterContext := deepCopy . }}
 {{- $_ := set $eventExporterContext "Values" (get .Values "event-exporter") }}
 {{- $_ := set $eventExporterContext.Values "global" (get .Values "global") }}
-{{- $_ := set $eventExporterContext.Values "nameOverride" (get .Values "nameOverride") }}
-{{- $_ := set $eventExporterContext.Values "fullnameOverride" (coalesce (index .Values "event-exporter" "fullnameOverride") (get .Values "fullnameOverride")) }}
+{{- $_ := set $eventExporterContext.Values "fullnameOverride" (get .Values "fullnameOverride") }}
+{{- $_ := set $eventExporterContext.Values "name" (index .Values "event-exporter" "name") }}
 
 {{- if $eventExporterContext.Values.enabled }}
 {{- include "event-exporter.resources.service" $eventExporterContext }}
