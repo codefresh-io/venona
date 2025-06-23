@@ -1262,7 +1262,7 @@ Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](http
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
-| runtime.patch.cronjob | object | `{"enabled":true,"schedule":"0/5 * * * *"}` | CronJob to update the runtime on schedule |
+| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:0ea571fd0d4b2f787baad48c1216100cfe4fb598dda6fc550fc120855e5684a1","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.0-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
