@@ -148,6 +148,8 @@ runner:
 volumeProvisioner:
   # -- Enable volume-provisioner
   enabled: true
+  # -- Override release name
+  fullnameOverride: ""
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
@@ -262,7 +264,7 @@ volumeProvisioner:
 # @default -- See below
 storage:
   # -- Override storage class name for dind volumes
-  storageClassNameOverride: ""
+  fullnameOverride: ""
   # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
   backend: local
   # -- Set filesystem type (`ext4`/`xfs`)
@@ -860,6 +862,8 @@ podMonitor:
 event-exporter:
   # -- Enable event-exporter
   enabled: false
+  # -- Override release name
+  fullnameOverride: ""
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy

@@ -89,5 +89,5 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "dind-volume-provisioner.storageClassName" }}
-{{- coalesce .Values.storage.storageClassNameOverride (printf "dind-local-volumes-runner-%s" .Release.Namespace) }}
+{{- coalesce .Values.storage.fullnameOverride (printf "dind-local-volumes-runner-%s" .Release.Namespace) }}
 {{- end }}
