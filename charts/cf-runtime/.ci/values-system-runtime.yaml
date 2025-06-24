@@ -11,6 +11,8 @@ runtime:
     pvcs:
       dind:
         storageClassName: dind-ebs-csi-us-east-1a-workflows
+  accounts:
+    - 5672d8deb6724b6e359adf62 # codefresh-inc
 
 volumeProvisioner:
   enabled: false
