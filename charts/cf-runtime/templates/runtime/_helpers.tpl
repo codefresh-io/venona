@@ -131,3 +131,13 @@ Usage:
   {{- $runtimeName := .runtimeName }}
   {{- printf "%s" ( trimPrefix "system/" $runtimeName | replace "_" "-" | replace "/" "-" | lower ) }}
 {{- end }}
+
+{{/*
+Print normalized runtime-environment filename
+Usage:
+{{ include "runtime.runtime-environment-spec.runtime-filename-normalized" "runtimeName" $runtimeName ) }}
+*/}}
+{{- define "runtime.runtime-environment-spec.runtime-filename-normalized" }}
+  {{- $runtimeName := .runtimeName }}
+  {{- printf "%s.yaml" ( trimPrefix "system/" $runtimeName | replace "_" "-" | replace "/" "-" | lower ) }}
+{{- end }}
