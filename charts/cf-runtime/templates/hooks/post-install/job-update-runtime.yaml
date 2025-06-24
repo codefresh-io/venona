@@ -50,8 +50,8 @@ spec:
           {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 8 }}
         volumeMounts:
         - name: runtime-config
-          mountPath: /opt/codefresh/runtime.yaml
-          subPath: runtime.yaml
+          mountPath: /opt/codefresh/{{ printf "%s.yaml" (include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" (include "runtime.runtime-environment-spec.runtime-name" .))) }}
+          subPath: {{ printf "%s.yaml" (include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" (include "runtime.runtime-environment-spec.runtime-name" .)))}}
         {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
         - name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
           mountPath: /opt/codefresh/runtime.d/system/{{ printf "%s.yaml" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
