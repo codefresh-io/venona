@@ -11,6 +11,23 @@ runtime:
     pvcs:
       dind:
         storageClassName: dind-ebs-csi-us-east-1a-workflows
+    nodeSelector:
+      node-type: dind
+      topology.kubernetes.io/zone: us-east-1a
+    tolerations:
+    - key: codefresh.io
+      operator: Equal
+      value: dinds
+      effect: NoSchedule
+  engine:
+    nodeSelector:
+      node-type: engine
+      topology.kubernetes.io/zone: us-east-1a
+    tolerations:
+    - key: codefresh.io
+      operator: Equal
+      value: engines
+      effect: NoSchedule
   accounts:
     - 5672d8deb6724b6e359adf62 # codefresh-inc
 
