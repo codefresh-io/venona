@@ -30,7 +30,7 @@ tests:
             codefresh.io/application: runner
       - equal:
           path: metadata.name
-          value: cf-runtime-runner
+          value: runner
 
   - it: Test runner podAnnotations
     template: templates/runner/deployment.yaml
@@ -76,11 +76,11 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.serviceAccountName
-          value: cf-runtime-runner
+          value: runner
         template: templates/runner/deployment.yaml
       - equal:
           path: metadata.name
-          value: cf-runtime-runner
+          value: runner
         template: templates/runner/rbac.yaml
         documentIndex: 0
 
@@ -200,7 +200,7 @@ tests:
             valueFrom:
               secretKeyRef:
                 key: agent-codefresh-token
-                name: cf-runtime-runner
+                name: runner
 
   # DEPRECATED -- `global.agentToken` is deprecated
   # - it: Test runner agent token secret ref

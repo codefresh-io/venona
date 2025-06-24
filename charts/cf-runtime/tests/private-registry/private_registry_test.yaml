@@ -10,16 +10,15 @@ release:
   namespace: codefresh
   revision: 1
   upgrade: true
-# chart:
-#   version: 1.0.0
-#   appVersion: 1.0.0
+chart:
+  appVersion: 1.0.0
 tests:
   - it: Test private registry in runtime spec
     template: templates/hooks/post-install/cm-update-runtime.yaml
     asserts:
-      - matchRegex:
-          path: data["runtime.yaml"]
-          pattern: |
+      - equal:
+          path: data["my-context-codefresh.yaml"]
+          value: |
             metadata:
               name: my-context/codefresh
               agent: true
@@ -59,7 +58,7 @@ tests:
                 CR_6177_FIXER: 'somedomain.io/alpine:tagoverride'
                 GC_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'somedomain.io/codefresh/cf-cosign-image-signer:tagoverride'
-                RUNTIME_CHART_VERSION: [\w.-]+
+                RUNTIME_CHART_VERSION: 1.0.0
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -109,6 +108,26 @@ tests:
                   memory: 800Mi
                 requests: null
               terminationGracePeriodSeconds: 30
+              clientCertPath: /etc/ssl/cf/
+              volumeMounts:
+                codefresh-certs-server:
+                  name: codefresh-certs-server
+                  mountPath: /etc/ssl/cf
+                  readOnly: true
+                codefresh-dind-config:
+                  name: codefresh-dind-config
+                  mountPath: /etc/docker/daemon.json
+                  subPath: daemon.json
+                  readOnly: true
+              volumes:
+                codefresh-certs-server:
+                  name: codefresh-certs-server
+                  secret:
+                    secretName: codefresh-certs-server
+                codefresh-dind-config:
+                  name: codefresh-dind-config
+                  configMap:
+                    name: codefresh-dind-config
             extends:
               - system/default/hybrid/k8s_low_limits
             description: null

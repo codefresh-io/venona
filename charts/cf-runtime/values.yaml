@@ -61,6 +61,8 @@ re: {}
 runner:
   # -- Enable the runner
   enabled: true
+  # -- Set runner deployment name
+  name: "" # e.g. "runner"
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
@@ -148,8 +150,8 @@ runner:
 volumeProvisioner:
   # -- Enable volume-provisioner
   enabled: true
-  # -- Override release name
-  fullnameOverride: ""
+  # -- Set volume-provisioner deployment name
+  name: "" # e.g. "dind-volume-provisioner"
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy
@@ -207,7 +209,7 @@ volumeProvisioner:
   # @default -- See below
   dind-lv-monitor:
     enabled: true
-    name: dind-lv-monitor
+    name: "" # e.g. "dind-lv-monitor"
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
@@ -241,7 +243,7 @@ volumeProvisioner:
   # @default -- See below
   dind-volume-cleanup:
     enabled: true
-    name: dind-volume-cleanup
+    name: "" # e.g. "dind-volume-cleanup"
     image:
       registry: quay.io
       repository: codefresh/dind-volume-cleanup
@@ -250,7 +252,7 @@ volumeProvisioner:
     env: {}
     concurrencyPolicy: Forbid
     schedule: "*/10 * * * *"
-    successfulJobsHistory: 3
+    successfulJobsHistory: 1
     failedJobsHistory: 1
     suspend: false
     podAnnotations: {}
@@ -868,8 +870,8 @@ podMonitor:
 event-exporter:
   # -- Enable event-exporter
   enabled: false
-  # -- Override release name
-  fullnameOverride: ""
+  # -- Set name for the event-exporter deployment
+  name: "" # e.g. "event-exporter"
   # -- Set number of pods
   replicasCount: 1
   # -- Upgrade strategy

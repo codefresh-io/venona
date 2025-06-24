@@ -38,7 +38,7 @@ runtimeScheduler:
     CR_6177_FIXER: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.CR_6177_FIXER) | squote }}
     GC_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.GC_BUILDER_IMAGE) | squote }}
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.COSIGN_IMAGE_SIGNER_IMAGE) | squote }}
-    RUNTIME_CHART_VERSION: {{ .Chart.Version }}
+    RUNTIME_CHART_VERSION: {{ coalesce .Values.version .Chart.Version }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -148,7 +148,7 @@ dockerDaemonScheduler:
       reuseVolumeSelector: {{ $pvc.reuseVolumeSelector | squote }}
       reuseVolumeSortOrder: {{ $pvc.reuseVolumeSortOrder }}
       storageClassName: {{ include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" $pvc.storageClassName "context" $) }}
-      volumeSize: {{ $pvc.volumeSize }}
+      volumeSize: {{ $pvc.volumeSize | default "16Gi" }}
       {{- with $pvc.annotations }}
       annotations: {{ . | toYaml | nindent 8 }}
       {{- end }}
@@ -172,17 +172,16 @@ dockerDaemonScheduler:
   {{- with $dindContext.userVolumes }}
   userVolumes: {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if and (not .Values.runtime.agent)  }}
   clientCertPath: /etc/ssl/cf/
   volumeMounts:
+    codefresh-certs-server:
+      name: codefresh-certs-server
+      mountPath: /etc/ssl/cf
+      readOnly: true
     codefresh-dind-config:
       name: codefresh-dind-config
       mountPath: /etc/docker/daemon.json
       subPath: daemon.json
-      readOnly: true
-    codefresh-certs-server:
-      name: codefresh-certs-server
-      mountPath: /etc/ssl/cf
       readOnly: true
   volumes:
     codefresh-certs-server:
@@ -193,7 +192,6 @@ dockerDaemonScheduler:
       name: codefresh-dind-config
       configMap:
         name: codefresh-dind-config
-  {{- end }}
   {{- with $dindContext.podSecurityContext }}
   podSecurityContext: {{- toYaml . | nindent 4 }}
   {{- end }}

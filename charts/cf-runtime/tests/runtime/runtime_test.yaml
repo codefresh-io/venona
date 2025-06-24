@@ -20,7 +20,7 @@ tests:
       - isKind:
           of: ConfigMap
       - isNotEmpty:
-          path: data["runtime.yaml"]
+          path: data["my-context-codefresh.yaml"]
 
   - it: Test runtime spec override
     template: templates/hooks/post-install/cm-update-runtime.yaml
@@ -28,9 +28,9 @@ tests:
       - ../values.yaml
       - ./runtime_values.yaml
     asserts:
-      - matchRegex:
-          path: data["runtime.yaml"]
-          pattern: |
+      - equal:
+          path: data["my-context-codefresh.yaml"]
+          value: |
             metadata:
               name: my-context/codefresh
               agent: true
@@ -73,7 +73,7 @@ tests:
                 CR_6177_FIXER: 'alpine:tagoverride'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
-                RUNTIME_CHART_VERSION: [\w.-]+
+                RUNTIME_CHART_VERSION: 1.0.0
               userEnvVars:
                 - name: ALICE
                   valueFrom:
@@ -182,6 +182,26 @@ tests:
                   name: cert
                   secret:
                     secretName: tls-secret
+              clientCertPath: /etc/ssl/cf/
+              volumeMounts:
+                codefresh-certs-server:
+                  name: codefresh-certs-server
+                  mountPath: /etc/ssl/cf
+                  readOnly: true
+                codefresh-dind-config:
+                  name: codefresh-dind-config
+                  mountPath: /etc/docker/daemon.json
+                  subPath: daemon.json
+                  readOnly: true
+              volumes:
+                codefresh-certs-server:
+                  name: codefresh-certs-server
+                  secret:
+                    secretName: codefresh-certs-server
+                codefresh-dind-config:
+                  name: codefresh-dind-config
+                  configMap:
+                    name: codefresh-dind-config
             extends:
               - system/default/hybrid/k8s_low_limits
             description: null

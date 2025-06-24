@@ -20,16 +20,16 @@ tests:
       - isKind:
           of: ConfigMap
       - isNotEmpty:
-          path: data["runtime.yaml"]
+          path: data["my-runtime.yaml"]
 
   - it: Test runtime spec override
     template: templates/hooks/post-install/cm-update-runtime.yaml
     values:
       - ./runtime_onprem_values.yaml
     asserts:
-      - matchRegex:
-          path: data["runtime.yaml"]
-          pattern: |
+      - equal:
+          path: data["my-runtime.yaml"]
+          value: |
             metadata:
               name: system/my-runtime
               agent: false
@@ -72,7 +72,7 @@ tests:
                 CR_6177_FIXER: 'alpine:tagoverride'
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
-                RUNTIME_CHART_VERSION: [\w.-]+
+                RUNTIME_CHART_VERSION: 1.0.0
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -174,12 +174,21 @@ tests:
                 codefresh-certs-server:
                   name: codefresh-certs-server
                   mountPath: /etc/ssl/cf
-                  readOnly: false
+                  readOnly: true
+                codefresh-dind-config:
+                  name: codefresh-dind-config
+                  mountPath: /etc/docker/daemon.json
+                  subPath: daemon.json
+                  readOnly: true
               volumes:
                 codefresh-certs-server:
                   name: codefresh-certs-server
                   secret:
                     secretName: codefresh-certs-server
+                codefresh-dind-config:
+                  name: codefresh-dind-config
+                  configMap:
+                    name: codefresh-dind-config
             extends:
               - system/default
             description: some description

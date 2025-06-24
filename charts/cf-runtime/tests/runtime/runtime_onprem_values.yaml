@@ -1,3 +1,6 @@
+# -- workaround for helm unit tests
+version: 1.0.0
+
 global:
   codefreshHost: "https://onprem.somedomain.com"
   codefreshToken: 1234567890abcdef
@@ -92,7 +95,7 @@ runtime:
       PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:tagoverride
       TEMPLATE_ENGINE: quay.io/codefresh/pikolo:tagoverride
       CR_6177_FIXER: alpine:tagoverride
-      GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:tagoverride      
+      GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:tagoverride
       COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:tagoverride
     env:
       FOO: BAR
