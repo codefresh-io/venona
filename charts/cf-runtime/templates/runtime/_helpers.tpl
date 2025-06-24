@@ -129,5 +129,5 @@ Usage:
 */}}
 {{- define "runtime.runtime-environment-spec.runtime-name-normalized" }}
   {{- $runtimeName := .runtimeName }}
-  {{- printf "%s" ( trimPrefix "system/" $runtimeName | replace "_" "-" | lower ) }}
+  {{- printf "%s" ( trimPrefix "system/" $runtimeName | replace "_" "-" | replace "/" "-" | lower ) }}
 {{- end }}
