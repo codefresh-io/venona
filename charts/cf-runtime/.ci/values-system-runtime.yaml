@@ -18,5 +18,5 @@ volumeProvisioner:
 monitor:
   enabled: false
 
-app-proxy:
+appProxy:
   enabled: false
