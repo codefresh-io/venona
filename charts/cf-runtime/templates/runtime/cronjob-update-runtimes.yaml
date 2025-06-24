@@ -82,7 +82,7 @@ spec:
           volumes:
           - name: runtime-config
             configMap:
-              name: {{ include "runtime.fullname" . }}-spec
+              name: {{ include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" (include "runtime.runtime-environment-spec.runtime-name" .)) }}-runtime-config
           {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
           - name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
             configMap:
