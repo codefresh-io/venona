@@ -54,7 +54,7 @@ spec:
           subPath: {{ printf "%s.yaml" (include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" (include "runtime.runtime-environment-spec.runtime-name" .)))}}
         {{- range $runtimeIndex, $runtimeItem := .Values.extraRuntimes }}
         - name: {{ printf "%s-runtime-config" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
-          mountPath: /opt/codefresh/runtime.d/system/{{ printf "%s.yaml" ( trimPrefix "system/" $runtimeItem.runtimeName) }}
+          mountPath: /opt/codefresh/runtime.d/system/{{ printf "%s.yaml" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
           subPath: {{ printf "%s.yaml" ( include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName) ) }}
         {{- end }}
       {{- with $values.nodeSelector }}
