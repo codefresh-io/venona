@@ -17,6 +17,19 @@ fi
 for runtime in /opt/codefresh/*.yaml; do
     if [[ -f $runtime ]]; then
         codefresh patch $patch_type -f $runtime
+        ACCOUNTS=$(yq '.accounts' $runtime)
+        RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -r @uri)
+        if [[ -n $ACCOUNTS ]]; then
+            PAYLOAD=$(echo $ACCOUNTS | jq '{accounts: .}')
+                set +x
+                curl -X PUT \
+                    -H "Content-Type: application/json" \
+                    -H "Authorization: $API_KEY" \
+                    -d "$PAYLOAD" \
+                    "$API_HOST/api/admin/runtime-environments/account/modify/$RUNTIME_NAME_ENCODED"
+        else
+            echo "No accounts to add"
+        fi
     fi
 done
 
