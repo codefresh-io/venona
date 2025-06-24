@@ -41,3 +41,6 @@ runtime:
 
 volumeProvisioner:
   enabled: false
+
+monitor:
+  enabled: false
