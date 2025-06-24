@@ -520,6 +520,8 @@ runtime:
         memory: 2048Mi
     # -- Set termination grace period.
     terminationGracePeriodSeconds: 180
+    # -- Override docker image registry for runtime images.
+    runtimeImagesRegisty: ""
     # -- Set system(base) runtime images.
     # @default -- See below.
     runtimeImages:

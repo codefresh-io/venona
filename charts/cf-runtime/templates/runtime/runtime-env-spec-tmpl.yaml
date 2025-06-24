@@ -4,7 +4,7 @@
 {{- $name := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
-{{- $imageRegistry := .Values.global.imageRegistry -}}
+{{- $imageRegistry := coalesce .Values.runtime.engine.runtimeImagesRegisty .Values.global.imageRegistry -}}
 metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
