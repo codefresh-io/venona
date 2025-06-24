@@ -226,7 +226,7 @@ description: {{ .Values.runtime.description }}
   {{- else }}
 description: null
   {{- end }}
-{{- if .Values.global.accountId }}
+{{- if and .Values.global.accountId .Values.runtime.agent }}
 accountId: {{ .Values.global.accountId }}
 {{- end }}
 {{- if not .Values.runtime.agent }}
