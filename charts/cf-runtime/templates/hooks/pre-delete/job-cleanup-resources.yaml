@@ -43,7 +43,7 @@ spec:
         - | {{ .Files.Get "files/cleanup-runtime.sh" | nindent 10 }}
         env:
         - name: AGENT_NAME
-          value: {{ include "runtime.runtime-environment-spec.agent-name" . }}
+          value: {{ include "runtime.runtime-environment-spec.agent-name" . | default "" }}
         - name: RUNTIME_NAME
           value: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
         - name: API_HOST
