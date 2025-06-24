@@ -1,0 +1,43 @@
+# Values used in `helm-chart-ci` pipeline
+# All placeholders will be set during ci build
+fullnameOverride: cf-runtime-override
+global:
+  codefreshToken: placeholder
+  accountId: null
+  context: null
+  runtimeName: system/test-ci-runtime
+
+runtime:
+  agent: false
+  inCluster: false
+  description: "Test runtime created by venona-helm-chart-ci pipeline"
+  kubeconfigFilePath: /opt/codefresh/kubeconfigs/prod-ue1-runtime-free-1/kubeconfig
+  kubeconfigName: prod-ue1-runtime-free-1
+  dind:
+    podLabels:
+      key: dind
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    limits:
+        cpu: 1000m
+        memory: 1024Mi
+    env:
+      DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: true
+    pvcs:
+      dind:
+        storageClassName: dind-ebs-csi-us-east-1a-workflows
+  engine:
+    podLabels:
+      key: engine
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    limits:
+        cpu: 1000m
+        memory: 1024Mi
+
+volumeProvisioner:
+  enabled: false
