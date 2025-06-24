@@ -14,7 +14,11 @@ else
     patch_type="sys-re"
 fi
 
-codefresh patch $patch_type -f /opt/codefresh/runtime.yaml
+for runtime in /opt/codefresh/*.yaml; do
+    if [[ -f $runtime ]]; then
+        codefresh patch $patch_type -f $runtime
+    fi
+done
 
 for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
     if [[ -f $runtime ]]; then
