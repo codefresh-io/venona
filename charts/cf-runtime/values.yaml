@@ -822,7 +822,7 @@ serviceMonitor:
   main:
     # -- Enable service monitor for dind pods
     enabled: false
-    nameOverride: dind
+    fullnameOverride: dind
     selector:
       matchLabels:
         app: dind
@@ -838,7 +838,7 @@ podMonitor:
   main:
     # -- Enable pod monitor for engine pods
     enabled: false
-    nameOverride: engine
+    fullnameOverride: engine
     selector:
       matchLabels:
         app: runtime
@@ -848,7 +848,7 @@ podMonitor:
   runner:
     # -- Enable pod monitor for runner pod
     enabled: false
-    nameOverride: runner
+    fullnameOverride: runner
     selector:
       matchLabels:
         codefresh.io/application: runner
@@ -858,7 +858,7 @@ podMonitor:
   volume-provisioner:
     # -- Enable pod monitor for volumeProvisioner pod
     enabled: false
-    nameOverride: volume-provisioner
+    fullnameOverride: volume-provisioner
     selector:
       matchLabels:
         codefresh.io/application: volume-provisioner
