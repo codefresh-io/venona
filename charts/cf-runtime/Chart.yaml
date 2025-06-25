@@ -22,7 +22,7 @@ annotations:
     - kind: added
       description: "(on-premise) Add option to create extra agentless runtimes"
     - kind: added
-      description: "Add cronjob to constantle patch runtime spec"
+      description: "Add cronjob to continuously patch runtime spec"
     - kind: fixed
       description: "Fix missing codefresh-dind-config ConfigMap in runtime spec"
     - kind: changed
