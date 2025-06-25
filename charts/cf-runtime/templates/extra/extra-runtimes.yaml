@@ -1,7 +1,6 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
 {{- $extraRuntimes := .Values.extraRuntimes }}
 
----
 {{- range $runtimeIndex, $runtimeItem := $extraRuntimes }}
 {{- $rootContext := deepCopy $ }}
 {{- $_ := set $rootContext.Values.runtime "accounts" (list) }}
@@ -24,7 +23,7 @@
 {{- end }}
 
 {{- $runtimeFile := printf "%s.yaml" (include "runtime.runtime-environment-spec.runtime-name-normalized" (dict "context" . "runtimeName" $runtimeItem.runtimeName)) }}
-
+---
 kind: ConfigMap
 apiVersion: v1
 metadata:
