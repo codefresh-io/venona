@@ -18,7 +18,15 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Fix kubeconfigFilePath for agentless runtime"
+      description: "(on-premise) Fix kubeconfigFilePath for agentless runtime"
+    - kind: added
+      description: "(on-premise) Add option to create extra agentless runtimes"
+    - kind: added
+      description: "Add cronjob to constantle patch runtime spec"
+    - kind: fixed
+      description: "Fix missing codefresh-dind-config ConfigMap in runtime spec"
+    - kind: changed
+      description: "Misc templates renaming"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

@@ -14,22 +14,30 @@ else
     patch_type="sys-re"
 fi
 
+modify_accounts() {
+    local runtime_name_encoded
+    runtime_name_encoded=$(yq '.metadata.name' "$1" | jq -r @uri)
+    local accounts
+    accounts=$(yq '.accounts' "$1")
+
+    if [[ -n $accounts ]]; then
+        local payload
+        payload=$(echo "$accounts" | jq '{accounts: .}')
+        set +x
+        curl -X PUT \
+            -H "Content-Type: application/json" \
+            -H "Authorization: $API_KEY" \
+            -d "$payload" \
+            "$API_HOST/api/admin/runtime-environments/account/modify/$runtime_name_encoded"
+    else
+        echo "No accounts to add for $1"
+    fi
+}
+
 for runtime in /opt/codefresh/*.yaml; do
     if [[ -f $runtime ]]; then
         codefresh patch $patch_type -f $runtime
-        ACCOUNTS=$(yq '.accounts' $runtime)
-        RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -r @uri)
-        if [[ -n $ACCOUNTS ]]; then
-            PAYLOAD=$(echo $ACCOUNTS | jq '{accounts: .}')
-                set +x
-                curl -X PUT \
-                    -H "Content-Type: application/json" \
-                    -H "Authorization: $API_KEY" \
-                    -d "$PAYLOAD" \
-                    "$API_HOST/api/admin/runtime-environments/account/modify/$RUNTIME_NAME_ENCODED"
-        else
-            echo "No accounts to add"
-        fi
+        modify_accounts "$runtime"
     fi
 done
 
@@ -37,18 +45,6 @@ for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
     if [[ -f $runtime ]]; then
         cat $runtime
         codefresh patch sys-re -f $runtime
-        ACCOUNTS=$(yq '.accounts' $runtime)
-        RUNTIME_NAME_ENCODED=$(yq '.metadata.name' $runtime | jq -r @uri)
-        if [[ -n $ACCOUNTS ]]; then
-            PAYLOAD=$(echo $ACCOUNTS | jq '{accounts: .}')
-                set +x
-                curl -X PUT \
-                    -H "Content-Type: application/json" \
-                    -H "Authorization: $API_KEY" \
-                    -d "$PAYLOAD" \
-                    "$API_HOST/api/admin/runtime-environments/account/modify/$RUNTIME_NAME_ENCODED"
-        else
-            echo "No accounts to add"
-        fi
+        modify_accounts "$runtime"
     fi
 done

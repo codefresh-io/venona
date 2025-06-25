@@ -175,8 +175,8 @@ tests:
                   name: codefresh-certs-server
                   mountPath: /etc/ssl/cf
                   readOnly: true
-                codefresh-dind-config:
-                  name: codefresh-dind-config
+                dind-config:
+                  name: dind-config
                   mountPath: /etc/docker/daemon.json
                   subPath: daemon.json
                   readOnly: true
@@ -185,8 +185,8 @@ tests:
                   name: codefresh-certs-server
                   secret:
                     secretName: codefresh-certs-server
-                codefresh-dind-config:
-                  name: codefresh-dind-config
+                dind-config:
+                  name: dind-config
                   configMap:
                     name: codefresh-dind-config
             extends:

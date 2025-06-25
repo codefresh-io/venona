@@ -615,7 +615,7 @@ runtime:
   # @default -- See below
   patch:
     enabled: true
-    name: ""
+    name: "" # e.g. "runtime-patch"
     hook:
       enabled: true
       image:
@@ -654,7 +654,7 @@ runtime:
   # @default -- See below
   gencerts:
     enabled: true
-    name: dind-gencerts
+    name: "" # e.g. "dind-gencerts"
     image:
       registry: quay.io
       repository: codefresh/kubectl
