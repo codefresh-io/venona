@@ -5,13 +5,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "runtime.fullname" . }}-gencerts-dind
+  name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "runtime.fullname" . }}-gencerts-dind
+  name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
   namespace: {{ .Release.Namespace }}
 rules:
   - apiGroups:
@@ -24,14 +24,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "runtime.fullname" . }}-gencerts-dind
+  name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "runtime.fullname" . }}-gencerts-dind
+  name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "runtime.fullname" . }}-gencerts-dind
+    name: {{ coalesce .Values.runtime.gencerts.name (printf "%s-dind-gencerts" (include "runtime.fullname" .)) }}
     namespace: {{ .Release.Namespace }}
 {{ end }}

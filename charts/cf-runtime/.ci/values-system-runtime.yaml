@@ -1,0 +1,43 @@
+global:
+  runtimeName: system/test-ci-runtime
+
+runtime:
+  agent: false
+  inCluster: false
+  description: "Test runtime created by venona-helm-chart-ci pipeline"
+  kubeconfigFilePath: /opt/codefresh/kubeconfigs/prod-ue1-runtime-free-1/kubeconfig
+  kubeconfigName: prod-ue1-runtime-free-1
+  dind:
+    pvcs:
+      dind:
+        storageClassName: dind-ebs-csi-us-east-1a-workflows
+    nodeSelector:
+      node-type: dind
+      topology.kubernetes.io/zone: us-east-1a
+    tolerations:
+    - key: codefresh.io
+      operator: Equal
+      value: dinds
+      effect: NoSchedule
+    schedulerName: default-scheduler
+  engine:
+    nodeSelector:
+      node-type: engine
+      topology.kubernetes.io/zone: us-east-1a
+    tolerations:
+    - key: codefresh.io
+      operator: Equal
+      value: engines
+      effect: NoSchedule
+    schedulerName: default-scheduler
+  accounts:
+    - 5672d8deb6724b6e359adf62 # codefresh-inc
+
+volumeProvisioner:
+  enabled: false
+
+monitor:
+  enabled: false
+
+appProxy:
+  enabled: false

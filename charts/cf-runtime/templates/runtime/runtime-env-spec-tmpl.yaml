@@ -1,10 +1,10 @@
 {{- define "runtime.runtime-environment-spec.template" }}
 {{- $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version -}}
-{{- $kubeconfigFilePath := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
-{{- $name := (include "runtime.runtime-environment-spec.runtime-name" .) -}}
+{{- $kubeconfigFilePath := coalesce .Values.runtime.kubeconfigFilePath (printf "/etc/kubeconfig/%s" (include "runtime.runtime-environment-spec.runtime-name" .)) -}}
+{{- $name := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
-{{- $imageRegistry := .Values.global.imageRegistry -}}
+{{- $imageRegistry := coalesce .Values.runtime.engine.runtimeImagesRegisty .Values.global.imageRegistry -}}
 metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
@@ -38,7 +38,7 @@ runtimeScheduler:
     CR_6177_FIXER: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.CR_6177_FIXER) | squote }}
     GC_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.GC_BUILDER_IMAGE) | squote }}
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $imageRegistry "imageFullName" $engineContext.runtimeImages.COSIGN_IMAGE_SIGNER_IMAGE) | squote }}
-    RUNTIME_CHART_VERSION: {{ .Chart.Version }}
+    RUNTIME_CHART_VERSION: {{ coalesce .Values.version .Chart.Version }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -58,7 +58,7 @@ runtimeScheduler:
     kubeconfigFilePath: null
       {{- else }}
     name: {{ $name }}
-    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+    kubeconfigFilePath: {{ $kubeconfigFilePath }}
       {{- end }}
     {{- end }}
     {{- with $engineContext.nodeSelector }}
@@ -117,7 +117,7 @@ dockerDaemonScheduler:
     kubeconfigFilePath: null
       {{- else }}
     name: {{ $name }}
-    kubeconfigFilePath: {{ printf "/etc/kubeconfig/%s" $kubeconfigFilePath }}
+    kubeconfigFilePath: {{ $kubeconfigFilePath }}
       {{- end }}
     {{- end }}
     {{- with $dindContext.nodeSelector }}
@@ -148,7 +148,7 @@ dockerDaemonScheduler:
       reuseVolumeSelector: {{ $pvc.reuseVolumeSelector | squote }}
       reuseVolumeSortOrder: {{ $pvc.reuseVolumeSortOrder }}
       storageClassName: {{ include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" $pvc.storageClassName "context" $) }}
-      volumeSize: {{ $pvc.volumeSize }}
+      volumeSize: {{ $pvc.volumeSize | default "16Gi" }}
       {{- with $pvc.annotations }}
       annotations: {{ . | toYaml | nindent 8 }}
       {{- end }}
@@ -172,19 +172,26 @@ dockerDaemonScheduler:
   {{- with $dindContext.userVolumes }}
   userVolumes: {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- if and (not .Values.runtime.agent)  }}
   clientCertPath: /etc/ssl/cf/
   volumeMounts:
     codefresh-certs-server:
       name: codefresh-certs-server
       mountPath: /etc/ssl/cf
-      readOnly: false
+      readOnly: true
+    dind-config:
+      name: dind-config
+      mountPath: /etc/docker/daemon.json
+      subPath: daemon.json
+      readOnly: true
   volumes:
     codefresh-certs-server:
       name: codefresh-certs-server
       secret:
         secretName: codefresh-certs-server
-  {{- end }}
+    dind-config:
+      name: dind-config
+      configMap:
+        name: codefresh-dind-config
   {{- with $dindContext.podSecurityContext }}
   podSecurityContext: {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -219,7 +226,7 @@ description: {{ .Values.runtime.description }}
   {{- else }}
 description: null
   {{- end }}
-{{- if .Values.global.accountId }}
+{{- if and .Values.global.accountId .Values.runtime.agent }}
 accountId: {{ .Values.global.accountId }}
 {{- end }}
 {{- if not .Values.runtime.agent }}

@@ -121,3 +121,23 @@ Print context
   {{- printf "%s" .Values.global.context }}
 {{- end }}
 {{- end }}
+
+{{/*
+Print normalized runtime-environment name
+Usage:
+{{ include "runtime.runtime-environment-spec.runtime-name-normalized" "runtimeName" $runtimeName ) }}
+*/}}
+{{- define "runtime.runtime-environment-spec.runtime-name-normalized" }}
+  {{- $runtimeName := .runtimeName }}
+  {{- printf "%s" ( trimPrefix "system/" $runtimeName | replace "_" "-" | replace "/" "-" | lower ) }}
+{{- end }}
+
+{{/*
+Print normalized runtime-environment filename
+Usage:
+{{ include "runtime.runtime-environment-spec.runtime-filename-normalized" "runtimeName" $runtimeName ) }}
+*/}}
+{{- define "runtime.runtime-environment-spec.runtime-filename-normalized" }}
+  {{- $runtimeName := .runtimeName }}
+  {{- printf "%s.yaml" ( trimPrefix "system/" $runtimeName | replace "_" "-" | replace "/" "-" | lower ) }}
+{{- end }}

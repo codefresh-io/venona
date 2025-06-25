@@ -1,3 +1,6 @@
+# -- workaround for helm unit tests
+version: 1.0.0
+
 appProxy:
   enabled: false
 
@@ -10,3 +13,13 @@ global:
   agentName: my-context_codefresh
   runtimeName: my-context/codefresh
   context: my-context
+
+runner:
+  name: runner
+
+volumeProvisioner:
+  name: dind-volume-provisioner
+  dind-lv-monitor:
+    name: dind-lv-monitor
+  dind-volume-cleanup:
+    name: dind-volume-cleanup

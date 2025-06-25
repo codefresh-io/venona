@@ -1,5 +1,5 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := .Values.runtime.patch }}
+{{ $values := .Values.runtime.patch.hook }}
 {{- if and $values.enabled }}
 ---
 apiVersion: batch/v1
@@ -40,10 +40,13 @@ spec:
         - "/bin/bash"
         args:
         - -ec
-        - | {{ .Files.Get "files/cleanup-runtime.sh" | nindent 10 }}
+        - |
+          {{ .Files.Get "files/cleanup-runtime.sh" | nindent 10 }}
         env:
+        {{- if .Values.runtime.agent }}
         - name: AGENT_NAME
-          value: {{ include "runtime.runtime-environment-spec.agent-name" . }}
+          value: {{ include "runtime.runtime-environment-spec.agent-name" . | default "" }}
+        {{- end }}
         - name: RUNTIME_NAME
           value: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
         - name: API_HOST

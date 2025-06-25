@@ -17,7 +17,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 4.x](#to-4-x)
   - [To 5.x](#to-5-x)
   - [To 6.x](#to-6-x)
-  - [To 7.x](#to-7-x)  
+  - [To 7.x](#to-7-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -272,7 +272,7 @@ runtime:
       digest: sha256:d547c2044c1488e911ff726462cc417adf2dda731cafd736493c4de4eb9e357b
 ```
 
-Which means any overrides for tags won't be used and underlying Kubernetes runtime will pull the image by the digest. 
+Which means any overrides for tags won't be used and underlying Kubernetes runtime will pull the image by the digest.
 
 See [Pull an image by digest (immutable identifier)](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier)
 
@@ -957,7 +957,7 @@ NAMESPACE=cf-runtime
 CLUSTER_NAME=prod-ue1-some-cluster-name
 CURRENT_CONTEXT=$(kubectl config current-context)
 
-USER_TOKEN_VALUE=$(kubectl -n cf-runtime get secret/codefresh-runtime-user-token -o=go-template='{{ `{{.data.token}}` }}' | base64 --decode)
+USER_TOKEN_VALUE=$(kubectl -n $NAMESPACE get secret/codefresh-runtime-user-token -o=go-template='{{ `{{.data.token}}` }}' | base64 --decode)
 CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{ `{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}` }}')
 CLUSTER_CA=$(kubectl config view --raw -o=go-template='{{ `{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}"{{with index .cluster "certificate-authority-data" }}{{.}}{{end}}"{{ end }}{{ end }}` }}')
 CLUSTER_SERVER=$(kubectl config view --raw -o=go-template='{{ `{{range .clusters}}{{if eq .name "'''${CURRENT_CLUSTER}'''"}}{{ .cluster.server }}{{end}}{{ end }}` }}')
@@ -984,7 +984,7 @@ clusters:
     certificate-authority-data: ${CLUSTER_CA}
     server: ${CLUSTER_SERVER}
 users:
-- name: ${CLUSTER_NAME}
+- name: codefresh-runtime-user
   user:
     token: ${USER_TOKEN_VALUE}
 EOF
