@@ -43,7 +43,6 @@ done
 
 for runtime in /opt/codefresh/runtime.d/system/*.yaml; do
     if [[ -f $runtime ]]; then
-        cat $runtime
         codefresh patch sys-re -f $runtime
         modify_accounts "$runtime"
     fi
