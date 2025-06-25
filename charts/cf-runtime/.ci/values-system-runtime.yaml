@@ -19,6 +19,7 @@ runtime:
       operator: Equal
       value: dinds
       effect: NoSchedule
+    schedulerName: default-scheduler
   engine:
     nodeSelector:
       node-type: engine
@@ -28,6 +29,7 @@ runtime:
       operator: Equal
       value: engines
       effect: NoSchedule
+    schedulerName: default-scheduler
   accounts:
     - 5672d8deb6724b6e359adf62 # codefresh-inc
 
