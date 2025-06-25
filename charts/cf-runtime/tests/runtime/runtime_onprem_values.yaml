@@ -120,3 +120,27 @@ runtime:
         operator: Equal
         value: engine
     serviceAccount: service-account-override
+
+extraRuntimes:
+  system/default-override:
+    runtimeName: system/default-override
+    runtimeExtends:
+      - system/default
+    description: "default runtime override"
+    dind:
+      resources:
+        requests: null
+        limits:
+          cpu: 2000m
+          memory: 4096Mi
+  system/default-override-x2:
+    runtimeName: system/default-override-x2
+    runtimeExtends:
+      - system/default
+    description: "default runtime override x2"
+    dind:
+      resources:
+        requests: null
+        limits:
+          cpu: 4000m
+          memory: 8192Mi
