@@ -4,6 +4,7 @@
 ---
 {{- range $runtimeIndex, $runtimeItem := $extraRuntimes }}
 {{- $rootContext := deepCopy $ }}
+{{- $_ := set $rootContext.Values.runtime "accounts" (list) }}
 {{- $runtimeItem = (mergeOverwrite $rootContext.Values.runtime $runtimeItem) }}
 {{- $_ := set $rootContext.Values "runtime" $runtimeItem }}
 
