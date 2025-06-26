@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.8.0
+version: 7.8.1
 keywords:
   - codefresh
   - runner
@@ -18,15 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "(on-premise) Fix kubeconfigFilePath for agentless runtime"
-    - kind: added
-      description: "(on-premise) Add option to create extra agentless runtimes"
-    - kind: added
-      description: "Add cronjob to continuously patch runtime spec"
-    - kind: fixed
-      description: "Fix missing codefresh-dind-config ConfigMap in runtime spec"
-    - kind: changed
-      description: "Misc templates renaming"
+      description: "Rename dind/engine ballast deployments"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
