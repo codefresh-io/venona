@@ -4,7 +4,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ballast.fullname" . }}-{{ $name }}
+  name: {{ include "ballast.fullname" . }}
   labels:
     {{- include "ballast.labels" . | nindent 4 }}
 spec:
