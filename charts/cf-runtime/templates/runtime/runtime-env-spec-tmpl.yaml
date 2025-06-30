@@ -183,6 +183,9 @@ dockerDaemonScheduler:
       mountPath: /etc/docker/daemon.json
       subPath: daemon.json
       readOnly: true
+  {{- with $dindContext.volumeMounts }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   volumes:
     codefresh-certs-server:
       name: codefresh-certs-server
@@ -192,6 +195,9 @@ dockerDaemonScheduler:
       name: dind-config
       configMap:
         name: codefresh-dind-config
+  {{- with $dindContext.volumes }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with $dindContext.podSecurityContext }}
   podSecurityContext: {{- toYaml . | nindent 4 }}
   {{- end }}
