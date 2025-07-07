@@ -11,5 +11,7 @@ metadata:
 data:
   images: |
     {{- range $key, $val := $images }}
-    image: {{ printf "%s/%s:%s@%s" $val.image.registry $val.image.repository $val.image.tag $val.image.digest }}
+      {{- if kindIs "map" $val }}
+      image: {{ printf "%s/%s:%s@%s" $val.image.registry $val.image.repository $val.image.tag $val.image.digest }}
+      {{- end }}
     {{- end }}
