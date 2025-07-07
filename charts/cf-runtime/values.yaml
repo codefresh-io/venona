@@ -562,7 +562,7 @@ runtime:
         repository: codefresh/fs-ops
         tag: 1.2.10
         digest: sha256:70d53821b9314d88e3571dfb096e8f577caf3e4c2199253621b8d0c85d20b8ad
-      git-clone:
+      git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
         tag: 10.3.1

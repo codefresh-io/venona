@@ -35,7 +35,7 @@ runtimeScheduler:
     DOCKER_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-pusher") "context" $rootContext) | squote }}
     DOCKER_TAG_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-tag-pusher") "context" $rootContext) | squote }}
     FS_OPS_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "fs-ops") "context" $rootContext) | squote }}
-    GIT_CLONE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "git-clone") "context" $rootContext) | squote }}
+    GIT_CLONE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "git-cloner") "context" $rootContext) | squote }}
     KUBE_DEPLOY: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "kube-deploy") "context" $rootContext) | squote }}
     PIPELINE_DEBUGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "pipeline-debugger") "context" $rootContext) | squote }}
     TEMPLATE_ENGINE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "template-engine") "context" $rootContext) | squote }}
