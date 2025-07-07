@@ -70,11 +70,11 @@ runtime:
         memory: 256Mi
     runtimeImages:
       # check legacy way to specify runtime images
-      COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverride
-      # compose:
-      #   image:
-      #     tag: tagoverride
-      #     digest: ""
+      COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverrideold
+      compose:
+        image:
+          tag: tagoverridenew
+          digest: ""
       container-logger:
         image:
           tag: tagoverride
