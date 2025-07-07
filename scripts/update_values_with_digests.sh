@@ -4,7 +4,6 @@ set -eou xtrace
 MYDIR=$(dirname $0)
 CHARTDIR="${MYDIR}/../charts/cf-runtime"
 VALUES_FILE="${CHARTDIR}/values.yaml"
-TMPFILE="${CHARTDIR}/values-test-output.yaml"
 
 get_image_digest() {
   local registry=$1
@@ -20,8 +19,6 @@ get_image_digest() {
     echo "$digest"
   fi
 }
-
-cp "$VALUES_FILE" "$TMPFILE"
 
 # find paths to all maps having registry/repository/tag
 yq -o=json '.. | select(type == "!!map" and has("registry") and has("repository") and has("tag")) | path' "$VALUES_FILE" |
