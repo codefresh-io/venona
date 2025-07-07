@@ -1,5 +1,5 @@
 {{ $cfCommonTplSemver := printf "cf-common-%s" (index .Subcharts "cf-common").Chart.Version }}
-{{ $values := .Values.runtime.engine.runtimeImages }}
+{{ $images := .Values.runtime.engine.runtimeImages }}
 ---
 kind: ConfigMap
 apiVersion: v1
@@ -8,12 +8,8 @@ metadata:
   name: {{ include "runtime.fullname" . }}-images
   labels:
     {{- include "runtime.labels" . | nindent 4 }}
-  annotations:
-    {{- with $values.annotations }}
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
 data:
   images: |
-    {{- range $key, $val := $values }}
-    image: {{ $val }}
+    {{- range $key, $val := $images }}
+    image: {{ printf "%s/%s:%s@%s" $val.image.registry $val.image.repository $val.image.tag $val.image.digest }}
     {{- end }}
