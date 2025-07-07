@@ -72,65 +72,50 @@ runtime:
       # check legacy way to specify runtime images
       COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverrideold
       compose:
-        image:
-          tag: tagoverridenew
-          digest: ""
+        tag: tagoverridenew
+        digest: ""
       container-logger:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       default-qemu:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       docker-builder:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       docker-puller:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       docker-pusher:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       docker-tag-pusher:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       fs-ops:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       git-cloner:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       kube-deploy:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       pipeline-debugger:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       template-engine:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       alpine:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       gc-builder:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
       cosign-image-signer:
-        image:
-          tag: tagoverride
-          digest: ""
+        tag: tagoverride
+        digest: ""
     env:
       FOO: BAR
       INT_AS_STRING: "123"
