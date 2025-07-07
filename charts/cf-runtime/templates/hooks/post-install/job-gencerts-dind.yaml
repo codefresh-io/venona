@@ -41,7 +41,8 @@ spec:
         - "/bin/bash"
         args:
         - -ec
-        - | {{ .Files.Get "files/configure-dind-certs.sh" | nindent 10 }}
+        - |
+          {{- .Files.Get "files/configure-dind-certs.sh" | nindent 10 }}
         env:
         - name: NAMESPACE
           value: {{ .Release.Namespace }}
