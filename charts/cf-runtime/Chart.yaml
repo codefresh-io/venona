@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "runtimeImages changed to map of images with registry, repository, tag and digest."
+      description: "Added ability to specify .Values.runtime.engine.runtimeImages as a maps with registry, repository, tag and digest."
     - kind: fixed
       description: "Fixed empty lines in misc templates."
 dependencies:
