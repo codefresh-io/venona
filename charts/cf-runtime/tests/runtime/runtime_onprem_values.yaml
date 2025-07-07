@@ -83,50 +83,65 @@ runtime:
         memory: 256Mi
     runtimeImages:
       compose:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       container-logger:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       default-qemu:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       docker-builder:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       docker-puller:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       docker-pusher:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       docker-tag-pusher:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       fs-ops:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       git-cloner:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       kube-deploy:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       pipeline-debugger:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       template-engine:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       alpine:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       gc-builder:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
       cosign-image-signer:
-        tag: tagoverride
-        digest: ""
+        image:
+          tag: tagoverride
+          digest: ""
     env:
       FOO: BAR
       INT: 123
