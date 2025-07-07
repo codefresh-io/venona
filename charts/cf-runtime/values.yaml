@@ -528,95 +528,80 @@ runtime:
     # @default -- See below.
     runtimeImages:
       compose:
-        image:
-          registry: quay.io
-          repository: codefresh/compose
-          tag: v2.37.0-1.5.4
-          digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
+        registry: quay.io
+        repository: codefresh/compose
+        tag: v2.37.0-1.5.4
+        digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
       container-logger:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-container-logger
-          tag: 1.12.5
-          digest: sha256:9152151faf828dfd3bf52ea568b6d70bcc88ef99d5fa7d011f7b4d9beed652cc
+        registry: quay.io
+        repository: codefresh/cf-container-logger
+        tag: 1.12.5
+        digest: sha256:9152151faf828dfd3bf52ea568b6d70bcc88ef99d5fa7d011f7b4d9beed652cc
       docker-builder:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-docker-builder
-          tag: 1.4.6
-          digest: sha256:94683c11ac66705ef752b7d4c7f8fb57445cb96d4f1425a52b5b3a9428ec852b
+        registry: quay.io
+        repository: codefresh/cf-docker-builder
+        tag: 1.4.6
+        digest: sha256:94683c11ac66705ef752b7d4c7f8fb57445cb96d4f1425a52b5b3a9428ec852b
       docker-puller:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-docker-puller
-          tag: 8.0.21
-          digest: sha256:fdcae9ab57fd5121409fd7f669795eda2ddcb94e4e50e08f4ff3830a9bf40064
+        registry: quay.io
+        repository: codefresh/cf-docker-puller
+        tag: 8.0.21
+        digest: sha256:fdcae9ab57fd5121409fd7f669795eda2ddcb94e4e50e08f4ff3830a9bf40064
       docker-pusher:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-docker-pusher
-          tag: 6.0.19
-          digest: sha256:3753503dcfee41065ffa6ca1527453604ce69fbf31fce5d356d679bf26579417
+        registry: quay.io
+        repository: codefresh/cf-docker-pusher
+        tag: 6.0.19
+        digest: sha256:3753503dcfee41065ffa6ca1527453604ce69fbf31fce5d356d679bf26579417
       docker-tag-pusher:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-docker-tag-pusher
-          tag: 1.3.17
-          digest: sha256:d0f09428b74da4bcae581477db519e694669702bb42a55f4a7977014f2ed21b2
+        registry: quay.io
+        repository: codefresh/cf-docker-tag-pusher
+        tag: 1.3.17
+        digest: sha256:d0f09428b74da4bcae581477db519e694669702bb42a55f4a7977014f2ed21b2
       fs-ops:
-        image:
-          registry: quay.io
-          repository: codefresh/fs-ops
-          tag: 1.2.10
-          digest: sha256:70d53821b9314d88e3571dfb096e8f577caf3e4c2199253621b8d0c85d20b8ad
+        registry: quay.io
+        repository: codefresh/fs-ops
+        tag: 1.2.10
+        digest: sha256:70d53821b9314d88e3571dfb096e8f577caf3e4c2199253621b8d0c85d20b8ad
       git-cloner:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-git-cloner
-          tag: 10.3.1
-          digest: sha256:2a7854d00287a181c056ea932652ec8a21300ff729d2e6f5f5b517cf4a3f0abf
+        registry: quay.io
+        repository: codefresh/cf-git-cloner
+        tag: 10.3.1
+        digest: sha256:2a7854d00287a181c056ea932652ec8a21300ff729d2e6f5f5b517cf4a3f0abf
       kube-deploy:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-deploy-kubernetes
-          tag: 16.2.9
-          digest: sha256:35649b14eb43717d3752d08597ada77d3737b2508f1b8e1f52f67b7a0e5ff263
+        registry: quay.io
+        repository: codefresh/cf-deploy-kubernetes
+        tag: 16.2.9
+        digest: sha256:35649b14eb43717d3752d08597ada77d3737b2508f1b8e1f52f67b7a0e5ff263
       pipeline-debugger:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-debugger
-          tag: 1.3.9
-          digest: sha256:37975653b4ef5378bd1e38d453c7dac4721cba1c1977a5ca6118a67b98a47925
+        registry: quay.io
+        repository: codefresh/cf-debugger
+        tag: 1.3.9
+        digest: sha256:37975653b4ef5378bd1e38d453c7dac4721cba1c1977a5ca6118a67b98a47925
       template-engine:
-        image:
-          registry: quay.io
-          repository: codefresh/pikolo
-          tag: 0.14.6
-          digest: sha256:b3f499fcf93037e69fba599d2f292cfc9f28a158052dd57d5de9cdf9756f1f60
+        registry: quay.io
+        repository: codefresh/pikolo
+        tag: 0.14.6
+        digest: sha256:b3f499fcf93037e69fba599d2f292cfc9f28a158052dd57d5de9cdf9756f1f60
       cosign-image-signer:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-cosign-image-signer
-          tag: 2.5.0-cf.1
-          digest: sha256:f28c2f9f99cc963b190f260c3d5b7374512fcfb93cedf94ba7a0ea7caa2a5833
+        registry: quay.io
+        repository: codefresh/cf-cosign-image-signer
+        tag: 2.5.0-cf.1
+        digest: sha256:f28c2f9f99cc963b190f260c3d5b7374512fcfb93cedf94ba7a0ea7caa2a5833
       gc-builder:
-        image:
-          registry: quay.io
-          repository: codefresh/cf-gc-builder
-          tag: 0.5.3
-          digest: sha256:33ac914e6b844909f188a208cf90e569358cafa5aaa60f49848f49d99bcaf875
+        registry: quay.io
+        repository: codefresh/cf-gc-builder
+        tag: 0.5.3
+        digest: sha256:33ac914e6b844909f188a208cf90e569358cafa5aaa60f49848f49d99bcaf875
       default-qemu:
-        image:
-          registry: docker.io
-          repository: tonistiigi/binfmt
-          tag: qemu-v9.2.2
-          digest: sha256:1b804311fe87047a4c96d38b4b3ef6f62fca8cd125265917a9e3dc3c996c39e6
+        registry: docker.io
+        repository: tonistiigi/binfmt
+        tag: qemu-v9.2.2
+        digest: sha256:1b804311fe87047a4c96d38b4b3ef6f62fca8cd125265917a9e3dc3c996c39e6
       alpine:
-        image:
-          registry: docker.io
-          repository: alpine
-          tag: edge
-          digest: sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
+        registry: docker.io
+        repository: alpine
+        tag: edge
+        digest: sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
     # -- Legacy way to specify runtime images.
     # runtimeImages:
     #   COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
