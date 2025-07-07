@@ -45,12 +45,12 @@ runtimeScheduler:
   {{- if (index $engineContext "runtimeImages" "DOCKER_BUILDER_IMAGE") }}
     DOCKER_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_BUILDER_IMAGE) | squote }}
   {{- else }}
-  DOCKER_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-builder" "image") "context" $rootContext) | squote }}
+    DOCKER_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-builder" "image") "context" $rootContext) | squote }}
   {{- end }}
   {{- if (index $engineContext "runtimeImages" "DOCKER_PULLER_IMAGE") }}
     DOCKER_PULLER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PULLER_IMAGE) | squote }}
   {{- else }}
-  DOCKER_PULLER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-puller" "image") "context" $rootContext) | squote }}
+    DOCKER_PULLER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-puller" "image") "context" $rootContext) | squote }}
   {{- end }}
   {{- if (index $engineContext "runtimeImages" "DOCKER_PUSHER_IMAGE") }}
     DOCKER_PUSHER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PUSHER_IMAGE) | squote }}
