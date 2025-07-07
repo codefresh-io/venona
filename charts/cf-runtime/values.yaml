@@ -617,10 +617,9 @@ runtime:
           repository: alpine
           tag: edge
           digest: sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
-
-        COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
     # -- Legacy way to specify runtime images.
     # runtimeImages:
+    #   COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
     #   CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:1.12.5@sha256:9152151faf828dfd3bf52ea568b6d70bcc88ef99d5fa7d011f7b4d9beed652cc
     #   DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:1.4.6@sha256:94683c11ac66705ef752b7d4c7f8fb57445cb96d4f1425a52b5b3a9428ec852b
     #   DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:8.0.21@sha256:fdcae9ab57fd5121409fd7f669795eda2ddcb94e4e50e08f4ff3830a9bf40064
