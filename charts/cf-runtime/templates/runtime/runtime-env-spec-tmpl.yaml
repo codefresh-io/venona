@@ -95,7 +95,7 @@ runtimeScheduler:
     {{- if (index $engineContext "runtimeImages" "GC_BUILDER_IMAGE") }}
       GC_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.GC_BUILER_IMAGE) | squote }}
     {{- else }}
-      GC_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "gc -builder" "image") "context" $rootContext) | squote }}
+      GC_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "gc-builder" "image") "context" $rootContext) | squote }}
     {{- end }}
     {{- if (index $engineContext "runtimeImages" "COSIGN_IMAGE_SIGNER_IMAGE") }}
       COSIGN_IMAGE_SIGNER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.COSIGN_IMAGE_SIGNER_IMAGE) | squote }}
