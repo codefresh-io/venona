@@ -19,6 +19,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: "runtimeImages changed to map of images with registry, repository, tag and digest."
+    - kind: fixed
+      description: "Fixed empty lines in misc templates."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
