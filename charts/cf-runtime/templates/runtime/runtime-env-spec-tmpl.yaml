@@ -27,21 +27,21 @@ runtimeScheduler:
     {{ $key }}: {{ $val | squote }}
     {{- end }}
   {{- end }}
-    COMPOSE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "compose") "context" $rootContext) | squote }}
-    CONTAINER_LOGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "container-logger") "context" $rootContext) | squote }}
-    DEFAULT_QEMU_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "default-qemu") "context" $rootContext) | squote }}
-    DOCKER_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-builder") "context" $rootContext) | squote }}
-    DOCKER_PULLER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-puller") "context" $rootContext) | squote }}
-    DOCKER_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-pusher") "context" $rootContext) | squote }}
-    DOCKER_TAG_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-tag-pusher") "context" $rootContext) | squote }}
-    FS_OPS_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "fs-ops") "context" $rootContext) | squote }}
-    GIT_CLONE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "git-cloner") "context" $rootContext) | squote }}
-    KUBE_DEPLOY: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "kube-deploy") "context" $rootContext) | squote }}
-    PIPELINE_DEBUGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "pipeline-debugger") "context" $rootContext) | squote }}
-    TEMPLATE_ENGINE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "template-engine") "context" $rootContext) | squote }}
-    CR_6177_FIXER: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "alpine") "context" $rootContext) | squote }}
-    GC_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "gc-builder") "context" $rootContext) | squote }}
-    COSIGN_IMAGE_SIGNER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "cosign-image-signer") "context" $rootContext) | squote }}
+    COMPOSE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "compose" "image") "context" $rootContext) | squote }}
+    CONTAINER_LOGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "container-logger" "image") "context" $rootContext) | squote }}
+    DEFAULT_QEMU_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "default-qemu" "image") "context" $rootContext) | squote }}
+    DOCKER_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-builder" "image") "context" $rootContext) | squote }}
+    DOCKER_PULLER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-puller" "image") "context" $rootContext) | squote }}
+    DOCKER_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-pusher" "image") "context" $rootContext) | squote }}
+    DOCKER_TAG_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-tag-pusher" "image") "context" $rootContext) | squote }}
+    FS_OPS_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "fs-ops" "image") "context" $rootContext) | squote }}
+    GIT_CLONE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "git-cloner" "image") "context" $rootContext) | squote }}
+    KUBE_DEPLOY: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "kube-deploy" "image") "context" $rootContext) | squote }}
+    PIPELINE_DEBUGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "pipeline-debugger" "image") "context" $rootContext) | squote }}
+    TEMPLATE_ENGINE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "template-engine" "image") "context" $rootContext) | squote }}
+    CR_6177_FIXER: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "alpine" "image") "context" $rootContext) | squote }}
+    GC_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "gc-builder" "image") "context" $rootContext) | squote }}
+    COSIGN_IMAGE_SIGNER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "cosign-image-signer" "image") "context" $rootContext) | squote }}
     RUNTIME_CHART_VERSION: {{ coalesce .Values.version .Chart.Version }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
