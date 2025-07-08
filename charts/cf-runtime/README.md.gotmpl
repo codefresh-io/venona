@@ -18,6 +18,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 5.x](#to-5-x)
   - [To 6.x](#to-6-x)
   - [To 7.x](#to-7-x)
+  - [To 7.9.x](#to-7-9-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -276,7 +277,29 @@ Which means any overrides for tags won't be used and underlying Kubernetes runti
 
 See [Pull an image by digest (immutable identifier)](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier)
 
+### To 7.9.x
 
+We changed the type of `.Values.runtime.engine.runtimeImages` from key-value maps to a list of maps with `registry`, `repository`, `tag` and `digest` fields.
+
+If you used this value, please migrate like below:
+
+```yaml
+# before
+runtime:
+  engine:
+    runtimeImages:
+      COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
+
+# after
+runtime:
+  engine:
+    runtimeImages:
+      compose:
+        registry: quay.io
+        repository: codefresh/compose
+        tag: v2.37.0-1.5.4
+        digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
+```
 
 ## Architecture
 

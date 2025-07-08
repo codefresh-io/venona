@@ -69,21 +69,53 @@ runtime:
         cpu: 200m
         memory: 256Mi
     runtimeImages:
-      COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverride
-      CONTAINER_LOGGER_IMAGE: quay.io/codefresh/cf-container-logger:tagoverride
-      DEFAULT_QEMU_IMAGE: tonistiigi/binfmt:tagoverride
-      DOCKER_BUILDER_IMAGE: quay.io/codefresh/cf-docker-builder:tagoverride
-      DOCKER_PULLER_IMAGE: quay.io/codefresh/cf-docker-puller:tagoverride
-      DOCKER_PUSHER_IMAGE: quay.io/codefresh/cf-docker-pusher:tagoverride
-      DOCKER_TAG_PUSHER_IMAGE: quay.io/codefresh/cf-docker-tag-pusher:tagoverride
-      FS_OPS_IMAGE: quay.io/codefresh/fs-ops:tagoverride
-      GIT_CLONE_IMAGE: quay.io/codefresh/cf-git-cloner:tagoverride
-      KUBE_DEPLOY: quay.io/codefresh/cf-deploy-kubernetes:tagoverride
-      PIPELINE_DEBUGGER_IMAGE: quay.io/codefresh/cf-debugger:tagoverride
-      TEMPLATE_ENGINE: quay.io/codefresh/pikolo:tagoverride
-      CR_6177_FIXER: alpine:tagoverride
-      GC_BUILDER_IMAGE: quay.io/codefresh/cf-gc-builder:tagoverride
-      COSIGN_IMAGE_SIGNER_IMAGE: quay.io/codefresh/cf-cosign-image-signer:tagoverride
+      # check legacy way to specify runtime images
+      COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverrideold
+      compose:
+        tag: tagoverridenew
+        digest: ""
+      container-logger:
+        tag: tagoverride
+        digest: ""
+      default-qemu:
+        tag: tagoverride
+        digest: ""
+      docker-builder:
+        tag: tagoverride
+        digest: ""
+      docker-puller:
+        tag: tagoverride
+        digest: ""
+      docker-pusher:
+        tag: tagoverride
+        digest: ""
+      docker-tag-pusher:
+        tag: tagoverride
+        digest: ""
+      fs-ops:
+        tag: tagoverride
+        digest: ""
+      git-cloner:
+        tag: tagoverride
+        digest: ""
+      kube-deploy:
+        tag: tagoverride
+        digest: ""
+      pipeline-debugger:
+        tag: tagoverride
+        digest: ""
+      template-engine:
+        tag: tagoverride
+        digest: ""
+      alpine:
+        tag: tagoverride
+        digest: ""
+      gc-builder:
+        tag: tagoverride
+        digest: ""
+      cosign-image-signer:
+        tag: tagoverride
+        digest: ""
     env:
       FOO: BAR
       INT_AS_STRING: "123"

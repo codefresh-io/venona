@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.8.1
+version: 7.9.0
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Rename dind/engine ballast deployments"
+      description: "Added ability to specify .Values.runtime.engine.runtimeImages as a maps with registry, repository, tag and digest."
+    - kind: fixed
+      description: "Fixed empty lines in misc templates."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
