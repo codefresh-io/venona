@@ -198,7 +198,7 @@ func run(options startOptions) {
 		runtimes = remoteRuntimeConfiguration(options, k8sLog)
 	}
 
-	var monitor monitoring.Monitor = monitoring.NewEmpty()
+	monitor := monitoring.NewEmpty()
 	var err error
 
 	if options.newrelicLicenseKey != "" {
