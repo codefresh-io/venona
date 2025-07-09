@@ -1124,6 +1124,8 @@ global:
 EOF
 ```
 
+⚠️ Any customizations in runtime-environment spec done via CLI (like `nodeSelector`, `tolerations`, `podLabels`, etc) should be added to the `values.yaml` file as well.
+
 Install the Helm chart
 
 ## Requirements
