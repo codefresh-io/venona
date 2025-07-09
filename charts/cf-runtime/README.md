@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.9.0](https://img.shields.io/badge/Version-7.9.0-informational?style=flat-square)
+![Version: 7.9.1](https://img.shields.io/badge/Version-7.9.1-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -32,6 +32,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [ARM](#arm)
   - [Openshift](#openshift)
   - [On-premise](#on-premise)
+- [Migrating from CLI-based installation to Helm chart](#migrating-from-cli-based-installation-to-helm-chart)
 
 ## Prerequisites
 
@@ -1086,6 +1087,46 @@ helm upgrade --install cf-runtime oci://quay.io/codefresh/cf-runtime -f values.y
 - Verify the runtime and run test pipeline
 
 Go to [https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system](https://<YOUR_ONPREM_DOMAIN_HERE>/admin/runtime-environments/system) to see the runtime. Assign it to the required account(s).
+
+## Migrating from CLI-based installation to Helm chart
+
+If you have previously installed Codefresh Runner via CLI, you can migrate to the Helm chart by following these steps:
+
+Get Agent and Runtime from existing installation:
+
+```console
+NAMESPACE=codefresh
+AGENT_NAME=$(kubectl -n $NAMESPACE get deploy runner -o json | jq -r '.spec.template.spec.containers[].env[] | select(.name == "AGENT_ID") | .value')
+RUNTIME_NAME=$(kubectl -n $NAMESPACE get secret runnerconf -o json | jq -r '.data | to_entries | .[0].value' | base64 -d | grep 'name:' | cut -d':' -f2 | tr -d ' ')
+echo "AGENT_NAME: $AGENT_NAME"
+echo "RUNTIME_NAME: $RUNTIME_NAME"
+```
+
+Delete the legacy k8s resources created via CLI with `./scripts/delete-legacy-cli-resources.sh` script:
+
+⚠️⚠️⚠️ **DO NOT DELETE `runner` secret!** ⚠️⚠️⚠️
+
+```console
+NAMESPACE=codefresh
+./scripts/delete-legacy-cli-resources.sh $NAMESPACE
+```
+
+Fill Agent and Runtime names in the `values.yaml` file:
+
+```console
+cat << EOF > my-values.yaml
+global:
+  agentName: $AGENT_NAME
+  runtimeName: $RUNTIME_NAME
+  agentTokenSecretKeyRef:
+    name: runner
+    key: codefresh.token
+EOF
+```
+
+⚠️ Any customizations in runtime-environment spec done via CLI (like `nodeSelector`, `tolerations`, `podLabels`, etc) should be added to the `values.yaml` file as well.
+
+Install the Helm chart
 
 ## Requirements
 
