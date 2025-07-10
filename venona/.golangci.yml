@@ -1,0 +1,9 @@
+version: "2"
+linters:
+  settings:
+    staticcheck:
+      checks:
+        - all
+        - '-ST1005'
+        - '-ST1000'
+        - '-ST1003'

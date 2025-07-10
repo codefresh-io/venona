@@ -81,14 +81,14 @@ const (
 
 var (
 	// internal errors
-	errAlreadyRunning           = errors.New("agent already running")
-	errAlreadyStopped           = errors.New("agent already stopped")
-	errOptionsRequired          = errors.New("options are required")
+	errAlreadyRunning           = errors.New("Agent already running")
+	errAlreadyStopped           = errors.New("Agent already stopped")
+	errOptionsRequired          = errors.New("Options are required")
 	errIDRequired               = errors.New("ID options is required")
-	errRuntimesRequired         = errors.New("runtimes options is required")
-	errLoggerRequired           = errors.New("logger options is required")
-	errFailedToParseAgentTask   = errors.New("failed to parse agent task spec")
-	errUknownAgentTaskType      = errors.New("agent task has unknown type")
+	errRuntimesRequired         = errors.New("Runtimes options is required")
+	errLoggerRequired           = errors.New("Logger options is required")
+	errFailedToParseAgentTask   = errors.New("Failed to parse agent task spec")
+	errUknownAgentTaskType      = errors.New("Agent task has unknown type")
 	errAgentTaskMalformedParams = errors.New("failed to marshal agent task params")
 	errProxyTaskWithoutURL      = errors.New(`url not provided for task of type "proxy"`)
 	errProxyTaskWithoutToken    = errors.New(`token not provided for task of type "proxy"`)

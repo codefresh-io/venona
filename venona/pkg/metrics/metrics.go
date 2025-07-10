@@ -103,7 +103,7 @@ var (
 	}, []string{"k8s_type"})
 )
 
-// New creates a new Metrics instnace
+// Register : New creates a new Metrics instnace
 func Register(reg *prometheus.Registry) {
 	reg.MustRegister([]prometheus.Collector{
 		agentTasks,
