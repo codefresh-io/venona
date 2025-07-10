@@ -196,7 +196,9 @@ func (c cf) doRequest(ctx context.Context, method string, body io.Reader, query 
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err

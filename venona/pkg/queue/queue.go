@@ -64,7 +64,7 @@ type (
 	}
 )
 
-var errRuntimeNotFound = errors.New("Runtime environment not found")
+var errRuntimeNotFound = errors.New("runtime environment not found")
 
 // New creates a new TaskQueue instance
 func New(opts *Options) WorkflowQueue {
