@@ -1,8 +1,6 @@
 module github.com/codefresh-io/go/venona
 
-go 1.22
-
-toolchain go1.23.4
+go 1.23
 
 require (
 	github.com/gorilla/mux v1.8.0
