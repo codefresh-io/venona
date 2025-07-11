@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.9.2](https://img.shields.io/badge/Version-7.9.2-informational?style=flat-square)
+![Version: 7.9.3](https://img.shields.io/badge/Version-7.9.3-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1214,7 +1214,7 @@ Install the Helm chart
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.image | object | `{"digest":"sha256:2827aa2a274b186f7bfab3fab3dd0ff136a4ffadcc3b04c130beb5780caa3def","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.22"}` | Set image |
+| monitor.image | object | `{"digest":"sha256:4ada371e2eca5e80bb63583749737d8a17504d8ada3901fe1ef295e226a3e5d0","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.23"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
 | monitor.podSecurityContext | object | `{}` |  |
@@ -1241,7 +1241,7 @@ Install the Helm chart
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"digest":"sha256:bcc6e7495186f1f9c3e885afa891a3bda11b5374a577f069f34ddc75142342ef","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.0"}` | Set image |
+| runner.image | object | `{"digest":"sha256:d00c6645039c3716e778217cc22fb44ae2324fd3349d8e782dd3a8af05dc0e2d","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.6"}` | Set image |
 | runner.init | object | `{"image":{"digest":"sha256:ea37c7064a95a68269cb93f17e05501f87403706665319ed8f3c646c77e3880c","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.2-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
