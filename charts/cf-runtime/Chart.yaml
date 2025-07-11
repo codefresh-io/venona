@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 7.9.2
+version: 7.9.3
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Bump runtime images with security fixes"
+      description: "Bump venona with security fixes"
     - kind: security
-      description: "Bump codefresh/cli with security fixes"
+      description: "Bump k8s-agent with security fixes"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
