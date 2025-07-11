@@ -83,7 +83,7 @@ type (
 var (
 	errNotValidType           = errors.New("not a valid type")
 	kubeDecode                = scheme.Codecs.UniversalDeserializer().Decode
-	removeFinalizersJsonPatch = []byte(`[{ "op": "remove", "path": "/metadata/finalizers" }]`)
+	removeFinalizersJSONPatch = []byte(`[{ "op": "remove", "path": "/metadata/finalizers" }]`)
 )
 
 func (e K8sError) IsRetriable() bool {
@@ -184,7 +184,7 @@ func (k kube) DeleteResource(ctx context.Context, opts DeleteOptions) error {
 		}
 
 		if k.forceDeletePvc {
-			_, err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Patch(ctx, opts.Name, types.JSONPatchType, removeFinalizersJsonPatch, metav1.PatchOptions{})
+			_, err := k.client.CoreV1().PersistentVolumeClaims(opts.Namespace).Patch(ctx, opts.Name, types.JSONPatchType, removeFinalizersJSONPatch, metav1.PatchOptions{})
 			if err != nil {
 				return NewK8sError(fmt.Errorf("failed removing finalizers from PVC \"%s\\%s\": %w", opts.Namespace, opts.Name, err), TypeK8sDeleteResource)
 			}

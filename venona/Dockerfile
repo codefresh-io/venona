@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine3.20 AS build
+FROM golang:1.23-alpine3.22 AS build
 RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 ENV USER=venona
 ENV UID=10001 
@@ -17,7 +17,7 @@ RUN go mod verify
 # compile
 RUN make build
 
-FROM alpine:3.20
+FROM alpine:3.22
 # copy ca-certs and user details
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd

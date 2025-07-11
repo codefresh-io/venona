@@ -427,7 +427,10 @@ func proxyRequest(t *task.AgentTask, log logger.Logger) error {
 		return fmt.Errorf("failed sending request: %w", err)
 	}
 
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(resp.Body)
+
 	body, _ := io.ReadAll(resp.Body)
 	log.Info("finished proxy task", "url", url, "method", method, "status", resp.Status, "body", string(body))
 

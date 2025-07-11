@@ -43,7 +43,7 @@ type (
 	// Type of the task
 	Type string
 
-	// Task status
+	// Status : Task status
 	Status string
 
 	// Task options
