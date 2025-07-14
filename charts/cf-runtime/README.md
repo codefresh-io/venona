@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.9.3](https://img.shields.io/badge/Version-7.9.3-informational?style=flat-square)
+![Version: 7.9.4](https://img.shields.io/badge/Version-7.9.4-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 

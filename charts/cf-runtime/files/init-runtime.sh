@@ -47,6 +47,12 @@ fi
 if [ ! -z "${EXISTING_AGENT_CODEFRESH_TOKEN}" ]; then
     echo "using existing agentToken value"
     create_agent_secret $EXISTING_AGENT_CODEFRESH_TOKEN
+
+    codefresh attach runtime \
+      --runtime-name ${RUNTIME_NAME} \
+      --agent-name ${AGENT_NAME} \
+      --platform-only
+
     exit 0
 fi
 
