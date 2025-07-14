@@ -39,10 +39,10 @@ create_auth_context() {
 }
 
 attach_runtime() {
-  codefresh attach runtime \
+  (set -x; codefresh attach runtime \
     --runtime-name ${RUNTIME_NAME} \
     --agent-name ${AGENT_NAME} \
-    --platform-only
+    --platform-only)
 }
 
 OWNER_UID=$(kubectl get deploy ${OWNER_NAME} --namespace ${KUBE_NAMESPACE} -o jsonpath='{.metadata.uid}')
