@@ -34,6 +34,17 @@ EOF
 
 }
 
+create_auth_context() {
+  codefresh auth create-context --api-key ${USER_CODEFRESH_TOKEN} --url ${API_HOST}
+}
+
+attach_runtime() {
+  (set -x; codefresh attach runtime \
+    --runtime-name ${RUNTIME_NAME} \
+    --agent-name ${AGENT_NAME} \
+    --platform-only)
+}
+
 OWNER_UID=$(kubectl get deploy ${OWNER_NAME} --namespace ${KUBE_NAMESPACE} -o jsonpath='{.metadata.uid}')
 echo "got owner uid: ${OWNER_UID}"
 
@@ -41,12 +52,20 @@ if [ ! -z "${AGENT_CODEFRESH_TOKEN}" ]; then
     echo "-----"
     echo "runtime and agent are already initialized"
     echo "-----"
+
+    create_auth_context
+    attach_runtime
+
     exit 0
 fi
 
 if [ ! -z "${EXISTING_AGENT_CODEFRESH_TOKEN}" ]; then
     echo "using existing agentToken value"
     create_agent_secret $EXISTING_AGENT_CODEFRESH_TOKEN
+
+    create_auth_context
+    attach_runtime
+
     exit 0
 fi
 
@@ -57,7 +76,7 @@ if [ -z "${USER_CODEFRESH_TOKEN}" ]; then
     exit 1
 fi
 
-codefresh auth create-context --api-key ${USER_CODEFRESH_TOKEN} --url ${API_HOST}
+create_auth_context
 
 # AGENT_TOKEN might be empty, in which case it will be returned by the call
 RES=$(codefresh install agent \
