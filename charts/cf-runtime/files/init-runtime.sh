@@ -41,6 +41,12 @@ if [ ! -z "${AGENT_CODEFRESH_TOKEN}" ]; then
     echo "-----"
     echo "runtime and agent are already initialized"
     echo "-----"
+
+    codefresh attach runtime \
+      --runtime-name ${RUNTIME_NAME} \
+      --agent-name ${AGENT_NAME} \
+      --platform-only
+
     exit 0
 fi
 
