@@ -302,7 +302,7 @@ runtime:
         digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
 ```
 
-### To 9.x
+### To 8.x
 
 ⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
 
