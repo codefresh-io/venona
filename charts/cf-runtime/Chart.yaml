@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: added
-      description: "Add docker daemon metrics endpoint to default configuration"
+      description: "Added ports for metrics in dind service."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
