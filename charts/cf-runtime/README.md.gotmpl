@@ -302,6 +302,15 @@ runtime:
         digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
 ```
 
+### To 9.x
+
+⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
+
+We upgraded dind version to 28.1.1
+
+Pipelines may stop working if the deprecated images are not resolved before the upgrade.
+Tutorial how to upgrade deprecated images: https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/
+
 ## Architecture
 
 [Codefresh Runner architecture](https://codefresh.io/docs/docs/installation/codefresh-runner/#codefresh-runner-architecture)
