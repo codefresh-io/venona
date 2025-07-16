@@ -18,11 +18,11 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "dind image updated to version 28.1.1-3.0.1"
+      description: Updated dind image  to version 28.1.1-3.0.1
     - kind: deprecated
-      description: Deprecate pushing and pulling images manifest v2 schema 1 and "Docker Image v1"
+      description: Deprecated pushing and pulling images manifest v2 schema 1 and "Docker Image v1"
     - kind: security
-      description: Some vulnerabilities fixed in dind
+      description: Fixed some vulnerabilities in dind
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
