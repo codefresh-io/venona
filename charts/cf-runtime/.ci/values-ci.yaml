@@ -32,7 +32,6 @@ runtime:
     limits:
         cpu: 1000m
         memory: 1024Mi
-    env:
   engine:
     podLabels:
       key: engine

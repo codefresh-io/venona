@@ -446,7 +446,7 @@ runtime:
         # annotations:
         #   codefresh.io/volume-retention: 7d
     # -- Set additional env vars.
-    env:
+    env: {}
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.
