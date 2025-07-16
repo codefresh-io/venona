@@ -307,8 +307,6 @@ runtime:
 
 ⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
 
-We upgraded dind version to 28.1.1
-
 Docker engine in `dind` component is upgraded to 28.x. The main change is that in this version the image manifest v2 schema 1 and "Docker Image v1" formats were deprecated in favor of the v2 schema 2 and OCI image spec formats. Read [the official Docker documentation](https://docs.docker.com/engine/deprecated/#pushing-and-pulling-with-image-manifest-v2-schema-1) for more details.
 
 This means that any existing images in your pipelines that were created using these older formats will no longer be pulled after upgrade. **This may affect pipelines operation.**
