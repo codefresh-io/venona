@@ -19,6 +19,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 6.x](#to-6-x)
   - [To 7.x](#to-7-x)
   - [To 7.9.x](#to-7-9-x)
+  - [To 8.x](#to-8-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
