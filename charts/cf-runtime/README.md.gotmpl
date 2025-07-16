@@ -311,7 +311,7 @@ Docker engine in `dind` component is upgraded to 28.x. The main change is that i
 
 This means that any existing images in your pipelines that were created using these older formats will no longer be pulled after upgrade. **This may affect pipelines operation.**
 
-To avoid operation disruption, you have to identify and convert such deprecated images to modern formats. Tutorial: (https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/)
+To avoid operation disruption, you have to identify and convert such deprecated images to modern formats. Tutorial: [https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/](https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/)
 
 ## Architecture
 
