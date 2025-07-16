@@ -310,6 +310,11 @@ runtime:
 We upgraded dind version to 28.1.1
 
 Pipelines may stop working if the deprecated images are not resolved before the upgrade.
+
+The main change is that newer Docker versions (starting from 27) disable support for deprecated Docker image manifest formats by default: v1 and v2, schema 1. This means that any existing images in your pipelines that were created using these older formats will no longer be correctly pulled or function with the new Docker runner.
+
+To resolve this issue, you need to identify and convert these deprecated images to modern formats (OCI or Docker manifest v2, schema 2). This can be achieved by "re-pushing" the image using a modern Docker client, which will automatically update the manifest format.
+
 Tutorial how to upgrade deprecated images: https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/
 
 ## Architecture
