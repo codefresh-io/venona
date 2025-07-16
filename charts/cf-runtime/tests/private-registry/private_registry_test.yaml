@@ -88,8 +88,6 @@ tests:
               dindImage: 'somedomain.io/codefresh/dind:tagoverride'
               imagePullPolicy: IfNotPresent
               userAccess: true
-              envVars:
-                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine

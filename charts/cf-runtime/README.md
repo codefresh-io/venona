@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 7.9.4](https://img.shields.io/badge/Version-7.9.4-informational?style=flat-square)
+![Version: 8.0.0](https://img.shields.io/badge/Version-8.0.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -19,6 +19,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 6.x](#to-6-x)
   - [To 7.x](#to-7-x)
   - [To 7.9.x](#to-7-9-x)
+  - [To 8.x](#to-8-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -301,6 +302,16 @@ runtime:
         tag: v2.37.0-1.5.4
         digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
 ```
+
+### To 8.x
+
+⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
+
+Docker engine in `dind` component is upgraded to 28.x. The main change is that in this version the image manifest v2 schema 1 and "Docker Image v1" formats were deprecated in favor of the v2 schema 2 and OCI image spec formats. Read [the official Docker documentation](https://docs.docker.com/engine/deprecated/#pushing-and-pulling-with-image-manifest-v2-schema-1) for more details.
+
+This means that any existing images in your pipelines that were created using these older formats will no longer be pulled after upgrade. **This may affect pipelines operation.**
+
+To avoid operation disruption, you have to identify and convert such deprecated images to modern formats. Tutorial: [https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/](https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/)
 
 ## Architecture
 
@@ -1264,11 +1275,11 @@ Install the Helm chart
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true},"image":{"digest":"sha256:33c343dd01e8a24f0b4a872bbe62884320719f9d9dc27b7a8fed9f7e9fc7e80e","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.8"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f","registry":"docker.io","repository":"alpine","tag":3.18},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{},"image":{"digest":"sha256:e6f8044b6963b3d1fbf728853aa31edff0bb26ce7613595d3b2a470482bd2cc3","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"28.1.1-3.0.1"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f","registry":"docker.io","repository":"alpine","tag":3.18},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.containerSecurityContext | object | `{}` | Set container security context. |
-| runtime.dind.env | object | `{"DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE":true}` | Set additional env vars. |
-| runtime.dind.image | object | `{"digest":"sha256:33c343dd01e8a24f0b4a872bbe62884320719f9d9dc27b7a8fed9f7e9fc7e80e","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"26.1.4-1.28.8"}` | Set dind image. |
+| runtime.dind.env | object | `{}` | Set additional env vars. |
+| runtime.dind.image | object | `{"digest":"sha256:e6f8044b6963b3d1fbf728853aa31edff0bb26ce7613595d3b2a470482bd2cc3","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"28.1.1-3.0.1"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |

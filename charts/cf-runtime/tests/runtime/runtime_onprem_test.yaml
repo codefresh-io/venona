@@ -120,7 +120,6 @@ tests:
               userAccess: true
               envVars:
                 ALICE: 'BOB'
-                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
                 FLOAT_AS_STRING: '12.34'
                 INT: '123'
               cluster:
@@ -307,7 +306,6 @@ tests:
               userAccess: true
               envVars:
                 ALICE: 'BOB'
-                DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: 'true'
                 FLOAT_AS_STRING: '12.34'
                 INT: '123'
               cluster:
