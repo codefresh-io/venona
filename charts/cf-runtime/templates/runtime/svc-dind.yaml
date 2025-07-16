@@ -11,6 +11,12 @@ spec:
   - name: "dind-port"
     port: 1300
     protocol: TCP
+  - name: dind-metrics
+    port: 9100
+    protocol: TCP
+  - name: daemon-metrics
+    port: 9323
+    protocol: TCP
   clusterIP: None
   selector:
     app: dind
