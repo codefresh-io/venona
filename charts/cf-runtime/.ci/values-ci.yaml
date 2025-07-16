@@ -33,7 +33,6 @@ runtime:
         cpu: 1000m
         memory: 1024Mi
     env:
-      DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: true
   engine:
     podLabels:
       key: engine

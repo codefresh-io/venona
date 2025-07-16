@@ -447,7 +447,6 @@ runtime:
         #   codefresh.io/volume-retention: 7d
     # -- Set additional env vars.
     env:
-      DOCKER_ENABLE_DEPRECATED_PULL_SCHEMA_1_IMAGE: true
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.
