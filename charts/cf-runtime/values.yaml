@@ -908,6 +908,11 @@ serviceMonitor:
         relabelings:
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
+      - path: /metrics
+        targetPort: 9323
+        relabelings:
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
 # -- Add podMonitor (for engine pods)
 # @default -- See below
 podMonitor:
