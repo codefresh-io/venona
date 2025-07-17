@@ -37,7 +37,9 @@ modify_accounts() {
 for runtime in /opt/codefresh/*.yaml; do
     if [[ -f $runtime ]]; then
         codefresh patch $patch_type -f $runtime
-        modify_accounts "$runtime"
+        if [[ "$AGENT" == "false" ]]; then
+            modify_accounts "$runtime"
+        fi
     fi
 done
 
