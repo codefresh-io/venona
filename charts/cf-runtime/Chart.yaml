@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.0.1
+version: 8.0.2
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Fix patch-runtime.sh script to not modify accounts when agent is false"
+    - kind: added
+      description: "Add docker daemon metrics endpoint to default configuration"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
