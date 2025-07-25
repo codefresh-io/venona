@@ -2,10 +2,6 @@
 
 set -x
 
-AGENT=${AGENT:-true}
-API_HOST=${API_HOST:-""}
-API_KEY=${API_KEY:-""}
-
 (set +x; codefresh auth create-context --api-key $API_KEY --url $API_HOST)
 
 if [[ "$AGENT" == "true" ]]; then

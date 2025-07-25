@@ -56,7 +56,7 @@ spec:
             - name: API_HOST
               value: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
             - name: AGENT
-              value: {{  .Values.runtime.agent | quote }}
+              value: {{  .Values.runtime.agent | quote | default "true" }}
               {{- include (printf "%s.env-vars" $cfCommonTplSemver) (dict "Values" $values.env "context" .) | nindent 12 }}
             volumeMounts:
             - name: runtime-config
