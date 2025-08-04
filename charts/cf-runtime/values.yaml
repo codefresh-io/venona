@@ -81,8 +81,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 0.89.2-rootless
-      digest: sha256:ea37c7064a95a68269cb93f17e05501f87403706665319ed8f3c646c77e3880c
+      tag: 0.89.3-rootless
+      digest: sha256:bbf49935b078eb0f282fec4ff674eea55f880b101809c6415e3ead7a0c729261
     resources:
       limits:
         memory: 512Mi
@@ -697,8 +697,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 0.89.2-rootless
-        digest: sha256:ea37c7064a95a68269cb93f17e05501f87403706665319ed8f3c646c77e3880c
+        tag: 0.89.3-rootless
+        digest: sha256:bbf49935b078eb0f282fec4ff674eea55f880b101809c6415e3ead7a0c729261
       rbac:
         enabled: true
       annotations: {}
@@ -719,8 +719,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 0.89.2-rootless
-        digest: sha256:ea37c7064a95a68269cb93f17e05501f87403706665319ed8f3c646c77e3880c
+        tag: 0.89.3-rootless
+        digest: sha256:bbf49935b078eb0f282fec4ff674eea55f880b101809c6415e3ead7a0c729261
       affinity: {}
       nodeSelector: {}
       podSecurityContext: {}
@@ -777,8 +777,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.55
-    digest: sha256:47e56203a2b091986bce51bed5395aaccd8c4ec6e1a8f60060919f4f5fc0ab66
+    tag: 0.0.56
+    digest: sha256:06417d368b0bf296597441e9f7796ee19905c3205472d81eebf2bcd3cb2cfd98
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
@@ -855,8 +855,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.23
-    digest: sha256:4ada371e2eca5e80bb63583749737d8a17504d8ada3901fe1ef295e226a3e5d0
+    tag: 1.3.24
+    digest: sha256:890cf228f2ac4ee66e35efc55b56a7a27627b7ad4eebc93f21ac74bb56b5860e
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
