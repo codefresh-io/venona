@@ -174,13 +174,13 @@ dockerDaemonScheduler:
   {{- with $dindContext.userAccess }}
   userAccess: {{ . }}
   {{- end }}
-  {{- with $dindContext.env }}
   envVars:
+  {{- with $dindContext.env }}
     {{- range $key, $val := . }}
     {{ $key }}: {{ $val | squote }}
     {{- end }}
-    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=classic-dind,service.version=%s,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $dindVersion $runtimeName $runtimeVersion }}
   {{- end }}
+    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=classic-dind,service.version=%s,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $dindVersion $runtimeName $runtimeVersion }}
   cluster:
     namespace: {{ .Release.Namespace }}
     serviceAccount: {{ $dindContext.serviceAccount }}
