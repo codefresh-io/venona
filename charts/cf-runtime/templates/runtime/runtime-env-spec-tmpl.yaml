@@ -103,6 +103,8 @@ runtimeScheduler:
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "cosign-image-signer") "context" $rootContext) | squote }}
   {{- end }}
     RUNTIME_CHART_VERSION: {{ coalesce .Values.version .Chart.Version }}
+    CF_SERVICE_VERSION: {{ printf "%s@%s" $engineContext.image.tag $engineContext.image.digest }}
+    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" (coalesce .Values.global.runtimeName (printf "%s/%s" .Values.global.context .Release.Namespace)) (coalesce .Values.version .Chart.Version) }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}

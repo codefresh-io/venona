@@ -20,6 +20,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 7.x](#to-7-x)
   - [To 7.9.x](#to-7-9-x)
   - [To 8.x](#to-8-x)
+  - [To 9.x](#to-9-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -312,6 +313,30 @@ Docker engine in `dind` component is upgraded to 28.x. The main change is that i
 This means that any existing images in your pipelines that were created using these older formats will no longer be pulled after upgrade. **This may affect pipelines operation.**
 
 To avoid operation disruption, you have to identify and convert such deprecated images to modern formats. Tutorial: [https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/](https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/)
+
+### To 9.x
+
+⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
+
+In this major release, the `engine` component has migrated its metrics collection to OpenTelemetry, using the *push* model by default.
+
+You can still switch to the *pull* model by setting the `OTEL_METRICS_EXPORTER=prometheus` environment variable for the `engine`. However, we recommend using the default configuration, as it is better suited for the short-lived nature of Classic Builds and provides more precise and complete metrics.
+
+View [default chart values](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime?modal=values&path=runtime.engine.env) for more configuration options.
+
+The `engine` metrics have also been redesigned to follow OpenTelemetry standards and to deliver more actionable insights.
+Full list of metrics: TODO: LINK TO DOCS
+
+For a smooth transition, the previous Prometheus metrics are still available but are now disabled by default. **These legacy metrics will be removed in future releases.** If you need to temporarily retain the old metrics, add the following values to your chart configuration:
+
+```yaml
+runtime:
+  engine:
+    env:
+      CF_TELEMETRY_PROMETHEUS_ENABLE: "false" # Disable new Prometheus metrics to avoid ports conflict and data duplication
+      CF_TELEMETRY_OTEL_ENABLE: "false" # Disable new OTel metrics to avoid data duplication
+      METRICS_PROMETHEUS_ENABLED: "true" # Enable old Prometheus metrics
+```
 
 ## Architecture
 
