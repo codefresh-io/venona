@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 8.0.5](https://img.shields.io/badge/Version-8.0.5-informational?style=flat-square)
+![Version: 8.0.6](https://img.shields.io/badge/Version-8.0.6-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1152,7 +1152,7 @@ Install the Helm chart
 | appProxy.affinity | object | `{}` | Set affinity |
 | appProxy.enabled | bool | `false` | Enable app-proxy |
 | appProxy.env | object | `{}` | Add additional env vars |
-| appProxy.image | object | `{"digest":"sha256:47e56203a2b091986bce51bed5395aaccd8c4ec6e1a8f60060919f4f5fc0ab66","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.55"}` | Set image |
+| appProxy.image | object | `{"digest":"sha256:06417d368b0bf296597441e9f7796ee19905c3205472d81eebf2bcd3cb2cfd98","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.56"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
@@ -1225,7 +1225,7 @@ Install the Helm chart
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.image | object | `{"digest":"sha256:4ada371e2eca5e80bb63583749737d8a17504d8ada3901fe1ef295e226a3e5d0","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.23"}` | Set image |
+| monitor.image | object | `{"digest":"sha256:890cf228f2ac4ee66e35efc55b56a7a27627b7ad4eebc93f21ac74bb56b5860e","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.24"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
 | monitor.podSecurityContext | object | `{}` |  |
@@ -1253,7 +1253,7 @@ Install the Helm chart
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
 | runner.image | object | `{"digest":"sha256:d00c6645039c3716e778217cc22fb44ae2324fd3349d8e782dd3a8af05dc0e2d","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.6"}` | Set image |
-| runner.init | object | `{"image":{"digest":"sha256:ea37c7064a95a68269cb93f17e05501f87403706665319ed8f3c646c77e3880c","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.2-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
+| runner.init | object | `{"image":{"digest":"sha256:bbf49935b078eb0f282fec4ff674eea55f880b101809c6415e3ead7a0c729261","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.3-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
@@ -1342,7 +1342,7 @@ Install the Helm chart
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
-| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:ea37c7064a95a68269cb93f17e05501f87403706665319ed8f3c646c77e3880c","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.2-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
+| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:bbf49935b078eb0f282fec4ff674eea55f880b101809c6415e3ead7a0c729261","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.3-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
