@@ -9,6 +9,16 @@
 {{- if $runtimeImageRegistry }}
   {{- $_ := set $rootContext.Values.global "imageRegistry" $runtimeImageRegistry }}
 {{- end }}
+{{- $runtimeVersion := coalesce .Values.version .Chart.Version -}}
+{{- $runtimeName := include "runtime.runtime-environment-spec.runtime-name" . -}}
+{{- $engineVersion := coalesce $engineContext.image.tag "latest" -}}
+{{- if $engineContext.image.digest }}
+  {{- $engineVersion = printf "%s@%s" $engineVersion $engineContext.image.digest -}}
+{{- end }}
+{{- $dindVersion := coalesce $dindContext.image.tag "latest" -}}
+{{- if $dindContext.image.digest }}
+  {{- $dindVersion = printf "%s@%s" $dindVersion $dindContext.image.digest -}}
+{{- end }}
 metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
@@ -102,9 +112,9 @@ runtimeScheduler:
   {{- else }}
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "cosign-image-signer") "context" $rootContext) | squote }}
   {{- end }}
-    RUNTIME_CHART_VERSION: {{ coalesce .Values.version .Chart.Version }}
-    CF_SERVICE_VERSION: {{ printf "%s@%s" $engineContext.image.tag $engineContext.image.digest }}
-    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" (coalesce .Values.global.runtimeName (printf "%s/%s" .Values.global.context .Release.Namespace)) (coalesce .Values.version .Chart.Version) }}
+    RUNTIME_CHART_VERSION: {{ $runtimeVersion }}
+    CF_SERVICE_VERSION: {{ $engineVersion }}
+    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=classic-engine,service.version=%s,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $engineVersion $runtimeName $runtimeVersion }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -169,6 +179,7 @@ dockerDaemonScheduler:
     {{- range $key, $val := . }}
     {{ $key }}: {{ $val | squote }}
     {{- end }}
+    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=classic-dind,service.version=%s,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $dindVersion $runtimeName $runtimeVersion }}
   {{- end }}
   cluster:
     namespace: {{ .Release.Namespace }}
