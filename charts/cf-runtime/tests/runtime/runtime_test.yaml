@@ -36,7 +36,7 @@ tests:
               agent: true
             runtimeScheduler:
               type: KubernetesPod
-              image: 'quay.io/codefresh/engine:tagoverride'
+              image: 'quay.io/codefresh/engine:tagoverride@sha256:123'
               imagePullPolicy: Always
               command:
                 - one
@@ -81,7 +81,7 @@ tests:
                 OTEL_TRACES_SAMPLER: 'parentbased_always_on'
                 PYROSCOPE_SERVER_ADDRESS: ''
                 TRUSTED_QEMU_IMAGES: 'my-registry/tonistiigi/binfmt'
-                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverrideold'
+                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverrideold@sha256:123'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride'
                 DEFAULT_QEMU_IMAGE: 'docker.io/tonistiigi/binfmt:tagoverride'
                 DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
@@ -98,7 +98,7 @@ tests:
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
                 CF_SERVICE_VERSION: tagoverride
-                OTEL_RESOURCE_ATTRIBUTES: service.name=classic-engine,service.version=tagoverride,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
+                OTEL_RESOURCE_ATTRIBUTES: service.name=classic-engine,service.version=tagoverride@sha256:123,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               userEnvVars:
                 - name: ALICE
                   valueFrom:

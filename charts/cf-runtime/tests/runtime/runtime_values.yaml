@@ -56,7 +56,7 @@ runtime:
     image:
       tag: tagoverride
       pullPolicy: Always
-      digest: ""
+      digest: "sha256:123"
     command:
       - one
       - two
@@ -73,7 +73,7 @@ runtime:
       COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverrideold
       compose:
         tag: tagoverridenew
-        digest: ""
+        digest: "sha256:123"
       container-logger:
         tag: tagoverride
         digest: ""
