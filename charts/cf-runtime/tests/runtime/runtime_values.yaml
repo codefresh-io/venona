@@ -73,10 +73,10 @@ runtime:
       COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverrideold
       compose:
         tag: tagoverridenew
-        digest: "sha256:123"
+        digest: ""
       container-logger:
         tag: tagoverride
-        digest: ""
+        digest: "sha256:123"
       default-qemu:
         tag: tagoverride
         digest: ""
