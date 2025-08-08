@@ -649,9 +649,9 @@ runtime:
       # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
       MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
 
-      # -- Maximum allowed time for post-steps to finish (optional!).
+      # -- Maximum allowed time for post-steps to finish (optional!); seconds.
       # Overrides POST_STEPS_GRACE_PERIOD_MIN environment variable in cf-api for this specific runtime only.
-      # It's maximum time allowed to wait for the post-steps to finish before terminating build; seconds.
+      # It's maximum time allowed to wait for the post-steps to finish before terminating build.
       MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH_SECONDS: -1
       # E.g.
       # MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH_SECONDS: 1800
