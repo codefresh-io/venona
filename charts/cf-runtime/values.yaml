@@ -652,9 +652,9 @@ runtime:
       # -- Maximum allowed time for post-steps to finish (optional!).
       # Overrides POST_STEPS_GRACE_PERIOD_MIN environment variable in cf-api for this specific runtime only.
       # It's maximum time allowed to wait for the post-steps to finish before terminating build; seconds.
-      MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH: -1
+      MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH_SECONDS: -1
       # E.g.
-      # MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH: 1800
+      # MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH_SECONDS: 1800
 
       # -- Maximum time for workflow execution; seconds.
       MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
