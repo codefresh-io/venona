@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: added
-      description: "Added MAXIMUM_ALLOWED_TIME_FOR_POST_STEPS_TO_FINISH_SECONDS value for engine."
+      description: "Added MAXIMUM_POST_STEPS_GRACE_PERIOD_MINUTES value for engine."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
