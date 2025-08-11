@@ -652,6 +652,9 @@ runtime:
       MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
       # -- Maximum time allowed to workflow to spend in "elected" state; seconds.
       MAXIMUM_ELECTED_STATE_AGE_ALLOWED: 900
+      # -- Maximum time for internal build chores before termination; minutes.
+      # For on-prem installations may be overridden by the platform admin.
+      MAXIMUM_POST_STEPS_GRACE_PERIOD_MINUTES: 30
       # -- Maximum retry attempts allowed for workflow.
       MAXIMUM_RETRY_ATTEMPTS_ALLOWED: 20
       # -- Maximum time allowed to workflow to spend in "terminating" state until force terminated; seconds.
