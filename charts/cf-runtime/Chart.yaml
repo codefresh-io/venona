@@ -27,6 +27,8 @@ annotations:
       description: "Redesign \"engine\" metrics to follow OpenTelemetry standards and provide more comprehensive insights about Classic Build execution. Please read upgrade notes for more details."
     - kind: deprecated
       description: "Deprecate legacy Prometheus metrics in favor of new OpenTelemetry metrics in \"engine\". Please read upgrade notes for more details."
+    - kind: changed
+      description: "Improve observability of build's \"Initializing Process\" step by providing more logs and more detailed status of the step."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

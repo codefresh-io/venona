@@ -503,9 +503,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.179.0
+      tag: 1.179.1
       pullPolicy: IfNotPresent
-      digest: sha256:9a10181adad3db563e9abe44d813ab4e713bb501a1af5af3126b54f6ab701386
+      digest: sha256:37caef1e58f8d07ed76da753fb46eb59224e723495c1b9081d3ef7e0bc9449f9
     # -- Set container command.
     command:
       - npm
@@ -627,13 +627,14 @@ runtime:
       CF_TELEMETRY_LOGS_LEVEL: 'debug'
       # -- Enable OpenTelemetry signals (logs, metrics, traces)
       CF_TELEMETRY_OTEL_ENABLE: 'true'
-      # -- Enable OTel HTTP instrumentation. Make sure to sanitize `url.full` and `url.query` span attributes on collector before enabling this flag, as it may contain sensitive information.
+      # -- Enable OTel HTTP instrumentation.
+      # Make sure to sanitize `url.full` and `url.query` span attributes on collector before enabling this flag, as it may contain sensitive information.
       CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
       # -- Enable Prometheus server (used solely to emit process metrics, if CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS=true)
       # If enabled, make sure to disable legacy metrics by specifying METRICS_PROMETHEUS_ENABLED=false.
-      CF_TELEMETRY_PROMETHEUS_ENABLE: 'true'
+      CF_TELEMETRY_PROMETHEUS_ENABLE: 'false'
       # -- Enable collecting process metrics
-      CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS: 'true'
+      CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS: 'false'
       # -- Host for Prometheus metrics server
       CF_TELEMETRY_PROMETHEUS_HOST: '0.0.0.0'
       # -- Port for Prometheus metrics server
