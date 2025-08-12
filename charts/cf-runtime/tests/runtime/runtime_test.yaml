@@ -43,7 +43,6 @@ tests:
                 - two
                 - three
               envVars:
-                CF_SERVICE_NAME: 'classic-engine'
                 CF_TELEMETRY_LOGS_LEVEL: 'debug'
                 CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
                 CF_TELEMETRY_OTEL_ENABLE: 'true'
@@ -97,8 +96,9 @@ tests:
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
+                CF_SERVICE_NAME: 'cf-classic-engine'
                 CF_SERVICE_VERSION: tagoverride@sha256:123
-                OTEL_RESOURCE_ATTRIBUTES: service.name=classic-engine,service.version=tagoverride@sha256:123,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
+                OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-engine,service.version=tagoverride@sha256:123,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               userEnvVars:
                 - name: ALICE
                   valueFrom:
@@ -159,7 +159,7 @@ tests:
                 ALICE: 'BOB'
                 FLOAT: '12.34'
                 INT_AS_STRING: '123'
-                OTEL_RESOURCE_ATTRIBUTES: service.name=classic-dind,service.version=tagoverride,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
+                OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
                 serviceAccount: service-account-override

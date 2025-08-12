@@ -621,8 +621,6 @@ runtime:
     # -- Set additional env vars.
     env:
       # -- Telemetry configuration
-      # -- Engine name for telemetry purposes
-      CF_SERVICE_NAME: 'classic-engine'
       # -- Level of logging for engine
       CF_TELEMETRY_LOGS_LEVEL: 'debug'
       # -- Enable OpenTelemetry signals (logs, metrics, traces)

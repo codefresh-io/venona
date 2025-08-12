@@ -31,7 +31,6 @@ tests:
                 - run
                 - start
               envVars:
-                CF_SERVICE_NAME: 'classic-engine'
                 CF_TELEMETRY_LOGS_LEVEL: 'debug'
                 CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
                 CF_TELEMETRY_OTEL_ENABLE: 'true'
@@ -82,8 +81,9 @@ tests:
                 GC_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'somedomain.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
+                CF_SERVICE_NAME: 'cf-classic-engine'
                 CF_SERVICE_VERSION: tagoverride
-                OTEL_RESOURCE_ATTRIBUTES: service.name=classic-engine,service.version=tagoverride,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
+                OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-engine,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               workflowLimits:
                 MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
                 MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
@@ -115,7 +115,7 @@ tests:
               imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
-                OTEL_RESOURCE_ATTRIBUTES: service.name=classic-dind,service.version=tagoverride,service.namespace=codefresh-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
+                OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
                 serviceAccount: codefresh-engine
