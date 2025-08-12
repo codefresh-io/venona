@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"engine\" to version 1.179.0."
+      description: "Update \"engine\" to version 1.179.1."
     - kind: added
       description: "Add support for OpenTelemetry signals: metrics, logs, traces."
     - kind: added
