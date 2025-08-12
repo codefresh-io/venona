@@ -96,7 +96,7 @@ tests:
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
-                CF_SERVICE_NAME: 'cf-classic-engine'
+                CF_SERVICE_NAME: cf-classic-engine
                 CF_SERVICE_VERSION: tagoverride@sha256:123
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-engine,service.version=tagoverride@sha256:123,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               userEnvVars:

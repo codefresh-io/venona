@@ -94,7 +94,7 @@ tests:
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
-                CF_SERVICE_NAME: 'cf-classic-engine'
+                CF_SERVICE_NAME: cf-classic-engine
                 CF_SERVICE_VERSION: tagoverride
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-engine,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/my-runtime,cf.classic.runtime.version=1.0.0
               workflowLimits:
@@ -307,7 +307,7 @@ tests:
                 GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
-                CF_SERVICE_NAME: 'cf-classic-engine'
+                CF_SERVICE_NAME: cf-classic-engine
                 CF_SERVICE_VERSION: tagoverride
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-engine,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/default-override,cf.classic.runtime.version=1.0.0
               workflowLimits:
