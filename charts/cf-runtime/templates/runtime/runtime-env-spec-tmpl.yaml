@@ -115,6 +115,7 @@ runtimeScheduler:
     RUNTIME_CHART_VERSION: {{ $runtimeVersion }}
     CF_SERVICE_NAME: {{ printf "cf-classic-engine" }}
     CF_SERVICE_VERSION: {{ $engineVersion }}
+    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=cf-classic-engine,service.version=%s,service.namespace=cf-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $engineVersion $runtimeName $runtimeVersion }}
   {{- with $engineContext.userEnvVars }}
   userEnvVars:  {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -180,6 +181,7 @@ dockerDaemonScheduler:
     {{ $key }}: {{ $val | squote }}
     {{- end }}
   {{- end }}
+    OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=cf-classic-dind,service.version=%s,service.namespace=cf-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $dindVersion $runtimeName $runtimeVersion }}
   cluster:
     namespace: {{ .Release.Namespace }}
     serviceAccount: {{ $dindContext.serviceAccount }}
