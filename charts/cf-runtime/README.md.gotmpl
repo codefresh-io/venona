@@ -20,7 +20,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 7.x](#to-7-x)
   - [To 7.9.x](#to-7-9-x)
   - [To 8.x](#to-8-x)
-  - [To 9.x](#to-9-x)
+  - [To 8.2.x](#to-8-2-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
@@ -314,11 +314,11 @@ This means that any existing images in your pipelines that were created using th
 
 To avoid operation disruption, you have to identify and convert such deprecated images to modern formats. Tutorial: [https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/](https://codefresh.io/docs/docs/kb/articles/upgrade-deprecated-docker-images/)
 
-### To 9.x
+### To 8.2.x
 
-⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
+⚠️⚠️⚠️ **BREAKING CHANGE in metrics configuration** ⚠️⚠️⚠️
 
-In this major release, the `engine` component has migrated its metrics collection to OpenTelemetry, using the *push* model by default.
+In this release, the `engine` component has migrated its metrics collection to OpenTelemetry, using the *push* model by default.
 
 You can still switch to the *pull* model by setting the `OTEL_METRICS_EXPORTER=prometheus` environment variable for the `engine`. However, we recommend using the default configuration, as it is better suited for the short-lived nature of Classic Builds and provides more precise and complete metrics.
 
