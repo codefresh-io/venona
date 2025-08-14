@@ -56,7 +56,7 @@ runtime:
     image:
       tag: tagoverride
       pullPolicy: Always
-      digest: ""
+      digest: "sha256:123"
     command:
       - one
       - two
@@ -76,7 +76,7 @@ runtime:
         digest: ""
       container-logger:
         tag: tagoverride
-        digest: ""
+        digest: "sha256:123"
       default-qemu:
         tag: tagoverride
         digest: ""

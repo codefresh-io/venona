@@ -503,9 +503,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.178.3
+      tag: 1.179.1
       pullPolicy: IfNotPresent
-      digest: sha256:c8e74362a3462a635cad70ac81877a7d3a0d4833cfaefb8d3b8b4b90e8c95159
+      digest: sha256:37caef1e58f8d07ed76da753fb46eb59224e723495c1b9081d3ef7e0bc9449f9
     # -- Set container command.
     command:
       - npm
@@ -620,28 +620,91 @@ runtime:
     #   DEFAULT_QEMU_IMAGE: tonistiigi/binfmt:qemu-v9.2.2@sha256:1b804311fe87047a4c96d38b4b3ef6f62fca8cd125265917a9e3dc3c996c39e6
     # -- Set additional env vars.
     env:
+      # -- Telemetry configuration
+      # -- Level of logging for engine
+      CF_TELEMETRY_LOGS_LEVEL: 'debug'
+      # -- Enable OpenTelemetry signals (logs, metrics, traces)
+      CF_TELEMETRY_OTEL_ENABLE: 'true'
+      # -- Enable OTel HTTP instrumentation.
+      # Make sure to sanitize `url.full` and `url.query` span attributes on collector before enabling this flag, as it may contain sensitive information.
+      CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
+      # -- Enable Prometheus server (used solely to emit process metrics, if CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS=true)
+      # If enabled, make sure to disable legacy metrics by specifying METRICS_PROMETHEUS_ENABLED=false.
+      CF_TELEMETRY_PROMETHEUS_ENABLE: 'false'
+      # -- Enable collecting process metrics
+      CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS: 'false'
+      # -- Host for Prometheus metrics server
+      CF_TELEMETRY_PROMETHEUS_HOST: '0.0.0.0'
+      # -- Port for Prometheus metrics server
+      CF_TELEMETRY_PROMETHEUS_PORT: '9100'
+      # -- Enable Pyroscope profiling. If enabled, the Pyroscope server address must be set in PYROSCOPE_SERVER_ADDRESS.
+      CF_TELEMETRY_PYROSCOPE_ENABLE: 'false'
+      # -- Pyroscope server address
+      PYROSCOPE_SERVER_ADDRESS: ''
+      # -- Level of logging for engine
+      LOGGER_LEVEL: debug
+      # -- Enable debug-level logging of outgoing HTTP/HTTPS requests.
+      # Use with caution, as it may log sensitive information.
+      LOG_OUTGOING_HTTP_REQUESTS: false
+      # -- On exit, wait <timeout>ms for the scrape before exiting. No waiting will be done if set to 0. If OTEL_METRICS_EXPORTER=prometheus, it's recommended to set this to 4×scrape_interval.
+      METRICS_SCRAPE_TIMEOUT_MS: '0'
+      # -- Base endpoint URL for all OpenTelemetry signals.
+      # Ref: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
+      # -- Specifies the OTLP transport protocol to be used for all telemetry data.
+      # Ref: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/
+      OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
+      # -- Specifies the compression algorithm to be used for all telemetry data.
+      # Ref: https://opentelemetry.io/docs/specs/otel/protocol/exporter/
+      OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
+      # -- OTel Logs exporter to be used.
+      # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      OTEL_LOGS_EXPORTER: 'none'
+      # -- OTel traces exporter to be used.
+      # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      OTEL_TRACES_EXPORTER: 'none'
+      # -- OTel sampler to be used for traces.
+      # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      OTEL_TRACES_SAMPLER: 'parentbased_always_on'
+      # -- OTel metrics exporter to be used. Set to "prometheus" to export metrics in Prometheus format. If set to "prometheus", it's recommended to set METRICS_SCRAPE_TIMEOUT_MS=4×scrape_interval.
+      # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      OTEL_METRICS_EXPORTER: 'otlp'
+      # -- The time interval (in milliseconds) between the start of two export attempts for push metric exporters, such as "otlp".
+      # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      OTEL_METRIC_EXPORT_INTERVAL: '10000'
+      # -- Maximum allowed time (in milliseconds) to export data for push metric exporters, such as "otlp".
+      # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+      OTEL_METRIC_EXPORT_TIMEOUT: '5000'
+      # -- Host used by the Prometheus OTel metrics exporter if OTEL_METRICS_EXPORTER=prometheus
+      OTEL_EXPORTER_PROMETHEUS_HOST: '0.0.0.0'
+      # -- Port used by the Prometheus OTel metrics exporter if OTEL_METRICS_EXPORTER=prometheus
+      OTEL_EXPORTER_PROMETHEUS_PORT: '9464'
+      # -- Emit the stable HTTP and networking OTel conventions if CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION=true.
+      OTEL_SEMCONV_STABILITY_OPT_IN: 'http'
+      #
+      # -- Deprecated metrics configuration
+      # -- DEPRECATED: Use OpenTelemetry metrics instead. This option enables Prometheus metrics and will be removed in a future release.
+      # If enabled, make sure to disable newest metrics by specifying CF_TELEMETRY_PROMETHEUS_ENABLE=false.
+      METRICS_PROMETHEUS_ENABLED: false
+      # -- DEPRECATED: Use OpenTelemetry metrics instead. This option enables legacy metrics and will be removed in a future release.
+      METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: false
+      # -- DEPRECATED: Use OpenTelemetry metrics instead. This option enables process metrics and will be removed in a future release.
+      METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS: false
+      # -- DEPRECATED: Use OpenTelemetry metrics instead. This options sets the host for Prometheus metrics server and will be removed in a future release.
+      METRICS_PROMETHEUS_HOST: '0.0.0.0'
+      # -- DEPRECATED: Use OpenTelemetry metrics instead. This options sets the port for Prometheus metrics server and will be removed in a future release.
+      METRICS_PROMETHEUS_PORT: 9100
+      # -- DEPRECATED: Use OpenTelemetry metrics instead. This options sets exit timeout for Prometheus metrics server and will be removed in a future release.
+      # If set, the engine will wait <timeout>ms for the scrape before exiting.
+      METRICS_PROMETHEUS_SCRAPE_TIMEOUT: '15000'
+      #
+      # -- Engine operation configuration
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
       # -- Timeout while doing requests to the Docker daemon
       DOCKER_REQUEST_TIMEOUT_MS: 30000
       # -- If "true", composition images will be pulled sequentially
       FORCE_COMPOSE_SERIAL_PULL: false
-      # -- Level of logging for engine
-      LOGGER_LEVEL: debug
-      # -- Enable debug-level logging of outgoing HTTP/HTTPS requests
-      LOG_OUTGOING_HTTP_REQUESTS: false
-      # -- Enable emitting metrics from engine
-      METRICS_PROMETHEUS_ENABLED: true
-      # -- Enable legacy metrics
-      METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS: false
-      # -- Enable collecting process metrics
-      METRICS_PROMETHEUS_COLLECT_PROCESS_METRICS: false
-      # -- Host for Prometheus metrics server
-      METRICS_PROMETHEUS_HOST: '0.0.0.0'
-      # -- Port for Prometheus metrics server
-      METRICS_PROMETHEUS_PORT: 9100
-      # -- The timeout till the engine waits for Prometheus to pull the latest metrics before engine shuts down (in milliseconds)
-      METRICS_PROMETHEUS_SCRAPE_TIMEOUT: '15000'
       # -- Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.DEFAULT_QEMU_IMAGE value
       TRUSTED_QEMU_IMAGES: 'tonistiigi/binfmt'
     # -- Set workflow limits.
@@ -916,7 +979,7 @@ serviceMonitor:
         relabelings:
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
-# -- Add podMonitor (for engine pods)
+# -- Add podMonitor
 # @default -- See below
 podMonitor:
   main:
@@ -929,6 +992,8 @@ podMonitor:
     podMetricsEndpoints:
       - path: /metrics
         targetPort: 9100
+      - path: /metrics
+        targetPort: 9464
   runner:
     # -- Enable pod monitor for runner pod
     enabled: false

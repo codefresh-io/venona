@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.1.0
+version: 8.2.0
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,18 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: changed
+      description: "Update \"engine\" to version 1.179.1."
     - kind: added
-      description: "Added MAXIMUM_POST_STEPS_GRACE_PERIOD_MINUTES configuration for engine which controls maximum time for internal build chores before termination."
+      description: "Add support for OpenTelemetry signals: metrics, logs, traces."
+    - kind: added
+      description: "Add support for Pyroscope profiles."
+    - kind: changed
+      description: "Redesign \"engine\" metrics to follow OpenTelemetry standards and provide more comprehensive insights about Classic Build execution. Please read upgrade notes for more details."
+    - kind: deprecated
+      description: "Deprecate legacy Prometheus metrics in favor of new OpenTelemetry metrics in \"engine\". Please read upgrade notes for more details."
+    - kind: changed
+      description: "Improve observability of build's \"Initializing Process\" step by providing more logs and more detailed status of the step."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
