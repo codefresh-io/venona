@@ -324,8 +324,7 @@ You can still switch to the *pull* model by setting the `OTEL_METRICS_EXPORTER=p
 
 View [default chart values](https://artifacthub.io/packages/helm/codefresh-runner/cf-runtime?modal=values&path=runtime.engine.env) for more configuration options.
 
-The `engine` metrics have also been redesigned to follow OpenTelemetry standards and to deliver more actionable insights.
-Full list of metrics: TODO: LINK TO DOCS
+The `engine` metrics have also been redesigned to follow OpenTelemetry standards and to deliver more actionable insights. Full list of metrics: https://codefresh.io/docs/docs/installation/runner/classic-runtime-monitoring/
 
 For a smooth transition, the previous Prometheus metrics are still available but are now disabled by default. **These legacy metrics will be removed in future releases.** If you need to temporarily retain the old metrics, add the following values to your chart configuration:
 
