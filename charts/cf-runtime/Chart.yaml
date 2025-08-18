@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.2.1
+version: 8.2.2
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"engine\" to version 1.179.2."
-    - kind: fixed
-      description: "Set correct \"cf.classic.build.step.type\" attributes for internal steps metrics."
+      description: "Update \"engine\" to version 1.179.3."
+    - kind: changed
+      description: "Improve \"cf.classic.build.step.name\" attribute values for internal steps for better clarity."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
