@@ -446,7 +446,9 @@ runtime:
         # annotations:
         #   codefresh.io/volume-retention: 7d
     # -- Set additional env vars.
-    env: {}
+    env:
+      # -- Enable in-docker cleaner
+      CLEAN_DOCKER: true
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.
