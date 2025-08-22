@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.2.2
+version: 8.2.3
 keywords:
   - codefresh
   - runner
@@ -17,10 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: "Update \"engine\" to version 1.179.3."
-    - kind: changed
-      description: "Improve \"cf.classic.build.step.name\" attribute values for internal steps for better clarity."
+    - kind: added
+      description: "Add CLEAN_DOCKER env var to dind pod spec"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
