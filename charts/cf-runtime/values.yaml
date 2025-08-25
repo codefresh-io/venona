@@ -449,6 +449,18 @@ runtime:
     env:
       # -- Enable in-docker cleaner
       CLEAN_DOCKER: true
+      # -- Run cleanup if the last cleanup was more than CLEAN_PERIOD_SECONDS seconds ago
+      CLEAN_PERIOD_SECONDS: '21600'
+      # -- Run cleanup if there have been more than CLEAN_PERIOD_BUILDS builds since the last cleanup
+      CLEAN_PERIOD_BUILDS: '5'
+      # -- Do not delete Docker images if they have events newer than `NOW minus IMAGE_RETAIN_PERIOD`
+      IMAGE_RETAIN_PERIOD: '14400'
+      # -- Do not delete Docker volumes if they have events newer than `NOW minus VOLUMES_RETAIN_PERIOD`
+      VOLUMES_RETAIN_PERIOD: '14400'
+      # -- Run cleanup if current disk usage exceeds DISK_USAGE_THRESHOLD
+      DISK_USAGE_THRESHOLD: '0.8'
+      # -- Run cleanup if current inodes usage exceeds INODES_USAGE_THRESHOLD
+      INODES_USAGE_THRESHOLD: '0.8'
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.
