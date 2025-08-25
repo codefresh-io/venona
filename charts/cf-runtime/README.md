@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 8.2.4](https://img.shields.io/badge/Version-8.2.4-informational?style=flat-square)
+![Version: 8.3.0](https://img.shields.io/badge/Version-8.3.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1299,11 +1299,17 @@ Install the Helm chart
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true},"image":{"digest":"sha256:0f2a83603e27e6d88768a6ab8ead3e2426eaf989cd93919fa1128d98a7c617c6","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"28.3.3-3.0.2"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f","registry":"docker.io","repository":"alpine","tag":3.18},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"},"image":{"digest":"sha256:0f2a83603e27e6d88768a6ab8ead3e2426eaf989cd93919fa1128d98a7c617c6","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"28.3.3-3.0.2"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:de0eb0b3f2a47ba1eb89389859a9bd88b28e82f5826b6969ad604979713c2d4f","registry":"docker.io","repository":"alpine","tag":3.18},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.containerSecurityContext | object | `{}` | Set container security context. |
-| runtime.dind.env | object | `{"CLEAN_DOCKER":true}` | Set additional env vars. |
+| runtime.dind.env | object | `{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"}` | Set additional env vars. |
 | runtime.dind.env.CLEAN_DOCKER | bool | `true` | Enable in-docker cleaner |
+| runtime.dind.env.CLEAN_PERIOD_BUILDS | string | `"5"` | Run cleanup if there have been more than CLEAN_PERIOD_BUILDS builds since the last cleanup |
+| runtime.dind.env.CLEAN_PERIOD_SECONDS | string | `"21600"` | Run cleanup if the last cleanup was more than CLEAN_PERIOD_SECONDS seconds ago |
+| runtime.dind.env.DISK_USAGE_THRESHOLD | string | `"0.8"` | Run cleanup if current disk usage exceeds DISK_USAGE_THRESHOLD |
+| runtime.dind.env.IMAGE_RETAIN_PERIOD | string | `"14400"` | Do not delete Docker images if they have events newer than `NOW minus IMAGE_RETAIN_PERIOD` |
+| runtime.dind.env.INODES_USAGE_THRESHOLD | string | `"0.8"` | Run cleanup if current inodes usage exceeds INODES_USAGE_THRESHOLD |
+| runtime.dind.env.VOLUMES_RETAIN_PERIOD | string | `"14400"` | Do not delete Docker volumes if they have events newer than `NOW minus VOLUMES_RETAIN_PERIOD` |
 | runtime.dind.image | object | `{"digest":"sha256:0f2a83603e27e6d88768a6ab8ead3e2426eaf989cd93919fa1128d98a7c617c6","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"28.3.3-3.0.2"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
