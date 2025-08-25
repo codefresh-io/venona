@@ -115,6 +115,7 @@ tests:
               imagePullPolicy: IfNotPresent
               userAccess: true
               envVars:
+                CLEAN_DOCKER: 'true'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh

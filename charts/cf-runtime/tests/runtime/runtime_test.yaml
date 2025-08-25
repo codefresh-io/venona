@@ -157,6 +157,7 @@ tests:
               userAccess: true
               envVars:
                 ALICE: 'BOB'
+                CLEAN_DOCKER: 'true'
                 FLOAT: '12.34'
                 INT_AS_STRING: '123'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0

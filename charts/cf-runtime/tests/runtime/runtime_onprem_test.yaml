@@ -146,6 +146,7 @@ tests:
               userAccess: true
               envVars:
                 ALICE: 'BOB'
+                CLEAN_DOCKER: 'true'
                 FLOAT_AS_STRING: '12.34'
                 INT: '123'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/my-runtime,cf.classic.runtime.version=1.0.0
@@ -359,6 +360,7 @@ tests:
               userAccess: true
               envVars:
                 ALICE: 'BOB'
+                CLEAN_DOCKER: 'true'
                 FLOAT_AS_STRING: '12.34'
                 INT: '123'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/default-override,cf.classic.runtime.version=1.0.0
