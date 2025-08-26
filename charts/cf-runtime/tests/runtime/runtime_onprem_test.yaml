@@ -147,8 +147,14 @@ tests:
               envVars:
                 ALICE: 'BOB'
                 CLEAN_DOCKER: 'true'
+                CLEAN_PERIOD_BUILDS: '5'
+                CLEAN_PERIOD_SECONDS: '21600'
+                DISK_USAGE_THRESHOLD: '0.8'
                 FLOAT_AS_STRING: '12.34'
+                IMAGE_RETAIN_PERIOD: '14400'
+                INODES_USAGE_THRESHOLD: '0.8'
                 INT: '123'
+                VOLUMES_RETAIN_PERIOD: '14400'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/my-runtime,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
@@ -361,8 +367,14 @@ tests:
               envVars:
                 ALICE: 'BOB'
                 CLEAN_DOCKER: 'true'
+                CLEAN_PERIOD_BUILDS: '5'
+                CLEAN_PERIOD_SECONDS: '21600'
+                DISK_USAGE_THRESHOLD: '0.8'
                 FLOAT_AS_STRING: '12.34'
+                IMAGE_RETAIN_PERIOD: '14400'
+                INODES_USAGE_THRESHOLD: '0.8'
                 INT: '123'
+                VOLUMES_RETAIN_PERIOD: '14400'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/default-override,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh

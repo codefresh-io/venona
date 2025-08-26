@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.2.4
+version: 8.3.0
 keywords:
   - codefresh
   - runner
@@ -14,13 +14,11 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: "Update \"dind\" to version 28.3.3-3.0.2."
-    - kind: security
-      description: "Fix CVE-2025-48060, CVE-2024-23337, CVE-2024-53427, GO-2025-3787, CVE-2025-32728, CVE-2025-5025."
+    - kind: added
+      description: "Add default configuration for in-docker cleaner."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

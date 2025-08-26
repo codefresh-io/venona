@@ -116,6 +116,12 @@ tests:
               userAccess: true
               envVars:
                 CLEAN_DOCKER: 'true'
+                CLEAN_PERIOD_BUILDS: '5'
+                CLEAN_PERIOD_SECONDS: '21600'
+                DISK_USAGE_THRESHOLD: '0.8'
+                IMAGE_RETAIN_PERIOD: '14400'
+                INODES_USAGE_THRESHOLD: '0.8'
+                VOLUMES_RETAIN_PERIOD: '14400'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
