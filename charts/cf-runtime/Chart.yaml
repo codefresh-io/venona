@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.1
+version: 8.3.2
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "Pin event-exporter to the correct architecture"
+      description: "Fix typo in \"runtime.engine.runtimeImagesRegistry\""
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
