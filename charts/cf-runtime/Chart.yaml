@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.0
+version: 8.3.1
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: added
-      description: "Add default configuration for in-docker cleaner."
+    - kind: fixed
+      description: "Update engine from version `1.179.3` to `1.179.4` to fix cf_export command in Windows Runtime Environments."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
