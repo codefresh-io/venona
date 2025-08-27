@@ -536,7 +536,7 @@ runtime:
     # -- Set termination grace period.
     terminationGracePeriodSeconds: 180
     # -- Override docker image registry for runtime images.
-    runtimeImagesRegisty: ""
+    runtimeImagesRegistry: ""
     # -- Set system(base) runtime images.
     # @default -- See below.
     runtimeImages:
