@@ -14,11 +14,13 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "Update engine from version `1.179.3` to `1.179.4` to fix cf_export command in Windows Runtime Environments."
+      description: "engine: fixed cf_export command in Windows Runtime Environments."
+    - kind: security
+      description: "engine: fixed CVE-2025-9288."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
