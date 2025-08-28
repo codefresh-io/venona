@@ -1217,7 +1217,7 @@ Install the Helm chart
 | event-exporter.env | object | `{}` | Add additional env vars |
 | event-exporter.image | object | `{"digest":"sha256:cf52048f1378fb6659dffd1394d68fdf23a7ea709585dc14b5007f3e5a1b7584","registry":"docker.io","repository":"codefresh/k8s-event-exporter","tag":"latest"}` | Set image |
 | event-exporter.name | string | `""` | Set name for the event-exporter deployment |
-| event-exporter.nodeSelector | object | `{}` | Set node selector |
+| event-exporter.nodeSelector | object | `{"kubernetes.io/arch":"amd64"}` | Set node selector |
 | event-exporter.podAnnotations | object | `{}` | Set pod annotations |
 | event-exporter.podSecurityContext | object | See below | Set security context for the pod |
 | event-exporter.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |

@@ -1069,7 +1069,8 @@ event-exporter:
   podSecurityContext:
     enabled: false
   # -- Set node selector
-  nodeSelector: {}
+  nodeSelector:
+    kubernetes.io/arch: amd64
   # -- Set resources
   resources: {}
   # -- Set tolerations
