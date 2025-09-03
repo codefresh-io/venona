@@ -18,9 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Security fix in cf-app-proxy."
-    - kind: security
-      description: "Security fix in cf-cosign-image-signer."
+      description: "Security fix in cf-app-proxy and cf-cosign-image-signer."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
