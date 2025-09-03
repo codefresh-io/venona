@@ -598,8 +598,8 @@ runtime:
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 2.5.2-cf.1
-        digest: sha256:ad74291dc11833e13dbf7ae1919446dee2baedb16b96a8a3acc600b5499c716d
+        tag: 2.5.2-cf.2
+        digest: sha256:308dbb83992e6a13c46f3c76a8e082e6c5e212045bfaff699ccfe7f56366c543
       gc-builder:
         registry: quay.io
         repository: codefresh/cf-gc-builder
@@ -857,8 +857,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.56
-    digest: sha256:06417d368b0bf296597441e9f7796ee19905c3205472d81eebf2bcd3cb2cfd98
+    tag: 0.0.57
+    digest: sha256:e71789ed9c36bda32785b88708065bd819b055dbe053310cdbb2f1903fe15b21
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
