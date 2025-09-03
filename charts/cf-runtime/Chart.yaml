@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.1
+version: 8.3.2
 keywords:
   - codefresh
   - runner
@@ -14,11 +14,13 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "Pin event-exporter to the correct architecture"
+      description: "engine: fixed cf_export command in Windows Runtime Environments."
+    - kind: security
+      description: "engine: fixed CVE-2025-9288."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
