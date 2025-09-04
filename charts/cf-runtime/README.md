@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 8.3.3](https://img.shields.io/badge/Version-8.3.3-informational?style=flat-square)
+![Version: 8.3.4](https://img.shields.io/badge/Version-8.3.4-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1428,7 +1428,7 @@ Install the Helm chart
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"digest":"sha256:94323807949da518a051fc8d95947da32f9276bfb78388cb133b2f38de818838","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"1.35.4"}` | Set image |
+| volumeProvisioner.image | object | `{"digest":"sha256:d158998a69c6843b1420ddae0b3cb18f46fe7fc0cf0e51b92f4a73f9b189d291","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"2.0.0"}` | Set image |
 | volumeProvisioner.name | string | `""` | Set volume-provisioner deployment name |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
