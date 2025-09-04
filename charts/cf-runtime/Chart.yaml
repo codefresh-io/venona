@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.2
+version: 8.3.3
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: "engine: fixed cf_export command in Windows Runtime Environments."
-    - kind: security
-      description: "engine: fixed CVE-2025-9288."
+      description: "Fix typo in \"runtime.engine.runtimeImagesRegistry\""
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
