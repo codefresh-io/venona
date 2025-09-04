@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.3
+version: 8.3.4
 keywords:
   - codefresh
   - runner
@@ -14,11 +14,11 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "Fix typo in \"runtime.engine.runtimeImagesRegistry\""
+    - kind: added
+      description: "Added telemetry to cf-container-logger."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

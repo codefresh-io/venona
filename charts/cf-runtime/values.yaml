@@ -517,9 +517,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.179.5
+      tag: 1.180.0
       pullPolicy: IfNotPresent
-      digest: sha256:3a7126b17a4ca9d24b4b193f4a4578a3e65df21b72d08d5db3f82ff050d9c77e
+      digest: sha256:2783d4d43d2c374003820ca68fb820352c75272b48945471efd6533d9bf01693
     # -- Set container command.
     command:
       - npm
@@ -548,8 +548,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 1.12.8
-        digest: sha256:6e376bb00e824827cb038e15160ccf0fead4f868197b75bbc80dbd6bc34af8d6
+        tag: 1.13.0
+        digest: sha256:c18ca45f2d67c4aa6d9533f20205fb6e5f8481b3d5807f3418573466fc7d91b8
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -715,6 +715,10 @@ runtime:
       # -- Engine operation configuration
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
+      # -- If "true", propagate environmental variables from engine to container-logger listed in PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_LIST
+      PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_ENABLE: true
+      # -- A list of variables to propagate from engine to container-logger (comma-separated string)
+      PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_LIST: 'CF_TELEMETRY_LOGS_LEVEL,CF_TELEMETRY_OTEL_ENABLE,CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION,CF_TELEMETRY_PROMETHEUS_ENABLE,CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS,CF_TELEMETRY_PROMETHEUS_HOST,CF_TELEMETRY_PROMETHEUS_PORT,CF_TELEMETRY_PYROSCOPE_ENABLE,PYROSCOPE_SERVER_ADDRESS,LOGGER_LEVEL,LOG_OUTGOING_HTTP_REQUESTS,METRICS_SCRAPE_TIMEOUT_MS,OTEL_EXPORTER_OTLP_ENDPOINT,OTEL_EXPORTER_OTLP_PROTOCOL,OTEL_EXPORTER_OTLP_COMPRESSION,OTEL_LOGS_EXPORTER,OTEL_TRACES_EXPORTER,OTEL_TRACES_SAMPLER,OTEL_METRICS_EXPORTER,OTEL_METRIC_EXPORT_INTERVAL,OTEL_METRIC_EXPORT_TIMEOUT,OTEL_EXPORTER_PROMETHEUS_HOST,OTEL_EXPORTER_PROMETHEUS_PORT,OTEL_SEMCONV_STABILITY_OPT_IN'
       # -- Timeout while doing requests to the Docker daemon
       DOCKER_REQUEST_TIMEOUT_MS: 30000
       # -- If "true", composition images will be pulled sequentially
