@@ -5,7 +5,7 @@
 {{- $name := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
-{{- $runtimeImageRegistry := .Values.runtime.engine.runtimeImagesRegisty -}}
+{{- $runtimeImageRegistry := .Values.runtime.engine.runtimeImagesRegistry -}}
 {{- if $runtimeImageRegistry }}
   {{- $_ := set $rootContext.Values.global "imageRegistry" $runtimeImageRegistry }}
 {{- end }}
