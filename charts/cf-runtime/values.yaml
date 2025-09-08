@@ -517,9 +517,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.179.5
+      tag: 1.180.0
       pullPolicy: IfNotPresent
-      digest: sha256:3a7126b17a4ca9d24b4b193f4a4578a3e65df21b72d08d5db3f82ff050d9c77e
+      digest: sha256:2783d4d43d2c374003820ca68fb820352c75272b48945471efd6533d9bf01693
     # -- Set container command.
     command:
       - npm
@@ -543,18 +543,18 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: v2.37.0-1.5.4
-        digest: sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
+        tag: v2.37.0-1.5.5
+        digest: sha256:542a9711f17be40174c66263e7a289be9306ac031ddad8c6cb84773644865b5c
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 1.12.8
-        digest: sha256:6e376bb00e824827cb038e15160ccf0fead4f868197b75bbc80dbd6bc34af8d6
+        tag: 1.13.1
+        digest: sha256:5a109961927eeff5e3155e0bb9be5d2270e9a9ec76ddcba1a01d8681ee7dc5bc
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.4.7
-        digest: sha256:1d02df4dcf703a97c7a64b147cd2c3f6ec2c708aad16be5abbd337f3c13a48ad
+        tag: 1.4.8
+        digest: sha256:e3394318954fd39e6d3d05c83d93a0432ec2ecdbd5ccae43c711d228b7bc7b5c
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
@@ -563,8 +563,8 @@ runtime:
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.20
-        digest: sha256:bad3773029a68f33953f1dc245cb92c386b5311a996340eea41fe6b9cc52a96c
+        tag: 6.0.21
+        digest: sha256:95697a8e7a1ee44ca6bb8b73a5e13fddb8709db2d25f63ceb65cc88492430290
       docker-tag-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-tag-pusher
@@ -588,13 +588,13 @@ runtime:
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
-        tag: 1.3.9
-        digest: sha256:37975653b4ef5378bd1e38d453c7dac4721cba1c1977a5ca6118a67b98a47925
+        tag: 1.3.10
+        digest: sha256:61eba0921344478f7e124e957b4eedcc8fea09ae562ee1f5e18773a93d66acd2
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.14.6
-        digest: sha256:b3f499fcf93037e69fba599d2f292cfc9f28a158052dd57d5de9cdf9756f1f60
+        tag: 0.14.7
+        digest: sha256:e465641ec172975c670120ec46128a5781db406b874edcf1257bd8d8f29aa35c
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
@@ -715,6 +715,10 @@ runtime:
       # -- Engine operation configuration
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
+      # -- If "true", propagate environmental variables from engine to container-logger listed in PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_LIST
+      PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_ENABLE: false
+      # -- A list of variables to propagate from engine to container-logger (comma-separated string)
+      PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_LIST: ''
       # -- Timeout while doing requests to the Docker daemon
       DOCKER_REQUEST_TIMEOUT_MS: 30000
       # -- If "true", composition images will be pulled sequentially
