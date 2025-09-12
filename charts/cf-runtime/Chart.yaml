@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Security fix in cf-git-cloner"
+      description: "Security fix in cf-git-cloner and cf-docker-puller"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
