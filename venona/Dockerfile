@@ -14,17 +14,16 @@ WORKDIR /venona
 COPY . .
 RUN go mod download -x
 RUN go mod verify
-# compile
 RUN make build
 
-FROM alpine:3.22
-# copy ca-certs and user details
+
+FROM alpine:3.22.1 AS prod
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 WORKDIR /home/venona
-RUN chown -R venona:venona /home/venona && chmod 755 /home/venona
-# copy binary
+RUN chown -R venona:venona /home/venona \
+    && chmod 755 /home/venona
 COPY --from=build /venona/venona /usr/local/bin/venona
 USER venona:venona
 
