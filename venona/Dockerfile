@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine3.22 AS build
+FROM golang:1.25-alpine3.22 AS build
 RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 ENV USER=venona
 ENV UID=10001 
