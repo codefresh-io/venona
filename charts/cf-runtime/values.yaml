@@ -715,10 +715,6 @@ runtime:
       # -- Engine operation configuration
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
-      # -- If "true", propagate environmental variables from engine to container-logger listed in PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_LIST
-      PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_ENABLE: false
-      # -- A list of variables to propagate from engine to container-logger (comma-separated string)
-      PROPAGATE_ENVS_TO_INTERNAL_CONTAINERS_LIST: ''
       # -- Timeout while doing requests to the Docker daemon
       DOCKER_REQUEST_TIMEOUT_MS: 30000
       # -- If "true", composition images will be pulled sequentially
