@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.6
+version: 8.3.8
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "Security fix in cf-docker-builder, cf-docker-puller, cf-docker-pusher, compose, pikolo, cf-debugger."
+      description: "Security fix in gcloud-builder"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
