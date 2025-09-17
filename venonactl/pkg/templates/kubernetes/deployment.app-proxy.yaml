@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .AppProxy.AppName }}
+    version: {{ .Version }} 
+  name:  {{ .AppProxy.AppName }}
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .AppProxy.AppName }}
+      version: {{ .Version }}
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .AppProxy.AppName }}
+        version: {{ .Version }}
+    spec:
+      {{- if .CreateRbac }}
+      serviceAccountName: {{ .AppProxy.AppName }}
+      {{- end }}
+      containers:
+      - name: {{ .AppProxy.AppName }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- else }} {{- .AppProxy.Image.Name }}:{{ .AppProxy.Image.Tag }} {{- end}}
+        imagePullPolicy: Always
+        resources:
+{{ toYaml .AppProxy.resources | indent 10 }}
+        env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
+          {{- if $.AppProxy.AdditionalEnvVars }}
+          {{- range $key, $value := $.AppProxy.AdditionalEnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
+          - name: PORT
+            value: "3000"
+          - name: CODEFRESH_HOST
+            value: {{ .CodefreshHost }}
+          {{ if .AppProxy.Ingress.PathPrefix }}
+          - name: API_PATH_PREFIX
+            value: {{ .AppProxy.Ingress.PathPrefix }}
+          {{ end }}
+          {{- if .NewRelicLicense }}
+          - name: NEWRELIC_LICENSE_KEY
+          {{- if isString .NewRelicLicense }}
+            value: {{ .NewRelicLicense }}
+          {{- else }}
+{{ toYaml .NewRelicLicense | indent 12 }}
+          {{- end }}
+          {{- end }}
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5

@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }} 
+  name: {{ .AppName }}
+  namespace: {{ .Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .AppName }}
+      version: {{ .Version }}
+  replicas: 1
+  revisionHistoryLimit: 5
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .AppName }}
+        version: {{ .Version }}
+    spec:
+      volumes:
+        - name: runnerconf
+          secret:
+            secretName: runnerconf
+      {{ if ne .NodeSelector "" }}
+      nodeSelector:
+{{ .NodeSelector | nodeSelectorParamToYaml | indent 8 | unescape }}
+      {{ end }}
+      tolerations:
+{{ toYaml .Tolerations | indent 8 | unescape }}
+      containers:
+      - env:
+        {{- if $.EnvVars }}
+        {{- range $key, $value := $.EnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
+        {{- if $.AdditionalEnvVars }}
+        {{- range $key, $value := $.AdditionalEnvVars }}
+        - name: {{ $key }}
+          value: "{{ $value}}"
+        {{- end}}
+        {{- end}}
+        - name: SELF_DEPLOYMENT_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: CODEFRESH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ .AppName }}
+              key: codefresh.token
+        - name: CODEFRESH_HOST
+          value: {{ .CodefreshHost }}
+        - name: AGENT_MODE
+          value: {{ .Mode }}
+        - name: AGENT_NAME
+          value: {{ .AppName }}
+        - name: "AGENT_ID"
+          value: {{ .AgentId }}
+        - name: VENONA_CONFIG_DIR
+          value: "/etc/secrets"
+        {{- if ne .DockerRegistry "" }}
+        - name: DOCKER_REGISTRY
+          value: {{ .DockerRegistry }}
+        {{- end }}
+        {{- if .NewRelicLicense }}
+        - name: NEWRELIC_LICENSE_KEY
+        {{- if isString .NewRelicLicense }}
+          value: {{ .NewRelicLicense }}
+        {{- else }}
+{{ toYaml .NewRelicLicense | indent 10}}
+        {{- end }}
+        {{- end }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Image.Name }} {{- else }} {{- .Image.Name }}{{- end}}:{{ .Image.Tag | default "latest"}}
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        volumeMounts:
+        - name: runnerconf
+          mountPath: "/etc/secrets"
+          readOnly: true
+        imagePullPolicy: Always
+        name: {{ .AppName }}
+        resources:
+{{ toYaml .Runner.Resources | indent 10 }}
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      restartPolicy: Always

@@ -1,0 +1,87 @@
+{{- if eq .Storage.Backend "local" -}}
+{{- $localVolumeParentDir := ( .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" ) }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: dind-lv-monitor-{{ .AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: dind-lv-monitor
+spec:
+  selector:
+    matchLabels:
+      app: dind-lv-monitor
+  template:
+    metadata:
+      labels:
+        app: dind-lv-monitor
+      annotations:
+        prometheus_port: "9100"
+        prometheus_scrape: "true"
+    spec:
+      serviceAccountName: volume-provisioner-{{ .AppName }}
+      tolerations:
+        - key: 'codefresh/dind'
+          operator: 'Exists'
+          effect: 'NoSchedule'
+        
+{{ toYaml .Tolerations | indent 8 | unescape}}
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+      - command:
+        - chown
+        - -R
+        - 1000:1000
+        - /var/lib/codefresh/dind-volumes
+        image: alpine
+        imagePullPolicy: Always
+        name: fs-change-owner
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/codefresh/dind-volumes
+          name: dind-volume-dir
+      containers:
+        - image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Storage.LocalVolumeMonitor.Image.Name }}:{{ .Storage.LocalVolumeMonitor.Image.Tag }} {{- else }}{{- .Storage.LocalVolumeMonitor.Image.Name }}:{{ .Storage.LocalVolumeMonitor.Image.Tag }} {{- end}}
+          name: lv-cleaner
+          resources:
+{{ toYaml .Storage.LocalVolumeMonitor.Resources | indent 10 }}
+          imagePullPolicy: Always
+          command:
+          - /home/dind-volume-utils/bin/local-volumes-agent
+          env:
+            {{- if $.EnvVars }}
+            {{- range $key, $value := $.EnvVars }}
+            - name: {{ $key }}
+              value: "{{ $value}}"
+            {{- end}}
+            {{- end}}
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: VOLUME_PARENT_DIR
+              value: {{ $localVolumeParentDir }}
+#              Debug:
+#            - name: DRY_RUN
+#              value: "1"
+#            - name: DEBUG
+#              value: "1"
+#            - name: SLEEP_INTERVAL
+#              value: "3"
+#            - name: LOG_DF_EVERY
+#              value: "60"
+#            - name: KB_USAGE_THRESHOLD
+#              value: "20"
+
+          volumeMounts:
+          - mountPath: {{ $localVolumeParentDir }}
+            readOnly: false
+            name: dind-volume-dir
+      volumes:
+      - name: dind-volume-dir
+        hostPath:
+          path: {{ $localVolumeParentDir }}
+{{- end -}}

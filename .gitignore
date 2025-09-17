@@ -13,6 +13,8 @@ encodings.xml
 yarn-error.log
 .idea/*
 telepresence.log
+venonactl/dist/*
+venonactl-linux
 venonalog.json
 .venonaconf
 .cover

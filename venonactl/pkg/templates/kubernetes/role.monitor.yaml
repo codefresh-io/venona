@@ -1,0 +1,49 @@
+{{- if .CreateRbac }}
+{{- if and .Monitor.Enabled .Monitor.RbacEnabled }}
+{{- if .Monitor.UseNamespaceWithRole }}
+kind: Role
+{{- else }}
+kind: ClusterRole
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Monitor.AppName }}-cluster-reader
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .Monitor.AppName }}
+    version: {{ .Version }}
+rules:
+- apiGroups:
+  - ""
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+    - ""
+  resources: ["pods"]
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+    - deletecollection
+- apiGroups:
+  - extensions
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources: ["*"]
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
+{{- end }}

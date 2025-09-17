@@ -1,0 +1,57 @@
+{{- if .Storage.CreateStorageClass }}
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ .Storage.StorageClassName }}
+  labels:
+    app: dind-volume-provisioner
+  annotations:
+  {{ range $key, $value := .Storage.Annotations }}
+    {{ $key }}: {{ $value }}
+  {{ end }}
+provisioner: codefresh.io/dind-volume-provisioner-{{ .AppName }}-{{ .Namespace }}
+parameters:
+{{- if eq .Storage.Backend "local" }}
+  volumeBackend: local
+  volumeParentDir: {{ .Storage.LocalVolumeParentDir | default "/var/lib/codefresh/dind-volumes" }}
+{{- else if eq .Storage.Backend "gcedisk" }}
+  volumeBackend: {{ .Storage.Backend }}
+  #  pd-ssd or pd-standard
+  type: {{ .Storage.VolumeType | default "pd-ssd" }}
+  # Valid zone in GCP
+  zone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 because xfs is not installed on GKE by default )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+{{- else if or (eq .Storage.Backend "ebs") (eq .Storage.Backend "ebs-csi")}}
+  # ebs or ebs-csi
+  volumeBackend: {{ .Storage.Backend }}
+  #  gp2 or io1
+  VolumeType: {{ .Storage.VolumeType | default "gp2" }}
+  # Valid zone in aws (us-east-1c, ...)
+  AvailabilityZone: {{ .Storage.AvailabilityZone }}
+  # ext4 or xfs (default to ext4 )
+  fsType: {{ .Storage.FsType | default "ext4" }}
+  
+  # "true" or "false" (default - "false")
+  encrypted: "{{ .Storage.Encrypted | default "false" }}"
+  {{ if .Storage.KmsKeyId }}
+  # KMS Key ID
+  kmsKeyId: {{ .Storage.KmsKeyId }}
+  {{- end }}
+{{- else if or (eq .Storage.Backend "azuredisk") (eq .Storage.Backend "azuredisk-csi")}}
+  ## azuredisk or azuredisk-csi
+  volumeBackend: {{ .Storage.Backend }}
+
+  kind: managed
+  skuName: {{ .Storage.SkuName | default "Premium_LRS" }}
+  fsType: {{ .Storage.FsType | default "ext4" }}
+  cachingMode: {{ .Storage.CachingMode | default "None" }}
+  {{- if .Storage.AzureLocation }}
+  location: {{ .Storage.AzureLocation }}
+  {{- end }}
+  {{- if .Storage.AzureResourceGroup }}
+  resourceGroup: {{ .Storage.AzureResourceGroup }}
+  {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,81 @@
+{{- if .Monitor.Enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Monitor.AppName }}
+  namespace: {{ .Namespace }}
+  labels:
+    app: {{ .AppName }}
+    version: {{ .Version }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 50%
+  selector:
+    matchLabels:
+      app: {{ .Monitor.AppName }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Monitor.AppName }}
+        version: {{ .Version }}
+    spec:
+      {{- if .Monitor.RbacEnabled}}
+      serviceAccountName: {{ .Monitor.AppName }}
+      {{- end }}
+      containers:
+      - name: {{ .Monitor.AppName }}
+        resources:
+{{ toYaml .Monitor.resources | indent 10 }}
+        image: {{ if ne .DockerRegistry ""}} {{- .DockerRegistry }}/{{ .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- else }} {{- .Monitor.Image.Name }}:{{ .Monitor.Image.Tag }} {{- end}}
+        imagePullPolicy: Always
+        env:
+          {{- if $.EnvVars }}
+          {{- range $key, $value := $.EnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
+          {{- if $.Monitor.AdditionalEnvVars }}
+          {{- range $key, $value := $.Monitor.AdditionalEnvVars }}
+          - name: {{ $key }}
+            value: "{{ $value}}"
+          {{- end}}
+          {{- end}}
+          - name: SERVICE_NAME
+            value: {{ .Monitor.AppName }}
+          {{- if .Monitor.UseNamespaceWithRole }}
+          - name: ROLE_BINDING
+            value: "true"
+          {{- end }}
+          - name: PORT
+            value: "9020"
+          - name: API_TOKEN
+            value: {{ .Token }}
+          - name: CLUSTER_ID
+            value: {{ .ClusterId }}
+          - name: API_URL
+            value: {{ .CodefreshHost }}/api/k8s-monitor/events
+          - name: ACCOUNT_ID
+            value: user
+          - name: HELM3
+            value: "{{ .Monitor.Helm3 }}"
+          - name: NAMESPACE
+            value: "{{ .Namespace }}"
+          - name: NODE_OPTIONS
+            value: "--max_old_space_size=4096"
+        ports:
+        - containerPort: 9020
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /api/ping
+            port: 9020
+          periodSeconds: 5
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+{{- end }}          
