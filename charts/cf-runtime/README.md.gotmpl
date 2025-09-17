@@ -827,6 +827,11 @@ runtime:
       enabled: true
 ```
 
+> [!WARNING]
+> When running in rootless mode on cgroup v2 nodes, to ensure correct handling of OOM events, set `singleProcessOOMKill=true` (available in k8s ≥1.32) in the Kubelet configuration.
+>
+> Ref: https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/
+
 ### ARM
 
 With the Codefresh Runner, you can run native ARM64v8 builds.
