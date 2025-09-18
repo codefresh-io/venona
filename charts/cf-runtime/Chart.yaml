@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.7
+version: 8.3.8
 keywords:
   - codefresh
   - runner
@@ -17,8 +17,10 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: changed
+      description: "Update \"runner\" (aka \"venona\") to 2.0.7"
     - kind: security
-      description: "Security fix in cf-git-cloner and cf-docker-puller"
+      description: "Fix CVE-2025-4575, CVE-2025-22868, CVE-2025-22872, CVE-2025-22870, CVE-2024-45338, CVE-2025-4575"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
