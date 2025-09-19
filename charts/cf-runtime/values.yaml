@@ -517,9 +517,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.179.5
+      tag: 1.180.0
       pullPolicy: IfNotPresent
-      digest: sha256:3a7126b17a4ca9d24b4b193f4a4578a3e65df21b72d08d5db3f82ff050d9c77e
+      digest: sha256:2783d4d43d2c374003820ca68fb820352c75272b48945471efd6533d9bf01693
     # -- Set container command.
     command:
       - npm
@@ -548,8 +548,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 1.12.8
-        digest: sha256:6e376bb00e824827cb038e15160ccf0fead4f868197b75bbc80dbd6bc34af8d6
+        tag: 1.13.1
+        digest: sha256:5a109961927eeff5e3155e0bb9be5d2270e9a9ec76ddcba1a01d8681ee7dc5bc
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
