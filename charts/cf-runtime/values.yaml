@@ -74,8 +74,8 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 2.0.6
-    digest: sha256:d00c6645039c3716e778217cc22fb44ae2324fd3349d8e782dd3a8af05dc0e2d
+    tag: 2.0.7
+    digest: sha256:96a8696ab418c3327e2e5fcf8ab08359b332167ef750b543ddd245ac4270153f
   # -- Init container
   init:
     image:
@@ -548,8 +548,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 1.12.8
-        digest: sha256:6e376bb00e824827cb038e15160ccf0fead4f868197b75bbc80dbd6bc34af8d6
+        tag: 1.13.1
+        digest: sha256:5a109961927eeff5e3155e0bb9be5d2270e9a9ec76ddcba1a01d8681ee7dc5bc
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -558,8 +558,8 @@ runtime:
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.22
-        digest: sha256:914f071bcb1893bcb42c3f8907f8f3874f1f30db1a2ccaa4b825dab9bb157e60
+        tag: 8.0.23
+        digest: sha256:fa42ad5b90231cf176c60dada614b8bbdace1b06f90fb305a30436a24739c6c0
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
@@ -578,8 +578,8 @@ runtime:
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
-        tag: 10.3.2
-        digest: sha256:2e09eef18d5caddae708058ec63247825ac4e4ee5e5763986f65e1312fbcc449
+        tag: 10.3.3
+        digest: sha256:91c36338bc191b6c17111bc9672302fece527b5d6a545173b889c70e31efafc9
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
