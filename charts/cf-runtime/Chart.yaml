@@ -23,6 +23,8 @@ annotations:
       description: "Update \"engine\" to 1.180.2"
     - kind: fixed
       description: "Prevent DinD containers escaping the pod cgroup on cgroup v2. Rootless DinD requires additional configuration on cgroup v2, see \"Rootless DinD\" section in docs for details."
+    - kind: fixed
+      description: "Enable legacy Prometheus metrics in the \"engine\" only if METRICS_PROMETHEUS_ENABLED=true."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
