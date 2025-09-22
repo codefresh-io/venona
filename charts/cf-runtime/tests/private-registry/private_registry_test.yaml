@@ -78,7 +78,7 @@ tests:
                 PIPELINE_DEBUGGER_IMAGE: 'somedomain.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'somedomain.io/codefresh/pikolo:tagoverride'
                 CR_6177_FIXER: 'somedomain.io/alpine:tagoverride'
-                GC_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-gc-builder:tagoverride'
+                GC_BUILDER_IMAGE: 'somedomain.io/codefresh/gcloud-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'somedomain.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
                 CF_SERVICE_NAME: cf-classic-engine

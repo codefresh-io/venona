@@ -91,7 +91,7 @@ tests:
                 PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
                 CR_6177_FIXER: 'docker.io/alpine:tagoverride'
-                GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
+                GC_BUILDER_IMAGE: 'quay.io/codefresh/gcloud-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
                 CF_SERVICE_NAME: cf-classic-engine
@@ -311,7 +311,7 @@ tests:
                 PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
                 TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
                 CR_6177_FIXER: 'docker.io/alpine:tagoverride'
-                GC_BUILDER_IMAGE: 'quay.io/codefresh/cf-gc-builder:tagoverride'
+                GC_BUILDER_IMAGE: 'quay.io/codefresh/gcloud-builder:tagoverride'
                 COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
                 RUNTIME_CHART_VERSION: 1.0.0
                 CF_SERVICE_NAME: cf-classic-engine
