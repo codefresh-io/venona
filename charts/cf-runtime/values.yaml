@@ -413,9 +413,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 28.3.3-3.0.2 # use `latest-rootless/rootless/28.3.3-3.0.2-rootless` tags for rootless-dind
+      tag: 28.3.3-3.0.3 # use `latest-rootless/rootless/28.3.3-3.0.3-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:0f2a83603e27e6d88768a6ab8ead3e2426eaf989cd93919fa1128d98a7c617c6
+      digest: sha256:3a817abd8f71c900fcb62a68a1c3123d1037fecf836f4005e3d96d388263d13e
     # -- Set dind resources.
     resources:
       requests: null
@@ -517,9 +517,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.180.0
+      tag: 1.180.2
       pullPolicy: IfNotPresent
-      digest: sha256:2783d4d43d2c374003820ca68fb820352c75272b48945471efd6533d9bf01693
+      digest: sha256:29e61a6a6ad9a86623beafac30aad9fc72d51d576bf80a5785f3ca74804808e5
     # -- Set container command.
     command:
       - npm

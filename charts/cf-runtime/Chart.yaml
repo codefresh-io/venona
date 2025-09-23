@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.10
+version: 8.3.11
 keywords:
   - codefresh
   - runner
@@ -14,11 +14,17 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: security
-      description: "Updated gcloud-builder with security fixes"
+    - kind: changed
+      description: "Update \"dind\" to 28.3.3-3.0.3"
+    - kind: changed
+      description: "Update \"engine\" to 1.180.2"
+    - kind: fixed
+      description: "Prevent DinD containers escaping the pod cgroup on cgroup v2. Rootless DinD requires additional configuration on cgroup v2, see \"Rootless DinD\" section in docs for details."
+    - kind: fixed
+      description: "Enable legacy Prometheus metrics in the \"engine\" only if METRICS_PROMETHEUS_ENABLED=true."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
