@@ -18,9 +18,6 @@ monitor:
   enabled: true
   rbac:
     namespaced: true
-runner:
-  sidecar:
-    enabled: true
 runtime:
   dind:
     podLabels:

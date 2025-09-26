@@ -69,23 +69,6 @@ spec:
         volumeMounts:
           {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- if .Values.sidecar.enabled }}
-      - name: reconcile-runtime
-        image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" .Values.sidecar.image "context" .) }}
-        imagePullPolicy: {{ .Values.sidecar.image.pullPolicy | default "IfNotPresent" }}
-        command:
-        - /bin/bash
-        args:
-        - -ec
-        - |
-          {{- .Files.Get "files/reconcile-runtime.sh" | nindent 10 }}
-        env:
-        {{- include "runner-sidecar.environment-variables" . | nindent 8 }}
-        {{- with .Values.sidecar.resources }}
-        resources:
-          {{- toYaml . | nindent 10  }}
-        {{- end }}
-      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
