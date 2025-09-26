@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 8.3.11](https://img.shields.io/badge/Version-8.3.11-informational?style=flat-square)
+![Version: 8.3.12](https://img.shields.io/badge/Version-8.3.12-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1297,7 +1297,6 @@ Install the Helm chart
 | runner.serviceAccount.annotations | object | `{}` | Additional service account annotations |
 | runner.serviceAccount.create | bool | `true` | Create service account |
 | runner.serviceAccount.name | string | `""` | Override service account name |
-| runner.sidecar | object | `{"enabled":false,"env":{"RECONCILE_INTERVAL":300},"image":{"digest":"sha256:da0c9d12b4772e6cd6c1ecb93883471e8785d4d61c9108c9f7d0dc9cc2f5a149","registry":"quay.io","repository":"codefresh/kubectl","tag":"1.33.0"},"resources":{}}` | Sidecar container Reconciles runtime spec from Codefresh API for drift detection |
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |

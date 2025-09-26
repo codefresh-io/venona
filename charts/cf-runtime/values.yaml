@@ -90,18 +90,6 @@ runner:
       requests:
         memory: 256Mi
         cpu: '0.2'
-  # -- Sidecar container
-  # Reconciles runtime spec from Codefresh API for drift detection
-  sidecar:
-    enabled: false
-    image:
-      registry: quay.io
-      repository: codefresh/kubectl
-      tag: 1.33.0
-      digest: sha256:da0c9d12b4772e6cd6c1ecb93883471e8785d4d61c9108c9f7d0dc9cc2f5a149
-    env:
-      RECONCILE_INTERVAL: 300
-    resources: {}
   # -- Add additional env vars
   env: {}
   # E.g.
