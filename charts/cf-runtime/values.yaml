@@ -531,18 +531,18 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: v2.37.0-1.5.5
-        digest: sha256:542a9711f17be40174c66263e7a289be9306ac031ddad8c6cb84773644865b5c
+        tag: v2.37.0-1.5.6
+        digest: sha256:19f212e9aee62f112f8a1df474122f850357f1c85521e804dcfc9a48b69a840f
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 1.13.1
-        digest: sha256:5a109961927eeff5e3155e0bb9be5d2270e9a9ec76ddcba1a01d8681ee7dc5bc
+        tag: 1.13.2
+        digest: sha256:285c7f1c372edde9605d117bc60cffddeea282c0427f9a45bd6323465cf42b17
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.4.8
-        digest: sha256:e3394318954fd39e6d3d05c83d93a0432ec2ecdbd5ccae43c711d228b7bc7b5c
+        tag: 1.4.9
+        digest: sha256:3b87e3e4bd7ab76d94ca4dbee63317085a2e2e45779214ec3e42c5049ec2fbf8
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
@@ -551,13 +551,13 @@ runtime:
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.21
-        digest: sha256:95697a8e7a1ee44ca6bb8b73a5e13fddb8709db2d25f63ceb65cc88492430290
+        tag: 6.0.22
+        digest: sha256:69066b919c75a39a276f83ba1234036c7f8b97efaf8fc48a4550d18fa64f9d01
       docker-tag-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-tag-pusher
-        tag: 1.3.19
-        digest: sha256:ec4416525bbf4912786035fbb2e1f26ae04f94559c535f02232b48eb0a1c5fa7
+        tag: 1.3.20
+        digest: sha256:69b6154fe34cda7a48b2e44cfe7667acdd79a6a5901001b092f8cf485b75ff3f
       fs-ops:
         registry: quay.io
         repository: codefresh/fs-ops
@@ -581,12 +581,12 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.14.7
-        digest: sha256:e465641ec172975c670120ec46128a5781db406b874edcf1257bd8d8f29aa35c
+        tag: 0.14.8
+        digest: sha256:37ec7bed4b09e4055c3600a7805f84e37cccf8d849fe0fdd5b29f079de15010c
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 2.5.2-cf.2
+        tag: 2.5.2-cf.3
         digest: sha256:308dbb83992e6a13c46f3c76a8e082e6c5e212045bfaff699ccfe7f56366c543
       gc-builder:
         registry: quay.io
@@ -802,8 +802,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.33.0
-      digest: sha256:da0c9d12b4772e6cd6c1ecb93883471e8785d4d61c9108c9f7d0dc9cc2f5a149
+      tag: 1.33.5
+      digest: sha256:ac12fa598de71b3497e6f7e552a4944652933539817662a852b705876c828699
     rbac:
       enabled: true
     annotations: {}
@@ -923,8 +923,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.24
-    digest: sha256:890cf228f2ac4ee66e35efc55b56a7a27627b7ad4eebc93f21ac74bb56b5860e
+    tag: 1.3.25
+    digest: sha256:e93840dc32e19fa92ee9a77493c998556d4dad887c3c8996c2573c4f7ff6e19e
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
