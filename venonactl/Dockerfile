@@ -12,7 +12,7 @@ RUN VERSION=$(cat VERSION) \
     -X github.com/codefresh-io/venona/venonactl/cmd.commit=${COMMIT} -X github.com/codefresh-io/venona/venonactl/cmd.date=${DATE}" \
     -o venona
 
-FROM alpine:3.20
+FROM alpine:3.22.1
 RUN apk add --update ca-certificates
 COPY --from=build /venona/venona /usr/local/bin/venona
 
