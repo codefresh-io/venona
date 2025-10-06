@@ -505,9 +505,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.180.2
+      tag: 1.180.3
       pullPolicy: IfNotPresent
-      digest: sha256:29e61a6a6ad9a86623beafac30aad9fc72d51d576bf80a5785f3ca74804808e5
+      digest: sha256:5d43c834d998f76341ce6338f717fec561d91092ef5ffe3ad9f05c75c6d77782
     # -- Set container command.
     command:
       - npm
@@ -587,7 +587,7 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
         tag: 2.5.2-cf.3
-        digest: sha256:308dbb83992e6a13c46f3c76a8e082e6c5e212045bfaff699ccfe7f56366c543
+        digest: sha256:316cd24c623a26edc59e0f5d9a3fd6269a1307c74e11cf523efa3a42a5573fb5
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
