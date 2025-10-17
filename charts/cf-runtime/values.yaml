@@ -403,7 +403,7 @@ runtime:
       repository: codefresh/dind
       tag: 28.5.1-3.0.4 # use `latest-rootless/rootless/28.5.1-3.0.4-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:3a817abd8f71c900fcb62a68a1c3123d1037fecf836f4005e3d96d388263d13e
+      digest: sha256:89c9239f6692f81b2cbdb52554f3d4dbd25a8a5b476dd653837125a7d327f1c9
     # -- Set dind resources.
     resources:
       requests: null
@@ -537,7 +537,7 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-container-logger
         tag: 1.13.3
-        digest: sha256:285c7f1c372edde9605d117bc60cffddeea282c0427f9a45bd6323465cf42b17
+        digest: sha256:e2ccf1aab9dc118d91a449843842f5d19b4cd25731b5409de412b4ade7a2a524
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -547,12 +547,12 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-docker-puller
         tag: 8.0.24
-        digest: sha256:fa42ad5b90231cf176c60dada614b8bbdace1b06f90fb305a30436a24739c6c0
+        digest: sha256:09725c496f66cace02b523e1e3be7434519e751b5a1a5927c76cf95fbb0dc7d7
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
         tag: 6.0.23
-        digest: sha256:69066b919c75a39a276f83ba1234036c7f8b97efaf8fc48a4550d18fa64f9d01
+        digest: sha256:5bf734ffea8f3bb9cdafeabbdcff7f26a2db68552cf7a91d48a5eff2699a57a8
       docker-tag-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-tag-pusher
