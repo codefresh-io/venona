@@ -546,7 +546,7 @@ runtime:
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.23
+        tag: 8.0.24
         digest: sha256:fa42ad5b90231cf176c60dada614b8bbdace1b06f90fb305a30436a24739c6c0
       docker-pusher:
         registry: quay.io
