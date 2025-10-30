@@ -22,7 +22,7 @@ annotations:
     - kind: fixed
       description: "Fix an issue that prevented the Docker metrics collector from shutting down gracefully"
     - kind: security
-      description: "Security fixes in dind, engine, cf-debugger and cli"
+      description: "Security fixes in cf-debugger, cf-git-cloner, cli, dind, engine, fs-ops and kubectl"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
