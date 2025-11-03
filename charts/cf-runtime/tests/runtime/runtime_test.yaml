@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
 suite: runtime test
 values:
   - ../values.yaml
@@ -30,12 +30,13 @@ tests:
     asserts:
       - equal:
           path: data["my-context-codefresh.yaml"]
-          value: |
+          value: | #yaml
             metadata:
               name: my-context/codefresh
               agent: true
             runtimeScheduler:
               type: KubernetesPod
+              internalInfra: false
               image: 'quay.io/codefresh/engine:tagoverride@sha256:123'
               imagePullPolicy: Always
               command:
