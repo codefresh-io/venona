@@ -28,12 +28,13 @@ tests:
     asserts:
       - equal:
           path: data["my-runtime.yaml"]
-          value: |
+          value: | #yaml
             metadata:
               name: system/my-runtime
               agent: false
             runtimeScheduler:
               type: KubernetesPod
+              internalInfra: true
               image: 'quay.io/codefresh/engine:tagoverride'
               imagePullPolicy: IfNotPresent
               command:
@@ -248,12 +249,13 @@ tests:
     asserts:
       - equal:
           path: data["default-override.yaml"]
-          value: |
+          value: | #yaml
             metadata:
               name: system/default-override
               agent: false
             runtimeScheduler:
               type: KubernetesPod
+              internalInfra: true
               image: 'quay.io/codefresh/engine:tagoverride'
               imagePullPolicy: IfNotPresent
               command:
