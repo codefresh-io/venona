@@ -329,4 +329,7 @@ appProxy:
 {{- if not .Values.runtime.agent }}
 systemHybrid: true
 {{- end }}
+{{- if not .Values.runtime.agent }}
+environmentCertPath: /etc/ssl/cf/
+{{- end }}
 {{- end }}
