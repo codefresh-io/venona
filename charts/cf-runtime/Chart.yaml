@@ -21,8 +21,6 @@ annotations:
       description: "Update \"engine\" to 1.180.8"
     - kind: fixed
       description: "Fix race condition causing build step failures if running in parallel and inline Dockerfile is used"
-    - kind: changed
-      description: "Update default \"git-cloner\" and \"fs-ops\" runtime images, used when running build locally"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
