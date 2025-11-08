@@ -1,5 +1,5 @@
 # quay.io/codefresh/venona-tester
-FROM golang:1.23-alpine3.21
+FROM golang:1.25.4-alpine3.21
 
 RUN apk -U add --no-cache ca-certificates git make gcc g++ bash && update-ca-certificates
 RUN go install github.com/client9/misspell/cmd/misspell@v0.3.4 && \
