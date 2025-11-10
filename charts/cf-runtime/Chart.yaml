@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.15
+version: 8.3.16
 keywords:
   - codefresh
   - runner
@@ -14,15 +14,13 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"engine\" to 1.180.6"
+      description: "Update \"engine\" to 1.180.8"
     - kind: fixed
-      description: "Fix an issue that prevented the Docker metrics collector from shutting down gracefully"
-    - kind: security
-      description: "Security fixes in cf-debugger, cf-git-cloner, cli, dind, engine, fs-ops and kubectl"
+      description: "Fix race condition causing build step failures if running in parallel and inline Dockerfile is used"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
