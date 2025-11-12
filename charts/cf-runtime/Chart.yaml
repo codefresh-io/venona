@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.16
+version: 8.3.17
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"engine\" to 1.180.8"
-    - kind: fixed
-      description: "Fix race condition causing build step failures if running in parallel and inline Dockerfile is used"
+      description: "Improve documentation regarding runtime spec synchronization"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
