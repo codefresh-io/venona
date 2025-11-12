@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 8.3.16](https://img.shields.io/badge/Version-8.3.16-informational?style=flat-square)
+![Version: 8.3.17](https://img.shields.io/badge/Version-8.3.17-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -249,16 +249,6 @@ global:
   runtimeName: "my-cluster-name/my-namespace" # optional
 ```
 
-> **Note!** Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) commands, it's recommended to enable sidecar container to pull runtime spec from Codefresh API to detect any drift in configuration.
-
-```yaml
-runner:
-  # -- Sidecar container
-  # Reconciles runtime spec from Codefresh API for drift detection
-  sidecar:
-    enabled: true
-```
-
 ### To 7.x
 
 ⚠️⚠️⚠️ **BREAKING CHANGE** ⚠️⚠️⚠️
@@ -344,6 +334,14 @@ runtime:
 ## Configuration
 
 See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing).
+
+### Runtime spec synchronization
+
+> **Note!** Though it's still possible to update runtime-environment via [get](https://codefresh-io.github.io/cli/runtime-environments/get-runtime-environments/) and [patch](https://codefresh-io.github.io/cli/runtime-environments/apply-runtime-environments/) CLI commands, it's recommended to apply all changes via Helm chart values and upgrade the chart.
+
+To avoid drift between the Helm chart values and the actual runtime-environment spec in Codefresh, on every chart upgrade the runtime-environment spec is updated to match the chart values.
+
+In addition, CronJob that enabled by default runs every 5 minutes and overrides any changes made directly in Codefresh to ensure the runtime-environment spec matches the chart values. This job may be configured via `runtime.patch.cronjob` values.
 
 ### EBS backend volume configuration
 
