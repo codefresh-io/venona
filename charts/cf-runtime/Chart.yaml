@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.3.17
+version: 8.4.0
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Improve documentation regarding runtime spec synchronization"
+      description: "Update \"cf-docker-builder\" to 1.5.0"
+    - kind: added
+      description: "Support \"progress: tty\" for build steps if BuildKit is enabled"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
