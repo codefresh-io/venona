@@ -27,9 +27,8 @@ tests:
               image: 'somedomain.io/codefresh/engine:tagoverride'
               imagePullPolicy: IfNotPresent
               command:
-                - npm
-                - run
-                - start
+                - node
+                - dist/server/index.js
               envVars:
                 CF_TELEMETRY_LOGS_LEVEL: 'debug'
                 CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
