@@ -11,7 +11,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Install Chart](#install-chart)
 - [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
-  - [⚠️ Known issues](#⚠️-known-issues)
+  - [⚠️ Known issues](#-known-issues)
   - [To 2.x](#to-2-x)
   - [To 3.x](#to-3-x)
   - [To 4.x](#to-4-x)
@@ -23,6 +23,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 8.2.x](#to-8-2-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
+  - [Runtime spec synchronization](#runtime-spec-synchronization)
   - [EBS backend volume configuration in AWS](#ebs-backend-volume-configuration)
   - [Azure Disks backend volume configuration in AKS](#azure-disks-backend-volume-configuration)
   - [GCE Disks backend volume configuration in GKE](#gce-disks-backend-volume-configuration-in-gke)
@@ -113,7 +114,15 @@ See [Customizing the Chart Before Installing](https://helm.sh/docs/intro/using_h
 
 Please check the following known issues before upgrading the chart:
 
-- Charts **7.1.1–7.4.3** have a bug because of which the following feature does not work: [“Secret Store — Kubernetes-Runtime Secret”](https://codefresh.io/docs/docs/integrations/secret-storage/#secret-store-setup-for-codefresh-runner-installation).
+- Charts **7.1.1–7.4.3** contain a bug because of which the following feature does not work: [“Secret Store — Kubernetes-Runtime Secret”](https://codefresh.io/docs/docs/integrations/secret-storage/#secret-store-setup-for-codefresh-runner-installation).
+- Charts **8.0.5–8.3.11** contain a bug that prevents builds from terminating properly. To work around this, set the following values:
+```yaml
+runtime:
+  engine:
+    command:
+      - "node"
+      - "dist/server/index.js"
+```
 
 ### To 2.x
 
