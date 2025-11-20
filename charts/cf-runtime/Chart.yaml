@@ -18,9 +18,11 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"cf-docker-builder\" to 1.5.1."
+      description: "Update \"cf-docker-builder\" to 1.5.2."
     - kind: added
       description: "Support \"progress: tty\" for build steps if BuildKit is enabled."
+    - kind: fixed
+      description: "Fix \"docker-container\" driver escaping desired control group on cgroup v2 in \"build\" step."
     - kind: changed
       description: "Update \"engine\" to 1.180.9."
     - kind: deprecated

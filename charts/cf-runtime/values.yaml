@@ -540,8 +540,8 @@ runtime:
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.5.1
-        digest: sha256:d72c2331f21859158cd3abe7b845e2b5d118b1affc10708c0d503631eaa5b2fd
+        tag: 1.5.2
+        digest: sha256:aee6cd939ce17708c6d1022bec4d799dfbf81844a6a36ae5fe56e4308ad6d4b1
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
