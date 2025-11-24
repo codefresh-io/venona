@@ -505,14 +505,13 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 1.180.8
+      tag: 1.180.9
       pullPolicy: IfNotPresent
-      digest: sha256:92d5ff2394c316f0241107575c8e5948ce92418d1839140333d541f2f80c3776
+      digest: sha256:946d9b718d92cfb10dabdd3c7f66b3be1056882e023d58da09a66f36af18e781
     # -- Set container command.
     command:
-      - npm
-      - run
-      - start
+      - 'node'
+      - 'dist/server/index.js'
     # -- Set resources.
     resources:
       requests:
@@ -541,8 +540,8 @@ runtime:
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.4.9
-        digest: sha256:3b87e3e4bd7ab76d94ca4dbee63317085a2e2e45779214ec3e42c5049ec2fbf8
+        tag: 1.5.2
+        digest: sha256:aee6cd939ce17708c6d1022bec4d799dfbf81844a6a36ae5fe56e4308ad6d4b1
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
