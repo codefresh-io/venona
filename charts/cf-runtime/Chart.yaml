@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 8.4.0
+version: 9.0.0
 keywords:
   - codefresh
   - runner
@@ -14,21 +14,28 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"cf-docker-builder\" to 1.5.2."
+      description: "Update \"cf-deploy-kubernetes\" to 17.0.0."
+    - kind: security
+      description: "Fix various CVE in \"cf-deploy-kubernetes\"."
     - kind: added
-      description: "Support \"progress: tty\" for build steps if BuildKit is enabled."
-    - kind: fixed
-      description: "Fix \"docker-container\" driver escaping desired control group on cgroup v2 in \"build\" step."
-    - kind: changed
-      description: "Update \"engine\" to 1.180.9."
+      description: "Support k8s 1.32, 1.33, 1.34 in \"deploy\" step."
     - kind: deprecated
-      description: "Remove Node.js package managers such as \"npm\" from the \"engine\" image."
+      description: "Remove support for k8s older than 1.32 in \"deploy\" step."
+      links:
+        - name: Codefresh Docs - Deploy
+          url: https://codefresh.io/docs/docs/pipelines/steps/deploy/
     - kind: changed
-      description: "Do not use \"npm\" as the entrypoint for \"engine\"."
+      description: "Update \"cf-container-logger\" to 2.0.0."
+    - kind: changed
+      description: "Update \"engine\" to 2.0.0."
+    - kind: deprecated
+      description: "Remove deprecated Prometheus metrics controlled by env variables \"METRICS_PROMETHEUS_ENABLED\" and \"METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS\""
+    - kind: deprecated
+      description: "Remove \"codefresh.classic.build.deprecated_images.pulled\" OTel metric."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
