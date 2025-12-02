@@ -1197,7 +1197,7 @@ Install the Helm chart
 | appProxy.affinity | object | `{}` | Set affinity |
 | appProxy.enabled | bool | `false` | Enable app-proxy |
 | appProxy.env | object | `{}` | Add additional env vars |
-| appProxy.image | object | `{"digest":"sha256:e71789ed9c36bda32785b88708065bd819b055dbe053310cdbb2f1903fe15b21","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.57"}` | Set image |
+| appProxy.image | object | `{"digest":"sha256:f8ae2af25014edb2aeb45e27684054bc5c66a539ca1dac629da75df65a43cc57","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.58"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
