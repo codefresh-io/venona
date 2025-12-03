@@ -590,8 +590,8 @@ runtime:
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
-        tag: 0.5.5
-        digest: sha256:383306f0775d70776f26284176c5cebd21784b371defecbf96e99b0b7bafe058
+        tag: 0.5.6
+        digest: sha256:5405a4476420e21d12d4a80b030d8737dcae5262a8b20c0ea018e8db710e9d2c
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
