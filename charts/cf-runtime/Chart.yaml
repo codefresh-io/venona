@@ -14,11 +14,17 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
       description: "Update \"engine\" to 2.0.1."
+    - kind: fixed
+      description: "Prevent \"on_finish\" and \"on_elected\" pipeline hooks from executing in the middle if paused for \"pending-approval\" step."
+    - kind: changed
+      description: "Update \"cf-docker-builder\" to 1.5.3."
+    - kind: security
+      description: "Fix various security vulnerabilities in \"cf-docker-builder\"."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
