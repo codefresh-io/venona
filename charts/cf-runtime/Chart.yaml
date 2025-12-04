@@ -19,6 +19,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: security
       description: "security fixes in gcloud-builder"
+    - kind: changed
+      description: "Update \"gcloud-builder\" to 0.5.6."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
