@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 9.0.1
+version: 9.0.2
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: "security fixes in cf-app-proxy"
+      description: "security fixes in gcloud-builder"
+    - kind: changed
+      description: "Update \"gcloud-builder\" to 0.5.6."
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
