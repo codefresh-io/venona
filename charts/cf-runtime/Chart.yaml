@@ -18,9 +18,14 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: "Update \"engine\" to 2.0.1."
+      description: "Update \"engine\" to 2.1.0."
     - kind: fixed
       description: "Prevent \"on_finish\" and \"on_elected\" pipeline hooks from executing in the middle if paused for \"pending-approval\" step."
+    - kind: deprecated
+      description: "Print deprecation warning in build logs if Docker daemon is running on cgroup v1"
+      links:
+        - name: Docker cgroup v1 deprecation notice
+          url: https://docs.docker.com/engine/deprecated/#support-for-cgroup-v1
     - kind: changed
       description: "Update \"cf-docker-builder\" to 1.5.3."
     - kind: security
