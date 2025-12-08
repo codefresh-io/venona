@@ -52,24 +52,10 @@ while IFS= read -r path_json; do
     echo "✅ Digest: $digest"
   else
     echo "❌ Failed to get digest for $image"
-    continue
+    exit 1
   fi
 
   # write back to YAML
   echo "✍️  Writing digest back at $yq_path"
   yq -i "${yq_path}.digest = \"$digest\"" "$VALUES_FILE"
 done
-
-
-# yq eval-all '. as $item ireduce ({}; . * $item) | .. | select(has("image")) | path | join(".")' "$VALUES_FILE" | \
-# while read -r path; do
-#   registry=$(yq eval ".$path.image.registry" "$VALUES_FILE")
-#   repository=$(yq eval ".$path.image.repository" "$VALUES_FILE")
-#   tag=$(yq eval ".$path.image.tag" "$VALUES_FILE")
-
-#   digest=$(get_image_digest "$registry" "$repository" "$tag")
-
-#   if [[ -n "$digest" ]]; then
-#     yq eval -i ".$path.image.digest = \"$digest\"" "$VALUES_FILE"
-#   fi
-# done
