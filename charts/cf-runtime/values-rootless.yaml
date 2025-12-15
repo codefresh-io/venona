@@ -19,7 +19,7 @@ volumeProvisioner:
 runtime:
   dind:
     image:
-      tag: 28.5.1-3.0.5-rootless
+      tag: 28.5.2-3.0.7-rootless
       digest: sha256:49d77f61e754db1329c7969cc20d2e6b6d034faa33b7303835eff318223e85ed
     userVolumeMounts:
       dind:
