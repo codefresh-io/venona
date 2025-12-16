@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 9.0.3
+version: 9.0.4
 keywords:
   - codefresh
   - runner
@@ -17,19 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: "Update \"engine\" to 2.1.0."
-    - kind: fixed
-      description: "Prevent \"on_finish\" and \"on_elected\" pipeline hooks from executing in the middle if paused for \"pending-approval\" step."
-    - kind: deprecated
-      description: "Print deprecation warning in build logs if Docker daemon is running on cgroup v1"
-      links:
-        - name: Docker cgroup v1 deprecation notice
-          url: https://docs.docker.com/engine/deprecated/#support-for-cgroup-v1
-    - kind: changed
-      description: "Update \"cf-docker-builder\" to 1.5.3."
     - kind: security
-      description: "Fix various security vulnerabilities in \"cf-docker-builder\"."
+      description: "Fix various security vulnerabilities in engine, container-logger, app-proxy, debugger, k8s-agent"
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
