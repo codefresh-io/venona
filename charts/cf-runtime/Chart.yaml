@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 9.0.6
+version: 9.0.7
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Update "engine" to 2.1.2'
-    - kind: security
-      description: 'Fix security vulnerability in engine.'
+      description: 'Remove runtimeExtends validation in .Values.extraRuntimes'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
