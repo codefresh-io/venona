@@ -580,8 +580,8 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.14.8
-        digest: sha256:37ec7bed4b09e4055c3600a7805f84e37cccf8d849fe0fdd5b29f079de15010c
+        tag: 0.14.9
+        digest: sha256:db9b68b68fdb2d4a548aee6e3797fe366bf9122692357911d8704943c907c170
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
@@ -601,7 +601,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: edge
-        digest: sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
+        digest: sha256:ea71a031ed91cd46b00d438876550bc765da43b4ae40f331a12daf62f0937758
     # -- Legacy way to specify runtime images.
     # runtimeImages:
     #   COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
