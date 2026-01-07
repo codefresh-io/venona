@@ -14,10 +14,6 @@
   {{- $_ := set $rootContext.Values.global "runtimeName" $runtimeItem.runtimeName }}
 {{- end }}
 
-{{- if or (not (kindIs "slice" $runtimeItem.runtimeExtends)) (eq (len $runtimeItem.runtimeExtends) 0) }}
-  {{- fail "runtimeExtends must be a non-empty list" }}
-{{- end }}
-
 {{- if not (hasPrefix "system/" $runtimeItem.runtimeName) }}
   {{- fail "extra runtime name must start with 'system/'" }}
 {{- end }}
