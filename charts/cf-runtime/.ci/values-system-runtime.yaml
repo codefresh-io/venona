@@ -5,8 +5,8 @@ runtime:
   agent: false
   inCluster: false
   description: "Test runtime created by venona-helm-chart-ci pipeline"
-  kubeconfigFilePath: /opt/codefresh/kubeconfigs/prod-ue1-runtime-free-1/kubeconfig
-  kubeconfigName: prod-ue1-runtime-free-1
+  kubeconfigFilePath: /opt/codefresh/kubeconfigs/prod-ue1-runtime-paying-1/kubeconfig
+  kubeconfigName: prod-ue1-runtime-paying-1
   dind:
     pvcs:
       dind:
