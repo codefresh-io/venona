@@ -505,9 +505,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 2.1.2
+      tag: 2.1.1
       pullPolicy: IfNotPresent
-      digest: sha256:9a2605ff47d632246854f3737f3aae21024c5007ef49d7eee4d0fe7623506cc0
+      digest: sha256:34090203ad745bb5264b0220a73917840fb4c3000b38a5d19a8d8a4a0c101c3d
     # -- Set container command.
     command:
       - 'node'
@@ -601,7 +601,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: edge
-        digest: sha256:115729ec5cb049ba6359c3ab005ac742012d92bbaa5b8bc1a878f1e8f62c0cb8
+        digest: sha256:ea71a031ed91cd46b00d438876550bc765da43b4ae40f331a12daf62f0937758
     # -- Legacy way to specify runtime images.
     # runtimeImages:
     #   COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
