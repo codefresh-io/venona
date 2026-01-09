@@ -261,6 +261,9 @@ dockerDaemonScheduler:
       mountPath: /etc/docker/daemon.json
       subPath: daemon.json
       readOnly: true
+    cf-client-certs:
+      name: cf-client-certs
+      mountPath: /etc/ssl/cf-client
   {{- with $dindContext.volumeMounts }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -273,6 +276,9 @@ dockerDaemonScheduler:
       name: dind-config
       configMap:
         name: codefresh-dind-config
+    cf-client-certs:
+      name: cf-client-certs
+      emptyDir: {}
   {{- with $dindContext.volumes }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -297,6 +303,8 @@ dockerDaemonScheduler:
     volumeMounts:
     - mountPath: /home/rootless/.local/share/docker
       name: dind
+    - mountPath: /etc/ssl/cf-client
+      name: cf-client-certs
     {{- if eq ( toString ( $dindContext.volumePermissions.securityContext.runAsUser )) "auto" }}
     securityContext: {{- omit $dindContext.volumePermissions.securityContext "runAsUser" | toYaml | nindent 6 }}
     {{- else }}
