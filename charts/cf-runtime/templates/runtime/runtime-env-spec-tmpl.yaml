@@ -293,6 +293,7 @@ dockerDaemonScheduler:
       - -ec
       - |
         chown -R {{ $dindContext.containerSecurityContext.runAsUser }}:{{ $dindContext.podSecurityContext.fsGroup }} /home/rootless/.local/share/docker
+        chown -R {{ $dindContext.containerSecurityContext.runAsUser }}:{{ $dindContext.podSecurityContext.fsGroup }} /etc/ssl/cf-client
     volumeMounts:
     - mountPath: /home/rootless/.local/share/docker
       name: dind
