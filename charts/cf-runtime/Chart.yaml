@@ -23,6 +23,8 @@ annotations:
       description: 'Update "dind-volume-utils" to 1.30.3.'
     - kind: changed
       description: 'Update "dind-volume-provisioner" to 2.0.1.'
+    - kind: changed
+      description: 'Update "cf-deploy-kubernetes" to 17.0.1.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:
