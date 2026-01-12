@@ -27,6 +27,8 @@ annotations:
       description: 'Update "cf-deploy-kubernetes" to 17.0.1.'
     - kind: changed
       description: 'Update "cf-git-cloner" to 10.3.5.'
+    - kind: changed
+      description: 'Update "cf-docker-builder" to 1.5.4.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:
