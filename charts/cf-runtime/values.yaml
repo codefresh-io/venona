@@ -152,7 +152,7 @@ volumeProvisioner:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
     tag: 2.0.1
-    digest: sha256:d158998a69c6843b1420ddae0b3cb18f46fe7fc0cf0e51b92f4a73f9b189d291
+    digest: sha256:9c3db74fc7b4abddb8d059fecc6d5db224561855cea11433f2627b8d8f6a15c7
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -201,8 +201,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.2
-      digest: sha256:4ba3029e7fe8fe9824749a93d7831cf0d7b0e8587f9eaa56e440cd453cf36989
+      tag: 1.30.3
+      digest: sha256:7bf6d5b9e71a1ebe1b9de8dbe87c949dc03afbf1660ac196f7615993b54dc32a
     podAnnotations: {}
     podSecurityContext:
       enabled: false
@@ -403,7 +403,7 @@ runtime:
       repository: codefresh/dind
       tag: 28.5.2-3.0.8 # use `latest-rootless/rootless/28.5.2-3.0.8-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:1c53d5dfb9428d2f917d6786f2fa13dc2e07192b71fe762e2a8280af4f12c90d
+      digest: sha256:cc5f2f5db98b5c7c98361b15dddd815f7f269cb960fc4ec62f48a8181f5f4556
     # -- Set dind resources.
     resources:
       requests: null
