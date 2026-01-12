@@ -17,7 +17,7 @@ runtime:
   dind:
     image:
       tag: 28.5.2-3.0.8-rootless
-      digest: sha256:cc5f2f5db98b5c7c98361b15dddd815f7f269cb960fc4ec62f48a8181f5f4556
+      digest: sha256:f4e60317d9e3ce1a11b3f1c47ee078f5c842a7a7439f1a1f5fee270f23512a62
     userVolumeMounts:
       dind:
         name: dind
