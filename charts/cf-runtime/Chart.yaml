@@ -17,8 +17,14 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: changed
+      description: 'Update "dind" to 28.5.2-3.0.8.'
+    - kind: changed
+      description: 'Update "dind-volume-utils" to 1.30.3.'
+    - kind: changed
+      description: 'Update "dind-volume-provisioner" to 2.0.1.'
     - kind: security
-      description: 'Fix security vulnerability in pikolo'
+      description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
