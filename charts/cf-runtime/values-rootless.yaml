@@ -4,8 +4,8 @@ volumeProvisioner:
   # -- Only if local volumes are used as backend storage (ignored for ebs/ebs-csi disks)
   dind-lv-monitor:
     image:
-      tag: 1.30.0-rootless
-      digest: sha256:712e549e6e843b04684647f17e0973f8047e0d60e6e8b38a693ea64dc75b0479
+      tag: 1.30.3-rootless
+      digest: sha256:290508be2c5b03c81d1ea5f26c3498460609fead4cb824d6065b1e09132f8a7a
     containerSecurityContext:
       runAsUser: 1000
     podSecurityContext:
@@ -19,8 +19,8 @@ volumeProvisioner:
 runtime:
   dind:
     image:
-      tag: 28.5.2-3.0.7-rootless
-      digest: sha256:399980d68e06b9622e89c79eccd4e62f19b9f5c24b88e3cbab559cde82039368
+      tag: 28.5.2-3.0.8-rootless
+      digest: sha256:f4e60317d9e3ce1a11b3f1c47ee078f5c842a7a7439f1a1f5fee270f23512a62
     userVolumeMounts:
       dind:
         name: dind
