@@ -505,9 +505,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 2.1.2
+      tag: 2.1.6
       pullPolicy: IfNotPresent
-      digest: sha256:9a2605ff47d632246854f3737f3aae21024c5007ef49d7eee4d0fe7623506cc0
+      digest: sha256:b217803a56a150c22c85eb1b78847b3897dc2e36225df2458de832dccbc46276
     # -- Set container command.
     command:
       - 'node'
@@ -570,8 +570,8 @@ runtime:
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
-        tag: 17.0.1
-        digest: sha256:54e724d5ca2e9dda466b7d74e7aaf8b1fef0b49e82fd075b4def703037e9e778
+        tag: 17.0.2
+        digest: sha256:35b461ca29b37d4012bc805c5b32f4c4f6a9947a4c57823dcec6692c16ca7b5a
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger

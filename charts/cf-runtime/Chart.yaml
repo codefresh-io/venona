@@ -14,13 +14,27 @@ maintainers:
     url: https://codefresh-io.github.io/
 annotations:
   # 💡 Do not forget to update this annotation:
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
       description: 'Update "cf-container-logger" to 2.0.2.'
     - kind: fixed
-      description: 'Fix "cf-container-logger" compatibility with Docker Engine API v1.52.'
+      description: 'Fix compatibility of "cf-container-logger" with Docker Engine API v1.52.'
+    - kind: changed
+      description: 'Update "cf-deploy-kubernetes" to 17.0.2.'
+    - kind: security
+      description: 'Fix various CVE in "cf-deploy-kubernetes" component.'
+    - kind: changed
+      description: 'Update "engine" to 2.1.6.'
+    - kind: fixed
+      description: 'Fix compatibility of the "engine" with Docker Engine API v1.52.'
+    - kind: security
+      description: 'Fix CVE in development dependencies of the "engine".'
+    - kind: fixed
+      description: 'Improve the retry mechanism in the "engine" when sending requests to a Docker daemon.'
+    - kind: fixed
+      description: 'Improve the resilience of the "engine" when writing files to Docker containers.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
