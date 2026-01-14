@@ -12,7 +12,7 @@ fi
 
 modify_accounts() {
     local runtime_name_encoded
-    runtime_name_encoded=$(yq -r '.metadata.name' "$1" | jq -sRr @uri)
+    runtime_name_encoded=$(yq -r '.metadata.name' "$1" | jq -Rr @uri)
     local accounts
     accounts=$(yq -o=json '.accounts' "$1")
 
