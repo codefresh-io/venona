@@ -14,7 +14,7 @@ modify_accounts() {
     local runtime_name_encoded
     runtime_name_encoded=$(yq -r '.metadata.name' "$1" | jq -sRr @uri)
     local accounts
-    accounts=$(yq '.accounts' "$1")
+    accounts=$(yq -o=json '.accounts' "$1")
 
     if [[ -n $accounts ]]; then
         local payload
