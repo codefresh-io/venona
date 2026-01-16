@@ -28,6 +28,11 @@ annotations:
         - name: Docker Engine deprecated features
           url: https://docs.docker.com/engine/deprecated/
     - kind: changed
+      description: 'Update "compose" to v5.0.1-1.6.0.'
+      links:
+        - name: Docker Compose v5 release notes
+          url: https://github.com/docker/compose/releases/tag/v5.0.0
+    - kind: changed
       description: 'Update "container-logger" to 2.0.6.'
     - kind: fixed
       description: 'Fix compatibility of the "container-logger" with Docker Engine API v1.52.'
@@ -54,7 +59,7 @@ annotations:
     - kind: changed
       description: 'Update "git-cloner" to 10.3.6.'
     - kind: security
-      description: 'Fix various CVEs in "git-cloner", "cosign-image-signer", "docker-puller", "docker-builder", "deploy-kubernetes", "engine", "container-logger" components.'
+      description: 'Fix various CVEs in multiple runtime components.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
