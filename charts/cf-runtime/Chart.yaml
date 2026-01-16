@@ -41,7 +41,7 @@ annotations:
       description: 'Improve the retry mechanism in the "engine" when sending requests to a Docker daemon.'
     - kind: fixed
       description: 'Improve the resilience of the "engine" when writing files to Docker containers.'
-      - kind: changed
+    - kind: changed
       description: 'Optimize dependencies of the "engine" to reduce image size.'
     - kind: changed
       description: 'Update "deploy-kubernetes" to 17.0.2.'
