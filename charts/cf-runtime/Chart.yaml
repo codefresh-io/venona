@@ -28,7 +28,7 @@ annotations:
         - name: Docker Engine deprecated features
           url: https://docs.docker.com/engine/deprecated/
     - kind: changed
-      description: 'Update "cf-container-logger" to 2.0.2.'
+      description: 'Update "cf-container-logger" to 2.0.6.'
     - kind: fixed
       description: 'Fix compatibility of "cf-container-logger" with Docker Engine API v1.52.'
     - kind: changed
@@ -55,6 +55,10 @@ annotations:
       description: 'Fix various CVE in "cf-docker-puller" component.'
     - kind: changed
       description: 'Update "cf-git-cloner" to 10.3.6.'
+    - kind: changed
+      description: 'Update "cosign-image-signer" to 2.5.2-cf.4.'
+    - kind: changed
+      description: 'Update "k8s-agent" to 1.3.27.'
     - kind: security
       description: 'Fix various CVE in "cf-git-cloner" component.'
 dependencies:
