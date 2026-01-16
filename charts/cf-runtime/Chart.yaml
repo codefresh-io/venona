@@ -54,11 +54,15 @@ annotations:
     - kind: security
       description: 'Fix various CVE in "cf-docker-puller" component.'
     - kind: changed
-      description: 'Update "cf-git-cloner" to 10.3.6.'
-    - kind: changed
       description: 'Update "cosign-image-signer" to 2.5.2-cf.4.'
+      - kind: security
+      description: 'Fix various CVE in "cosign-image-signer" component.'
     - kind: changed
       description: 'Update "k8s-agent" to 1.3.27.'
+      - kind: security
+      description: 'Fix various CVE in "k8s-agent" component.'
+    - kind: changed
+      description: 'Update "cf-git-cloner" to 10.3.6.'
     - kind: security
       description: 'Fix various CVE in "cf-git-cloner" component.'
 dependencies:
