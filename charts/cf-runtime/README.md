@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 9.0.10](https://img.shields.io/badge/Version-9.0.10-informational?style=flat-square)
+![Version: 9.0.11](https://img.shields.io/badge/Version-9.0.11-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1316,8 +1316,8 @@ Install the Helm chart
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
-| runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
-| runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
+| runtime.accounts | for On-Premise only | `[]` | Assign accounts to runtime (list of account ids) |
+| runtime.agent | for On-Premise only | `true` | Enable agent |
 | runtime.description | string | `""` | Runtime description |
 | runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"},"image":{"digest":"sha256:cc5f2f5db98b5c7c98361b15dddd815f7f269cb960fc4ec62f48a8181f5f4556","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"28.5.2-3.0.8"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62","registry":"docker.io","repository":"alpine","tag":3.23},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
@@ -1407,8 +1407,8 @@ Install the Helm chart
 | runtime.engine.workflowLimits.TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY | int | `60` | Time since the last health check report after which the engine is considered unhealthy; seconds. |
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
-| runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
-| runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
+| runtime.inCluster | for On-Premise only | `true` | Set inCluster runtime |
+| runtime.kubeconfigFilePath | for On-Premise only | `""` | Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:6e0e29a87dc214e2d014b70c36796ada4ae6a045dc21ebf0bc081ee372c2cec6","registry":"quay.io","repository":"codefresh/cli","tag":"1.0.0-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
