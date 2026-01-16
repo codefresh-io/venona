@@ -45,6 +45,18 @@ annotations:
       description: 'Update "cf-deploy-kubernetes" to 17.0.2.'
     - kind: security
       description: 'Fix various CVE in "cf-deploy-kubernetes" component.'
+    - kind: changed
+      description: 'Update "cf-docker-builder" to 1.5.5.'
+    - kind: security
+      description: 'Fix various CVE in "cf-docker-builder" component.'
+    - kind: changed
+      description: 'Update "cf-docker-puller" to 8.0.25.'
+    - kind: security
+      description: 'Fix various CVE in "cf-docker-puller" component.'
+    - kind: changed
+      description: 'Update "cf-git-cloner" to 10.3.6.'
+    - kind: security
+      description: 'Fix various CVE in "cf-git-cloner" component.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
