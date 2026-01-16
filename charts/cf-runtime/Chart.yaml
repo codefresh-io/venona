@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Update "cli" to 1.0.0 with security fixes and removed git cli "hub"'
+      description: 'Update "codefresh/cli" to 1.0.0 with security fixes'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
