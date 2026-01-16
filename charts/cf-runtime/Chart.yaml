@@ -35,36 +35,24 @@ annotations:
       description: 'Update "engine" to 2.1.7.'
     - kind: fixed
       description: 'Fix compatibility of the "engine" with Docker Engine API v1.52.'
-    - kind: security
-      description: 'Fix CVE in development dependencies of the "engine".'
     - kind: fixed
       description: 'Improve the retry mechanism in the "engine" when sending requests to a Docker daemon.'
     - kind: fixed
       description: 'Improve the resilience of the "engine" when writing files to Docker containers.'
     - kind: changed
       description: 'Update "cf-deploy-kubernetes" to 17.0.2.'
-    - kind: security
-      description: 'Fix various CVE in "cf-deploy-kubernetes" component.'
     - kind: changed
       description: 'Update "cf-docker-builder" to 1.5.5.'
-    - kind: security
-      description: 'Fix various CVE in "cf-docker-builder" component.'
     - kind: changed
       description: 'Update "cf-docker-puller" to 8.0.25.'
-    - kind: security
-      description: 'Fix various CVE in "cf-docker-puller" component.'
     - kind: changed
       description: 'Update "cosign-image-signer" to 2.5.2-cf.4.'
-      - kind: security
-      description: 'Fix various CVE in "cosign-image-signer" component.'
     - kind: changed
       description: 'Update "k8s-agent" to 1.3.27.'
-      - kind: security
-      description: 'Fix various CVE in "k8s-agent" component.'
     - kind: changed
       description: 'Update "cf-git-cloner" to 10.3.6.'
     - kind: security
-      description: 'Fix various CVE in "cf-git-cloner" component.'
+      description: 'Fix various CVEs in "cf-git-cloner, k8s-agent, cosign-image-signer, docker-puller, docker-builder, cf-deploy-kubernetes, engine, cf-container-logger" components.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
