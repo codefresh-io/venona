@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 9.0.10
+version: 9.0.11
 keywords:
   - codefresh
   - runner
@@ -18,9 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Update "dind-volume-utils" to 1.30.4.'
-    - kind: security
-      description: 'Fix various security vulnerabilities in "dind-volume-utils".'
+      description: 'Update "codefresh/cli" to 1.0.0 with security fixes'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
