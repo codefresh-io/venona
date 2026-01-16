@@ -18,15 +18,21 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
+      description: 'Update "dind" to 29.1.4-3.0.9.'
+    - kind: changed
+      description: 'Update Docker Engine to v29 in "dind" component. Containerd image store is disabled.'
+      links:
+        - name: Docker Engine v29 release notes
+          url: https://docs.docker.com/engine/release-notes/29/
+      links:
+        - name: Docker Engine deprecated features
+          url: https://docs.docker.com/engine/deprecated/
+    - kind: changed
       description: 'Update "cf-container-logger" to 2.0.2.'
     - kind: fixed
       description: 'Fix compatibility of "cf-container-logger" with Docker Engine API v1.52.'
     - kind: changed
-      description: 'Update "cf-deploy-kubernetes" to 17.0.2.'
-    - kind: security
-      description: 'Fix various CVE in "cf-deploy-kubernetes" component.'
-    - kind: changed
-      description: 'Update "engine" to 2.1.6.'
+      description: 'Update "engine" to 2.1.7.'
     - kind: fixed
       description: 'Fix compatibility of the "engine" with Docker Engine API v1.52.'
     - kind: security
@@ -35,6 +41,10 @@ annotations:
       description: 'Improve the retry mechanism in the "engine" when sending requests to a Docker daemon.'
     - kind: fixed
       description: 'Improve the resilience of the "engine" when writing files to Docker containers.'
+    - kind: changed
+      description: 'Update "cf-deploy-kubernetes" to 17.0.2.'
+    - kind: security
+      description: 'Fix various CVE in "cf-deploy-kubernetes" component.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
