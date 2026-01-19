@@ -1298,7 +1298,7 @@ Install the Helm chart
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
 | runner.image | object | `{"digest":"sha256:96a8696ab418c3327e2e5fcf8ab08359b332167ef750b543ddd245ac4270153f","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.7"}` | Set image |
-| runner.init | object | `{"image":{"digest":"sha256:5ee4232a14d1dd81e47e95dc5f7c06f27a24c3d6936f988f157833ea93e1ab6c","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.5-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
+| runner.init | object | `{"image":{"digest":"sha256:6e0e29a87dc214e2d014b70c36796ada4ae6a045dc21ebf0bc081ee372c2cec6","registry":"quay.io","repository":"codefresh/cli","tag":"1.0.0-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
@@ -1410,7 +1410,7 @@ Install the Helm chart
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
-| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:5ee4232a14d1dd81e47e95dc5f7c06f27a24c3d6936f988f157833ea93e1ab6c","registry":"quay.io","repository":"codefresh/cli","tag":"0.89.5-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
+| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:6e0e29a87dc214e2d014b70c36796ada4ae6a045dc21ebf0bc081ee372c2cec6","registry":"quay.io","repository":"codefresh/cli","tag":"1.0.0-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
