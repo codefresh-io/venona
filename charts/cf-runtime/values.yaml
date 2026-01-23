@@ -565,8 +565,8 @@ runtime:
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
-        tag: 10.3.6
-        digest: sha256:212b6d9efb6f85e9fefa88b33d2c2732f7a9ce69b89e4fb62a23ee3164b6c1b4
+        tag: 10.3.5
+        digest: sha256:152f2e5153b135e7c9d2cc79cbca8e84fb43b3d68a15335a7e10e75fb10ba1b0
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes

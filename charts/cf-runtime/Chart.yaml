@@ -56,8 +56,6 @@ annotations:
       description: 'Update "docker-puller" to 8.0.25.'
     - kind: changed
       description: 'Update "cosign-image-signer" to 2.5.2-cf.4.'
-    - kind: changed
-      description: 'Update "git-cloner" to 10.3.6.'
     - kind: security
       description: 'Fix various CVEs in multiple runtime components.'
 dependencies:
