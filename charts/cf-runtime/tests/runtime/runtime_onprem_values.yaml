@@ -100,9 +100,6 @@ runtime:
       docker-pusher:
         tag: tagoverride
         digest: ""
-      docker-tag-pusher:
-        tag: tagoverride
-        digest: ""
       fs-ops:
         tag: tagoverride
         digest: ""

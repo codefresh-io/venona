@@ -64,7 +64,6 @@ tests:
                 DOCKER_BUILDER_IMAGE: 'somedomain.io/codefresh/cf-docker-builder:tagoverride'
                 DOCKER_PULLER_IMAGE: 'somedomain.io/codefresh/cf-docker-puller:tagoverride'
                 DOCKER_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-pusher:tagoverride'
-                DOCKER_TAG_PUSHER_IMAGE: 'somedomain.io/codefresh/cf-docker-tag-pusher:tagoverride'
                 FS_OPS_IMAGE: 'somedomain.io/codefresh/fs-ops:tagoverride'
                 GIT_CLONE_IMAGE: 'somedomain.io/codefresh/cf-git-cloner:tagoverride'
                 KUBE_DEPLOY: 'somedomain.io/codefresh/cf-deploy-kubernetes:tagoverride'
