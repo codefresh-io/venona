@@ -67,11 +67,6 @@ runtimeScheduler:
   {{- else }}
     DOCKER_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-pusher") "context" $rootContext) | squote }}
   {{- end }}
-  {{- if (index $engineContext "runtimeImages" "DOCKER_TAG_PUSHER_IMAGE") }}
-    DOCKER_TAG_PUSHER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_TAG_PUSHER_IMAGE) | squote }}
-  {{- else }}
-    DOCKER_TAG_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-tag-pusher") "context" $rootContext) | squote }}
-  {{- end }}
   {{- if (index $engineContext "runtimeImages" "FS_OPS_IMAGE") }}
     FS_OPS_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.FS_OPS_IMAGE) | squote }}
   {{- else }}
