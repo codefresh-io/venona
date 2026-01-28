@@ -17,8 +17,10 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: deprecated
+      description: '"push-tag" step is no longer supported.'
     - kind: removed
-      description: 'Remove docker-tag-pusher image'
+      description: 'Remove "docker-tag-pusher" image.'
     - kind: changed
       description: 'Update "cf-app-proxy" to 0.0.60.'
     - kind: changed
@@ -27,6 +29,11 @@ annotations:
       description: 'Update "cf-git-cloner" to 10.3.7.'
     - kind: changed
       description: 'Update "k8s-agent" to 1.3.29.'
+    - kind: changed
+      description: 'Update "dind" to 29.2.0-3.0.10 with Docker Engine v29.2.0.'
+      links:
+        - name: Docker Engine v29 release notes
+          url: https://docs.docker.com/engine/release-notes/29/
     - kind: security
       description: 'Fix various CVEs in multiple runtime components.'
 dependencies:
