@@ -222,7 +222,7 @@ volumeProvisioner:
         registry: docker.io
         repository: alpine
         tag: 3.23
-        digest: sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62
+        digest: sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
       resources: {}
       securityContext:
         runAsUser: 0 # auto
@@ -495,7 +495,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: 3.23
-        digest: sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4eb62
+        digest: sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
       resources: {}
       securityContext:
         runAsUser: 0 # auto
@@ -596,7 +596,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: edge
-        digest: sha256:ea71a031ed91cd46b00d438876550bc765da43b4ae40f331a12daf62f0937758
+        digest: sha256:9a341ff2287c54b86425cbee0141114d811ae69d88a36019087be6d896cef241
     # -- Legacy way to specify runtime images.
     # runtimeImages:
     #   COMPOSE_IMAGE: quay.io/codefresh/compose:v2.37.0-1.5.4@sha256:e74494370100678ccb1c1058e6ef3ddcf67b21fcd37da8b3482376c8282549ad
