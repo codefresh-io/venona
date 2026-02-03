@@ -401,9 +401,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 29.2.0-3.0.10 # use `latest-rootless/rootless/29.2.0-3.0.10-rootless` tags for rootless-dind
+      tag: 29.2.0-3.0.11 # use `latest-rootless/rootless/29.2.0-3.0.11-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:74ad041c4d6bbf200c48ed492eb255187f4e8a9df01cf4ff919b669ac53661fe
+      digest: sha256:069a8e2cae74f0a133aec4731be62db8fd1c2379fe529cdbc2a8c39073abd1b9
     # -- Set dind resources.
     resources:
       requests: null
@@ -591,7 +591,7 @@ runtime:
         registry: docker.io
         repository: tonistiigi/binfmt
         tag: qemu-v10.0.4
-        digest: sha256:30cc9a4d03765acac9be2ed0afc23af1ad018aed2c28ea4be8c2eb9afe03fbd1
+        digest: sha256:8f58e6214f4cc9dc83ce8f5acad1ece508eb6b20e696a8c1e9f274481982c541
       alpine:
         registry: docker.io
         repository: alpine
