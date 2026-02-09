@@ -505,9 +505,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.0.1
+      tag: 3.0.3
       pullPolicy: IfNotPresent
-      digest: sha256:2fba9505476a4bce45754e6e67d8c60a3122755c0663b28c8a6ae03ce0788142
+      digest: sha256:ab84c6eebc1a58544879e9c97ead8ea70dbf0bee01f7a0388e8b7e3408568992
     # -- Set container command.
     command:
       - 'node'
@@ -535,13 +535,13 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.6
-        digest: sha256:2c9e594e227a2b8dc5d0a3dcff577503d19741eda88c2abd847e5ed30f5cef0b
+        tag: 2.0.8
+        digest: sha256:976ab33f6995de16a8b4b91a0286badee367fb82c2b3219347614b3778acc9ba
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.5.5
-        digest: sha256:1011245a5a8917d7327d340b2fff4df72d14b5cda197a33a71e600511a20862b
+        tag: 1.5.6
+        digest: sha256:b12fe181f39aa1b41baa0d2324ac3b6e8d5db705a468ff35c2c73e94fdf70a32
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
@@ -560,8 +560,8 @@ runtime:
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
-        tag: 10.3.7
-        digest: sha256:95e98bc421c4c2df7062fce1021d4d861ead252b4a3128f8488ea9636a2f22c3
+        tag: 10.3.8
+        digest: sha256:73fca875568d05611e7d55cdcaebdfbaf1934fa26c6750f8193b559b46770aab
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
@@ -570,8 +570,8 @@ runtime:
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
-        tag: 1.3.12
-        digest: sha256:f31592c1b9955e49bee62c0cde0ce4d2b0ee3519f0c2e4adb1a08d7babde7164
+        tag: 1.3.13
+        digest: sha256:2dbf79a87f641507fc2111d4ff01e046954bca2f31e41ebc1e9cda96b1189780
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
@@ -585,8 +585,8 @@ runtime:
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
-        tag: 0.5.6
-        digest: sha256:5405a4476420e21d12d4a80b030d8737dcae5262a8b20c0ea018e8db710e9d2c
+        tag: 0.5.7
+        digest: sha256:788f80d061e3a26581c34a4605bc3fc64aafddf13cf8a119eeb2032711f3ba92
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
@@ -822,8 +822,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.60
-    digest: sha256:b634deb5694279f4c3627ff4738e718d98e37304b8b9ae2d71da688988d8b049
+    tag: 0.0.61
+    digest: sha256:f5819192c02f8f396482ec2759a9b72235f9e2107bf9f7a0c639bf36dde66d80
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
@@ -900,8 +900,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.29
-    digest: sha256:9bd94d083f2d605c57e5989fb9d29b2281cd536257a0082f2a48122779b108fc
+    tag: 1.3.30
+    digest: sha256:54a57ceebaa2af35bbc97b91d47896e98c90f3b31702d15f6d826ae025eb4736
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
