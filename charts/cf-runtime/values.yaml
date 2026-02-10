@@ -550,8 +550,8 @@ runtime:
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.23
-        digest: sha256:5bf734ffea8f3bb9cdafeabbdcff7f26a2db68552cf7a91d48a5eff2699a57a8
+        tag: 6.0.24
+        digest: sha256:199053e81fbba18363f4f7081b48b6da61b02d794ff8a914707710cd867bed96
       fs-ops:
         registry: quay.io
         repository: codefresh/fs-ops
@@ -900,8 +900,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.30
-    digest: sha256:54a57ceebaa2af35bbc97b91d47896e98c90f3b31702d15f6d826ae025eb4736
+    tag: 1.3.31
+    digest: sha256:638c8908f3339db7359600574adff7286b306638ea411c36b70f8ba388dd8df0
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
