@@ -742,8 +742,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.0.0-rootless
-        digest: sha256:6e0e29a87dc214e2d014b70c36796ada4ae6a045dc21ebf0bc081ee372c2cec6
+        tag: 1.0.2-rootless
+        digest: sha256:cec6d0ee83828ef49cf6d2c3df0a3231c344ce4dbd9cd3857955a9017b667be7
       rbac:
         enabled: true
       annotations: {}

@@ -35,6 +35,8 @@ annotations:
       description: 'Update "cf-app-proxy" to 0.0.61.'
     - kind: changed
       description: 'Update "cf-docker-pusher" to 6.0.24.'
+    - kind: changed
+      description: 'Update "cli" to 1.0.2.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:
