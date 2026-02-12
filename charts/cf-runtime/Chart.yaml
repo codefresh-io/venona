@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.0.2
+version: 10.0.3
 keywords:
   - codefresh
   - runner
@@ -18,25 +18,15 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Update "cf-debugger" to 1.3.13.'
+      description: 'Update "gcloud-builder" to 0.5.8.'
     - kind: changed
-      description: 'Update "engine" to 3.0.3.'
+      description: 'Update "dind" to 3.0.12.'
     - kind: changed
-      description: 'Update "cf-git-cloner" to 10.3.8.'
+      description: 'Update "cf-app-proxy" to 0.0.62.'
     - kind: changed
-      description: 'Update "cf-container-logger" to 2.0.8.'
+      description: 'Update "cf-docker-puller" to 8.0.26.'
     - kind: changed
-      description: 'Update "cf-k8s-agent" to 1.3.31.'
-    - kind: changed
-      description: 'Update "cf-docker-builder" to 1.5.6.'
-    - kind: changed
-      description: 'Update "gcloud-builder" to 0.5.7.'
-    - kind: changed
-      description: 'Update "cf-app-proxy" to 0.0.61.'
-    - kind: changed
-      description: 'Update "cf-docker-pusher" to 6.0.24.'
-    - kind: changed
-      description: 'Update "cli" to 1.0.2.'
+      description: 'Update "engine" to 3.0.5.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:
