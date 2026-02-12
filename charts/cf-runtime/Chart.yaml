@@ -27,6 +27,8 @@ annotations:
       description: 'Update "cf-docker-puller" to 8.0.26.'
     - kind: changed
       description: 'Update "engine" to 3.0.5.'
+    - kind: changed
+      description: 'Update "kubectl" to 1.35.1.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:
