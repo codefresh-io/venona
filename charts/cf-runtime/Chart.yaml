@@ -29,6 +29,10 @@ annotations:
       description: 'Update "engine" to 3.0.5.'
     - kind: changed
       description: 'Update "kubectl" to 1.35.1.'
+    - kind: changed
+      description: 'Update "fs-ops" to 1.2.12.'
+    - kind: changed
+      description: 'Update "cli" to 1.0.5.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
 dependencies:

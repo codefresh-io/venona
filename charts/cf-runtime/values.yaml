@@ -555,8 +555,8 @@ runtime:
       fs-ops:
         registry: quay.io
         repository: codefresh/fs-ops
-        tag: 1.2.11
-        digest: sha256:cade5ace4d05528dfd0cbdbb96bd99c6ccae79dfeebe14661a4b7808e2131dc9
+        tag: 1.2.12
+        digest: sha256:5f954c1f4618dbcebf1c3ef7b9185c6e1c9bb14b0aad3d2830cfeb715541bf47
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
@@ -742,8 +742,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.0.2-rootless
-        digest: sha256:cec6d0ee83828ef49cf6d2c3df0a3231c344ce4dbd9cd3857955a9017b667be7
+        tag: 1.0.5-rootless
+        digest: sha256:505489d0dae3a5275ea0aebda50bbef7488565848039e7340aa7a870deed4613
       rbac:
         enabled: true
       annotations: {}
