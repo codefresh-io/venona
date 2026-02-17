@@ -74,7 +74,7 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 2.0.7
+    tag: 2.0.8
     digest: sha256:96a8696ab418c3327e2e5fcf8ab08359b332167ef750b543ddd245ac4270153f
   # -- Init container
   init:
@@ -201,7 +201,7 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.4
+      tag: 1.30.5
       digest: sha256:5efbe4d9bbb2826a47bde55ae09f4760890dd9acf46a8e2a3a1c70809ba0dcdc
     podAnnotations: {}
     podSecurityContext:
@@ -530,7 +530,7 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: v5.0.1-1.6.0
+        tag: v5.0.1-1.6.1
         digest: sha256:235bd1f5c882cc1ad8eaf8ab34822f7cab4dc8282b998e8c5add5465224b4697
       container-logger:
         registry: quay.io
@@ -565,7 +565,7 @@ runtime:
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
-        tag: 17.0.2
+        tag: 17.0.3
         digest: sha256:35b461ca29b37d4012bc805c5b32f4c4f6a9947a4c57823dcec6692c16ca7b5a
       pipeline-debugger:
         registry: quay.io
@@ -575,7 +575,7 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.14.9
+        tag: 0.14.10
         digest: sha256:db9b68b68fdb2d4a548aee6e3797fe366bf9122692357911d8704943c907c170
       cosign-image-signer:
         registry: quay.io
