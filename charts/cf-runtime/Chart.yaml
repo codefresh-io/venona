@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Update "engine" to 3.1.0.'
+      description: 'Update "engine" to 3.2.0.'
     - kind: changed
       description: 'Update engine to support a brand new API token authorization for Bitbucket Cloud'
     - kind: changed
