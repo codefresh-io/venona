@@ -19,7 +19,7 @@ annotations:
   artifacthub.io/changes: |
     - kind: changed
       description: 'Update "engine" to 3.1.0.'
-    - kind: feat
+    - kind: changed
       description: 'Update engine to support a brand new API token authorization for Bitbucket Cloud'
     - kind: changed
       description: 'Update "pikolo" to 0.14.10.'
