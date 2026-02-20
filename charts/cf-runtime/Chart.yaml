@@ -24,8 +24,6 @@ annotations:
     - kind: changed
       description: 'Update "pikolo" to 0.14.10.'
     - kind: changed
-      description: 'Update "cf-deploy-kubernetes" to 17.0.3.'
-    - kind: changed
       description: 'Update "dind-volume-utils" to 1.30.5.'
     - kind: changed
       description: 'Update "compose" to 1.6.1.'
