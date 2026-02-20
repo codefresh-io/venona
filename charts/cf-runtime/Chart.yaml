@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.0.3
+version: 10.0.4
 keywords:
   - codefresh
   - runner
@@ -18,23 +18,23 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Update "gcloud-builder" to 0.5.8.'
+      description: 'Update "engine" to 3.2.0.'
     - kind: changed
-      description: 'Update "dind" to 3.0.12.'
+      description: 'Update engine to support a brand new API token authorization for Bitbucket Cloud'
     - kind: changed
-      description: 'Update "cf-app-proxy" to 0.0.62.'
+      description: 'Update "pikolo" to 0.14.10.'
     - kind: changed
-      description: 'Update "cf-docker-puller" to 8.0.26.'
+      description: 'Update "dind-volume-utils" to 1.30.5.'
     - kind: changed
-      description: 'Update "engine" to 3.0.5.'
-    - kind: changed
-      description: 'Update "kubectl" to 1.35.1.'
+      description: 'Update "compose" to 1.6.1.'
     - kind: changed
       description: 'Update "fs-ops" to 1.2.12.'
     - kind: changed
-      description: 'Update "cli" to 1.0.5.'
+      description: 'Update "venona" to 2.0.8.'
     - kind: security
       description: 'Fix various security vulnerabilities in multiple runtime components.'
+    - kind: security
+      description: 'Fix various security vulnerabilities in venona.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
