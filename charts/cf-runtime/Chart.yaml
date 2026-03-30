@@ -18,6 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
+
       description: 'Update "dind-volume-provisioner" to 2.0.3.'
 dependencies:
   - name: cf-common

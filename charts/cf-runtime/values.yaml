@@ -575,8 +575,8 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.14.10
-        digest: sha256:4b7cb2e58d8f314ed2edcc3c864a86372eceaba5df4e326babf122be57de5c1b
+        tag: 0.14.11
+        digest: sha256:fc1dc409ceef47ffdc5a8779851ac201c8c0322fea1b80d0cb6a0a99da9c4c6b
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
@@ -822,8 +822,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.63
-    digest: sha256:2829d340ed4481e01498007323445c763ebb2c2b7524d186fcbd22c1f0cdde97
+    tag: 0.0.64
+    digest: sha256:4654f39174912f87260376cf85d87b5fc2d0ab7b7004f479e388f6d1df853663
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
