@@ -151,8 +151,8 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 2.0.2
-    digest: sha256:8fb1fa7050e50bfa2576b97a8aad09374386cb83a8a60c2e7b2682e429413505
+    tag: 2.0.3
+    digest: sha256:e7455f8054c7938587edb366544d8ca5c00603c6856b6f53c5cb8afe68bc00c9
   # -- Add additional env vars
   env: {}
   # E.g.
