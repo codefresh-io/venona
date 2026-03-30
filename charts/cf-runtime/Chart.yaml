@@ -18,8 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-
       description: 'Update "dind-volume-provisioner" to 2.0.3.'
+    - kind: changed
+      description: 'Update "venona" to 2.0.9.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

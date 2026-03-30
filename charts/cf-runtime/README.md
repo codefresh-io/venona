@@ -1297,7 +1297,7 @@ Install the Helm chart
 | runner.affinity | object | `{}` | Set affinity |
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{}` | Add additional env vars |
-| runner.image | object | `{"digest":"sha256:0a7c3f28a2ab9a8a932c2fb62a1fe457d0fce97f57318567a1d656964bd8519f","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.8"}` | Set image |
+| runner.image | object | `{"digest":"sha256:c4cc6b898c17d7cc0e7049226fb554a35a38eece3eb391c33fdf3a0dda7735f5","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.9"}` | Set image |
 | runner.init | object | `{"image":{"digest":"sha256:583ca6ed86413d2bff4f1e435cd15fb06e2cfd035ac600a92cc2ef243ba76d8e","registry":"quay.io","repository":"codefresh/cli","tag":"1.0.6-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
