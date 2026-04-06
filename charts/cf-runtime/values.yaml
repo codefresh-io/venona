@@ -742,8 +742,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.0.6-rootless
-        digest: sha256:583ca6ed86413d2bff4f1e435cd15fb06e2cfd035ac600a92cc2ef243ba76d8e
+        tag: 1.1.2-rootless
+        digest: sha256:07c0cdb7e901c03cc81e232ba02a1df47c431f73e4423443723d55d3ed418a44
       rbac:
         enabled: true
       annotations: {}
@@ -764,8 +764,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.0.6-rootless
-        digest: sha256:583ca6ed86413d2bff4f1e435cd15fb06e2cfd035ac600a92cc2ef243ba76d8e
+        tag: 1.1.2-rootless
+        digest: sha256:07c0cdb7e901c03cc81e232ba02a1df47c431f73e4423443723d55d3ed418a44
       affinity: {}
       nodeSelector: {}
       podSecurityContext: {}
