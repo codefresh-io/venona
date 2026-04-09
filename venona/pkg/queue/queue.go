@@ -183,7 +183,7 @@ func (wfq *wfQueueImpl) handleWorkflow(ctx context.Context, wf *workflow.Workflo
 		"time in runner", inRunner,
 		"processing time", processed,
 	)
-	metrics.ObserveWorkflowMetrics(wf.Type, sinceCreation, inRunner, processed)
+	metrics.ObserveWorkflowMetrics(wf.Type, wf.Metadata.PipelineId, wf.Metadata.PipelineName, sinceCreation, inRunner, processed)
 }
 
 func (wfq *wfQueueImpl) reportTaskStatus(ctx context.Context, taskDef task.Task, err error) {

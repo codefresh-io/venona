@@ -382,7 +382,7 @@ func (a *Agent) executeAgentTask(ctx context.Context, t *task.Task) error {
 		"time in runner", inRunner,
 		"processing time", processed,
 	)
-	metrics.ObserveAgentTaskMetrics(spec.Type, sinceCreation, inRunner, processed)
+	metrics.ObserveAgentTaskMetrics(spec.Type, t.Metadata.PipelineId, t.Metadata.PipelineName, sinceCreation, inRunner, processed)
 	return err
 }
 

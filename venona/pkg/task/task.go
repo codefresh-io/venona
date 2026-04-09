@@ -62,6 +62,8 @@ type (
 		CreatedAt             string `json:"createdAt"`
 		ReName                string `json:"reName"`
 		WorkflowId            string `json:"workflowId"`
+		PipelineId            string `json:"pipelineId"`
+		PipelineName          string `json:"pipelineName"`
 		CurrentStatusRevision int    `json:"currentStatusRevision"`
 		ShouldReportStatus    bool   `json:"shouldReportStatus"`
 	}

@@ -15,7 +15,9 @@
 package metrics
 
 import (
+	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/codefresh-io/go/venona/pkg/task"
@@ -30,8 +32,11 @@ const (
 )
 
 var (
-	engineRegex = regexp.MustCompile(`engine-.*$`)
-	retryRegex  = regexp.MustCompile(`engine-.*-retry-(\d+)$`)
+	includePipelineName = os.Getenv("METRICS_INCLUDE_PIPELINE_NAME") != ""
+
+	engineRegex           = regexp.MustCompile(`engine-.*$`)
+	retryRegex            = regexp.MustCompile(`engine-.*-retry-(\d+)$`)
+	sanitizeLabelValueReg = regexp.MustCompile(`[^a-z0-9_]+`)
 
 	agentTasks = prometheus.NewCounter(prometheus.CounterOpts{
 		Namespace: runnerNamespace,
@@ -73,28 +78,28 @@ var (
 		Name:      "duration_since_creation_sec",
 		Help:      "Time since the creation of each workflow batch in the platform",
 		Buckets:   []float64{0.5, 1, 1.5, 2, 3, 6, 12, 30, 60},
-	}, []string{"workflow_type"})
+	}, wfLabelNames())
 	handlingTimeInRunner = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: runnerNamespace,
 		Subsystem: wfSubsystem,
 		Name:      "duration_in_runner_sec",
 		Help:      "Time each workflow batch has spent in the runner",
 		Buckets:   []float64{0.5, 1, 1.5, 2, 3, 6, 12, 30, 60},
-	}, []string{"workflow_type"})
+	}, wfLabelNames())
 	agentProcessingTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: runnerNamespace,
 		Subsystem: agentSubsystem,
 		Name:      "processing_sec",
 		Help:      "Net time to process an agent task in the runner",
 		Buckets:   []float64{0.25, 0.5, 1, 1.5, 2, 3, 6},
-	}, []string{"agent_type"})
+	}, agentLabelNames())
 	wfProcessingTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: runnerNamespace,
 		Subsystem: wfSubsystem,
 		Name:      "processing_sec",
 		Help:      "Net time to process each workflow batch in the runner",
 		Buckets:   []float64{0.5, 1, 1.5, 2, 3, 6, 12},
-	}, []string{"workflow_type"})
+	}, wfLabelNames())
 	k8sProcessingTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: runnerNamespace,
 		Name:      "k8s_processing_sec",
@@ -102,6 +107,32 @@ var (
 		Buckets:   []float64{0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 6, 12},
 	}, []string{"k8s_type"})
 )
+
+func wfLabelNames() []string {
+	if includePipelineName {
+		return []string{"workflow_type", "pipeline_id", "pipeline_name"}
+	}
+	return []string{"workflow_type"}
+}
+
+func agentLabelNames() []string {
+	if includePipelineName {
+		return []string{"agent_type", "pipeline_id", "pipeline_name"}
+	}
+	return []string{"agent_type"}
+}
+
+func sanitizeLabelValue(s string) string {
+	return strings.Trim(sanitizeLabelValueReg.ReplaceAllString(strings.ToLower(s), "_"), "_")
+}
+
+func withPipelineLabels(labels prometheus.Labels, pipelineId, pipelineName string) prometheus.Labels {
+	if includePipelineName {
+		labels["pipeline_id"] = pipelineId
+		labels["pipeline_name"] = sanitizeLabelValue(pipelineName)
+	}
+	return labels
+}
 
 // Register : New creates a new Metrics instnace
 func Register(reg *prometheus.Registry) {
@@ -153,15 +184,16 @@ func IncGetTasksRequests() {
 	getTasksRequests.Inc()
 }
 
-func ObserveAgentTaskMetrics(agentType string, sinceCreation, inRunner, processed time.Duration) {
-	labels := prometheus.Labels{"workflow_type": agentType}
-	handlingTimeSinceCreation.With(labels).Observe(sinceCreation.Seconds())
-	handlingTimeInRunner.With(labels).Observe(inRunner.Seconds())
-	agentProcessingTime.With(prometheus.Labels{"agent_type": agentType}).Observe(processed.Seconds())
+func ObserveAgentTaskMetrics(agentType, pipelineId, pipelineName string, sinceCreation, inRunner, processed time.Duration) {
+	wfLabels := withPipelineLabels(prometheus.Labels{"workflow_type": agentType}, pipelineId, pipelineName)
+	handlingTimeSinceCreation.With(wfLabels).Observe(sinceCreation.Seconds())
+	handlingTimeInRunner.With(wfLabels).Observe(inRunner.Seconds())
+	agentLabels := withPipelineLabels(prometheus.Labels{"agent_type": agentType}, pipelineId, pipelineName)
+	agentProcessingTime.With(agentLabels).Observe(processed.Seconds())
 }
 
-func ObserveWorkflowMetrics(wfType workflow.Type, sinceCreation, inRunner, processed time.Duration) {
-	labels := prometheus.Labels{"workflow_type": string(wfType)}
+func ObserveWorkflowMetrics(wfType workflow.Type, pipelineId, pipelineName string, sinceCreation, inRunner, processed time.Duration) {
+	labels := withPipelineLabels(prometheus.Labels{"workflow_type": string(wfType)}, pipelineId, pipelineName)
 	handlingTimeSinceCreation.With(labels).Observe(sinceCreation.Seconds())
 	handlingTimeInRunner.With(labels).Observe(inRunner.Seconds())
 	wfProcessingTime.With(labels).Observe(processed.Seconds())
