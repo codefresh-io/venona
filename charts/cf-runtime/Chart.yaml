@@ -27,6 +27,8 @@ annotations:
       description: 'update "codefresh/engine" to 3.2.4'
     - kind: fixed
       description: 'update "dind-volume-utils" to 1.30.7'
+    - kind: fixed
+      description: 'update "compose" to v5.1.1-1.6.2'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
