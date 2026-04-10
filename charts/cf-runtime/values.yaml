@@ -81,8 +81,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 1.1.2-rootless
-      digest: sha256:07c0cdb7e901c03cc81e232ba02a1df47c431f73e4423443723d55d3ed418a44
+      tag: 1.1.3-rootless
+      digest: sha256:f37f1c9a1d9befd5928ee0ff2c2f97472557bdd2c103b3f6bffae2b11ba5acfb
     resources:
       limits:
         memory: 512Mi
@@ -201,8 +201,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.5
-      digest: sha256:4a885d379cc94444468125be15ec40a9a24cf38dbfc2e2d472dba9ef4b7ff0b8
+      tag: 1.30.7
+      digest: sha256:0ad9a47d04b9e77308ddb18f452159990ff86770b27fd9338d4fa6d5fbac1682
     podAnnotations: {}
     podSecurityContext:
       enabled: false
@@ -401,9 +401,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 29.2.0-3.0.12 # use `latest-rootless/rootless/29.2.0-3.0.11-rootless` tags for rootless-dind
+      tag: 29.4.0-3.0.13 # use `latest-rootless/rootless/29.2.0-3.0.11-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:81fdbe5a7e048484007126d961772b4ab31889c4139176c1af774c5f709d739e
+      digest: sha256:6514b6d5f23cb12677914bb153364957094c7ec07e1dffa18d5a51edc7112968
     # -- Set dind resources.
     resources:
       requests: null
@@ -505,9 +505,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.2.3
+      tag: 3.2.4
       pullPolicy: IfNotPresent
-      digest: sha256:d426eb8ff28b8dd6fe3edf2770b55051f511358c5ec8207aeb4d999646ff583e
+      digest: sha256:c2157e7fde66448222a9c1cc9fb336a89d9e77de8a131f21e6313c9d0dd0c912
     # -- Set container command.
     command:
       - 'node'
@@ -530,8 +530,8 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: v5.0.1-1.6.1
-        digest: sha256:420add29b84665e5c03f51a065e16761253a7c1fe349f884c361e9a68c2c6d15
+        tag: v5.1.1-1.6.2
+        digest: sha256:af852ffa311163c614b340294547c72de9a275ef7350610fddb9ffeef15f754f
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
@@ -560,8 +560,8 @@ runtime:
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
-        tag: 10.3.9
-        digest: sha256:ce057e3147c6abc02d927450c723a807b6b0747ba33521d8845c5a6cfa150f97
+        tag: 10.3.10
+        digest: sha256:7270f5c451b72fce34d358a1a7b377c43bc9a28959f3771d5dd666959fb18177
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
@@ -742,8 +742,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.1.2-rootless
-        digest: sha256:07c0cdb7e901c03cc81e232ba02a1df47c431f73e4423443723d55d3ed418a44
+        tag: 1.1.3-rootless
+        digest: sha256:f37f1c9a1d9befd5928ee0ff2c2f97472557bdd2c103b3f6bffae2b11ba5acfb
       rbac:
         enabled: true
       annotations: {}
@@ -764,8 +764,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.1.2-rootless
-        digest: sha256:07c0cdb7e901c03cc81e232ba02a1df47c431f73e4423443723d55d3ed418a44
+        tag: 1.1.3-rootless
+        digest: sha256:f37f1c9a1d9befd5928ee0ff2c2f97472557bdd2c103b3f6bffae2b11ba5acfb
       affinity: {}
       nodeSelector: {}
       podSecurityContext: {}
