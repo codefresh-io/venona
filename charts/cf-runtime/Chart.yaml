@@ -21,6 +21,8 @@ annotations:
       description: 'update "cf-cosign-image-signer" to 3.0.6-cf.1.'
     - kind: security
       description: 'fix various security vulnerabilities in cf-cosign-image-signer.'
+    - kind: security
+      description: 'update "cf-container-logger" to 2.0.10'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
