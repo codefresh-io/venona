@@ -222,7 +222,7 @@ volumeProvisioner:
         registry: docker.io
         repository: alpine
         tag: 3.23
-        digest: sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+        digest: sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
       resources: {}
       securityContext:
         runAsUser: 0 # auto
@@ -495,7 +495,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: 3.23
-        digest: sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+        digest: sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
       resources: {}
       securityContext:
         runAsUser: 0 # auto
@@ -535,8 +535,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.9
-        digest: sha256:3d493cfab4b4a04668cc7842fb5a5cd321fcbf80d167837b5c9d7f2569da0594
+        tag: 2.0.10
+        digest: sha256:d5c028973cdb9ec7250014a2ced1ed31106fc5c1010207a7d08cd7099058aaf2
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -580,8 +580,8 @@ runtime:
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 2.5.2-cf.4
-        digest: sha256:17abeb293e5f0e97d073f7166f880cde60d89a38f1eb057a1e319e5b09806818
+        tag: 3.0.6-cf.1
+        digest: sha256:85ce347ad7b11a7e324ca64e38b0701bc6fb739bfcbb67a3b4657ef36939e623
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
