@@ -900,8 +900,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.33
-    digest: sha256:12795edf8857b58dc75e3e55a6687bf450cb6aba09575529f9c5cc2a0b7b8bce
+    tag: 1.3.34
+    digest: sha256:3bea972f87f447b9872c1a309f834f3a6bb9651149b259cd7787e44f574fd574
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
