@@ -505,9 +505,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.2.4
+      tag: 3.2.5
       pullPolicy: IfNotPresent
-      digest: sha256:c2157e7fde66448222a9c1cc9fb336a89d9e77de8a131f21e6313c9d0dd0c912
+      digest: sha256:c264a5f83156cbca2124930286bb584be09c060cd1b9739d6d0e0ebf0aa94065
     # -- Set container command.
     command:
       - 'node'
@@ -822,8 +822,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.64
-    digest: sha256:4654f39174912f87260376cf85d87b5fc2d0ab7b7004f479e388f6d1df853663
+    tag: 0.0.65
+    digest: sha256:697c71d8b27b475b82dcc5068c8201857855dcfdd3544ed0d6f88e794f2656c3
   # -- Add additional env vars
   env: {}
   # Set app-proxy ingress parameters
