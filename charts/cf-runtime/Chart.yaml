@@ -25,6 +25,8 @@ annotations:
       description: 'update "dind" to 29.4.1-3.0.14'
     - kind: security
       description: 'fix various security vulnerabilities in cf-docker-builder, compose and dind.'
+    - kind: changed
+      description: 'update "tonistiigi/binfmt" to qemu-v10.2.1'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts

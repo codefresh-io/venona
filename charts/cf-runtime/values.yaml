@@ -590,8 +590,8 @@ runtime:
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
-        tag: qemu-v10.0.4
-        digest: sha256:8f58e6214f4cc9dc83ce8f5acad1ece508eb6b20e696a8c1e9f274481982c541
+        tag: qemu-v10.2.1
+        digest: sha256:d3b963f787999e6c0219a48dba02978769286ff61a5f4d26245cb6a6e5567ea3
       alpine:
         registry: docker.io
         repository: alpine
