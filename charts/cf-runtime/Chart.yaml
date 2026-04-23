@@ -18,13 +18,13 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
+      description: 'update "cf-docker-builder" to v1.6.0'
+    - kind: changed
       description: 'update "compose" to v5.1.3-1.6.3'
-    - kind: security
-      description: 'fix various security vulnerabilities in compose.'
     - kind: changed
       description: 'update "dind" to 29.4.1-3.0.14'
     - kind: security
-      description: 'fix various security vulnerabilities in dind.'
+      description: 'fix various security vulnerabilities in cf-docker-builder, compose and dind.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
