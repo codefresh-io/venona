@@ -19,6 +19,10 @@ annotations:
   artifacthub.io/changes: |
     - kind: security
       description: 'update "k8s-agent" to 1.3.34'
+    - kind: security
+      description: 'update "engine" to 3.2.5'
+    - kind: security
+      description: 'update "app-proxy" to 0.0.65'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
