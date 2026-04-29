@@ -24,7 +24,7 @@ annotations:
     - kind: changed
       description: 'update "docker-pusher" to 6.0.25'
     - kind: changed
-      description: 'update "template-engine" to 0.15.0'    
+      description: 'update "template-engine" to 0.15.0'
     - kind: security
       description: 'fix various security vulnerabilities in container-logger, docker-puller, docker-pusher and template-engine'
 dependencies:
