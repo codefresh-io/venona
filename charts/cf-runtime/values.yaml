@@ -535,8 +535,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.10
-        digest: sha256:d5c028973cdb9ec7250014a2ced1ed31106fc5c1010207a7d08cd7099058aaf2
+        tag: 2.0.12
+        digest: sha256:d666502f8bb95a00a1a598dd33ccdd10927ae73d32a5eed278d476bb1c7140a4
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -545,13 +545,13 @@ runtime:
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.26
-        digest: sha256:a518ca194d85d5f254954f201e33f6cd4cd1a82d552fce8cdceabbaf12786cb3
+        tag: 8.0.27
+        digest: sha256:818773818053553505afbaf109bf67f1b22bdb80307e155d27d4f06eab3c3246
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.24
-        digest: sha256:199053e81fbba18363f4f7081b48b6da61b02d794ff8a914707710cd867bed96
+        tag: 6.0.25
+        digest: sha256:711ff93efa44135195466b3338ece12e1322e68dc742fb1e23e75ad0701a3696
       fs-ops:
         registry: quay.io
         repository: codefresh/fs-ops
@@ -575,8 +575,8 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.14.11
-        digest: sha256:fc1dc409ceef47ffdc5a8779851ac201c8c0322fea1b80d0cb6a0a99da9c4c6b
+        tag: 0.15.0
+        digest: sha256:10f61a9c9eac46d4db982b42f9af1e21a3bcd9f283943a9025ff50f2308a1861
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
