@@ -1,0 +1,14 @@
+venona/build/Dockerfile.tester
+  h_e5037b46dfdc11 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "e60698ad8af67abb128cc09f08b3ea74b385521a",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
