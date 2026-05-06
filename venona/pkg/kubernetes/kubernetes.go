@@ -99,7 +99,7 @@ func NewK8sError(err error, operation K8sOperation) error {
 		k8serrors.IsUnsupportedMediaType(err) ||
 		k8serrors.IsUnauthorized(err) ||
 		(operation == TypeK8sCreateResource && k8serrors.IsAlreadyExists(err)) ||
-		(operation == TypeK8sDeleteResource && (k8serrors.IsNotFound(err) || k8serrors.IsGone(err)))
+		(operation == TypeK8sDeleteResource && (k8serrors.IsNotFound(err) || k8serrors.IsGone(err) || k8serrors.IsResourceExpired(err)))
 
 	return &K8sError{
 		error:       err,
