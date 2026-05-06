@@ -263,7 +263,7 @@ func Test_NewK8sError_CreateResource(t *testing.T) {
 func Test_NewK8sError_DeleteResource(t *testing.T) {
 	nonRetriableErrors := []k8serrors.StatusError{
 		*k8serrors.NewNotFound(v1.Resource("pods"), "some-pod"),
-		*k8serrors.NewGone("reason"),
+		*k8serrors.NewResourceExpired("reason"),
 	}
 
 	for _, e := range nonRetriableErrors {
