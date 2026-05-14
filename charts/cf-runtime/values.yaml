@@ -201,8 +201,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.7
-      digest: sha256:0ad9a47d04b9e77308ddb18f452159990ff86770b27fd9338d4fa6d5fbac1682
+      tag: 1.30.8
+      digest: sha256:0e733b6ae2d619b85700d92ee5614b98fa30f79edf42c2a1be7c98ae3cd07e74
     podAnnotations: {}
     podSecurityContext:
       enabled: false
@@ -565,8 +565,8 @@ runtime:
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
-        tag: 17.0.4
-        digest: sha256:beb578bbe5bbf66c034c51937c909d16faf473225815ce416188176d363ec15d
+        tag: 18.0.0
+        digest: sha256:1fb0d3f5be3ece52c7ad47ebdb60533854c8a647f761c7ecc0d29e0ee441e14f
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
