@@ -1271,7 +1271,7 @@ Install the Helm chart
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.image | object | `{"digest":"sha256:3bea972f87f447b9872c1a309f834f3a6bb9651149b259cd7787e44f574fd574","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.34"}` | Set image |
+| monitor.image | object | `{"digest":"sha256:730c979cd8d47ccc45d9590985654acb1a1edfb24fcf410cc890c25de0d8c380","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.35"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
 | monitor.podSecurityContext | object | `{}` |  |

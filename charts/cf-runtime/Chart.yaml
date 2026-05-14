@@ -18,6 +18,8 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
+      description: 'update "cf-k8s-agent" to 1.3.035'
+    - kind: changed
       description: 'update "cf-deploy-kubernetes" to 18.0.0'
     - kind: added
       description: "Support k8s 1.33, 1.33, 1.35 in \"deploy\" step."
