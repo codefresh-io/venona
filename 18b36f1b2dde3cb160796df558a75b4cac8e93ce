@@ -1,0 +1,14 @@
+venona/Makefile
+  h_e5037b46dfdc11 88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "18b36f1b2dde3cb160796df558a75b4cac8e93ce",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
