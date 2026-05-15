@@ -580,8 +580,8 @@ runtime:
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 3.0.6-cf.1
-        digest: sha256:85ce347ad7b11a7e324ca64e38b0701bc6fb739bfcbb67a3b4657ef36939e623
+        tag: 3.0.6-cf.2
+        digest: sha256:ab2c3b058d47db9725f8a5d921a36fd056cccffbb123c87a9e621ebe090af3b6
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder

@@ -22,14 +22,16 @@ annotations:
     - kind: changed
       description: 'update "cf-deploy-kubernetes" to 18.0.0'
     - kind: added
-      description: "Support k8s 1.33, 1.33, 1.35 in \"deploy\" step."
+      description: "add support for k8s 1.35 in \"deploy\" step"
     - kind: deprecated
-      description: "Remove support for k8s older than 1.33 in \"deploy\" step."
+      description: "remove support for k8s 1.32 in \"deploy\" step"
       links:
         - name: Codefresh Docs - Deploy
           url: https://codefresh.io/docs/docs/pipelines/steps/deploy/
     - kind: changed
       description: 'update "dind-volume-utils" to 1.30.8'
+    - kind: changed
+      description: 'update "cosign-image-signer" to 3.0.6-cf.2'
     - kind: security
       description: 'fix various security vulnerabilities in different runtime components'
 dependencies:
