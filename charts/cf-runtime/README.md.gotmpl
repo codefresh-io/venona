@@ -349,7 +349,7 @@ runtime:
 
 ### To 10.1.x
 
-* **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for Kubernetes versions older than 1.33. Supported versions are: 1.35, 1.34, 1.33.
+* **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for 1.32 Kubernetes version. Supported versions are: 1.35, 1.34, 1.33.
 
 ## Architecture
 
