@@ -22,6 +22,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 8.x](#to-8-x)
   - [To 8.2.x](#to-8-2-x)
   - [To 9.x](#to-9-x)
+  - [To 10.1.x](#to-10-1-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [Runtime spec synchronization](#runtime-spec-synchronization)
@@ -345,6 +346,10 @@ runtime:
 * **Removed**: Legacy Prometheus metrics emitted by the `engine` component and controlled by `METRICS_PROMETHEUS_ENABLED` and `METRICS_PROMETHEUS_ENABLE_LEGACY_METRICS` environment variables are dropped. Use modern OpenTelemetry-based metrics instead. See [To 8.2.x](#to-8-2-x) for more details.
 
 * **Removed**: OTel metric `codefresh.classic.build.deprecated_images.pulled` emitted by the `engine` component is dropped.
+
+### To 10.1.x
+
+* **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for Kubernetes versions older than 1.33. Supported versions are: 1.35, 1.34, 1.33.
 
 ## Architecture
 
