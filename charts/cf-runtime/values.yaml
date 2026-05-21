@@ -52,7 +52,6 @@ global:
   # agentTokenSecretKeyRef:
   #   name: my-codefresh-agent-secret
   #   key: codefresh-agent-token
-
 # DEPRECATED -- Use `.Values.global.imageRegistry` instead
 dockerRegistry: ""
 # DEPRECATED -- Use `.Values.runtime` instead
