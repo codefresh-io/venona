@@ -60,6 +60,7 @@ tests:
                 LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
                 METRICS_SCRAPE_TIMEOUT_MS: '0'
+                NEW_RELIC_ENABLED: 'false'
                 OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
                 OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
                 OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
