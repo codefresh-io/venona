@@ -52,6 +52,7 @@ global:
   # agentTokenSecretKeyRef:
   #   name: my-codefresh-agent-secret
   #   key: codefresh-agent-token
+
 # DEPRECATED -- Use `.Values.global.imageRegistry` instead
 dockerRegistry: ""
 # DEPRECATED -- Use `.Values.runtime` instead
@@ -91,7 +92,9 @@ runner:
         memory: 256Mi
         cpu: '0.2'
   # -- Add additional env vars
-  env: {}
+  env:
+    # -- DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead.
+    NEW_RELIC_ENABLED: "false"
   # E.g.
   # env:
   #   WORKFLOW_CONCURRENCY: 50 # The number of workflow creation and termination tasks the Runner can handle in parallel. Defaults to 50
@@ -686,6 +689,8 @@ runtime:
       FORCE_COMPOSE_SERIAL_PULL: false
       # -- Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.DEFAULT_QEMU_IMAGE value
       TRUSTED_QEMU_IMAGES: 'tonistiigi/binfmt'
+      # -- DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead.
+      NEW_RELIC_ENABLED: "false"
     # -- Set workflow limits.
     workflowLimits:
       # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
