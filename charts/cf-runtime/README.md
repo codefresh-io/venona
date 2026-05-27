@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.2.0](https://img.shields.io/badge/Version-10.2.0-informational?style=flat-square)
+![Version: 10.2.1](https://img.shields.io/badge/Version-10.2.1-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1203,7 +1203,7 @@ Install the Helm chart
 | appProxy.affinity | object | `{}` | Set affinity |
 | appProxy.enabled | bool | `false` | Enable app-proxy |
 | appProxy.env | object | `{}` | Add additional env vars |
-| appProxy.image | object | `{"digest":"sha256:697c71d8b27b475b82dcc5068c8201857855dcfdd3544ed0d6f88e794f2656c3","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.65"}` | Set image |
+| appProxy.image | object | `{"digest":"sha256:5f3dc36911b50b55d9224450842d8e35a23789dc2902b2d66c8cf99b946d3d3b","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.66"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
