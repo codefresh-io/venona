@@ -1,0 +1,14 @@
+venona/pkg/kubernetes/kubernetes_test.go
+  h_e5037b46dfdc11 266
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "ddb281ef50e173c0b3d20050e2d723568894d10d",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
