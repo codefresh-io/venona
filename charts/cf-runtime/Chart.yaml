@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.2.1
+version: 10.2.2
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,13 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'bump cf-app-proxy to version 0.0.66'
+      description: 'update "cf-container-logger" to version 2.0.16'
+    - kind: changed
+      description: 'update "engine" to version 3.2.9'
+    - kind: changed
+      description: 'update "cosign-image-signer" to version 3.0.6-cf.3'
+    - kind: changed
+      description: 'update "gcloud-builder" to version 0.5.11'
     - kind: security
       description: 'fix various security vulnerabilities in different runtime components'
 dependencies:
