@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.2.3](https://img.shields.io/badge/Version-10.2.3-informational?style=flat-square)
+![Version: 10.3.0](https://img.shields.io/badge/Version-10.3.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1202,8 +1202,29 @@ Install the Helm chart
 |-----|------|---------|-------------|
 | appProxy.affinity | object | `{}` | Set affinity |
 | appProxy.enabled | bool | `false` | Enable app-proxy |
-| appProxy.env | object | `{}` | Add additional env vars |
-| appProxy.image | object | `{"digest":"sha256:5f3dc36911b50b55d9224450842d8e35a23789dc2902b2d66c8cf99b946d3d3b","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.0.66"}` | Set image |
+| appProxy.env | object | `{"CF_TELEMETRY_LOGS_LEVEL":"debug","CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION":"false","CF_TELEMETRY_OTEL_ENABLE":"true","CF_TELEMETRY_PROMETHEUS_ENABLE":"false","CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS":"false","CF_TELEMETRY_PROMETHEUS_HOST":"0.0.0.0","CF_TELEMETRY_PROMETHEUS_PORT":"9100","CF_TELEMETRY_PYROSCOPE_ENABLE":"false","OTEL_EXPORTER_OTLP_COMPRESSION":"gzip","OTEL_EXPORTER_OTLP_ENDPOINT":"http://localhost:4317","OTEL_EXPORTER_OTLP_PROTOCOL":"grpc","OTEL_EXPORTER_PROMETHEUS_HOST":"0.0.0.0","OTEL_EXPORTER_PROMETHEUS_PORT":"9464","OTEL_LOGS_EXPORTER":"none","OTEL_METRICS_EXPORTER":"otlp","OTEL_METRIC_EXPORT_INTERVAL":"10000","OTEL_METRIC_EXPORT_TIMEOUT":"5000","OTEL_SEMCONV_STABILITY_OPT_IN":"http","OTEL_TRACES_EXPORTER":"none","OTEL_TRACES_SAMPLER":"parentbased_always_on","PYROSCOPE_SERVER_ADDRESS":""}` | Add additional env vars |
+| appProxy.env.CF_TELEMETRY_LOGS_LEVEL | string | `"debug"` | Level of logging for app-proxy |
+| appProxy.env.CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION | string | `"false"` | Enable OTel HTTP instrumentation. Make sure to sanitize `url.full` and `url.query` span attributes on collector before enabling this flag, as it may contain sensitive information. |
+| appProxy.env.CF_TELEMETRY_OTEL_ENABLE | string | `"true"` | Enable OpenTelemetry signals (logs, metrics, traces) |
+| appProxy.env.CF_TELEMETRY_PROMETHEUS_ENABLE | string | `"false"` | Enable Prometheus server (used solely to emit process metrics, if CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS=true) If enabled, make sure to disable legacy metrics by specifying METRICS_PROMETHEUS_ENABLED=false. |
+| appProxy.env.CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS | string | `"false"` | Enable collecting process metrics |
+| appProxy.env.CF_TELEMETRY_PROMETHEUS_HOST | string | `"0.0.0.0"` | Host for Prometheus metrics server |
+| appProxy.env.CF_TELEMETRY_PROMETHEUS_PORT | string | `"9100"` | Port for Prometheus metrics server |
+| appProxy.env.CF_TELEMETRY_PYROSCOPE_ENABLE | string | `"false"` | Enable Pyroscope profiling. If enabled, the Pyroscope server address must be set in PYROSCOPE_SERVER_ADDRESS. |
+| appProxy.env.OTEL_EXPORTER_OTLP_COMPRESSION | string | `"gzip"` | Specifies the compression algorithm to be used for all telemetry data. Ref: https://opentelemetry.io/docs/specs/otel/protocol/exporter/ |
+| appProxy.env.OTEL_EXPORTER_OTLP_ENDPOINT | string | `"http://localhost:4317"` | Base endpoint URL for all OpenTelemetry signals. Ref: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/ |
+| appProxy.env.OTEL_EXPORTER_OTLP_PROTOCOL | string | `"grpc"` | Specifies the OTLP transport protocol to be used for all telemetry data. Ref: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/ |
+| appProxy.env.OTEL_EXPORTER_PROMETHEUS_HOST | string | `"0.0.0.0"` | Host used by the Prometheus OTel metrics exporter if OTEL_METRICS_EXPORTER=prometheus |
+| appProxy.env.OTEL_EXPORTER_PROMETHEUS_PORT | string | `"9464"` | Port used by the Prometheus OTel metrics exporter if OTEL_METRICS_EXPORTER=prometheus |
+| appProxy.env.OTEL_LOGS_EXPORTER | string | `"none"` | OTel Logs exporter to be used. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
+| appProxy.env.OTEL_METRICS_EXPORTER | string | `"otlp"` | OTel metrics exporter to be used. Set to "prometheus" to export metrics in Prometheus format. If set to "prometheus", it's recommended to set METRICS_SCRAPE_TIMEOUT_MS=4×scrape_interval. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
+| appProxy.env.OTEL_METRIC_EXPORT_INTERVAL | string | `"10000"` | The time interval (in milliseconds) between the start of two export attempts for push metric exporters, such as "otlp". Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
+| appProxy.env.OTEL_METRIC_EXPORT_TIMEOUT | string | `"5000"` | Maximum allowed time (in milliseconds) to export data for push metric exporters, such as "otlp". Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
+| appProxy.env.OTEL_SEMCONV_STABILITY_OPT_IN | string | `"http"` | Emit the stable HTTP and networking OTel conventions if CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION=true. |
+| appProxy.env.OTEL_TRACES_EXPORTER | string | `"none"` | OTel traces exporter to be used. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
+| appProxy.env.OTEL_TRACES_SAMPLER | string | `"parentbased_always_on"` | OTel sampler to be used for traces. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
+| appProxy.env.PYROSCOPE_SERVER_ADDRESS | string | `""` | Pyroscope server address |
+| appProxy.image | object | `{"digest":"sha256:73fa5a1cf956545dd057fc962f0b4c09102029ac5907467901d9299475df2adb","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.0"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
@@ -1425,6 +1446,7 @@ Install the Helm chart
 | runtime.runtimeExtends | list | `["system/default/hybrid/k8s_low_limits"]` | Set parent runtime to inherit. Should not be changes. Parent runtime is controlled from Codefresh side. |
 | runtime.serviceAccount | object | `{"annotations":{},"create":true}` | Set annotation on engine Service Account Ref: https://codefresh.io/docs/docs/administration/codefresh-runner/#injecting-aws-arn-roles-into-the-cluster |
 | serviceMonitor | object | See below | Add serviceMonitor |
+| serviceMonitor.app-proxy.enabled | bool | `false` | Enable service monitor for app-proxy pods |
 | serviceMonitor.main.enabled | bool | `false` | Enable service monitor for dind pods |
 | storage.azuredisk.cachingMode | string | `"None"` |  |
 | storage.azuredisk.skuName | string | `"Premium_LRS"` | Set storage type (`Premium_LRS`) |

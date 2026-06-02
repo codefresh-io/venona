@@ -12,6 +12,14 @@ spec:
     port: 80
     protocol: TCP
     targetPort: 3000
+  - name: prom-metrics
+    port: 9100
+    targetPort: 9100
+    protocol: TCP
+  - name: otel-metrics
+    port: 9464
+    targetPort: 9464
+    protocol: TCP
   selector:
     {{- include "app-proxy.selectorLabels" . | nindent 4 }}
 {{- end -}}
