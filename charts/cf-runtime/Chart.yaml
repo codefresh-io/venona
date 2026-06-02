@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.2.2
+version: 10.2.3
 keywords:
   - codefresh
   - runner
@@ -26,7 +26,7 @@ annotations:
     - kind: changed
       description: 'update "gcloud-builder" to version 0.5.11'
     - kind: security
-      description: 'fix various security vulnerabilities in different runtime components'
+      description: 'fix various security vulnerabilities in different runtime components.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
