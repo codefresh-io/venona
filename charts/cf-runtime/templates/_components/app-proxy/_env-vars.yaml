@@ -3,6 +3,15 @@ PORT: 3000
 {{- end }}
 
 {{- define "app-proxy.environment-variables.calculated" }}
+{{- $appProxyVersion := coalesce .Values.image.tag "latest" -}}
+{{- if .Values.image.digest }}
+  {{- $appProxyVersion = printf "%s@%s" $appProxyVersion .Values.image.digest -}}
+{{- end }}
+{{- $runtimeVersion := coalesce .Values.version .Chart.Version -}}
+{{- $runtimeName := include "runtime.runtime-environment-spec.runtime-name" . -}}
+CF_SERVICE_NAME: {{ printf "cf-classic-app-proxy" }}
+CF_SERVICE_VERSION: {{ $appProxyVersion }}
+OTEL_RESOURCE_ATTRIBUTES: {{ printf "service.name=cf-classic-app-proxy,service.version=%s,service.namespace=cf-classic-runtime,cf.classic.runtime.name=%s,cf.classic.runtime.version=%s" $appProxyVersion $runtimeName $runtimeVersion }}
 CODEFRESH_HOST: {{ include "runtime.runtime-environment-spec.codefresh-host" . }}
 {{- with .Values.ingress.pathPrefix }}
 API_PATH_PREFIX: {{ . | quote }}
