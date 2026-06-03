@@ -834,7 +834,7 @@ appProxy:
     # -- Level of logging for app-proxy
     CF_TELEMETRY_LOGS_LEVEL: 'debug'
     # -- Enable OpenTelemetry signals (logs, metrics, traces)
-    CF_TELEMETRY_OTEL_ENABLE: 'true'
+    CF_TELEMETRY_OTEL_ENABLE: 'false'
     # -- Enable OTel HTTP instrumentation.
     # Make sure to sanitize `url.full` and `url.query` span attributes on collector before enabling this flag, as it may contain sensitive information.
     CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
