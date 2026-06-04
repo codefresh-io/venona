@@ -826,10 +826,65 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.0.66
-    digest: sha256:5f3dc36911b50b55d9224450842d8e35a23789dc2902b2d66c8cf99b946d3d3b
+    tag: 0.1.0
+    digest: sha256:73fa5a1cf956545dd057fc962f0b4c09102029ac5907467901d9299475df2adb
   # -- Add additional env vars
-  env: {}
+  env:
+    # -- Telemetry configuration
+    # -- Level of logging for app-proxy
+    CF_TELEMETRY_LOGS_LEVEL: 'debug'
+    # -- Enable OpenTelemetry signals (logs, metrics, traces)
+    CF_TELEMETRY_OTEL_ENABLE: 'false'
+    # -- Enable OTel HTTP instrumentation.
+    # Make sure to sanitize `url.full` and `url.query` span attributes on collector before enabling this flag, as it may contain sensitive information.
+    CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
+    # -- Enable Prometheus server (used solely to emit process metrics, if CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS=true)
+    # If enabled, make sure to disable legacy metrics by specifying METRICS_PROMETHEUS_ENABLED=false.
+    CF_TELEMETRY_PROMETHEUS_ENABLE: 'false'
+    # -- Enable collecting process metrics
+    CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS: 'false'
+    # -- Host for Prometheus metrics server
+    CF_TELEMETRY_PROMETHEUS_HOST: '0.0.0.0'
+    # -- Port for Prometheus metrics server
+    CF_TELEMETRY_PROMETHEUS_PORT: '9100'
+    # -- Enable Pyroscope profiling. If enabled, the Pyroscope server address must be set in PYROSCOPE_SERVER_ADDRESS.
+    CF_TELEMETRY_PYROSCOPE_ENABLE: 'false'
+    # -- Pyroscope server address
+    PYROSCOPE_SERVER_ADDRESS: ''
+    # -- Base endpoint URL for all OpenTelemetry signals.
+    # Ref: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/
+    OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
+    # -- Specifies the OTLP transport protocol to be used for all telemetry data.
+    # Ref: https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/
+    OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
+    # -- Specifies the compression algorithm to be used for all telemetry data.
+    # Ref: https://opentelemetry.io/docs/specs/otel/protocol/exporter/
+    OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
+    # -- OTel Logs exporter to be used.
+    # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+    OTEL_LOGS_EXPORTER: 'none'
+    # -- OTel traces exporter to be used.
+    # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+    OTEL_TRACES_EXPORTER: 'none'
+    # -- OTel sampler to be used for traces.
+    # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+    OTEL_TRACES_SAMPLER: 'parentbased_always_on'
+    # -- OTel metrics exporter to be used. Set to "prometheus" to export metrics in Prometheus format. If set to "prometheus", it's recommended to set METRICS_SCRAPE_TIMEOUT_MS=4×scrape_interval.
+    # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+    OTEL_METRICS_EXPORTER: 'otlp'
+    # -- The time interval (in milliseconds) between the start of two export attempts for push metric exporters, such as "otlp".
+    # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+    OTEL_METRIC_EXPORT_INTERVAL: '10000'
+    # -- Maximum allowed time (in milliseconds) to export data for push metric exporters, such as "otlp".
+    # Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+    OTEL_METRIC_EXPORT_TIMEOUT: '5000'
+    # -- Host used by the Prometheus OTel metrics exporter if OTEL_METRICS_EXPORTER=prometheus
+    OTEL_EXPORTER_PROMETHEUS_HOST: '0.0.0.0'
+    # -- Port used by the Prometheus OTel metrics exporter if OTEL_METRICS_EXPORTER=prometheus
+    OTEL_EXPORTER_PROMETHEUS_PORT: '9464'
+    # -- Emit the stable HTTP and networking OTel conventions if CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION=true.
+    OTEL_SEMCONV_STABILITY_OPT_IN: 'http'
+    #
   # Set app-proxy ingress parameters
   # @default -- See below
   ingress:
@@ -962,6 +1017,18 @@ serviceMonitor:
         relabelings:
           - action: labelmap
             regex: __meta_kubernetes_pod_label_(.+)
+  app-proxy:
+    # -- Enable service monitor for app-proxy pods
+    enabled: false
+    fullnameOverride: app-proxy
+    selector:
+      matchLabels:
+        codefresh.io/application: app-proxy
+    endpoints:
+      - path: /metrics
+        targetPort: 9100
+      - path: /metrics
+        targetPort: 9464
 # -- Add podMonitor
 # @default -- See below
 podMonitor:
