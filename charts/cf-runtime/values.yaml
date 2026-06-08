@@ -203,8 +203,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.8
-      digest: sha256:0e733b6ae2d619b85700d92ee5614b98fa30f79edf42c2a1be7c98ae3cd07e74
+      tag: 1.30.9
+      digest: sha256:7c0f0eb504cb16c68e88326c3450f821a77c447261025ab11cad96ff8924f342
     podAnnotations: {}
     podSecurityContext:
       enabled: false
@@ -507,9 +507,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.2.9
+      tag: 3.2.11
       pullPolicy: IfNotPresent
-      digest: sha256:224c6093ad886c8fa4a5f0cfbc84a56493e6c4b9590c27800ad785b39c8ec09e
+      digest: sha256:2d4d9f74b41a66c770569eeb320abf041d226007ae749848de6c97a450618aab
     # -- Set container command.
     command:
       - 'node'
@@ -537,8 +537,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.16
-        digest: sha256:8e0420a49df4fb5f2769df748d49da2e8030faa0c83a72f94851a637ca60e5f8
+        tag: 2.0.17
+        digest: sha256:abef98caa641c974c59862307568d3436ab7d2ceb858a5d1c5e86b0764dc19eb
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -547,8 +547,8 @@ runtime:
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.27
-        digest: sha256:818773818053553505afbaf109bf67f1b22bdb80307e155d27d4f06eab3c3246
+        tag: 8.0.28
+        digest: sha256:332cbc021029c1e8dccd7e90ce47832a2066b67ed4fc4c94e072b267ab44d72b
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
@@ -567,8 +567,8 @@ runtime:
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
-        tag: 18.0.0
-        digest: sha256:1fb0d3f5be3ece52c7ad47ebdb60533854c8a647f761c7ecc0d29e0ee441e14f
+        tag: 18.0.1
+        digest: sha256:b48c83479464e7d5b1fc0e46c7a310557823b5908f0024a5146086ab40e33706
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
@@ -577,8 +577,8 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.15.1
-        digest: sha256:fc273091b98392c447d90ab678fd9d217ccc9565701bd65708da3b2ec421798a
+        tag: 0.15.2
+        digest: sha256:f5ee6af6eda9476ef044703211ed00622db06bf74b1a74cbb97f2f847cb903a9
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
@@ -959,8 +959,8 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.35
-    digest: sha256:730c979cd8d47ccc45d9590985654acb1a1edfb24fcf410cc890c25de0d8c380
+    tag: 1.3.36
+    digest: sha256:fae228533b6c44b60e5d6671ffaa29a43e2db5aafe6f245aac74b719723741a6
   # -- Add additional env vars
   env: {}
   # -- Service Account parameters
