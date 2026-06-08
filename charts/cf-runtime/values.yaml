@@ -552,8 +552,8 @@ runtime:
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.26
-        digest: sha256:fdd6d80b02d9464689984208045ad09f217002f463aa2e4af60f8ad41d2cf611
+        tag: 6.0.27
+        digest: sha256:c31fb1facbccbcc4f48b669f168acc96cd695dfbabb5dea7b95af24a4b29aef2
       fs-ops:
         registry: quay.io
         repository: codefresh/fs-ops
