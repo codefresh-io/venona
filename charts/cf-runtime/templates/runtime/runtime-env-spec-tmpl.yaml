@@ -24,6 +24,9 @@ metadata:
   agent: {{ .Values.runtime.agent }}
 runtimeScheduler:
   type: KubernetesPod
+  {{- if $engineContext.internalInfra }}
+  internalInfra: true
+  {{- end }}
   {{- if $engineContext.image }}
   image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) | squote }}
   {{- end }}
@@ -318,5 +321,8 @@ appProxy:
 {{- end }}
 {{- if not .Values.runtime.agent }}
 systemHybrid: true
+{{- end }}
+{{- if $engineContext.internalInfra }}
+environmentCertPath: /etc/ssl/cf/
 {{- end }}
 {{- end }}
