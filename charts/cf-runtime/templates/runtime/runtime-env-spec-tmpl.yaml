@@ -322,4 +322,7 @@ appProxy:
 {{- if not .Values.runtime.agent }}
 systemHybrid: true
 {{- end }}
+{{- if $engineContext.internalInfra }}
+environmentCertPath: /etc/ssl/cf/
+{{- end }}
 {{- end }}
