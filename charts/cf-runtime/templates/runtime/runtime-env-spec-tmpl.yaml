@@ -24,6 +24,9 @@ metadata:
   agent: {{ .Values.runtime.agent }}
 runtimeScheduler:
   type: KubernetesPod
+  {{- if $engineContext.internalInfra }}
+  internalInfra: true
+  {{- end }}
   {{- if $engineContext.image }}
   image: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $engineContext.image "context" .) | squote }}
   {{- end }}
