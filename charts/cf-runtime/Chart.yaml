@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.3.3
+version: 10.3.4
 keywords:
   - codefresh
   - runner
@@ -18,7 +18,9 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'add runtimeScheduler.internalInfra property to respect MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION workflow limit (only for SAAS)'
+      description: 'Update "engine" to 3.2.12'
+    - fixed:
+      description: 'Fix race condition, which could cause unexpected build status if "strict_fail_fast: true" flag is used.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
