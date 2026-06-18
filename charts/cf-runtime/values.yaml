@@ -81,8 +81,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 1.1.4-rootless
-      digest: sha256:a27b6755b83e76baccc45e5754861779c90744ea4013c726e991ade33a15ec25
+      tag: 1.2.1-rootless
+      digest: sha256:4d2f027b19fc742c9cf68e5771da7a2b43db7764dd41ec116685539d0cf71b32
     resources:
       limits:
         memory: 512Mi
@@ -403,9 +403,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 29.5.2-3.0.16 # use `latest-rootless/rootless/29.5.2-3.0.16-rootless` tags for rootless-dind
+      tag: 29.5.3-3.0.17 # use `latest-rootless/rootless/29.5.2-3.0.16-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:b3966b621e9d3dcfbbc31b7ae3ba32327f5a0dc3fb0ea082449567ba5ed3502a
+      digest: sha256:a12a681c80cb619d5ea557f5873401eecae742bf108833cc8c69feabf8668e0f
     # -- Set dind resources.
     resources:
       requests: null
@@ -507,9 +507,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.2.12
+      tag: 3.2.14
       pullPolicy: IfNotPresent
-      digest: sha256:5a40ebdf430a1f70f26013d4c623bd9013159e2171bcc404f035d75742aa07cd
+      digest: sha256:739ee01e0aa22270c9f6a0f3cca733548b6be5a158fcfa3c4de1227dc696cfcc
     # -- Set container command.
     command:
       - 'node'
@@ -532,8 +532,8 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: v5.1.4-1.6.5
-        digest: sha256:4e92b2a8b9c6ff38dfae4245849a88ea27e74e5c7cd4b6a5a089d29dbb832b94
+        tag: v5.1.4-1.6.6
+        digest: sha256:62085a63c8452b1d3208c002051e89685499ff8372524b9ffaca4a3ef9b534c0
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
@@ -587,8 +587,8 @@ runtime:
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
-        tag: 0.5.11
-        digest: sha256:ef77dcc827d0590aeafb2bbaa5362a8ad7d34588c8d407eb660d4530ba8e0fd0
+        tag: 0.5.12
+        digest: sha256:78e8e42d9d5b81ba77aa5fecb60e95934f3773f2a324e959d2b5b9c7cb484ce5
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
@@ -746,8 +746,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.1.4-rootless
-        digest: sha256:a27b6755b83e76baccc45e5754861779c90744ea4013c726e991ade33a15ec25
+        tag: 1.2.1-rootless
+        digest: sha256:4d2f027b19fc742c9cf68e5771da7a2b43db7764dd41ec116685539d0cf71b32
       rbac:
         enabled: true
       annotations: {}
@@ -768,8 +768,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.1.4-rootless
-        digest: sha256:a27b6755b83e76baccc45e5754861779c90744ea4013c726e991ade33a15ec25
+        tag: 1.2.1-rootless
+        digest: sha256:4d2f027b19fc742c9cf68e5771da7a2b43db7764dd41ec116685539d0cf71b32
       affinity: {}
       nodeSelector: {}
       podSecurityContext: {}
@@ -783,8 +783,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.35.4
-      digest: sha256:453d5288cf764281158c62762499ee755b4217f75c7899a73720b249c0363845
+      tag: 1.35.5
+      digest: sha256:87c304c6b4591aed22f299ab295b5e4cbb9795b099764e6fd10ca71620c6909e
     rbac:
       enabled: true
     annotations: {}
@@ -826,8 +826,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.0
-    digest: sha256:73fa5a1cf956545dd057fc962f0b4c09102029ac5907467901d9299475df2adb
+    tag: 0.1.1
+    digest: sha256:7bc98297e951044452bee3f374466322c24b0e80dc1d35e67695f56f8f398f09
   # -- Add additional env vars
   env:
     # -- Telemetry configuration
