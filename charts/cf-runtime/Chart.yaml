@@ -17,22 +17,20 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: 'Update "dind" to 29.5.3-3.0.17-rootless.'
-    - kind: changed
-      description: 'Update "compose" to v5.1.4-1.6.6.'
-    - kind: changed
-      description: 'Update "cf-app-proxy" to 0.1.1.'
-    - kind: changed
-      description: 'Update "kubectl" to 1.35.5.'
-    - kind: changed
-      description: 'Update "cli" to 1.2.1-rootless.'
-    - kind: changed
-      description: 'Update "gcloud-builder" to 0.5.12.'
-    - kind: changed
-      description: 'Update "engine" to 3.2.14.'
     - kind: security
-      description: 'Fix various CVEs in "dind", "compose", "cf-app-proxy", "kubectl", "cli", "gcloud-builder" and "engine" images.'
+      description: 'Update "dind" to 29.5.3-3.0.17-rootless. Security fixes.'
+    - kind: security
+      description: 'Update "compose" to v5.1.4-1.6.6. Security fixes.'
+    - kind: security
+      description: 'Update "cf-app-proxy" to 0.1.1. Security fixes.'
+    - kind: security
+      description: 'Update "kubectl" to 1.35.5. Security fixes.'
+    - kind: security
+      description: 'Update "cli" to 1.2.1-rootless. Security fixes.'
+    - kind: security
+      description: 'Update "gcloud-builder" to 0.5.12. Security fixes.'
+    - kind: security
+      description: 'Update "engine" to 3.2.14. Security fixes.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
