@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.3.4
+version: 10.3.5
 keywords:
   - codefresh
   - runner
@@ -17,14 +17,22 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: fixed
-      description: 'Fix race condition, which could cause unexpected build status if "strict_fail_fast: true" flag is used.'
+    - kind: changed
+      description: 'Update "dind" to 29.5.3-3.0.17-rootless.'
+    - kind: changed
+      description: 'Update "compose" to v5.1.4-1.6.6.'
+    - kind: changed
+      description: 'Update "cf-app-proxy" to 0.1.1.'
+    - kind: changed
+      description: 'Update "kubectl" to 1.35.5.'
+    - kind: changed
+      description: 'Update "cli" to 1.2.1-rootless.'
+    - kind: changed
+      description: 'Update "gcloud-builder" to 0.5.12.'
+    - kind: changed
+      description: 'Update "engine" to 3.2.14.'
     - kind: security
-      description: 'Fix some CVEs in "cf-docker-builder" image.'
-    - kind: changed
-      description: 'Update "engine" to 3.2.12.'
-    - kind: changed
-      description: 'Update "cf-docker-builder" to 1.6.2.'
+      description: 'Fix various CVEs in "dind", "compose", "cf-app-proxy", "kubectl", "cli", "gcloud-builder" and "engine" images.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
