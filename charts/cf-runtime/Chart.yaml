@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.3.5
+version: 10.3.6
 keywords:
   - codefresh
   - runner
@@ -18,19 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: 'Update "dind" to 29.5.3-3.0.17-rootless. Security fixes.'
-    - kind: security
-      description: 'Update "compose" to v5.1.4-1.6.6. Security fixes.'
-    - kind: security
-      description: 'Update "cf-app-proxy" to 0.1.1. Security fixes.'
-    - kind: security
-      description: 'Update "kubectl" to 1.35.5. Security fixes.'
-    - kind: security
-      description: 'Update "cli" to 1.2.1-rootless. Security fixes.'
-    - kind: security
-      description: 'Update "gcloud-builder" to 0.5.12. Security fixes.'
-    - kind: security
-      description: 'Update "engine" to 3.2.14. Security fixes.'
+      description: 'Set "library/alpine" to "latest" tag. Security fixes.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
