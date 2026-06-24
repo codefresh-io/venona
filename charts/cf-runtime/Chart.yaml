@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.3.5
+version: 10.3.6
 keywords:
   - codefresh
   - runner
@@ -18,19 +18,27 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: 'Update "dind" to 29.5.3-3.0.17-rootless. Security fixes.'
+      description: 'Set "dind-volume-utils" to "1.30.10" tag. Security fixes.'
     - kind: security
-      description: 'Update "compose" to v5.1.4-1.6.6. Security fixes.'
+      description: 'Set "engine" to "3.2.20" tag. Security fixes.'
     - kind: security
-      description: 'Update "cf-app-proxy" to 0.1.1. Security fixes.'
+      description: 'Set "cf-container-logger" to "2.0.25" tag. Security fixes.'
     - kind: security
-      description: 'Update "kubectl" to 1.35.5. Security fixes.'
+      description: 'Set "cf-docker-builder" to "1.6.4" tag. Security fixes.'
     - kind: security
-      description: 'Update "cli" to 1.2.1-rootless. Security fixes.'
+      description: 'Set "cf-docker-puller" to "8.0.34" tag. Security fixes.'
     - kind: security
-      description: 'Update "gcloud-builder" to 0.5.12. Security fixes.'
+      description: 'Set "cf-docker-pusher" to "6.0.28" tag. Security fixes.'
     - kind: security
-      description: 'Update "engine" to 3.2.14. Security fixes.'
+      description: 'Set "cf-git-cloner" to "10.3.13" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-deploy-kubernetes" to "18.0.2" tag. Security fixes.'
+    - kind: security
+      description: 'Set "pikolo" to "0.15.3" tag. Security fixes.'
+    - kind: security
+      description: 'Set "alpine" to "latest" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-k8s-agent" to "1.3.37" tag. Security fixes.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
