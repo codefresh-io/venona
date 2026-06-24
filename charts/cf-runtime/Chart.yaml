@@ -18,7 +18,27 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: security
-      description: 'Set "library/alpine" to "latest" tag. Security fixes.'
+      description: 'Set "dind-volume-utils" to "1.30.10" tag. Security fixes.'
+    - kind: security
+      description: 'Set "engine" to "3.2.20" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-container-logger" to "2.0.25" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-docker-builder" to "1.6.4" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-docker-puller" to "8.0.34" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-docker-pusher" to "6.0.28" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-git-cloner" to "10.3.13" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-deploy-kubernetes" to "18.0.2" tag. Security fixes.'
+    - kind: security
+      description: 'Set "pikolo" to "0.15.3" tag. Security fixes.'
+    - kind: security
+      description: 'Set "alpine" to "latest" tag. Security fixes.'
+    - kind: security
+      description: 'Set "cf-k8s-agent" to "1.3.37" tag. Security fixes.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
