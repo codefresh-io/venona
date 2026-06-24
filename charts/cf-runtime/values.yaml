@@ -567,8 +567,8 @@ runtime:
       kube-deploy:
         registry: quay.io
         repository: codefresh/cf-deploy-kubernetes
-        tag: 18.0.1
-        digest: sha256:b48c83479464e7d5b1fc0e46c7a310557823b5908f0024a5146086ab40e33706
+        tag: 18.0.2
+        digest: sha256:a9642f66c7696367b43f2931bab6f647f9f91262e194609e64a19ea362a7c873
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
