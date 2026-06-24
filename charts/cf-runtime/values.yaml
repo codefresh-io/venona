@@ -203,8 +203,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.9
-      digest: sha256:7c0f0eb504cb16c68e88326c3450f821a77c447261025ab11cad96ff8924f342
+      tag: 1.30.10
+      digest: sha256:70174fed19de2ad616327f0f49535d85fcb3480db51efbfb61577e0686094f1d
     podAnnotations: {}
     podSecurityContext:
       enabled: false
