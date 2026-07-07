@@ -1440,6 +1440,15 @@ Install the Helm chart
 | runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.2-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
+| runtime.podPerStep | object | See below | Pod-per-step runtime mode (experimental). When enabled, the engine schedules a Kubernetes pod per pipeline step instead of using DinD (docker-in-docker), and DinD-only resources (dind service, daemon config, cert generation hooks) are not installed. |
+| runtime.podPerStep.buildkitImage | object | `{"registry":"docker.io","repository":"moby/buildkit","tag":"v0.23.2-rootless"}` | Set buildkit (rootless) image used for build steps. |
+| runtime.podPerStep.craneImage | object | `{"registry":"gcr.io","repository":"go-containerregistry/crane","tag":"v0.21.7"}` | Set crane image used for push steps (registry-to-registry image copy). |
+| runtime.podPerStep.enabled | bool | `false` | Enable pod-per-step runtime mode |
+| runtime.podPerStep.stepScheduler | object | `{}` | Default scheduling constraints applied to every step pod (e.g. resources, tolerations, nodeSelector, annotations, labels, serviceAccount, terminationGracePeriodSeconds). |
+| runtime.podPerStep.workspace | object | `{"annotations":{},"storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"8Gi"}` | Workspace PV claim spec parameters. |
+| runtime.podPerStep.workspace.annotations | object | `{}` | PV annotations. |
+| runtime.podPerStep.workspace.storageClassName | string | `"{{ include \"dind-volume-provisioner.storageClassName\" . }}"` | PVC storage class name. Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner |
+| runtime.podPerStep.workspace.volumeSize | string | `"8Gi"` | PVC size. |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |

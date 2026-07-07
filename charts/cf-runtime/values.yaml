@@ -397,6 +397,35 @@ runtime:
   kubeconfigName: ""
   # -- (for On-Premise only) Assign accounts to runtime (list of account ids)
   accounts: []
+  # -- Pod-per-step runtime mode (experimental).
+  # When enabled, the engine schedules a Kubernetes pod per pipeline step instead of using DinD (docker-in-docker),
+  # and DinD-only resources (dind service, daemon config, cert generation hooks) are not installed.
+  # @default -- See below
+  podPerStep:
+    # -- Enable pod-per-step runtime mode
+    enabled: false
+    # -- Set buildkit (rootless) image used for build steps.
+    buildkitImage:
+      registry: docker.io
+      repository: moby/buildkit
+      tag: v0.23.2-rootless
+    # -- Set crane image used for push steps (registry-to-registry image copy).
+    craneImage:
+      registry: gcr.io
+      repository: go-containerregistry/crane
+      tag: v0.21.7
+    # -- Workspace PV claim spec parameters.
+    workspace:
+      # -- PVC storage class name.
+      # Change ONLY if you need to use storage class NOT from Codefresh volume-provisioner
+      storageClassName: '{{ include "dind-volume-provisioner.storageClassName" . }}'
+      # -- PVC size.
+      volumeSize: 8Gi
+      # -- PV annotations.
+      annotations: {}
+    # -- Default scheduling constraints applied to every step pod
+    # (e.g. resources, tolerations, nodeSelector, annotations, labels, serviceAccount, terminationGracePeriodSeconds).
+    stepScheduler: {}
   # -- Parameters for DinD (docker-in-docker) pod (aka "runtime" pod).
   dind:
     # -- Set dind image.
