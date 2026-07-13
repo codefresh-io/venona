@@ -19,6 +19,8 @@ annotations:
   artifacthub.io/changes: |
     - kind: fixed
       description: 'Fixes the bug in that was causing steps of type "Deploy to Kubernetes" to fail with "ReferenceError: _ is not defined" while pulling secrets.'
+    - kind: fixed
+      description: 'ECR integration with Service Account uses the region of integration'
     - kind: security
       description: 'Set "pikolo" to "0.15.7" tag. Security fixes.'
 dependencies:
