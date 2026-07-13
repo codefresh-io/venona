@@ -1,0 +1,20 @@
+charts/cf-runtime/Chart.yaml
+  h_e5037b46dfdc11 4,21-23
+charts/cf-runtime/templates/_components/app-proxy/_service.yaml
+  h_e5037b46dfdc11 15-22
+charts/cf-runtime/values.yaml
+  h_e5037b46dfdc11 829-830,833-887,1020-1031
+charts/cf-runtime/templates/_components/app-proxy/_deployment.yaml
+  h_e5037b46dfdc11 39-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4e5e4d383288e4e9b96cf43b9c69390b39c1687d",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

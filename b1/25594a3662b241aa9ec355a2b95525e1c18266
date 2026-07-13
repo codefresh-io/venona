@@ -1,0 +1,16 @@
+charts/cf-runtime/Chart.yaml
+  h_bdc637847e5b6a 4,21
+charts/cf-runtime/templates/runtime/runtime-env-spec-tmpl.yaml
+  h_bdc637847e5b6a 27-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "b125594a3662b241aa9ec355a2b95525e1c18266",
+  "prompts": {},
+  "humans": {
+    "h_bdc637847e5b6a": {
+      "author": "Mikhail Klimko <mikhail.klimko@octopus.com>"
+    }
+  }
+}
