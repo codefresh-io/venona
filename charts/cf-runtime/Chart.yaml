@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: 'Update "engine" to version "3.2.26" tag. This fixes the bug in that was causing steps of type "Deploy to Kubernetes" to fail with "ReferenceError: _ is not defined" while pulling secrets.'
+      description: 'Fixes the bug in that was causing steps of type "Deploy to Kubernetes" to fail with "ReferenceError: _ is not defined" while pulling secrets.'
     - kind: security
       description: 'Set "pikolo" to "0.15.7" tag. Security fixes.'
 dependencies:
