@@ -17,8 +17,9 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
-    - kind: changed
-      description: 'Set "engine" to "3.2.26" tag. Dependency fixes.'
+    - kind: fixed
+      description: 'Update "engine" to version "3.2.26" tag. In "kube-integration" dependency were broken 
+      dependency "lodash" which caused "engine" to fail while pulling secrets'
     - kind: security
       description: 'Set "pikolo" to "0.15.7" tag. Security fixes.'
 dependencies:
