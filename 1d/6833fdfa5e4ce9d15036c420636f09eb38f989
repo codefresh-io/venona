@@ -1,0 +1,16 @@
+charts/cf-runtime/README.md
+  h_51acfbafc7319b 129
+charts/cf-runtime/README.md.gotmpl
+  h_51acfbafc7319b 129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "1d6833fdfa5e4ce9d15036c420636f09eb38f989",
+  "prompts": {},
+  "humans": {
+    "h_51acfbafc7319b": {
+      "author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
