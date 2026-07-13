@@ -1,0 +1,20 @@
+charts/cf-runtime/README.md.gotmpl
+  s_56e322cc70172f::t_a1582f699f1e32 402-403
+  s_56e322cc70172f::t_bb5c1c53cfd6ff 472-487
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "b037cf984757603ad04de53c8a8194ace114e6a4",
+  "prompts": {},
+  "sessions": {
+    "s_56e322cc70172f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cf8141e-f2d9-435d-a014-9c89100429e7",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
