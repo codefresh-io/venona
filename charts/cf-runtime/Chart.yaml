@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: fixed
-      description: 'Fixes the bug in the default Classic Runtime that was causing steps of type "deploy" to fail while pulling secrets.'
+      description: 'Fixes the bug that was causing steps of type "deploy" to fail while pulling secrets.'
     - kind: fixed
       description: 'ECR integration with Service Account uses the region of integration.'
     - kind: changed
