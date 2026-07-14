@@ -24,7 +24,7 @@ annotations:
     - kind: changed
       description: 'Update "engine" to "3.3.0"'
     - kind: security
-      description: 'Set "pikolo" to "0.15.7" tag. Security fixes.'
+      description: 'Update "pikolo" to "0.15.7". Security fixes.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
