@@ -21,7 +21,7 @@ annotations:
       description: 'Fixes the bug in the default Classic Runtime that was causing steps of type "deploy" to fail while pulling secrets.'
     - kind: fixed
       description: 'ECR integration with Service Account uses the region of integration.'
-    - kind: changed 
+    - kind: changed
       description: 'Update "engine" to "3.3.0"'
     - kind: security
       description: 'Set "pikolo" to "0.15.7" tag. Security fixes.'
