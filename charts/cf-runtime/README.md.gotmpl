@@ -126,7 +126,7 @@ runtime:
       - "dist/server/index.js"
 ```
 - Charts **10.0.0-10.0.17** contain a bug because of which Git LFS is not supported by the `clone` step. Please upgrade to version 10.0.18 or later to fix this issue.
-- Chart **10.3.7** contains a bug that was causing steps of type "Deploy to Kubernetes" to fail with "ReferenceError: _ is not defined" while pulling secrets. Please upgrade to version 10.3.8.
+- Chart **10.3.7** contains a bug that was causing steps of type "deploy" to fail while pulling secrets. Please upgrade to version 10.3.8.
 
 ### To 2.x
 
