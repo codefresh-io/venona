@@ -1,0 +1,22 @@
+runtime:
+  podPerStep:
+    enabled: true
+    buildkitImage:
+      tag: tagoverride
+    craneImage:
+      tag: tagoverride
+    workspace:
+      storageClassName: my-custom-storage-class
+      volumeSize: 20Gi
+    stepScheduler:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      nodeSelector:
+        topology.kubernetes.io/zone: us-east-1a
+      tolerations:
+        - effect: NoSchedule
+          key: codefresh.io
+          operator: Equal
+          value: steps

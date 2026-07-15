@@ -233,3 +233,216 @@ tests:
               - system/default/hybrid/k8s_low_limits
             description: null
             accountId: 7890
+
+  - it: Test default engine role rules
+    template: templates/runtime/rbac.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: rules
+          value:
+            - apiGroups: [ "" ]
+              resources: [ "secrets" ]
+              verbs: [ "get" ]
+
+  - it: Test engine role rules with podPerStep enabled
+    template: templates/runtime/rbac.yaml
+    values:
+      - ../values.yaml
+      - ./runtime_podperstep_values.yaml
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: rules
+          value:
+            - apiGroups: [ "" ]
+              resources: [ "pods" ]
+              verbs: [ "get", "list", "watch", "create", "delete", "patch" ]
+            - apiGroups: [ "" ]
+              resources: [ "pods/log" ]
+              verbs: [ "get" ]
+            - apiGroups: [ "" ]
+              resources: [ "pods/exec" ]
+              verbs: [ "create" ]
+            - apiGroups: [ "" ]
+              resources: [ "pods/attach" ]
+              verbs: [ "create" ]
+            - apiGroups: [ "" ]
+              resources: [ "persistentvolumeclaims" ]
+              verbs: [ "get", "list" ]
+            - apiGroups: [ "" ]
+              resources: [ "configmaps" ]
+              verbs: [ "get" ]
+            - apiGroups: [ "" ]
+              resources: [ "secrets" ]
+              verbs: [ "get", "create", "update", "delete" ]
+            - apiGroups: [ "" ]
+              resources: [ "events" ]
+              verbs: [ "list", "watch" ]
+
+  - it: Test dind-only resources are not rendered with podPerStep enabled
+    values:
+      - ../values.yaml
+      - ./runtime_podperstep_values.yaml
+    templates:
+      - templates/runtime/svc-dind.yaml
+      - templates/runtime/cm-dind-daemon.yaml
+      - templates/hooks/post-install/job-gencerts-dind.yaml
+      - templates/hooks/post-install/rbac-gencerts-dind.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Test runtime spec with podPerStep enabled
+    template: templates/hooks/post-install/cm-update-runtime.yaml
+    values:
+      - ../values.yaml
+      - ./runtime_values.yaml
+      - ./runtime_podperstep_values.yaml
+    asserts:
+      - equal:
+          path: data["my-context-codefresh.yaml"]
+          value: |
+            metadata:
+              name: my-context/codefresh
+              agent: true
+            runtimeScheduler:
+              type: KubernetesPodPerStep
+              image: 'quay.io/codefresh/engine:tagoverride@sha256:123'
+              imagePullPolicy: Always
+              command:
+                - one
+                - two
+                - three
+              envVars:
+                CF_TELEMETRY_LOGS_LEVEL: 'debug'
+                CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION: 'false'
+                CF_TELEMETRY_OTEL_ENABLE: 'true'
+                CF_TELEMETRY_PROMETHEUS_ENABLE: 'false'
+                CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS: 'false'
+                CF_TELEMETRY_PROMETHEUS_HOST: '0.0.0.0'
+                CF_TELEMETRY_PROMETHEUS_PORT: '9100'
+                CF_TELEMETRY_PYROSCOPE_ENABLE: 'false'
+                CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                DOCKER_REQUEST_TIMEOUT_MS: '30000'
+                FLOAT: '12.34'
+                FOO: 'BAR'
+                FORCE_COMPOSE_SERIAL_PULL: 'false'
+                INT_AS_STRING: '123'
+                LOGGER_LEVEL: 'debug'
+                LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                METRICS_SCRAPE_TIMEOUT_MS: '0'
+                NEW_RELIC_ENABLED: 'false'
+                OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
+                OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
+                OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
+                OTEL_EXPORTER_PROMETHEUS_HOST: '0.0.0.0'
+                OTEL_EXPORTER_PROMETHEUS_PORT: '9464'
+                OTEL_LOGS_EXPORTER: 'none'
+                OTEL_METRICS_EXPORTER: 'otlp'
+                OTEL_METRIC_EXPORT_INTERVAL: '10000'
+                OTEL_METRIC_EXPORT_TIMEOUT: '5000'
+                OTEL_SEMCONV_STABILITY_OPT_IN: 'http'
+                OTEL_TRACES_EXPORTER: 'none'
+                OTEL_TRACES_SAMPLER: 'parentbased_always_on'
+                PYROSCOPE_SERVER_ADDRESS: ''
+                TRUSTED_QEMU_IMAGES: 'my-registry/tonistiigi/binfmt'
+                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverrideold'
+                CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride@sha256:123'
+                DEFAULT_QEMU_IMAGE: 'docker.io/tonistiigi/binfmt:tagoverride'
+                DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
+                DOCKER_PULLER_IMAGE: 'quay.io/codefresh/cf-docker-puller:tagoverride'
+                DOCKER_PUSHER_IMAGE: 'quay.io/codefresh/cf-docker-pusher:tagoverride'
+                FS_OPS_IMAGE: 'quay.io/codefresh/fs-ops:tagoverride'
+                GIT_CLONE_IMAGE: 'quay.io/codefresh/cf-git-cloner:tagoverride'
+                KUBE_DEPLOY: 'quay.io/codefresh/cf-deploy-kubernetes:tagoverride'
+                PIPELINE_DEBUGGER_IMAGE: 'quay.io/codefresh/cf-debugger:tagoverride'
+                TEMPLATE_ENGINE: 'quay.io/codefresh/pikolo:tagoverride'
+                CR_6177_FIXER: 'docker.io/alpine:tagoverride'
+                GC_BUILDER_IMAGE: 'quay.io/codefresh/gcloud-builder:tagoverride'
+                COSIGN_IMAGE_SIGNER_IMAGE: 'quay.io/codefresh/cf-cosign-image-signer:tagoverride'
+                BUILDKIT_IMAGE: 'docker.io/moby/buildkit:tagoverride'
+                CRANE_IMAGE: 'gcr.io/go-containerregistry/crane:tagoverride'
+                RUNTIME_CHART_VERSION: 1.0.0
+                CF_SERVICE_NAME: cf-classic-engine
+                CF_SERVICE_VERSION: tagoverride@sha256:123
+                OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-engine,service.version=tagoverride@sha256:123,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
+              userEnvVars:
+                - name: ALICE
+                  valueFrom:
+                    secretKeyRef:
+                      key: token
+                      name: alice-secret
+              workflowLimits:
+                MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS: 600
+                MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION: 86400
+                MAXIMUM_ELECTED_STATE_AGE_ALLOWED: 900
+                MAXIMUM_POST_STEPS_GRACE_PERIOD_MINUTES: 30
+                MAXIMUM_RETRY_ATTEMPTS_ALLOWED: 20
+                MAXIMUM_TERMINATING_STATE_AGE_ALLOWED: 900
+                MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE: 300
+                TIME_ENGINE_INACTIVE_UNTIL_TERMINATION: 300
+                TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY: 60
+                TIME_INACTIVE_UNTIL_TERMINATION: 2700
+              cluster:
+                namespace: codefresh
+                serviceAccount: service-account-override
+                clusterProvider:
+                  accountId: 7890
+                  selector: my-context
+                nodeSelector:
+                  topology.kubernetes.io/zone: us-east-1a
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: app
+                        operator: In
+                        values:
+                        - engine
+              tolerations:
+                - effect: NoSchedule
+                  key: codefresh.io
+                  operator: Equal
+                  value: engine
+              annotations:
+                karpenter.sh/do-not-evict: 'true'
+              labels:
+                key: engine
+              resources:
+                limits:
+                  cpu: 200m
+                  memory: 256Mi
+                requests:
+                  cpu: 200m
+                  memory: 256Mi
+              terminationGracePeriodSeconds: 180
+              pvcs:
+                - name: workspace
+                  reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+                  reuseVolumeSortOrder: pipeline_id
+                  storageClassName: my-custom-storage-class
+                  volumeSize: 20Gi
+              stepScheduler:
+                nodeSelector:
+                  topology.kubernetes.io/zone: us-east-1a
+                resources:
+                  requests:
+                    cpu: 100m
+                    memory: 128Mi
+                tolerations:
+                - effect: NoSchedule
+                  key: codefresh.io
+                  operator: Equal
+                  value: steps
+            dockerDaemonScheduler:
+              type: Empty
+            extends:
+              - system/default/hybrid/k8s_low_limits
+            description: null
+            accountId: 7890

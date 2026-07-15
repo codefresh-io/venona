@@ -5,6 +5,7 @@
 {{- $name := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
+{{- $podPerStepContext := .Values.runtime.podPerStep -}}
 {{- $runtimeImageRegistry := .Values.runtime.engine.runtimeImagesRegistry -}}
 {{- if $runtimeImageRegistry }}
   {{- $_ := set $rootContext.Values.global "imageRegistry" $runtimeImageRegistry }}
@@ -23,7 +24,11 @@ metadata:
   name: {{ include "runtime.runtime-environment-spec.runtime-name" . }}
   agent: {{ .Values.runtime.agent }}
 runtimeScheduler:
+{{- if $podPerStepContext.enabled }}
+  type: KubernetesPodPerStep
+{{- else }}
   type: KubernetesPod
+{{- end }}
   {{- if $engineContext.internalInfra }}
   internalInfra: true
   {{- end }}
@@ -110,6 +115,10 @@ runtimeScheduler:
   {{- else }}
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "cosign-image-signer") "context" $rootContext) | squote }}
   {{- end }}
+  {{- if $podPerStepContext.enabled }}
+    BUILDKIT_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $podPerStepContext.buildkitImage "context" $rootContext) | squote }}
+    CRANE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $podPerStepContext.craneImage "context" $rootContext) | squote }}
+  {{- end }}
     RUNTIME_CHART_VERSION: {{ $runtimeVersion }}
     CF_SERVICE_NAME: {{ printf "cf-classic-engine" }}
     CF_SERVICE_VERSION: {{ $engineVersion }}
@@ -164,6 +173,24 @@ runtimeScheduler:
   {{- with $engineContext.terminationGracePeriodSeconds }}
   terminationGracePeriodSeconds: {{ . }}
   {{- end }}
+  {{- if $podPerStepContext.enabled }}
+  pvcs:
+    - name: workspace
+      reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
+      reuseVolumeSortOrder: pipeline_id
+      storageClassName: {{ include (printf "%v.tplrender" $cfCommonTplSemver) (dict "Values" $podPerStepContext.workspace.storageClassName "context" $) }}
+      volumeSize: {{ $podPerStepContext.workspace.volumeSize | default "8Gi" }}
+      {{- with $podPerStepContext.workspace.annotations }}
+      annotations: {{ . | toYaml | nindent 8 }}
+      {{- end }}
+  {{- with $podPerStepContext.stepScheduler }}
+  stepScheduler: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- if $podPerStepContext.enabled }}
+dockerDaemonScheduler:
+  type: Empty
+{{- else }}
 dockerDaemonScheduler:
   type: DindKubernetesPod
   {{- if $dindContext.image }}
@@ -302,6 +329,7 @@ dockerDaemonScheduler:
     resources:
       {{- toYaml $dindContext.volumePermissions.resources | nindent 6 }}
   {{- end }}
+{{- end }}
 extends: {{- toYaml .Values.runtime.runtimeExtends | nindent 2 }}
   {{- if .Values.runtime.description }}
 description: {{ .Values.runtime.description }}
