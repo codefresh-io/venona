@@ -507,9 +507,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.2.25
+      tag: 3.3.0
       pullPolicy: IfNotPresent
-      digest: sha256:04d1a998593633333f4626121aa452ff4962d1b1dd9b9043f41f2e5bd2482a18
+      digest: sha256:8a0d47eefc6648902fc7fbde132206750257a8cc703d6d871296f8eb2438b285
     # -- Set container command.
     command:
       - 'node'
@@ -577,8 +577,8 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.15.4
-        digest: sha256:8df766d7cf2cfd9a3781a5d3a29007c483b559e5088e53af2886b0321c75abf6
+        tag: 0.15.7
+        digest: sha256:1c1ff75feceb8d4e6ffa09b933605d0a1476bf64890f247be186da3200a9d004
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
