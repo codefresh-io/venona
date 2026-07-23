@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.3.8](https://img.shields.io/badge/Version-10.3.8-informational?style=flat-square)
+![Version: 10.3.9](https://img.shields.io/badge/Version-10.3.9-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1228,6 +1228,7 @@ Install the Helm chart
 | appProxy.image | object | `{"digest":"sha256:8e7d27e24d0ec25e4825906359395efef0fe89d89b6c44d5a9fbb7b9dee142e7","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.2"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
+| appProxy.ingress.enabled | bool | `true` | Enable app-proxy ingress. Set to `false` to skip creating the Ingress object, e.g. when exposing app-proxy via Gateway API or a custom resource. |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
 | appProxy.ingress.pathPrefix | string | `""` | Set path prefix for ingress (keep empty for default `/` path) |
 | appProxy.ingress.tlsSecret | string | `""` | Set k8s tls secret for the ingress object |

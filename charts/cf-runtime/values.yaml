@@ -888,6 +888,9 @@ appProxy:
   # Set app-proxy ingress parameters
   # @default -- See below
   ingress:
+    # -- Enable app-proxy ingress. Set to `false` to skip creating the Ingress
+    # object, e.g. when exposing app-proxy via Gateway API or a custom resource.
+    enabled: true
     # -- Set path prefix for ingress (keep empty for default `/` path)
     pathPrefix: ""
     # -- Set ingress class

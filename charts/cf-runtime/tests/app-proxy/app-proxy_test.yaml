@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/quintush/helm-unittest/master/schema/helm-testsuite.json
+suite: app-proxy ingress test
+values:
+  - ../values.yaml
+templates:
+  - templates/app-proxy/ingress.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  appVersion: 1.0.0
+tests:
+  - it: Renders the app-proxy ingress by default when app-proxy is enabled
+    set:
+      appProxy.enabled: true
+      appProxy.ingress.host: app-proxy.example.com
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Ingress
+      - equal:
+          path: spec.rules[0].host
+          value: app-proxy.example.com
+
+  - it: Skips the app-proxy ingress when appProxy.ingress.enabled is false
+    set:
+      appProxy.enabled: true
+      appProxy.ingress.enabled: false
+      appProxy.ingress.host: app-proxy.example.com
+    asserts:
+      - hasDocuments:
+          count: 0
