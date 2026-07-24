@@ -81,8 +81,8 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 1.2.2-rootless
-      digest: sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f
+      tag: 1.2.3-rootless
+      digest: sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55
     resources:
       limits:
         memory: 512Mi
@@ -587,8 +587,8 @@ runtime:
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
-        tag: 0.5.13
-        digest: sha256:dbc469bb080a358011aabde00117d6e4505a2d4fa9a2bffa1a8ce58cad1ed870
+        tag: 0.5.18
+        digest: sha256:e43f05470f4579ed5788f1e8f39b4e398c69dd3c7e189e2eb80ef694bef616cf
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
@@ -746,8 +746,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.2.2-rootless
-        digest: sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f
+        tag: 1.2.3-rootless
+        digest: sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55
       rbac:
         enabled: true
       annotations: {}
@@ -768,8 +768,8 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.2.2-rootless
-        digest: sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f
+        tag: 1.2.3-rootless
+        digest: sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55
       affinity: {}
       nodeSelector: {}
       podSecurityContext: {}
