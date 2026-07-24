@@ -507,9 +507,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.3.0
+      tag: 3.3.2
       pullPolicy: IfNotPresent
-      digest: sha256:8a0d47eefc6648902fc7fbde132206750257a8cc703d6d871296f8eb2438b285
+      digest: sha256:59c8d68712548b83602614b690f7564134084986c37634f4b64f56d79b360ecd
     # -- Set container command.
     command:
       - 'node'
@@ -537,8 +537,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.29
-        digest: sha256:d1a6c23addb6e652f26cef3d5dde3fa65ea95662e5349ccf4431b8161e9efc60
+        tag: 2.0.31
+        digest: sha256:790b045da3fcba782e43bcb96c19379c818480b6b6dff47718e8490ea65cade3
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
@@ -826,8 +826,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.2
-    digest: sha256:8e7d27e24d0ec25e4825906359395efef0fe89d89b6c44d5a9fbb7b9dee142e7
+    tag: 0.1.3
+    digest: sha256:94847386db064a87d3ddcbfded5e5fd393f8695ddfe05fd406c152e0d2efe9a7
   # -- Add additional env vars
   env:
     # -- Telemetry configuration
