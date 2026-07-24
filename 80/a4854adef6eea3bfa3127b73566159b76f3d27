@@ -1,0 +1,16 @@
+charts/cf-runtime/README.md
+  h_48b74706cf95a4 1330,1443
+charts/cf-runtime/values.yaml
+  h_48b74706cf95a4 84,590-591,749,771
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "80a4854adef6eea3bfa3127b73566159b76f3d27",
+  "prompts": {},
+  "humans": {
+    "h_48b74706cf95a4": {
+      "author": "Bohdan Pysarenko <bohdan.pisarenko@octopus.com>"
+    }
+  }
+}
