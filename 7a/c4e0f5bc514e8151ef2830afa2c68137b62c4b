@@ -1,0 +1,14 @@
+charts/cf-runtime/Chart.yaml
+  h_48b74706cf95a4 4,21-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "7ac4e0f5bc514e8151ef2830afa2c68137b62c4b",
+  "prompts": {},
+  "humans": {
+    "h_48b74706cf95a4": {
+      "author": "Bohdan Pysarenko <bohdan.pisarenko@octopus.com>"
+    }
+  }
+}
