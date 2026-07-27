@@ -1,0 +1,295 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/helm-unittest/helm-unittest/main/schema/helm-testsuite.json
+suite: app-proxy test
+values:
+  - ../values.yaml
+templates:
+  - templates/**.yaml
+release:
+  name: cf-runtime
+  namespace: codefresh
+  revision: 1
+  upgrade: true
+chart:
+  appVersion: 1.0.0
+tests:
+  - it: Test app-proxy resources are not rendered when disabled
+    set:
+      appProxy.enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: templates/app-proxy/deployment.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/app-proxy/service.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/app-proxy/rbac.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/app-proxy/ingress.yaml
+      - hasDocuments:
+          count: 0
+        template: templates/app-proxy/httproute.yaml
+
+  - it: Test app-proxy deployment default
+    set:
+      appProxy.enabled: true
+    template: templates/app-proxy/deployment.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Deployment
+      - equal:
+          path: metadata.name
+          value: cf-runtime-app-proxy
+      - equal:
+          path: spec.replicas
+          value: 1
+      - isSubset:
+          path: metadata.labels
+          content:
+            codefresh.io/application: app-proxy
+
+  - it: Test app-proxy service default
+    set:
+      appProxy.enabled: true
+    template: templates/app-proxy/service.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Service
+      - equal:
+          path: metadata.name
+          value: cf-runtime-app-proxy
+
+  - it: Test app-proxy rbac default
+    set:
+      appProxy.enabled: true
+    template: templates/app-proxy/rbac.yaml
+    asserts:
+      - hasDocuments:
+          count: 3
+      - isKind:
+          of: ServiceAccount
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: cf-runtime-app-proxy
+        documentIndex: 0
+
+  # Ingress
+
+  - it: Test app-proxy ingress is rendered by default when app-proxy is enabled (backwards compatibility)
+    set:
+      appProxy.enabled: true
+    template: templates/app-proxy/ingress.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Ingress
+
+  - it: Test app-proxy ingress is not rendered when explicitly disabled
+    set:
+      appProxy.enabled: true
+      appProxy.ingress.enabled: false
+      appProxy.ingress.host: runtime.example.com
+    template: templates/app-proxy/ingress.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Test app-proxy ingress is not rendered when app-proxy is disabled, even if ingress is enabled
+    set:
+      appProxy.enabled: false
+      appProxy.ingress.enabled: true
+      appProxy.ingress.host: runtime.example.com
+    template: templates/app-proxy/ingress.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Test app-proxy ingress rendering with host set
+    set:
+      appProxy.enabled: true
+      appProxy.ingress.enabled: true
+      appProxy.ingress.host: runtime.example.com
+    template: templates/app-proxy/ingress.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Ingress
+      - equal:
+          path: apiVersion
+          value: networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: cf-runtime-app-proxy
+      - notExists:
+          path: spec.ingressClassName
+      - notExists:
+          path: spec.tls
+      - equal:
+          path: spec.rules[0].host
+          value: runtime.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /
+      - equal:
+          path: spec.rules[0].http.paths[0].pathType
+          value: ImplementationSpecific
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.name
+          value: cf-runtime-app-proxy
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.number
+          value: 80
+
+  - it: Test app-proxy ingress with custom path, class, tls and annotations
+    set:
+      appProxy.enabled: true
+      appProxy.ingress.enabled: true
+      appProxy.ingress.host: runtime.example.com
+      appProxy.ingress.pathPrefix: /cf-app-proxy
+      appProxy.ingress.class: nginx
+      appProxy.ingress.tlsSecret: tls-cert-app-proxy
+      appProxy.ingress.annotations:
+        nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+    template: templates/app-proxy/ingress.yaml
+    asserts:
+      - equal:
+          path: spec.ingressClassName
+          value: nginx
+      - equal:
+          path: spec.tls
+          value:
+            - hosts:
+                - runtime.example.com
+              secretName: tls-cert-app-proxy
+      - equal:
+          path: spec.rules[0].http.paths[0].path
+          value: /cf-app-proxy
+      - equal:
+          path: metadata.annotations
+          value:
+            nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+
+  # HTTPRoute
+
+  - it: Test app-proxy httproute is not rendered by default
+    set:
+      appProxy.enabled: true
+    template: templates/app-proxy/httproute.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Test app-proxy httproute is not rendered when app-proxy is disabled, even if httpRoute is enabled
+    set:
+      appProxy.enabled: false
+      appProxy.httpRoute.enabled: true
+    template: templates/app-proxy/httproute.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: Test app-proxy httproute default rendering
+    set:
+      appProxy.enabled: true
+      appProxy.httpRoute.enabled: true
+    template: templates/app-proxy/httproute.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: HTTPRoute
+      - equal:
+          path: apiVersion
+          value: gateway.networking.k8s.io/v1
+      - equal:
+          path: metadata.name
+          value: cf-runtime-app-proxy
+      - isSubset:
+          path: metadata.labels
+          content:
+            codefresh.io/application: app-proxy
+      - equal:
+          path: spec.parentRefs
+          value:
+            - name: traefik-gateway
+              namespace: traefik
+      - equal:
+          path: spec.hostnames
+          value:
+            - runtime.example.com
+      - equal:
+          path: spec.rules[0].matches[0].path
+          value:
+            type: PathPrefix
+            value: /
+      - equal:
+          path: spec.rules[0].backendRefs[0]
+          value:
+            name: cf-runtime-app-proxy
+            port: 80
+
+  - it: Test app-proxy httproute with custom pathPrefix, parentRefs, hostnames, labels and annotations
+    set:
+      appProxy.enabled: true
+      appProxy.httpRoute.enabled: true
+      appProxy.httpRoute.pathPrefix: /cf-app-proxy
+      appProxy.httpRoute.parentRefs:
+        - name: my-gateway
+          namespace: my-namespace
+      appProxy.httpRoute.hostnames:
+        - my-runtime.example.com
+      appProxy.httpRoute.labels:
+        alice: bob
+      appProxy.httpRoute.annotations:
+        alice: bob
+    template: templates/app-proxy/httproute.yaml
+    asserts:
+      - equal:
+          path: spec.rules[0].matches[0].path.value
+          value: /cf-app-proxy
+      - equal:
+          path: spec.parentRefs
+          value:
+            - name: my-gateway
+              namespace: my-namespace
+      - equal:
+          path: spec.hostnames
+          value:
+            - my-runtime.example.com
+      - isSubset:
+          path: metadata.labels
+          content:
+            alice: bob
+      - equal:
+          path: metadata.annotations
+          value:
+            alice: bob
+
+  - it: Test app-proxy httproute fails when parentRefs is empty
+    set:
+      appProxy.enabled: true
+      appProxy.httpRoute.enabled: true
+      appProxy.httpRoute.parentRefs: []
+    template: templates/app-proxy/httproute.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: "ERROR: appProxy.httpRoute.parentRefs is required when httpRoute is enabled"
+
+  - it: Test app-proxy httproute fails when hostnames is empty
+    set:
+      appProxy.enabled: true
+      appProxy.httpRoute.enabled: true
+      appProxy.httpRoute.hostnames: []
+    template: templates/app-proxy/httproute.yaml
+    asserts:
+      - failedTemplate:
+          errorMessage: "ERROR: appProxy.httpRoute.hostnames is required when httpRoute is enabled"
