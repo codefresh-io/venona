@@ -11,20 +11,28 @@
 
 ## Changes to the chart
 
-* <description of the change to the chart>
+###  <summary of the change to the chart>
+
+<change details>
 
 
 ## Features and enhancements
 
-* <description of the feature>
+### <summary of the feature>
+
+<feature details>
 
 ## Bug fixes
 
-* <description of the bug fix>
+### <summary of the bug fix>
+
+<bug fix details>
 
 ## Docs
 
-* <description of the documentation change>
+### <summary of the documentation change>
+
+<documentation change details>
 
 <!-- ⚠️ ↑↑↑ Release notes. Do not remove this comment. ↑↑↑ ⚠️ -->
 
