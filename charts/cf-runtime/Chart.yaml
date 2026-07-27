@@ -35,6 +35,10 @@ annotations:
       description: 'Update "gcloud-builder" to "0.5.18". Security fixes.'
     - kind: security
       description: 'Update "cf-app-proxy" to "0.1.3". Security fixes.'
+    - kind: security
+      description: 'Update "dind-volume-utils" to "1.30.9". Security fixes.'
+    - kind: security
+      description: 'Update "dind" to "3.0.20". Security fixes.'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
