@@ -22,8 +22,12 @@
 
 * <description of the bug fix>
 
+## Docs
+
+* <description of the documentation change>
+
 <!-- ⚠️ ↑↑↑ Release notes. Do not remove this comment. ↑↑↑ ⚠️ -->
 
-## Closed tickets
+## Related tickets
 
 * Closes <ticket number, i.e. CFS-15192>
