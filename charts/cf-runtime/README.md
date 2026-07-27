@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.3.8](https://img.shields.io/badge/Version-10.3.8-informational?style=flat-square)
+![Version: 10.4.1](https://img.shields.io/badge/Version-10.4.1-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -456,7 +456,7 @@ storage:
 
 3. Assign IAM role to `dind-volume-provisioner` service account via IRSA (recommended)
 
-> **⚠️ EKS Pod Identity is NOT supported.**
+> **⚠️ dind-volume-provsioner does NOT work with EKS Pod Identity.**
 > Note also that when **both** a Pod Identity association **and** an IRSA annotation exist
 > for the same service account, **Pod Identity takes precedence and silently disables IRSA**.
 > Make sure no Pod Identity association exists for the volume-provisioner service account:
