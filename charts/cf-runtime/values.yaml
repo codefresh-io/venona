@@ -888,6 +888,8 @@ appProxy:
   # Set app-proxy ingress parameters
   # @default -- See below
   ingress:
+    # -- Enable Ingress
+    enabled: true
     # -- Set path prefix for ingress (keep empty for default `/` path)
     pathPrefix: ""
     # -- Set ingress class
@@ -906,6 +908,30 @@ appProxy:
     #   tlsSecret: "tls-cert-app-proxy"
     #   annotations:
     #     nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+  # Set app-proxy HTTPRoute parameters
+  # @default -- See below
+  httpRoute:
+    # -- Enable HTTPRoute
+    enabled: false
+    # -- Set path prefix for httpRoute (keep empty for default `/` path)
+    pathPrefix: ""
+    # -- Required! List of parent Gateway references this HTTPRoute should attach to
+    # ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#parentreference
+    # E.g.
+    # parentRefs:
+    #   - name: traefik-gateway
+    #     namespace: traefik
+    parentRefs: []
+    # -- List of hostnames to be covered by this HTTPRoute
+    # ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#hostname
+    # E.g.
+    # hostnames:
+    #   - runtime.example.com
+    hostnames: []
+    # -- Set annotations on the HTTPRoute resource
+    annotations: {}
+    # -- Set labels on the HTTPRoute resource
+    labels: {}
   # -- Service Account parameters
   serviceAccount:
     # -- Create service account
