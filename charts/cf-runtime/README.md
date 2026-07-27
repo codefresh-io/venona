@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.3.8](https://img.shields.io/badge/Version-10.3.8-informational?style=flat-square)
+![Version: 10.3.9](https://img.shields.io/badge/Version-10.3.9-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -372,17 +372,6 @@ In addition, CronJob that enabled by default runs every 5 minutes and overrides 
 
 `dind-volume-provisioner` should have permissions to create/attach/detach/delete/get EBS volumes
 
-> **⚠️ EKS Pod Identity is NOT supported.**
-> Use one of the three options below (IRSA is recommended).
->
-> Note also that when **both** a Pod Identity association **and** an IRSA annotation exist
-> for the same service account, **Pod Identity takes precedence and silently disables IRSA**.
-> Make sure no Pod Identity association exists for the volume-provisioner service account:
-> ```
-> aws eks list-pod-identity-associations --cluster-name <CLUSTER_NAME> \
->   --query "associations[?serviceAccount=='cf-runtime-volume-provisioner']"
-> ```
-
 Minimal IAM policy for `dind-volume-provisioner`
 
 ```json
@@ -467,8 +456,14 @@ storage:
 
 3. Assign IAM role to `dind-volume-provisioner` service account via IRSA (recommended)
 
-   IRSA (IAM Roles for Service Accounts) works with the SDK version this provisioner ships,
-   unlike Pod Identity (see the warning above).
+> **⚠️ EKS Pod Identity is NOT supported.**
+> Note also that when **both** a Pod Identity association **and** an IRSA annotation exist
+> for the same service account, **Pod Identity takes precedence and silently disables IRSA**.
+> Make sure no Pod Identity association exists for the volume-provisioner service account:
+> ```
+> aws eks list-pod-identity-associations --cluster-name <CLUSTER_NAME> \
+>   --query "associations[?serviceAccount=='cf-runtime-volume-provisioner']"
+> ```
 
    a. Make sure the cluster OIDC provider is registered in IAM (once per cluster).
    Follow the official AWS guide: [Create an IAM OIDC provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html).
