@@ -1,0 +1,32 @@
+charts/cf-runtime/Chart.yaml
+  h_51acfbafc7319b 4,21
+charts/cf-runtime/README.md.gotmpl
+  s_4711032e5393a4::t_5d3b083124c0cd 375-385
+  s_4711032e5393a4::t_3ed4e66ab196a9 468-472,476-477,484-485,488,500-516,536-538,558-568
+  s_4711032e5393a4::t_c6543e6995f1d6 473-475,478-483
+  s_4711032e5393a4::t_1e52c0a8a49555 486-487,497-499,517-535
+  s_4711032e5393a4::t_c92ee4f2e9a913 414-419
+  s_4711032e5393a4::t_8687b8adbca2a5 489-496
+  s_4711032e5393a4::t_cfa8558c35ee5f 569
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "cae6d2d947f899f918acd2c8464f7b168f3fec89",
+  "prompts": {},
+  "humans": {
+    "h_51acfbafc7319b": {
+      "author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  },
+  "sessions": {
+    "s_4711032e5393a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0ce07dfe-fdcc-4d2c-b597-30e78ef0351e",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
