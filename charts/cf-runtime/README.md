@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.3.8](https://img.shields.io/badge/Version-10.3.8-informational?style=flat-square)
+![Version: 10.4.0](https://img.shields.io/badge/Version-10.4.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1225,9 +1225,16 @@ Install the Helm chart
 | appProxy.env.OTEL_TRACES_EXPORTER | string | `"none"` | OTel traces exporter to be used. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
 | appProxy.env.OTEL_TRACES_SAMPLER | string | `"parentbased_always_on"` | OTel sampler to be used for traces. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
 | appProxy.env.PYROSCOPE_SERVER_ADDRESS | string | `""` | Pyroscope server address |
+| appProxy.httpRoute.annotations | object | `{}` | Set annotations on the HTTPRoute resource |
+| appProxy.httpRoute.enabled | bool | `false` |  |
+| appProxy.httpRoute.hostnames | list | `[]` | List of hostnames to be covered by this HTTPRoute ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#hostname E.g. hostnames:   - runtime.example.com |
+| appProxy.httpRoute.labels | object | `{}` | Set labels on the HTTPRoute resource |
+| appProxy.httpRoute.parentRefs | list | `[]` | Required! List of parent Gateway references this HTTPRoute should attach to ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#parentreference E.g. parentRefs:   - name: traefik-gateway     namespace: traefik |
+| appProxy.httpRoute.pathPrefix | string | `""` |  |
 | appProxy.image | object | `{"digest":"sha256:8e7d27e24d0ec25e4825906359395efef0fe89d89b6c44d5a9fbb7b9dee142e7","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.2"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
+| appProxy.ingress.enabled | bool | `true` |  |
 | appProxy.ingress.host | string | `""` | Set DNS hostname the ingress will use |
 | appProxy.ingress.pathPrefix | string | `""` | Set path prefix for ingress (keep empty for default `/` path) |
 | appProxy.ingress.tlsSecret | string | `""` | Set k8s tls secret for the ingress object |
