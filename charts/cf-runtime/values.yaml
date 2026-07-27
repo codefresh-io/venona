@@ -888,6 +888,7 @@ appProxy:
   # Set app-proxy ingress parameters
   # @default -- See below
   ingress:
+    # -- Enable Ingress
     enabled: true
     # -- Set path prefix for ingress (keep empty for default `/` path)
     pathPrefix: ""
@@ -907,7 +908,10 @@ appProxy:
     #   tlsSecret: "tls-cert-app-proxy"
     #   annotations:
     #     nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
+  # Set app-proxy HTTPRoute parameters
+  # @default -- See below
   httpRoute:
+    # -- Enable HTTPRoute
     enabled: false
     # -- Set path prefix for httpRoute (keep empty for default `/` path)
     pathPrefix: ""
