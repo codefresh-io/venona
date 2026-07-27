@@ -400,11 +400,9 @@ Minimal IAM policy for `dind-volume-provisioner`
 }
 ```
 
-> **Availability zone.** `storage.ebs.availabilityZone` is required. The generated
-> StorageClass uses `volumeBindingMode: Immediate`, so the EBS volume is created in that
-> single zone up front. Make sure the `dind` pods can be scheduled onto a node in the same
-> AZ (via `volumeProvisioner`/`runtime.dind` `nodeSelector`/`tolerations`), otherwise the
-> volume will fail to attach across zones.
+> **Availability zone.** `storage.ebs.availabilityZone` supports a single zone only. It must
+> match the AZ that `dind` pods are scheduled onto (via `volumeProvisioner`/`runtime.dind`
+> `nodeSelector`/`tolerations`). For multiple AZs, install multiple runtimes.
 
 There are three options:
 
