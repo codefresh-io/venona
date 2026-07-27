@@ -81,7 +81,7 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 1.2.2-rootless
+      tag: 1.2.3-rootless
       digest: sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f
     resources:
       limits:
@@ -746,7 +746,7 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.2.2-rootless
+        tag: 1.2.3-rootless
         digest: sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f
       rbac:
         enabled: true
@@ -768,7 +768,7 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.2.2-rootless
+        tag: 1.2.3-rootless
         digest: sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f
       affinity: {}
       nodeSelector: {}
@@ -959,7 +959,7 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.16
+    tag: 1.3.38
     digest: sha256:54e9569417218ead346ba67be796025d3d1e0246b503d8cf855a04eb5b45883f
   # -- Add additional env vars
   env: {}
