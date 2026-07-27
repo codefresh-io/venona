@@ -1230,7 +1230,7 @@ Install the Helm chart
 | appProxy.httpRoute.hostnames | list | `[]` | List of hostnames to be covered by this HTTPRoute ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#hostname E.g. hostnames:   - runtime.example.com |
 | appProxy.httpRoute.labels | object | `{}` | Set labels on the HTTPRoute resource |
 | appProxy.httpRoute.parentRefs | list | `[]` | Required! List of parent Gateway references this HTTPRoute should attach to ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#parentreference E.g. parentRefs:   - name: traefik-gateway     namespace: traefik |
-| appProxy.httpRoute.pathPrefix | string | `""` |  |
+| appProxy.httpRoute.pathPrefix | string | `""` | Set path prefix for httpRoute (keep empty for default `/` path) |
 | appProxy.image | object | `{"digest":"sha256:8e7d27e24d0ec25e4825906359395efef0fe89d89b6c44d5a9fbb7b9dee142e7","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.2"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |

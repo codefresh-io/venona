@@ -909,6 +909,7 @@ appProxy:
     #     nginx.ingress.kubernetes.io/whitelist-source-range: 123.123.123.123/130
   httpRoute:
     enabled: false
+    # -- Set path prefix for httpRoute (keep empty for default `/` path)
     pathPrefix: ""
     # -- Required! List of parent Gateway references this HTTPRoute should attach to
     # ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#parentreference
