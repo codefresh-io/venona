@@ -1,6 +1,8 @@
 <!-- Remove unused sections below. -->
 
-<!-- ⚠️ ↓↓↓ Release notes. Do not remove this comment. ↓↓↓ ⚠️ -->
+# Changelog
+
+<!-- ⚠️ ↓↓↓ Release notes. Do not remove this comment. Everything inside will be included in the release notes. ↓↓↓ ⚠️ -->
 
 ## Breaking changes
 
@@ -34,8 +36,8 @@
 
 <documentation change details>
 
-<!-- ⚠️ ↑↑↑ Release notes. Do not remove this comment. ↑↑↑ ⚠️ -->
+<!-- ⚠️ ↑↑↑ Release notes. Do not remove this comment. Everything inside will be included in the release notes. ↑↑↑ ⚠️ -->
 
-## Related tickets
+# Related tickets
 
 * Closes <ticket number, i.e. CFS-15192>
