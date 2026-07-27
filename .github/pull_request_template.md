@@ -1,6 +1,6 @@
-<!-- 
-Remove unused sections.
- -->
+<!-- Remove unused sections below. -->
+
+<!-- ⚠️ ↓↓↓ Release notes. Do not remove this comment. ↓↓↓ ⚠️ -->
 
 ## Breaking changes
 
@@ -21,3 +21,9 @@ Remove unused sections.
 ## Bug fixes
 
 * <description of the bug fix>
+
+<!-- ⚠️ ↑↑↑ Release notes. Do not remove this comment. ↑↑↑ ⚠️ -->
+
+## Closed tickets
+
+* Closes <ticket number, i.e. CFS-15192>
