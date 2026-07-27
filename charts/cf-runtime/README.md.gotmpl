@@ -372,6 +372,17 @@ In addition, CronJob that enabled by default runs every 5 minutes and overrides 
 
 `dind-volume-provisioner` should have permissions to create/attach/detach/delete/get EBS volumes
 
+> **⚠️ EKS Pod Identity is NOT supported.**
+> Use one of the three options below (IRSA is recommended).
+>
+> Note also that when **both** a Pod Identity association **and** an IRSA annotation exist
+> for the same service account, **Pod Identity takes precedence and silently disables IRSA**.
+> Make sure no Pod Identity association exists for the volume-provisioner service account:
+> ```
+> aws eks list-pod-identity-associations --cluster-name <CLUSTER_NAME> \
+>   --query "associations[?serviceAccount=='cf-runtime-volume-provisioner']"
+> ```
+
 Minimal IAM policy for `dind-volume-provisioner`
 
 ```json
@@ -399,6 +410,12 @@ Minimal IAM policy for `dind-volume-provisioner`
   ]
 }
 ```
+
+> **Availability zone.** `storage.ebs.availabilityZone` is required. The generated
+> StorageClass uses `volumeBindingMode: Immediate`, so the EBS volume is created in that
+> single zone up front. Make sure the `dind` pods can be scheduled onto a node in the same
+> AZ (via `volumeProvisioner`/`runtime.dind` `nodeSelector`/`tolerations`), otherwise the
+> volume will fail to attach across zones.
 
 There are three options:
 
@@ -448,7 +465,77 @@ storage:
     #   key:
 ```
 
-3. Assign IAM role to `dind-volume-provisioner` service account
+3. Assign IAM role to `dind-volume-provisioner` service account via IRSA (recommended)
+
+   IRSA (IAM Roles for Service Accounts) works with the SDK version this provisioner ships,
+   unlike Pod Identity (see the warning above).
+
+   a. Make sure the cluster OIDC provider is registered in IAM (once per cluster).
+   Follow the official AWS guide: [Create an IAM OIDC provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html).
+   The simplest way is with `eksctl`, which resolves the OIDC issuer and thumbprint for you:
+
+   ```
+   cluster_name=<CLUSTER_NAME>
+   oidc_id=$(aws eks describe-cluster --name $cluster_name --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+   # check whether a provider already exists (skip the next command if it returns output):
+   aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4
+   # create it if missing:
+   eksctl utils associate-iam-oidc-provider --cluster $cluster_name --approve
+   ```
+
+   b. Create a role whose trust policy allows this service account to assume it via web
+   identity, and attach the minimal IAM policy (from above) to it.
+
+   Get `<OIDC_ISSUER_HOST>` (the issuer host + path, without the `https://` prefix, e.g.
+   `oidc.eks.eu-north-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E`):
+
+   ```
+   aws eks describe-cluster --name <CLUSTER_NAME> \
+     --query 'cluster.identity.oidc.issuer' --output text | sed 's~https://~~'
+   ```
+
+   Save the trust policy to `trust-policy.json` (replace `<ACCOUNT_ID>`, `<OIDC_ISSUER_HOST>`
+   and `<NAMESPACE>`):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": { "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/<OIDC_ISSUER_HOST>" },
+         "Action": "sts:AssumeRoleWithWebIdentity",
+         "Condition": {
+           "StringEquals": {
+             "<OIDC_ISSUER_HOST>:sub": "system:serviceaccount:<NAMESPACE>:cf-runtime-volume-provisioner",
+             "<OIDC_ISSUER_HOST>:aud": "sts.amazonaws.com"
+           }
+         }
+       }
+     ]
+   }
+   ```
+
+   Save the minimal IAM policy (from above) to `dind-volume-provisioner-policy.json`, then
+   create the role and attach the policy, reading both from the files:
+
+   ```
+   # create the role with the trust policy
+   aws iam create-role \
+     --role-name cf-runtime-volume-provisioner \
+     --assume-role-policy-document file://trust-policy.json
+
+   # attach the permissions policy (inline)
+   aws iam put-role-policy \
+     --role-name cf-runtime-volume-provisioner \
+     --policy-name dind-volume-provisioner-ebs \
+     --policy-document file://dind-volume-provisioner-policy.json
+
+   # role ARN to use in the chart values below
+   aws iam get-role --role-name cf-runtime-volume-provisioner --query 'Role.Arn' --output text
+   ```
+
+   c. Annotate the service account with the role ARN via chart values:
 
 ```yaml
 storage:
@@ -467,6 +554,18 @@ volumeProvisioner:
     annotations:
       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
+
+> **StorageClass is immutable.** The chart generates a StorageClass from `storage.ebs.*`.
+> Its `parameters` field cannot be changed in place, so if you later modify AZ / volume type
+> and run `helm upgrade`, it fails with `field is immutable`. Delete the StorageClass first,
+> then upgrade — the chart recreates it:
+> ```
+> kubectl delete storageclass dind-local-volumes-runner-<NAMESPACE>
+> helm upgrade ...
+> ```
+> IRSA env vars (`AWS_ROLE_ARN`, `AWS_WEB_IDENTITY_TOKEN_FILE`) are injected only when the pod
+> is created. If you changed only the service-account annotation, restart the deployment:
+> `kubectl rollout restart deployment cf-runtime-volume-provisioner -n <NAMESPACE>`.
 
 ### Custom volume mounts
 
