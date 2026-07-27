@@ -197,10 +197,15 @@ tests:
       - hasDocuments:
           count: 0
 
-  - it: Test app-proxy httproute default rendering
+  - it: Test app-proxy httproute rendering with dummy defaults
     set:
       appProxy.enabled: true
       appProxy.httpRoute.enabled: true
+      appProxy.httpRoute.parentRefs:
+        - name: traefik-gateway
+          namespace: traefik
+      appProxy.httpRoute.hostnames:
+        - runtime.example.com
     template: templates/app-proxy/httproute.yaml
     asserts:
       - hasDocuments:
@@ -288,6 +293,9 @@ tests:
     set:
       appProxy.enabled: true
       appProxy.httpRoute.enabled: true
+      appProxy.httpRoute.parentRefs:
+        - name: my-gateway
+          namespace: my-namespace
       appProxy.httpRoute.hostnames: []
     template: templates/app-proxy/httproute.yaml
     asserts:
