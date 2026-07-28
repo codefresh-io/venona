@@ -507,7 +507,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.3.0
+      tag: 3.3.9
       pullPolicy: IfNotPresent
       digest: sha256:8a0d47eefc6648902fc7fbde132206750257a8cc703d6d871296f8eb2438b285
     # -- Set container command.
@@ -537,22 +537,22 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.29
+        tag: 2.0.36
         digest: sha256:d1a6c23addb6e652f26cef3d5dde3fa65ea95662e5349ccf4431b8161e9efc60
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.6.7
+        tag: 1.6.16
         digest: sha256:65070d16c54e84ce0bfd16d2e7389d82a5ee1215e3431aa441558dfbc843fdb2
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.39
+        tag: 8.0.44
         digest: sha256:18b95752bbd76a37eecc69b41186ec3987d5a86cf28bd91485fbc00087922463
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.32
+        tag: 6.0.39
         digest: sha256:b1bc264903ff747c5496fd6a851f5586fd17e1da6550058a2af4689cd69d8155
       fs-ops:
         registry: quay.io
@@ -577,17 +577,17 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.15.7
+        tag: 0.15.12
         digest: sha256:1c1ff75feceb8d4e6ffa09b933605d0a1476bf64890f247be186da3200a9d004
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 3.1.1-cf.1
+        tag: 4.0.0
         digest: sha256:6097ec0f8f6426c5c71a080795643189cc8e7400899b70d49facdceb498916de
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
-        tag: 0.5.13
+        tag: 0.5.19
         digest: sha256:dbc469bb080a358011aabde00117d6e4505a2d4fa9a2bffa1a8ce58cad1ed870
       default-qemu:
         registry: docker.io
@@ -826,7 +826,7 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.2
+    tag: 0.1.3
     digest: sha256:8e7d27e24d0ec25e4825906359395efef0fe89d89b6c44d5a9fbb7b9dee142e7
   # -- Add additional env vars
   env:
@@ -985,7 +985,7 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.38
+    tag: 1.3.42
     digest: sha256:54e9569417218ead346ba67be796025d3d1e0246b503d8cf855a04eb5b45883f
   # -- Add additional env vars
   env: {}
