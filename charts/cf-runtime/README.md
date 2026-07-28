@@ -401,8 +401,8 @@ Minimal IAM policy for `dind-volume-provisioner`
 ```
 
 > **Availability zone.** `storage.ebs.availabilityZone` supports a single zone only. It must
-> match the AZ that `dind` pods are scheduled onto (via `volumeProvisioner`/`runtime.dind`
-> `nodeSelector`/`tolerations`). For multiple AZs, install multiple runtimes.
+> match the AZ that `dind` pods are scheduled onto (via .Values.runtime.dind.nodeSelector or .Values.runtime.dind.tolerations).
+> For multiple AZs, install multiple runtimes.
 
 There are three options:
 
@@ -454,30 +454,20 @@ storage:
 
 3. Assign IAM role to `dind-volume-provisioner` service account via IRSA (recommended)
 
-> **⚠️ dind-volume-provsioner does NOT work with EKS Pod Identity.**
-> Note also that when **both** a Pod Identity association **and** an IRSA annotation exist
-> for the same service account, **Pod Identity takes precedence and silently disables IRSA**.
-> Make sure no Pod Identity association exists for the volume-provisioner service account:
-> ```
-> aws eks list-pod-identity-associations --cluster-name <CLUSTER_NAME> \
->   --query "associations[?serviceAccount=='cf-runtime-volume-provisioner']"
-> ```
-
    a. Make sure the cluster OIDC provider is registered in IAM (once per cluster).
    Follow the official AWS guide: [Create an IAM OIDC provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html).
    The simplest way is with `eksctl`, which resolves the OIDC issuer and thumbprint for you:
 
    ```
-   cluster_name=<CLUSTER_NAME>
-   oidc_id=$(aws eks describe-cluster --name $cluster_name --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+   oidc_id=$(aws eks describe-cluster --name <CLUSTER_NAME> --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
    # check whether a provider already exists (skip the next command if it returns output):
    aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4
    # create it if missing:
-   eksctl utils associate-iam-oidc-provider --cluster $cluster_name --approve
+   eksctl utils associate-iam-oidc-provider --cluster <CLUSTER_NAME> --approve
    ```
 
    b. Create a role whose trust policy allows this service account to assume it via web
-   identity, and attach the minimal IAM policy (from above) to it.
+   identity, and attach the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to it.
 
    Get `<OIDC_ISSUER_HOST>` (the issuer host + path, without the `https://` prefix, e.g.
    `oidc.eks.eu-north-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E`):
@@ -509,7 +499,7 @@ storage:
    }
    ```
 
-   Save the minimal IAM policy (from above) to `dind-volume-provisioner-policy.json`, then
+   Save the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to `dind-volume-provisioner-policy.json`, then
    create the role and attach the policy, reading both from the files:
 
    ```
