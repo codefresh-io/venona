@@ -17,6 +17,8 @@ annotations:
   artifacthub.io/containsSecurityUpdates: "true"
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
+    - kind: fixed
+      description: 'corrected docs for attaching EBS volumes'
     - kind: security
       description: 'Update "cli" to "1.2.3". Security fixes.'
     - kind: security
