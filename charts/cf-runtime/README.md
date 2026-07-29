@@ -400,6 +400,10 @@ Minimal IAM policy for `dind-volume-provisioner`
 }
 ```
 
+> **Availability zone.** `storage.ebs.availabilityZone` supports a single zone only. It must
+> match the AZ that `dind` pods are scheduled onto (via .Values.runtime.dind.nodeSelector or .Values.runtime.dind.tolerations).
+> For multiple AZs, install multiple runtimes.
+
 There are three options:
 
 1. Run `dind-volume-provisioner` pod on the node/node-group with IAM role
@@ -448,7 +452,73 @@ storage:
     #   key:
 ```
 
-3. Assign IAM role to `dind-volume-provisioner` service account
+3. Assign IAM role to `dind-volume-provisioner` service account via IRSA (recommended)
+
+   a. Make sure the cluster OIDC provider is registered in IAM (once per cluster).
+   Follow the official AWS guide: [Create an IAM OIDC provider for your cluster](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html).
+   The simplest way is with `eksctl`, which resolves the OIDC issuer and thumbprint for you:
+
+   ```
+   oidc_id=$(aws eks describe-cluster --name <CLUSTER_NAME> --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+   # check whether a provider already exists (skip the next command if it returns output):
+   aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4
+   # create it if missing:
+   eksctl utils associate-iam-oidc-provider --cluster <CLUSTER_NAME> --approve
+   ```
+
+   b. Create a role whose trust policy allows this service account to assume it via web
+   identity, and attach the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to it.
+
+   Get `<OIDC_ISSUER_HOST>` (the issuer host + path, without the `https://` prefix, e.g.
+   `oidc.eks.eu-north-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E`):
+
+   ```
+   aws eks describe-cluster --name <CLUSTER_NAME> \
+     --query 'cluster.identity.oidc.issuer' --output text | sed 's~https://~~'
+   ```
+
+   Save the trust policy to `trust-policy.json` (replace `<ACCOUNT_ID>`, `<OIDC_ISSUER_HOST>`
+   and `<NAMESPACE>`):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": { "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/<OIDC_ISSUER_HOST>" },
+         "Action": "sts:AssumeRoleWithWebIdentity",
+         "Condition": {
+           "StringEquals": {
+             "<OIDC_ISSUER_HOST>:sub": "system:serviceaccount:<NAMESPACE>:cf-runtime-volume-provisioner",
+             "<OIDC_ISSUER_HOST>:aud": "sts.amazonaws.com"
+           }
+         }
+       }
+     ]
+   }
+   ```
+
+   Save the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to `dind-volume-provisioner-policy.json`, then
+   create the role and attach the policy, reading both from the files:
+
+   ```
+   # create the role with the trust policy
+   aws iam create-role \
+     --role-name cf-runtime-volume-provisioner \
+     --assume-role-policy-document file://trust-policy.json
+
+   # attach the permissions policy (inline)
+   aws iam put-role-policy \
+     --role-name cf-runtime-volume-provisioner \
+     --policy-name dind-volume-provisioner-ebs \
+     --policy-document file://dind-volume-provisioner-policy.json
+
+   # role ARN to use in the chart values below
+   aws iam get-role --role-name cf-runtime-volume-provisioner --query 'Role.Arn' --output text
+   ```
+
+   c. Annotate the service account with the role ARN via chart values:
 
 ```yaml
 storage:
@@ -467,6 +537,18 @@ volumeProvisioner:
     annotations:
       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
+
+> **StorageClass is immutable.** The chart generates a StorageClass from `storage.ebs.*`.
+> Its `parameters` field cannot be changed in place, so if you later modify AZ / volume type
+> and run `helm upgrade`, it fails with `field is immutable`. Delete the StorageClass first,
+> then upgrade — the chart recreates it:
+> ```
+> kubectl delete storageclass dind-local-volumes-runner-<NAMESPACE>
+> helm upgrade ...
+> ```
+> IRSA env vars (`AWS_ROLE_ARN`, `AWS_WEB_IDENTITY_TOKEN_FILE`) are injected only when the pod
+> is created. If you changed only the service-account annotation, restart the deployment:
+> `kubectl rollout restart deployment cf-runtime-volume-provisioner -n <NAMESPACE>`.
 
 ### Custom volume mounts
 
@@ -1231,7 +1313,7 @@ Install the Helm chart
 | appProxy.httpRoute.labels | object | `{}` | Set labels on the HTTPRoute resource |
 | appProxy.httpRoute.parentRefs | list | `[]` | Required! List of parent Gateway references this HTTPRoute should attach to ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#parentreference E.g. parentRefs:   - name: traefik-gateway     namespace: traefik |
 | appProxy.httpRoute.pathPrefix | string | `""` | Set path prefix for httpRoute (keep empty for default `/` path) |
-| appProxy.image | object | `{"digest":"sha256:8e7d27e24d0ec25e4825906359395efef0fe89d89b6c44d5a9fbb7b9dee142e7","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.2"}` | Set image |
+| appProxy.image | object | `{"digest":"sha256:94847386db064a87d3ddcbfded5e5fd393f8695ddfe05fd406c152e0d2efe9a7","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.3"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.enabled | bool | `true` | Enable Ingress |
@@ -1334,7 +1416,7 @@ Install the Helm chart
 | runner.env | object | `{"NEW_RELIC_ENABLED":"false"}` | Add additional env vars |
 | runner.env.NEW_RELIC_ENABLED | string | `"false"` | DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead. |
 | runner.image | object | `{"digest":"sha256:836510a8579e4985f046744cb409ae895c62aa01117884004887f7c061aad636","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.10"}` | Set image |
-| runner.init | object | `{"image":{"digest":"sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.2-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
+| runner.init | object | `{"image":{"digest":"sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.3-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
@@ -1355,7 +1437,7 @@ Install the Helm chart
 | runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
 | runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"},"image":{"digest":"sha256:e5bbff298ca7ea588f4d65f49787c11dae5c3a397ebe07fecb35d10f061c7b83","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"29.6.1-3.0.19"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40","registry":"docker.io","repository":"alpine","tag":3.23},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"},"image":{"digest":"sha256:254404ebc775b028d4843abd72e3148ec460a68e44c8e7e3c848377c0c195721","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.20"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40","registry":"docker.io","repository":"alpine","tag":3.23},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.containerSecurityContext | object | `{}` | Set container security context. |
 | runtime.dind.env | object | `{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"}` | Set additional env vars. |
@@ -1366,7 +1448,7 @@ Install the Helm chart
 | runtime.dind.env.IMAGE_RETAIN_PERIOD | string | `"14400"` | Do not delete Docker images if they have events newer than `NOW minus IMAGE_RETAIN_PERIOD` |
 | runtime.dind.env.INODES_USAGE_THRESHOLD | string | `"0.8"` | Run cleanup if current inodes usage exceeds INODES_USAGE_THRESHOLD |
 | runtime.dind.env.VOLUMES_RETAIN_PERIOD | string | `"14400"` | Do not delete Docker volumes if they have events newer than `NOW minus VOLUMES_RETAIN_PERIOD` |
-| runtime.dind.image | object | `{"digest":"sha256:e5bbff298ca7ea588f4d65f49787c11dae5c3a397ebe07fecb35d10f061c7b83","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"29.6.1-3.0.19"}` | Set dind image. |
+| runtime.dind.image | object | `{"digest":"sha256:254404ebc775b028d4843abd72e3148ec460a68e44c8e7e3c848377c0c195721","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.20"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |
@@ -1387,7 +1469,7 @@ Install the Helm chart
 | runtime.dind.userVolumeMounts | object | `{}` | Add extra volume mounts |
 | runtime.dind.userVolumes | object | `{}` | Add extra volumes |
 | runtime.dindDaemon | object | See below | DinD pod daemon config |
-| runtime.engine | object | `{"affinity":{},"command":["node","dist/server/index.js"],"env":{"CF_TELEMETRY_LOGS_LEVEL":"debug","CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION":"false","CF_TELEMETRY_OTEL_ENABLE":"true","CF_TELEMETRY_PROMETHEUS_ENABLE":"false","CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS":"false","CF_TELEMETRY_PROMETHEUS_HOST":"0.0.0.0","CF_TELEMETRY_PROMETHEUS_PORT":"9100","CF_TELEMETRY_PYROSCOPE_ENABLE":"false","CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_SCRAPE_TIMEOUT_MS":"0","NEW_RELIC_ENABLED":"false","OTEL_EXPORTER_OTLP_COMPRESSION":"gzip","OTEL_EXPORTER_OTLP_ENDPOINT":"http://localhost:4317","OTEL_EXPORTER_OTLP_PROTOCOL":"grpc","OTEL_EXPORTER_PROMETHEUS_HOST":"0.0.0.0","OTEL_EXPORTER_PROMETHEUS_PORT":"9464","OTEL_LOGS_EXPORTER":"none","OTEL_METRICS_EXPORTER":"otlp","OTEL_METRIC_EXPORT_INTERVAL":"10000","OTEL_METRIC_EXPORT_TIMEOUT":"5000","OTEL_SEMCONV_STABILITY_OPT_IN":"http","OTEL_TRACES_EXPORTER":"none","OTEL_TRACES_SAMPLER":"parentbased_always_on","PYROSCOPE_SERVER_ADDRESS":"","TRUSTED_QEMU_IMAGES":"tonistiigi/binfmt"},"image":{"digest":"sha256:8a0d47eefc6648902fc7fbde132206750257a8cc703d6d871296f8eb2438b285","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"3.3.0"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"alpine":{"digest":"sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b","registry":"docker.io","repository":"alpine","tag":"latest"},"compose":{"digest":"sha256:ffee581569a16ff77266fe11669415f54ffe12619e8814267620386438067018","registry":"quay.io","repository":"codefresh/compose","tag":"v5.2.0-1.6.7"},"container-logger":{"digest":"sha256:d1a6c23addb6e652f26cef3d5dde3fa65ea95662e5349ccf4431b8161e9efc60","registry":"quay.io","repository":"codefresh/cf-container-logger","tag":"2.0.29"},"cosign-image-signer":{"digest":"sha256:6097ec0f8f6426c5c71a080795643189cc8e7400899b70d49facdceb498916de","registry":"quay.io","repository":"codefresh/cf-cosign-image-signer","tag":"3.1.1-cf.1"},"default-qemu":{"digest":"sha256:d3b963f787999e6c0219a48dba02978769286ff61a5f4d26245cb6a6e5567ea3","registry":"docker.io","repository":"tonistiigi/binfmt","tag":"qemu-v10.2.1"},"docker-builder":{"digest":"sha256:65070d16c54e84ce0bfd16d2e7389d82a5ee1215e3431aa441558dfbc843fdb2","registry":"quay.io","repository":"codefresh/cf-docker-builder","tag":"1.6.7"},"docker-puller":{"digest":"sha256:18b95752bbd76a37eecc69b41186ec3987d5a86cf28bd91485fbc00087922463","registry":"quay.io","repository":"codefresh/cf-docker-puller","tag":"8.0.39"},"docker-pusher":{"digest":"sha256:b1bc264903ff747c5496fd6a851f5586fd17e1da6550058a2af4689cd69d8155","registry":"quay.io","repository":"codefresh/cf-docker-pusher","tag":"6.0.32"},"fs-ops":{"digest":"sha256:1f7ab2fddb3b8bb4153046261367e296c6c9ac3b224f48cd2028371a9f0e2bcf","registry":"quay.io","repository":"codefresh/fs-ops","tag":"1.2.13"},"gc-builder":{"digest":"sha256:dbc469bb080a358011aabde00117d6e4505a2d4fa9a2bffa1a8ce58cad1ed870","registry":"quay.io","repository":"codefresh/gcloud-builder","tag":"0.5.13"},"git-cloner":{"digest":"sha256:d5eae428c4896847795202036645a90fdad5f2f68a3eb08bf8ca7e65e450b5ed","registry":"quay.io","repository":"codefresh/cf-git-cloner","tag":"10.3.13"},"kube-deploy":{"digest":"sha256:a9642f66c7696367b43f2931bab6f647f9f91262e194609e64a19ea362a7c873","registry":"quay.io","repository":"codefresh/cf-deploy-kubernetes","tag":"18.0.2"},"pipeline-debugger":{"digest":"sha256:7a5890afcfdad4a9aa4eec1a218cb468d52855540c847b3809085415751bbaa7","registry":"quay.io","repository":"codefresh/cf-debugger","tag":"1.3.14"},"template-engine":{"digest":"sha256:1c1ff75feceb8d4e6ffa09b933605d0a1476bf64890f247be186da3200a9d004","registry":"quay.io","repository":"codefresh/pikolo","tag":"0.15.7"}},"runtimeImagesRegistry":"","schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":180,"tolerations":[],"userEnvVars":[],"workflowLimits":{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_POST_STEPS_GRACE_PERIOD_MINUTES":30,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
+| runtime.engine | object | `{"affinity":{},"command":["node","dist/server/index.js"],"env":{"CF_TELEMETRY_LOGS_LEVEL":"debug","CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION":"false","CF_TELEMETRY_OTEL_ENABLE":"true","CF_TELEMETRY_PROMETHEUS_ENABLE":"false","CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS":"false","CF_TELEMETRY_PROMETHEUS_HOST":"0.0.0.0","CF_TELEMETRY_PROMETHEUS_PORT":"9100","CF_TELEMETRY_PYROSCOPE_ENABLE":"false","CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_SCRAPE_TIMEOUT_MS":"0","NEW_RELIC_ENABLED":"false","OTEL_EXPORTER_OTLP_COMPRESSION":"gzip","OTEL_EXPORTER_OTLP_ENDPOINT":"http://localhost:4317","OTEL_EXPORTER_OTLP_PROTOCOL":"grpc","OTEL_EXPORTER_PROMETHEUS_HOST":"0.0.0.0","OTEL_EXPORTER_PROMETHEUS_PORT":"9464","OTEL_LOGS_EXPORTER":"none","OTEL_METRICS_EXPORTER":"otlp","OTEL_METRIC_EXPORT_INTERVAL":"10000","OTEL_METRIC_EXPORT_TIMEOUT":"5000","OTEL_SEMCONV_STABILITY_OPT_IN":"http","OTEL_TRACES_EXPORTER":"none","OTEL_TRACES_SAMPLER":"parentbased_always_on","PYROSCOPE_SERVER_ADDRESS":"","TRUSTED_QEMU_IMAGES":"tonistiigi/binfmt"},"image":{"digest":"sha256:90a745917e33f03082e0c6ac6f95b5da1240e0b3020b781ebf5f639d66038b90","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"3.3.5"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"cpu":"1000m","memory":"2048Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"runtimeImages":{"alpine":{"digest":"sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b","registry":"docker.io","repository":"alpine","tag":"latest"},"compose":{"digest":"sha256:ffee581569a16ff77266fe11669415f54ffe12619e8814267620386438067018","registry":"quay.io","repository":"codefresh/compose","tag":"v5.2.0-1.6.7"},"container-logger":{"digest":"sha256:872b08904591ecfd7baf7d2c7d29a95644e169ea2b3440d0d63123ba86dcd2db","registry":"quay.io","repository":"codefresh/cf-container-logger","tag":"2.0.33"},"cosign-image-signer":{"digest":"sha256:b1eb6fe0de7ab5ad2dd0ec7a6463eb3b4c38035f9e2fa38410d2a06ed24ef6c0","registry":"quay.io","repository":"codefresh/cf-cosign-image-signer","tag":"3.1.1-cf.2"},"default-qemu":{"digest":"sha256:d3b963f787999e6c0219a48dba02978769286ff61a5f4d26245cb6a6e5567ea3","registry":"docker.io","repository":"tonistiigi/binfmt","tag":"qemu-v10.2.1"},"docker-builder":{"digest":"sha256:8b190ccc955916f3dac9de7d09b3ac87a5f7709ae15d487e53ca2e13ad86b5a3","registry":"quay.io","repository":"codefresh/cf-docker-builder","tag":"1.6.13"},"docker-puller":{"digest":"sha256:dedac5d74953ce23e19db1749e1d17ea2730750dcaa93acbd6d5336b97acc208","registry":"quay.io","repository":"codefresh/cf-docker-puller","tag":"8.0.40"},"docker-pusher":{"digest":"sha256:b0e261cbb2e2143777f3647e9db82d8f4cdae03308de703c1ee676afc90e5120","registry":"quay.io","repository":"codefresh/cf-docker-pusher","tag":"6.0.39"},"fs-ops":{"digest":"sha256:1f7ab2fddb3b8bb4153046261367e296c6c9ac3b224f48cd2028371a9f0e2bcf","registry":"quay.io","repository":"codefresh/fs-ops","tag":"1.2.13"},"gc-builder":{"digest":"sha256:e43f05470f4579ed5788f1e8f39b4e398c69dd3c7e189e2eb80ef694bef616cf","registry":"quay.io","repository":"codefresh/gcloud-builder","tag":"0.5.18"},"git-cloner":{"digest":"sha256:d5eae428c4896847795202036645a90fdad5f2f68a3eb08bf8ca7e65e450b5ed","registry":"quay.io","repository":"codefresh/cf-git-cloner","tag":"10.3.13"},"kube-deploy":{"digest":"sha256:a9642f66c7696367b43f2931bab6f647f9f91262e194609e64a19ea362a7c873","registry":"quay.io","repository":"codefresh/cf-deploy-kubernetes","tag":"18.0.2"},"pipeline-debugger":{"digest":"sha256:7a5890afcfdad4a9aa4eec1a218cb468d52855540c847b3809085415751bbaa7","registry":"quay.io","repository":"codefresh/cf-debugger","tag":"1.3.14"},"template-engine":{"digest":"sha256:1c1ff75feceb8d4e6ffa09b933605d0a1476bf64890f247be186da3200a9d004","registry":"quay.io","repository":"codefresh/pikolo","tag":"0.15.7"}},"runtimeImagesRegistry":"","schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":180,"tolerations":[],"userEnvVars":[],"workflowLimits":{"MAXIMUM_ALLOWED_TIME_BEFORE_PRE_STEPS_SUCCESS":600,"MAXIMUM_ALLOWED_WORKFLOW_AGE_BEFORE_TERMINATION":86400,"MAXIMUM_ELECTED_STATE_AGE_ALLOWED":900,"MAXIMUM_POST_STEPS_GRACE_PERIOD_MINUTES":30,"MAXIMUM_RETRY_ATTEMPTS_ALLOWED":20,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED":900,"MAXIMUM_TERMINATING_STATE_AGE_ALLOWED_WITHOUT_UPDATE":300,"TIME_ENGINE_INACTIVE_UNTIL_TERMINATION":300,"TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY":60,"TIME_INACTIVE_UNTIL_TERMINATION":2700}}` | Parameters for Engine pod (aka "pipeline" orchestrator). |
 | runtime.engine.affinity | object | `{}` | Set affinity |
 | runtime.engine.command | list | `["node","dist/server/index.js"]` | Set container command. |
 | runtime.engine.env | object | `{"CF_TELEMETRY_LOGS_LEVEL":"debug","CF_TELEMETRY_OTEL_ALLOW_HTTP_INSTRUMENTATION":"false","CF_TELEMETRY_OTEL_ENABLE":"true","CF_TELEMETRY_PROMETHEUS_ENABLE":"false","CF_TELEMETRY_PROMETHEUS_ENABLE_PROCESS_METRICS":"false","CF_TELEMETRY_PROMETHEUS_HOST":"0.0.0.0","CF_TELEMETRY_PROMETHEUS_PORT":"9100","CF_TELEMETRY_PYROSCOPE_ENABLE":"false","CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS":1000,"DOCKER_REQUEST_TIMEOUT_MS":30000,"FORCE_COMPOSE_SERIAL_PULL":false,"LOGGER_LEVEL":"debug","LOG_OUTGOING_HTTP_REQUESTS":false,"METRICS_SCRAPE_TIMEOUT_MS":"0","NEW_RELIC_ENABLED":"false","OTEL_EXPORTER_OTLP_COMPRESSION":"gzip","OTEL_EXPORTER_OTLP_ENDPOINT":"http://localhost:4317","OTEL_EXPORTER_OTLP_PROTOCOL":"grpc","OTEL_EXPORTER_PROMETHEUS_HOST":"0.0.0.0","OTEL_EXPORTER_PROMETHEUS_PORT":"9464","OTEL_LOGS_EXPORTER":"none","OTEL_METRICS_EXPORTER":"otlp","OTEL_METRIC_EXPORT_INTERVAL":"10000","OTEL_METRIC_EXPORT_TIMEOUT":"5000","OTEL_SEMCONV_STABILITY_OPT_IN":"http","OTEL_TRACES_EXPORTER":"none","OTEL_TRACES_SAMPLER":"parentbased_always_on","PYROSCOPE_SERVER_ADDRESS":"","TRUSTED_QEMU_IMAGES":"tonistiigi/binfmt"}` | Set additional env vars. |
@@ -1420,7 +1502,7 @@ Install the Helm chart
 | runtime.engine.env.OTEL_TRACES_SAMPLER | string | `"parentbased_always_on"` | OTel sampler to be used for traces. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
 | runtime.engine.env.PYROSCOPE_SERVER_ADDRESS | string | `""` | Pyroscope server address |
 | runtime.engine.env.TRUSTED_QEMU_IMAGES | string | `"tonistiigi/binfmt"` | Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.DEFAULT_QEMU_IMAGE value |
-| runtime.engine.image | object | `{"digest":"sha256:8a0d47eefc6648902fc7fbde132206750257a8cc703d6d871296f8eb2438b285","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"3.3.0"}` | Set image. |
+| runtime.engine.image | object | `{"digest":"sha256:90a745917e33f03082e0c6ac6f95b5da1240e0b3020b781ebf5f639d66038b90","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"3.3.5"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |
 | runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.engine.podLabels | object | `{}` | Set pod labels. |
@@ -1447,7 +1529,7 @@ Install the Helm chart
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
-| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:32f4569f55f69ff9673cfd376b9321afd0bdbf889c5fbd320cf4b4421a160d7f","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.2-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
+| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.3-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
