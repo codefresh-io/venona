@@ -18,7 +18,7 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Release new chart'
+      description: 'Release 10.4.2'
       links:
         - name: 'Release notes'
           url: 'https://github.com/codefresh-io/venona/releases/tag/cf-runtime-10.4.2-helm'
