@@ -3,7 +3,16 @@ set -eou xtrace
 
 MYDIR=$(dirname $0)
 CHARTDIR="${MYDIR}/../charts/cf-runtime"
-VALUES_FILE="${CHARTDIR}/values.yaml"
+
+# $1: target file (relative to CHARTDIR) to update in place. Default: values.yaml
+# $2: base file (relative to CHARTDIR) used only as a fallback source for
+#     registry/repository when the target is a partial overlay (e.g. rootless
+#     values files that only override tag/digest). Default: same as target.
+TARGET_FILE_NAME="${1:-values.yaml}"
+BASE_FILE_NAME="${2:-$TARGET_FILE_NAME}"
+
+VALUES_FILE="${CHARTDIR}/${TARGET_FILE_NAME}"
+BASE_FILE="${CHARTDIR}/${BASE_FILE_NAME}"
 
 get_image_digest() {
   local registry=$1
@@ -20,8 +29,9 @@ get_image_digest() {
   fi
 }
 
-# find paths to all maps having registry/repository/tag
-yq -o=json '.. | select(type == "!!map" and has("registry") and has("repository") and has("tag")) | path' "$VALUES_FILE" |
+# find paths to all maps having tag/digest (registry/repository may live only
+# in the base file, e.g. for rootless overlay files)
+yq -o=json '.. | select(type == "!!map" and has("tag") and has("digest")) | path' "$VALUES_FILE" |
 jq -c '.' |
 while IFS= read -r path_json; do
   # build yq path expression
@@ -38,6 +48,15 @@ while IFS= read -r path_json; do
   registry=$(yq -r "${yq_path}.registry" "$VALUES_FILE")
   repository=$(yq -r "${yq_path}.repository" "$VALUES_FILE")
   tag=$(yq -r "${yq_path}.tag" "$VALUES_FILE")
+
+  # fall back to the base file for registry/repository when the target is a
+  # partial overlay (e.g. rootless values files)
+  if [[ -z "$registry" || "$registry" == "null" ]]; then
+    registry=$(yq -r "${yq_path}.registry" "$BASE_FILE")
+  fi
+  if [[ -z "$repository" || "$repository" == "null" ]]; then
+    repository=$(yq -r "${yq_path}.repository" "$BASE_FILE")
+  fi
 
   # skip if any are missing
   if [[ -z "$registry" || -z "$repository" || -z "$tag" || "$registry" == "null" || "$repository" == "null" || "$tag" == "null" ]]; then
