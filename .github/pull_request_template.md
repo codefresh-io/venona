@@ -1,8 +1,6 @@
-<!-- Remove unused sections below. -->
-
 # Changelog
 
-<!-- ⚠️ ↓↓↓ Release notes. Do not remove this comment. Everything inside will be included in the release notes. ↓↓↓ ⚠️ -->
+<!-- Remove unused sections below. -->
 
 ## Breaking changes
 
@@ -35,8 +33,6 @@
 ### <summary of the documentation change>
 
 <documentation change details>
-
-<!-- ⚠️ ↑↑↑ Release notes. Do not remove this comment. Everything inside will be included in the release notes. ↑↑↑ ⚠️ -->
 
 # Related tickets
 
