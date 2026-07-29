@@ -3,7 +3,6 @@
 # Changelog
 
 ## Breaking changes
-
 > [!WARNING]
 > **Breaking changes:**
 >
