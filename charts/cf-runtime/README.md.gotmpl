@@ -538,6 +538,80 @@ volumeProvisioner:
       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
 ```
 
+4. Assign IAM role to `dind-volume-provisioner` service account via [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html)
+
+   a. Make sure the `Amazon EKS Pod Identity Agent` addon is installed on the cluster (once per cluster):
+
+   ```
+   aws eks create-addon --cluster-name <CLUSTER_NAME> --addon-name eks-pod-identity-agent
+   ```
+
+   b. Create a role whose trust policy allows the EKS Pod Identity service to assume it, and attach the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to it.
+
+   Save the trust policy to `trust-policy.json`:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": { "Service": "pods.eks.amazonaws.com" },
+         "Action": ["sts:AssumeRole", "sts:TagSession"]
+       }
+     ]
+   }
+   ```
+
+   Save the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to `dind-volume-provisioner-policy.json`, then
+   create the role and attach the policy, reading both from the files:
+
+   ```
+   # create the role with the trust policy
+   aws iam create-role \
+     --role-name cf-runtime-volume-provisioner \
+     --assume-role-policy-document file://trust-policy.json
+
+   # attach the permissions policy (inline)
+   aws iam put-role-policy \
+     --role-name cf-runtime-volume-provisioner \
+     --policy-name dind-volume-provisioner-ebs \
+     --policy-document file://dind-volume-provisioner-policy.json
+
+   # role ARN to use in the next step
+   aws iam get-role --role-name cf-runtime-volume-provisioner --query 'Role.Arn' --output text
+   ```
+
+   c. Create the Pod Identity association, linking the service account to the role (replace `<CLUSTER_NAME>`, `<NAMESPACE>` and role ARN).
+   The service account name must match `volumeProvisioner.serviceAccount.name` from the chart values below:
+
+   ```
+   aws eks create-pod-identity-association \
+     --cluster-name <CLUSTER_NAME> \
+     --namespace <NAMESPACE> \
+     --service-account dind-volume-provisioner \
+     --role-arn arn:aws:iam::<ACCOUNT_ID>:role/cf-runtime-volume-provisioner
+   ```
+
+   d. Deploy the chart with the following values (no service account annotation is needed - the association created above binds the role):
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: ebs-csi
+
+  ebs:
+    availabilityZone: "us-east-1a"
+
+volumeProvisioner:
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: cf-runtime-volume-provisioner
+```
+
 > **StorageClass is immutable.** The chart generates a StorageClass from `storage.ebs.*`.
 > Its `parameters` field cannot be changed in place, so if you later modify AZ / volume type
 > and run `helm upgrade`, it fails with `field is immutable`. Delete the StorageClass first,

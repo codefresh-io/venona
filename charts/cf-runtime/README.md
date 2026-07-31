@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.4.2](https://img.shields.io/badge/Version-10.4.2-informational?style=flat-square)
+![Version: 10.5.0](https://img.shields.io/badge/Version-10.5.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -536,6 +536,80 @@ volumeProvisioner:
     # -- Additional service account annotations
     annotations:
       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
+```
+
+4. Assign IAM role to `dind-volume-provisioner` service account via [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html)
+
+   a. Make sure the `Amazon EKS Pod Identity Agent` addon is installed on the cluster (once per cluster):
+
+   ```
+   aws eks create-addon --cluster-name <CLUSTER_NAME> --addon-name eks-pod-identity-agent
+   ```
+
+   b. Create a role whose trust policy allows the EKS Pod Identity service to assume it, and attach the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to it.
+
+   Save the trust policy to `trust-policy.json`:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": { "Service": "pods.eks.amazonaws.com" },
+         "Action": ["sts:AssumeRole", "sts:TagSession"]
+       }
+     ]
+   }
+   ```
+
+   Save the minimal [IAM policy](#minimal-iam-policy-for-dind-volume-provisioner) to `dind-volume-provisioner-policy.json`, then
+   create the role and attach the policy, reading both from the files:
+
+   ```
+   # create the role with the trust policy
+   aws iam create-role \
+     --role-name cf-runtime-volume-provisioner \
+     --assume-role-policy-document file://trust-policy.json
+
+   # attach the permissions policy (inline)
+   aws iam put-role-policy \
+     --role-name cf-runtime-volume-provisioner \
+     --policy-name dind-volume-provisioner-ebs \
+     --policy-document file://dind-volume-provisioner-policy.json
+
+   # role ARN to use in the next step
+   aws iam get-role --role-name cf-runtime-volume-provisioner --query 'Role.Arn' --output text
+   ```
+
+   c. Create the Pod Identity association, linking the service account to the role (replace `<CLUSTER_NAME>`, `<NAMESPACE>` and role ARN).
+   The service account name must match `volumeProvisioner.serviceAccount.name` from the chart values below:
+
+   ```
+   aws eks create-pod-identity-association \
+     --cluster-name <CLUSTER_NAME> \
+     --namespace <NAMESPACE> \
+     --service-account dind-volume-provisioner \
+     --role-arn arn:aws:iam::<ACCOUNT_ID>:role/cf-runtime-volume-provisioner
+   ```
+
+   d. Deploy the chart with the following values (no service account annotation is needed - the association created above binds the role):
+
+```yaml
+storage:
+  # -- Set backend volume type (`local`/`ebs`/`ebs-csi`/`gcedisk`/`azuredisk`)
+  backend: ebs-csi
+
+  ebs:
+    availabilityZone: "us-east-1a"
+
+volumeProvisioner:
+  # -- Service Account parameters
+  serviceAccount:
+    # -- Create service account
+    create: true
+    # -- Override service account name
+    name: cf-runtime-volume-provisioner
 ```
 
 > **StorageClass is immutable.** The chart generates a StorageClass from `storage.ebs.*`.
@@ -1562,7 +1636,7 @@ Install the Helm chart
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"digest":"sha256:8a6d07510051bd5566ff09d89cdb7176b1ec0350aa2b717080bbbc394b1dc6c1","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"2.0.4"}` | Set image |
+| volumeProvisioner.image | object | `{"digest":"sha256:b104d4f9517f65122c6df1bc4caad54196588c4533908b8215a071511a3162ca","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"2.1.0"}` | Set image |
 | volumeProvisioner.name | string | `""` | Set volume-provisioner deployment name |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
