@@ -12,7 +12,6 @@ volumeProvisioner:
       fsGroupChangePolicy: "OnRootMismatch"
     volumePermissions:
       enabled: true
-
 runtime:
   dind:
     image:
