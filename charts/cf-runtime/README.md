@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 10.4.2](https://img.shields.io/badge/Version-10.4.2-informational?style=flat-square)
+![Version: 10.5.0](https://img.shields.io/badge/Version-10.5.0-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1434,8 +1434,8 @@ Install the Helm chart
 | runner.tolerations | list | `[]` | Set tolerations |
 | runner.updateStrategy | object | `{"type":"RollingUpdate"}` | Upgrade strategy |
 | runtime | object | See below | Set runtime parameters |
-| runtime.accounts | list | `[]` | (for On-Premise only) Assign accounts to runtime (list of account ids) |
-| runtime.agent | bool | `true` | (for On-Premise only) Enable agent |
+| runtime.accounts | for On-Premise only | `[]` | Assign accounts to runtime (list of account ids) |
+| runtime.agent | for On-Premise only | `true` | Enable agent |
 | runtime.description | string | `""` | Runtime description |
 | runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400"},"image":{"digest":"sha256:254404ebc775b028d4843abd72e3148ec460a68e44c8e7e3c848377c0c195721","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.20"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40","registry":"docker.io","repository":"alpine","tag":3.23},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
@@ -1526,8 +1526,8 @@ Install the Helm chart
 | runtime.engine.workflowLimits.TIME_ENGINE_INACTIVE_UNTIL_UNHEALTHY | int | `60` | Time since the last health check report after which the engine is considered unhealthy; seconds. |
 | runtime.engine.workflowLimits.TIME_INACTIVE_UNTIL_TERMINATION | int | `2700` | Time since the last workflow logs activity after which workflow is terminated; seconds. |
 | runtime.gencerts | object | See below | Parameters for `gencerts-dind` post-upgrade/install hook |
-| runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
-| runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
+| runtime.inCluster | for On-Premise only | `true` | Set inCluster runtime |
+| runtime.kubeconfigFilePath | for On-Premise only | `""` | Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
 | runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.3-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
@@ -1562,7 +1562,7 @@ Install the Helm chart
 | volumeProvisioner.dind-lv-monitor | object | See below | `dind-lv-monitor` DaemonSet parameters (local volumes cleaner) |
 | volumeProvisioner.enabled | bool | `true` | Enable volume-provisioner |
 | volumeProvisioner.env | object | `{}` | Add additional env vars |
-| volumeProvisioner.image | object | `{"digest":"sha256:8a6d07510051bd5566ff09d89cdb7176b1ec0350aa2b717080bbbc394b1dc6c1","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"2.0.4"}` | Set image |
+| volumeProvisioner.image | object | `{"digest":"sha256:b104d4f9517f65122c6df1bc4caad54196588c4533908b8215a071511a3162ca","registry":"quay.io","repository":"codefresh/dind-volume-provisioner","tag":"2.1.0"}` | Set image |
 | volumeProvisioner.name | string | `""` | Set volume-provisioner deployment name |
 | volumeProvisioner.nodeSelector | object | `{}` | Set node selector |
 | volumeProvisioner.podAnnotations | object | `{}` | Set pod annotations |
