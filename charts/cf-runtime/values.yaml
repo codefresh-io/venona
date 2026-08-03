@@ -532,8 +532,8 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: v5.2.0-1.6.7
-        digest: sha256:ffee581569a16ff77266fe11669415f54ffe12619e8814267620386438067018
+        tag: 1.6.8
+        digest: sha256:f1a90718f4e3f17782503c113c1d0cb97fd39b65aff40813bee0be1ee3a46c8f
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
