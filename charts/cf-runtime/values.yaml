@@ -783,8 +783,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.35.5
-      digest: sha256:87c304c6b4591aed22f299ab295b5e4cbb9795b099764e6fd10ca71620c6909e
+      tag: 1.36.3
+      digest: sha256:698013dc030404ac61b947da9cc85c30e264bdd5eff8c0c5769cea6f7d93b4f1
     rbac:
       enabled: true
     annotations: {}
