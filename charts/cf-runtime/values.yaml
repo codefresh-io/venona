@@ -403,7 +403,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 3.0.20 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
+      tag: 3.0.22 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
       digest: sha256:254404ebc775b028d4843abd72e3148ec460a68e44c8e7e3c848377c0c195721
     # -- Set dind resources.
@@ -507,7 +507,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.3.5
+      tag: 3.3.9
       pullPolicy: IfNotPresent
       digest: sha256:90a745917e33f03082e0c6ac6f95b5da1240e0b3020b781ebf5f639d66038b90
     # -- Set container command.
@@ -537,17 +537,17 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.33
+        tag: 2.0.36
         digest: sha256:872b08904591ecfd7baf7d2c7d29a95644e169ea2b3440d0d63123ba86dcd2db
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.6.13
+        tag: 1.6.16
         digest: sha256:8b190ccc955916f3dac9de7d09b3ac87a5f7709ae15d487e53ca2e13ad86b5a3
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.40
+        tag: 8.0.44
         digest: sha256:dedac5d74953ce23e19db1749e1d17ea2730750dcaa93acbd6d5336b97acc208
       docker-pusher:
         registry: quay.io
@@ -572,22 +572,22 @@ runtime:
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
-        tag: 1.3.14
+        tag: 1.3.15
         digest: sha256:7a5890afcfdad4a9aa4eec1a218cb468d52855540c847b3809085415751bbaa7
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.15.7
+        tag: 0.15.12
         digest: sha256:1c1ff75feceb8d4e6ffa09b933605d0a1476bf64890f247be186da3200a9d004
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 3.1.1-cf.2
+        tag: 4.0.0
         digest: sha256:b1eb6fe0de7ab5ad2dd0ec7a6463eb3b4c38035f9e2fa38410d2a06ed24ef6c0
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
-        tag: 0.5.18
+        tag: 0.5.19
         digest: sha256:e43f05470f4579ed5788f1e8f39b4e398c69dd3c7e189e2eb80ef694bef616cf
       default-qemu:
         registry: docker.io
@@ -985,7 +985,7 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.38
+    tag: 1.3.42
     digest: sha256:54e9569417218ead346ba67be796025d3d1e0246b503d8cf855a04eb5b45883f
   # -- Add additional env vars
   env: {}
