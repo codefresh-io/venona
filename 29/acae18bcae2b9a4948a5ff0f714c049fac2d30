@@ -1,0 +1,30 @@
+charts/cf-runtime/.ci/image-digests.sh
+  s_2a73b26685c1de::t_7aa9adb8327e19 7-19
+scripts/update_values_with_digests.sh
+  s_2a73b26685c1de::t_76939efa72e27d 52-59
+  s_2a73b26685c1de::t_701d3da46fc322 7-15
+  s_2a73b26685c1de::t_d74f6a18079332 32-34
+  s_2a73b26685c1de::t_309566aa1ad12e 6
+  s_2a73b26685c1de::t_403299904eb228 60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "29acae18bcae2b9a4948a5ff0f714c049fac2d30",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  },
+  "sessions": {
+    "s_2a73b26685c1de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4d13ee6c-67b6-4637-8d9f-967407c1515e",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

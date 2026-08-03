@@ -1,0 +1,14 @@
+charts/cf-runtime/values.yaml
+  h_104939d4aa3383 540,550
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "d98a7fd752820100c2ac5a401d61737558a3a2e9",
+  "prompts": {},
+  "humans": {
+    "h_104939d4aa3383": {
+      "author": "Vasil Sudakou <vasil.sudakov@codefresh.io>"
+    }
+  }
+}
