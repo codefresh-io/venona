@@ -15,12 +15,11 @@ volumeProvisioner:
     # -- Enable initContainer to run chmod for /var/lib/codefresh/dind-volumes on host nodes
     volumePermissions:
       enabled: false
-
 runtime:
   dind:
     image:
       tag: 3.0.22-rootless
-      digest: sha256:9241adb2cfab34f7c1f10f794e2e70efaa5428d94b4bb27646ddb2537fb627c5
+      digest: sha256:ae52f768273881cef45638d577ffd565fb62fdc5b5d7f713b3be2c63be147537
     userVolumeMounts:
       dind:
         name: dind
