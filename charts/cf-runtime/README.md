@@ -1603,7 +1603,7 @@ Install the Helm chart
 | runtime.inCluster | bool | `true` | (for On-Premise only) Set inCluster runtime |
 | runtime.kubeconfigFilePath | string | `""` | (for On-Premise only) Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
-| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:811924d0127e67a02a329817aa714b9a2a23e123b2e39fb41335d961568e8a55","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.5-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
+| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:f073118baa8cd84cbcb9c949bec937c7ea29504d02d4fb2c3469ebd4c071d77b","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.5-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
