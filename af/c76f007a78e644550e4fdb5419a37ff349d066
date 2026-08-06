@@ -1,0 +1,20 @@
+charts/cf-runtime/.ci/values-rootless.yaml
+  h_86ffe77adf8985 18-19
+charts/cf-runtime/README.md
+  h_86ffe77adf8985 1493,1514,1525,1606
+charts/cf-runtime/values-rootless.yaml
+  h_86ffe77adf8985 21-22
+charts/cf-runtime/values.yaml
+  h_86ffe77adf8985 84-85,406,408,749-750,771-772
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "afc76f007a78e644550e4fdb5419a37ff349d066",
+  "prompts": {},
+  "humans": {
+    "h_86ffe77adf8985": {
+      "author": "andrii-codefresh <andrii@codefresh.io>"
+    }
+  }
+}
