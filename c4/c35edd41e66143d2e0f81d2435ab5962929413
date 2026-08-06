@@ -1,0 +1,20 @@
+charts/cf-runtime/Chart.yaml
+  h_48b74706cf95a4 38-41
+charts/cf-runtime/values.yaml
+  h_48b74706cf95a4 406
+charts/cf-runtime/values-rootless.yaml
+  h_48b74706cf95a4 7,22
+charts/cf-runtime/.ci/values-rootless.yaml
+  h_48b74706cf95a4 6,19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c4c35edd41e66143d2e0f81d2435ab5962929413",
+  "prompts": {},
+  "humans": {
+    "h_48b74706cf95a4": {
+      "author": "Bohdan Pysarenko <bohdan.pisarenko@octopus.com>"
+    }
+  }
+}

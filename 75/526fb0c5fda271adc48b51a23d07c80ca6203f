@@ -1,0 +1,14 @@
+.github/pull_request_template.md
+  h_e5037b46dfdc11 1-3,24-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "75526fb0c5fda271adc48b51a23d07c80ca6203f",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
