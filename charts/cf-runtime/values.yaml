@@ -537,8 +537,8 @@ runtime:
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.33
-        digest: sha256:872b08904591ecfd7baf7d2c7d29a95644e169ea2b3440d0d63123ba86dcd2db
+        tag: 2.0.34
+        digest: sha256:4af0e50430c5fd13f103dd71572823e2c9244bb3cb437dab9110e37ae105e4d4
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
