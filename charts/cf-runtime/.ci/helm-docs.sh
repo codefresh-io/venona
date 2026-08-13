@@ -7,6 +7,7 @@ echo "$REPO_ROOT"
 echo "Running Helm-Docs"
 docker run \
     -v "$REPO_ROOT:/helm-docs" \
+    -w /helm-docs \
     -u $(id -u) \
     --rm \
     --entrypoint /bin/sh \
