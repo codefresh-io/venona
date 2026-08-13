@@ -89,7 +89,7 @@ runner:
         cpu: '1'
       requests:
         memory: 256Mi
-        cpu: '0.2'
+        cpu: '0.1'
   # -- Add additional env vars
   env:
     # -- DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead.
