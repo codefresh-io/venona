@@ -1,0 +1,14 @@
+charts/cf-runtime/README.md
+  h_86ffe77adf8985 1606
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "672a75b7867df5b35c8404c551537cd455996e87",
+  "prompts": {},
+  "humans": {
+    "h_86ffe77adf8985": {
+      "author": "andrii-codefresh <andrii@codefresh.io>"
+    }
+  }
+}
