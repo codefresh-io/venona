@@ -1,16 +1,16 @@
 #!/bin/bash
 ## Reference: https://github.com/norwoodj/helm-docs
-set -eux
+set -x
 REPO_ROOT="${1:-$(cd "$(dirname "$0")/../../.." && pwd)}"
-WORKDIR="${2:-/helm-docs}"
+WORKDIR="${2}"
 
 echo "$REPO_ROOT"
 echo "$WORKDIR"
 
 echo "Running Helm-Docs"
 docker run \
-    -v "$REPO_ROOT:$WORKDIR" \
-    -w "$WORKDIR" \
+    -v "$REPO_ROOT:/helm-docs" \
+    -w "/helm-docs/$WORKDIR" \
     -u $(id -u) \
     --rm \
     --entrypoint /bin/sh \
