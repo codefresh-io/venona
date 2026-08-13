@@ -1,7 +1,7 @@
 #!/bin/bash
 ## Reference: https://github.com/norwoodj/helm-docs
 set -eux
-REPO_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+REPO_ROOT="${1:-$(cd "$(dirname "$0")/../../.." && pwd)}"
 echo "$REPO_ROOT"
 
 echo "Running Helm-Docs"
