@@ -16,4 +16,7 @@ docker run \
     --entrypoint /bin/sh \
     jnorwood/helm-docs:v1.9.1 \
     -c \
-    "helm-docs --chart-search-root=charts --template-files=./_templates.gotmpl --template-files=README.md.gotmpl"
+    helm-docs \
+    --chart-search-root=charts \
+    --template-files=./_templates.gotmpl \
+    --template-files=README.md.gotmpl \
