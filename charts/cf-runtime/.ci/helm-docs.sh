@@ -14,7 +14,7 @@ docker run \
     -u $(id -u) \
     --rm \
     --entrypoint /bin/sh \
-    jnorwood/helm-docs:v1.9.1 \
+    jnorwood/helm-docs:v1.11.0 \
     -c \
     helm-docs \
     --chart-search-root=charts \
