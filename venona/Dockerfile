@@ -2,6 +2,7 @@ FROM octopusdeploy/dhi-golang:1.26-debian13-dev@sha256:e7f194366f8993d4c33eeeb24
 RUN apt update && apt install -y git make ca-certificates && update-ca-certificates
 ENV USER=venona
 ENV UID=10001
+USER root
 RUN adduser \
     --disabled-password \
     --gecos "" \
