@@ -1,5 +1,5 @@
-FROM octopusdeploy/dhi-golang:1.26-debian13-dev@sha256:e7f194366f8993d4c33eeeb24d96eee1b615c695127606917e93a9a81c3bd8ea AS build
-RUN apt update && apt install -y git make ca-certificates && update-ca-certificates
+FROM octopusdeploy/dhi-golang:1.26-alpine3.24-dev@sha256:8baca6975280a6b32bd947ea981230b587599ae6c0985105163a0a5d2d6eb84b AS build
+RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 WORKDIR /venona
 COPY . .
 RUN go mod download -x
@@ -7,7 +7,7 @@ RUN go mod verify
 RUN make build
 
 
-FROM octopusdeploy/dhi-debian-base:trixie-debian13@sha256:014bacad6433af5bc9bd098ac713c4f104f9b395dd1d9d58bbcafd51ad2ce582 AS prod
+FROM octopusdeploy/dhi-alpine-base:3.24@sha256:32e94d5fda692447a1ca48ff8910e5be4657053ba74744cd6b0cf6ed816c6cbf AS prod
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
