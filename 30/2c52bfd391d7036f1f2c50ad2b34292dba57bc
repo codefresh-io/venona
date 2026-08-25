@@ -1,0 +1,48 @@
+charts/cf-runtime/tests/runtime/runtime_podperstep_values.yaml
+  s_e84a2853442d0b::t_f5fcef8f320a36 1-22
+charts/cf-runtime/templates/runtime/svc-dind.yaml
+  s_e84a2853442d0b::t_63e5413174ff71 24
+  s_e84a2853442d0b::t_1c6b42a848aed4 1
+charts/cf-runtime/templates/hooks/post-install/job-gencerts-dind.yaml
+  s_e84a2853442d0b::t_f9c8900900cd8b 3
+charts/cf-runtime/tests/runtime/runtime_test.yaml
+  s_e84a2853442d0b::t_b2febd85797c11 236-448
+charts/cf-runtime/templates/hooks/post-install/rbac-gencerts-dind.yaml
+  s_e84a2853442d0b::t_0afe217f9273db 3
+charts/cf-runtime/values.yaml
+  s_e84a2853442d0b::t_48605b2715c20b 400-428
+charts/cf-runtime/templates/runtime/runtime-env-spec-tmpl.yaml
+  s_e84a2853442d0b::t_db208bf1fa95f5 332
+  s_e84a2853442d0b::t_7a8db53f07228d 27-29,31
+  s_e84a2853442d0b::t_2d4e916805da38 118-120
+  s_e84a2853442d0b::t_14ab9bc0b2af45 117,176-193
+  s_e84a2853442d0b::t_f7db958084654e 8
+charts/cf-runtime/templates/runtime/rbac.yaml
+  s_e84a2853442d0b::t_6c1e240324bea1 25-51,55
+charts/cf-runtime/templates/runtime/cm-dind-daemon.yaml
+  s_e84a2853442d0b::t_7760be734d7e9c 1
+  s_e84a2853442d0b::t_ccdfa97b598444 12
+charts/cf-runtime/README.md
+  s_e84a2853442d0b::t_e3ef26bd2e1f30 1443-1451
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "302c52bfd391d7036f1f2c50ad2b34292dba57bc",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  },
+  "sessions": {
+    "s_e84a2853442d0b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "838bb8fd-e1b9-4e3c-959b-a38c686d4469",
+        "model": "unknown"
+      },
+      "human_author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+charts/cf-runtime/Chart.yaml
+  h_e5037b46dfdc11 4,21,23,25,27-47,49
+charts/cf-runtime/values-rootless.yaml
+  h_e5037b46dfdc11 22-23
+charts/cf-runtime/values.yaml
+  h_e5037b46dfdc11 77-78,84-85,404,406,508,510,533-534,543-544,553-554,558-559,563-564,573-574,578-579,588-589,745-746,767-768,782
+charts/cf-runtime/.ci/values-rootless.yaml
+  h_e5037b46dfdc11 19-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "5baf1b3ff26f28e1e5c63f368ce58f86bfdae1ef",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

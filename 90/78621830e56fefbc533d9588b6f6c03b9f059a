@@ -1,0 +1,17 @@
+charts/cf-runtime/.ci/helm-docs.sh
+  h_e5037b46dfdc11 13
+  h_e5037b46dfdc11 18
+charts/cf-runtime/README.md
+  h_e5037b46dfdc11 1511-1512,1603-1604
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "9078621830e56fefbc533d9588b6f6c03b9f059a",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

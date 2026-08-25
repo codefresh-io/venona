@@ -1,0 +1,22 @@
+charts/cf-runtime/tests/runtime/runtime_test.yaml
+  h_e5037b46dfdc11 63
+charts/cf-runtime/values.yaml
+  h_e5037b46dfdc11 55,96-97,692-693
+charts/cf-runtime/Chart.yaml
+  h_e5037b46dfdc11 4,17,21
+charts/cf-runtime/tests/private-registry/private_registry_test.yaml
+  h_e5037b46dfdc11 47
+charts/cf-runtime/tests/runtime/runtime_onprem_test.yaml
+  h_e5037b46dfdc11 61,275
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "f467225780ddbabe65d1908d93df7dc197ece5b2",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

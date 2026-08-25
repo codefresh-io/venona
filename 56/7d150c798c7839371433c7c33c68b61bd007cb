@@ -1,0 +1,14 @@
+venona/Dockerfile
+  h_9fee6e699064f1 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "567d150c798c7839371433c7c33c68b61bd007cb",
+  "prompts": {},
+  "humans": {
+    "h_9fee6e699064f1": {
+      "author": "Vadim Kharin <vadim.kharin@codefresh.io>"
+    }
+  }
+}

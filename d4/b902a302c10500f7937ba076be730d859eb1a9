@@ -1,0 +1,14 @@
+charts/cf-runtime/README.md.gotmpl
+  h_e5037b46dfdc11 127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "d4b902a302c10500f7937ba076be730d859eb1a9",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

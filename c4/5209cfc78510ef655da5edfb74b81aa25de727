@@ -1,0 +1,16 @@
+charts/cf-runtime/values.yaml
+  h_104939d4aa3383 84-85,406,408,510,512,535-536,590-591,749-750,771-772,786-787,829-830
+charts/cf-runtime/values-rootless.yaml
+  h_104939d4aa3383 22-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "c45209cfc78510ef655da5edfb74b81aa25de727",
+  "prompts": {},
+  "humans": {
+    "h_104939d4aa3383": {
+      "author": "Vasil Sudakou <vasil.sudakov@codefresh.io>"
+    }
+  }
+}

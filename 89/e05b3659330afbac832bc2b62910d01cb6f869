@@ -1,0 +1,18 @@
+charts/cf-runtime/Chart.yaml
+  h_86ffe77adf8985 4
+charts/cf-runtime/README.md
+  h_86ffe77adf8985 3,1546
+charts/cf-runtime/values.yaml
+  h_86ffe77adf8985 540-541
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "89e05b3659330afbac832bc2b62910d01cb6f869",
+  "prompts": {},
+  "humans": {
+    "h_86ffe77adf8985": {
+      "author": "andrii-codefresh <andrii@codefresh.io>"
+    }
+  }
+}
