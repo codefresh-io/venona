@@ -74,8 +74,8 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 2.0.10
-    digest: sha256:836510a8579e4985f046744cb409ae895c62aa01117884004887f7c061aad636
+    tag: 2.0.11
+    digest: sha256:c6255468ea157db1b01b18c7d23b264da206bf6923513964583b6d6678223f18
   # -- Init container
   init:
     image:
@@ -153,8 +153,8 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 2.1.0
-    digest: sha256:b104d4f9517f65122c6df1bc4caad54196588c4533908b8215a071511a3162ca
+    tag: 2.1.1
+    digest: sha256:d3ed060c6f41dd4630b98aef6651cf4361891aee0b0928fd8026b52d25f0c5fd
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -532,8 +532,8 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: 1.6.9
-        digest: sha256:c4adbdb4a6ee5da6333552729efff45c2fd3f781fa1ed0800474fc58003ef1c5
+        tag: 1.6.10
+        digest: sha256:00be823909a6bb20e2c45f379942494fb433cc88977da40ad171a8119227e199
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
