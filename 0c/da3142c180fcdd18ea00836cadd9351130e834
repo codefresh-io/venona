@@ -1,0 +1,21 @@
+venona/Dockerfile
+  h_51acfbafc7319b 1,20
+venona/VERSION
+  h_51acfbafc7319b 1
+venona/go.mod
+  h_51acfbafc7319b 76
+  h_51acfbafc7319b 69,71-73,75
+venona/go.sum
+  h_51acfbafc7319b 150-159,166-167,170-175,180-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "0cda3142c180fcdd18ea00836cadd9351130e834",
+  "prompts": {},
+  "humans": {
+    "h_51acfbafc7319b": {
+      "author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
