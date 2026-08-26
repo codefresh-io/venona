@@ -1,7 +1,7 @@
 apiVersion: v2
 description: A Helm chart for Codefresh Runner
 name: cf-runtime
-version: 10.5.2
+version: 10.5.3
 keywords:
   - codefresh
   - runner
@@ -18,10 +18,10 @@ annotations:
   # Supported kinds: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`:
   artifacthub.io/changes: |
     - kind: changed
-      description: 'Release 10.5.2'
+      description: 'Release 10.5.3'
       links:
         - name: 'Release notes'
-          url: 'https://github.com/codefresh-io/venona/releases/tag/cf-runtime-10.5.2-helm'
+          url: 'https://github.com/codefresh-io/venona/releases/tag/cf-runtime-10.5.3-helm'
 dependencies:
   - name: cf-common
     repository: oci://quay.io/codefresh/charts
