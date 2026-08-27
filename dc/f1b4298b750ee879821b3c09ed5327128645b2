@@ -1,0 +1,14 @@
+charts/cf-runtime/Chart.yaml
+  h_86ffe77adf8985 21,24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "dcf1b4298b750ee879821b3c09ed5327128645b2",
+  "prompts": {},
+  "humans": {
+    "h_86ffe77adf8985": {
+      "author": "andrii-codefresh <andrii@codefresh.io>"
+    }
+  }
+}

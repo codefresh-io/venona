@@ -1,0 +1,16 @@
+charts/cf-runtime/Chart.yaml
+  h_51acfbafc7319b 20-21
+charts/cf-runtime/values.yaml
+  h_51acfbafc7319b 510
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "09351e3ab1fa4eb04920a119bbca0b756de5eb39",
+  "prompts": {},
+  "humans": {
+    "h_51acfbafc7319b": {
+      "author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
