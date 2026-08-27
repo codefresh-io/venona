@@ -538,17 +538,17 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-container-logger
         tag: 2.0.43
-        digest: sha256:88b4d3b2610419daaf4223bccc85cbc8e09312aab2f84c04fd6bf69ecb5e56d9
+        digest: sha256:73756992c737696d27e03990e6b97cf663060f120ee82383e0a07131b1f82e15
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
         tag: 1.6.22
-        digest: sha256:4e26c91fcb80b5e82b3481fe29f9d81a380ba928e6e75ff92b8615342aa0385c
+        digest: sha256:24be425afaf2f3d43df97f05d00b00f22cee6b890467a772511e8f042ad2f8a0
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
         tag: 8.0.49
-        digest: sha256:9b75ab05e4cf965a662e180b6ea8a1c2329862a8a0dc0f8042950cd8e155692e
+        digest: sha256:881d803fb67fcc49b0e94672f9691f8634a3ca85347ac60f7270153dc2ee0957
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
@@ -578,7 +578,7 @@ runtime:
         registry: quay.io
         repository: codefresh/pikolo
         tag: 0.15.16
-        digest: sha256:992256ae4333dd5fb6ad001a96341a13dfdfbbfd4152413d6c55d01ab7ff7296
+        digest: sha256:4eaea479e83ed1fccc0b8bee53ad1afbc3d16f32373e15d9bea3dd8232a7a3ac
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
@@ -588,7 +588,7 @@ runtime:
         registry: quay.io
         repository: codefresh/gcloud-builder
         tag: 0.5.22
-        digest: sha256:dd3dd1a013ee31a950b6a168ac12c7f2e88593e6120a251ab9325327032925a4
+        digest: sha256:1fc7066119f6558921c584ce16de64ed93d7df5b5ffdba7bb82ff881aa26515c
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
