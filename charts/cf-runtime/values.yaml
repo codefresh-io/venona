@@ -509,7 +509,7 @@ runtime:
       repository: codefresh/engine
       tag: 3.3.14
       pullPolicy: IfNotPresent
-      digest: sha256:ff57bea0a8fe271f5f9bde22e8eaa92f11570e4f6efc11629ce82cf55426dd59
+      digest: sha256:b0397e5931f11518463d83658d969660a49ad69f346c3c4d1a2a81e14c0e859f
     # -- Set container command.
     command:
       - 'node'
