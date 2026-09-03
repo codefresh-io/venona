@@ -1,0 +1,18 @@
+charts/cf-runtime/Chart.yaml
+  h_9fd7d1a18c4091 4,21,24
+charts/cf-runtime/README.md
+  h_9fd7d1a18c4091 3,1546
+charts/cf-runtime/values.yaml
+  h_9fd7d1a18c4091 540-541
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "14a663c4b5e0b8532d3aab4a3e2aaf7f5fbdbac8",
+  "prompts": {},
+  "humans": {
+    "h_9fd7d1a18c4091": {
+      "author": "Alina <alina.shportiuk@codefresh.io>"
+    }
+  }
+}
