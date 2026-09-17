@@ -184,7 +184,7 @@ tests:
                   cpu: 1000m
                   memory: 2048Mi
                 requests: null
-              terminationGracePeriodSeconds: 30
+              terminationGracePeriodSeconds: 300
               userVolumeMounts:
                 my-cert:
                   mountPath: /etc/ssl/cert
@@ -398,7 +398,7 @@ tests:
                   cpu: 2000m
                   memory: 4096Mi
                 requests: null
-              terminationGracePeriodSeconds: 30
+              terminationGracePeriodSeconds: 300
               userVolumeMounts:
                 my-cert:
                   mountPath: /etc/ssl/cert

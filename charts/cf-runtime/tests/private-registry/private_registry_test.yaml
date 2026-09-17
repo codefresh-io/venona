@@ -133,7 +133,7 @@ tests:
                   cpu: 400m
                   memory: 800Mi
                 requests: null
-              terminationGracePeriodSeconds: 30
+              terminationGracePeriodSeconds: 300
               clientCertPath: /etc/ssl/cf/
               volumeMounts:
                 codefresh-certs-server:

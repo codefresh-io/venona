@@ -413,7 +413,12 @@ runtime:
         cpu: 400m
         memory: 800Mi
     # -- Set termination grace period.
-    terminationGracePeriodSeconds: 30
+    # Kept generous on purpose: on pod teardown the dind SIGTERM handler
+    # (cleaner/docker-clean.sh) may need to run `docker system prune -a --volumes --force`
+    # over a build-cache volume that is already close to its inode limit (small-file-heavy
+    # workloads, e.g. `node_modules`-based builds); 30s was not always enough for that prune
+    # to finish, letting an exhausted-inode volume state carry into the next reused build.
+    terminationGracePeriodSeconds: 300
     # -- PV claim spec parametes.
     pvcs:
       # -- Default dind PVC parameters
