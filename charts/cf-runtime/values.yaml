@@ -74,8 +74,8 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 2.0.11
-    digest: sha256:c6255468ea157db1b01b18c7d23b264da206bf6923513964583b6d6678223f18
+    tag: 2.0.12
+    digest: sha256:f85cd3b2442f8f58e0fd1250cbe82889c6fc7fc62550733a898c60e6f91304d3
   # -- Init container
   init:
     image:
@@ -826,8 +826,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.5
-    digest: sha256:92a5090f3b407b98e2ef1b2d70d2461012cd7dad68f8e53f86c2038e05673ebe
+    tag: 0.1.6
+    digest: sha256:2928be25db57c22cd2bca2cce6be6e69aefc6eabb69e39081fa548cbbb30104c
   # -- Add additional env vars
   env:
     # -- Telemetry configuration
