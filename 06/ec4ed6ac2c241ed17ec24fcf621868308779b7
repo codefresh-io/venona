@@ -1,0 +1,14 @@
+charts/cf-runtime/values.yaml
+  h_9fd7d1a18c4091 77-78,829-830
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "06ec4ed6ac2c241ed17ec24fcf621868308779b7",
+  "prompts": {},
+  "humans": {
+    "h_9fd7d1a18c4091": {
+      "author": "Alina <alina.shportiuk@codefresh.io>"
+    }
+  }
+}
