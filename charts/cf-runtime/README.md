@@ -1387,7 +1387,7 @@ Install the Helm chart
 | appProxy.httpRoute.labels | object | `{}` | Set labels on the HTTPRoute resource |
 | appProxy.httpRoute.parentRefs | list | `[]` | Required! List of parent Gateway references this HTTPRoute should attach to ref: https://gateway-api.sigs.k8s.io/reference/api-spec/main/spec/#parentreference E.g. parentRefs:   - name: traefik-gateway     namespace: traefik |
 | appProxy.httpRoute.pathPrefix | string | `""` | Set path prefix for httpRoute (keep empty for default `/` path) |
-| appProxy.image | object | `{"digest":"sha256:92a5090f3b407b98e2ef1b2d70d2461012cd7dad68f8e53f86c2038e05673ebe","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.5"}` | Set image |
+| appProxy.image | object | `{"digest":"sha256:2928be25db57c22cd2bca2cce6be6e69aefc6eabb69e39081fa548cbbb30104c","registry":"quay.io","repository":"codefresh/cf-app-proxy","tag":"0.1.6"}` | Set image |
 | appProxy.ingress.annotations | object | `{}` | Set extra annotations for ingress object |
 | appProxy.ingress.class | string | `""` | Set ingress class |
 | appProxy.ingress.enabled | bool | `true` | Enable Ingress |
@@ -1489,7 +1489,7 @@ Install the Helm chart
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{"NEW_RELIC_ENABLED":"false"}` | Add additional env vars |
 | runner.env.NEW_RELIC_ENABLED | string | `"false"` | DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead. |
-| runner.image | object | `{"digest":"sha256:c6255468ea157db1b01b18c7d23b264da206bf6923513964583b6d6678223f18","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.11"}` | Set image |
+| runner.image | object | `{"digest":"sha256:f85cd3b2442f8f58e0fd1250cbe82889c6fc7fc62550733a898c60e6f91304d3","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.12"}` | Set image |
 | runner.init | object | `{"image":{"digest":"sha256:5cb18daf5941018bc64df5ab9be90bc4d31b84e716f1100f671fcaed6bc6a932","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.8-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
