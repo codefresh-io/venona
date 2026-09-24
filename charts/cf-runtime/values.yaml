@@ -507,9 +507,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.3.21
+      tag: 3.3.22
       pullPolicy: IfNotPresent
-      digest: sha256:94cd9eedb373408f9b534cd1061d309b2cdef2ef8bdf54895998560ebe616545
+      digest: sha256:e11df712187f945f63c8d0023948bf4e6b856b35d0b5cf0ed29766b77aa4b6ee
     # -- Set container command.
     command:
       - 'node'
