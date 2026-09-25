@@ -154,7 +154,7 @@ volumeProvisioner:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
     tag: 2.1.2
-    digest: sha256:d3ed060c6f41dd4630b98aef6651cf4361891aee0b0928fd8026b52d25f0c5fd
+    digest: sha256:66ca7c45b31c08e90193b97105e8e890db605ba6231fec3a1b9522e112c96877
   # -- Add additional env vars
   env: {}
   # E.g.
@@ -405,7 +405,7 @@ runtime:
       repository: codefresh/dind
       tag: 3.0.29 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:20856c0943a77d9223235036f4b9573062b7c81cd7514c6b38f93470fb1e548e
+      digest: sha256:a66e3257a4b58ab4fe418db2596288e271ff8a47e5f30777074f1941498bd6ff
     # -- Set dind resources.
     resources:
       requests: null
@@ -509,7 +509,7 @@ runtime:
       repository: codefresh/engine
       tag: 3.3.23
       pullPolicy: IfNotPresent
-      digest: sha256:e11df712187f945f63c8d0023948bf4e6b856b35d0b5cf0ed29766b77aa4b6ee
+      digest: sha256:34c5b000d90704088ac9ef46dc63672537ff1da5afd0d3f6abf4b58c1233a418
     # -- Set container command.
     command:
       - 'node'
@@ -533,7 +533,7 @@ runtime:
         registry: quay.io
         repository: codefresh/compose
         tag: 1.6.13
-        digest: sha256:5f4550b89385095088d73a644e2479a54ab68c4281bbdac59d1e2614f24b3070
+        digest: sha256:b353dd37cdf9251e2c4bcb2d09477a7ccbb494da8815449bad0ff4b5a6dffc5f
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
@@ -543,17 +543,17 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-docker-builder
         tag: 1.7.2
-        digest: sha256:5f6898b2c4cd276f988581a838e30e41056c2fb62e5968335e7e4d365c7b78dc
+        digest: sha256:80c3b70b6cd40966efdf393012874850990051b34066ed06508e2c049e1cb953
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
         tag: 8.0.57
-        digest: sha256:5b8cea6929563cb9e03118fa60f10974f88e1cddaef2ce756cd206d631a3cbab
+        digest: sha256:c564a49010fa209426994f043441c0d5aaf0f957d8203107725aa2ac9c3652ab
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
         tag: 6.0.46
-        digest: sha256:12c41aa8f01debbdcd18925e0581cffd6d11c145518824767961a33a837d62c1
+        digest: sha256:a7a8a9c8b6ec3bcbecb9c4f42905d0e493dc0d24775eaa82f5618e6aa858f0e0
       fs-ops:
         registry: quay.io
         repository: codefresh/fs-ops
@@ -578,17 +578,17 @@ runtime:
         registry: quay.io
         repository: codefresh/pikolo
         tag: 0.15.22
-        digest: sha256:308b1bcba3a6ba8e2a4803e968887bbd67c44c7c9d326a08c9899a6979cd5b73
+        digest: sha256:f23172b39e4f588a644b9ae65363929ecd43c14bdf5d99b866bc1567ee5fc469
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
         tag: 4.0.15
-        digest: sha256:4ad56e06355e1d3ef9b64e3efbebd6468035a97159f84a9454fa0164ffd4810e
+        digest: sha256:6557c23ad32e3615361880e4c02d6ad4046b993d129798bb20196cddf6d7813a
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
         tag: 0.5.25
-        digest: sha256:6c69e2ef038f42ca70d7a0fb976cd362d05c06a4122f1d149243e5c622e8da6f
+        digest: sha256:8d8a2cb8dfa4ef6cfa54200573986a7d6c6fa0aac7d22048051fea3b78185755
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
