@@ -233,3 +233,31 @@ tests:
               - system/default/hybrid/k8s_low_limits
             description: null
             accountId: 7890
+
+  - it: Test dind resources default
+    template: templates/hooks/post-install/cm-update-runtime.yaml
+    asserts:
+      - matchRegex:
+          path: data["my-context-codefresh.yaml"]
+          pattern: '\n  defaultDindResources:\n    limits:\n      cpu: 400m\n      memory: 800Mi\n    requests: null\n'
+
+  - it: Test dind resources with nulled limits
+    template: templates/hooks/post-install/cm-update-runtime.yaml
+    set:
+      runtime.dind.resources.requests.cpu: 800m
+      runtime.dind.resources.requests.memory: 3000Mi
+      runtime.dind.resources.limits: null
+    asserts:
+      - matchRegex:
+          path: data["my-context-codefresh.yaml"]
+          pattern: '\n  defaultDindResources:\n    limits: null\n    requests:\n      cpu: 800m\n      memory: 3000Mi\n'
+
+  - it: Test dind resources with nulled nested values
+    template: templates/hooks/post-install/cm-update-runtime.yaml
+    set:
+      runtime.dind.resources.requests.cpu: 200m
+      runtime.dind.resources.limits.memory: null
+    asserts:
+      - matchRegex:
+          path: data["my-context-codefresh.yaml"]
+          pattern: '\n  defaultDindResources:\n    limits:\n      cpu: 400m\n      memory: null\n    requests:\n      cpu: 200m\n      memory: null\n'
