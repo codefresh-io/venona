@@ -141,25 +141,3 @@ Usage:
   {{- $runtimeName := .runtimeName }}
   {{- printf "%s.yaml" ( trimPrefix "system/" $runtimeName | replace "_" "-" | replace "/" "-" | lower ) }}
 {{- end }}
-
-{{/*
-Render dind resources for the runtime spec.
-Helm removes null values during values merge, so keys nulled by the user are absent here.
-They are rendered as explicit nulls, otherwise the runtime would inherit them from the parent runtime (`runtimeExtends`).
-*/}}
-{{- define "runtime.dindResources" -}}
-  {{- $resources := deepCopy . -}}
-  {{- range $type := list "limits" "requests" -}}
-    {{- $values := get $resources $type -}}
-    {{- if kindIs "map" $values -}}
-      {{- range $resource := list "cpu" "memory" -}}
-        {{- if not (hasKey $values $resource) -}}
-          {{- $_ := set $values $resource nil -}}
-        {{- end -}}
-      {{- end -}}
-    {{- else if not $values -}}
-      {{- $_ := set $resources $type nil -}}
-    {{- end -}}
-  {{- end -}}
-  {{- toYaml $resources -}}
-{{- end }}
