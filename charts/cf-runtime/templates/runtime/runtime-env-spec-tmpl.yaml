@@ -161,17 +161,19 @@ runtimeScheduler:
   {{- if $engineContext.resources}}
   {{- toYaml $engineContext.resources | nindent 4 }}
   {{- end }}
-  {{- with $engineContext.terminationGracePeriodSeconds }}
-  terminationGracePeriodSeconds: {{ . }}
+  {{- if not (kindIs "invalid" $engineContext.terminationGracePeriodSeconds) }}
+  terminationGracePeriodSeconds: {{ $engineContext.terminationGracePeriodSeconds }}
   {{- end }}
+  volumeMounts: {}
+  volumes: {}
 dockerDaemonScheduler:
   type: DindKubernetesPod
   {{- if $dindContext.image }}
   dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) | squote }}
   {{- end }}
   imagePullPolicy: {{ $dindContext.image.pullPolicy }}
-  {{- with $dindContext.userAccess }}
-  userAccess: {{ . }}
+  {{- if not (kindIs "invalid" $dindContext.userAccess) }}
+  userAccess: {{ $dindContext.userAccess }}
   {{- end }}
   envVars:
   {{- with $dindContext.env }}
@@ -239,8 +241,8 @@ dockerDaemonScheduler:
   {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- end }}
-  {{- with $dindContext.terminationGracePeriodSeconds }}
-  terminationGracePeriodSeconds: {{ . }}
+  {{- if not (kindIs "invalid" $dindContext.terminationGracePeriodSeconds) }}
+  terminationGracePeriodSeconds: {{ $dindContext.terminationGracePeriodSeconds }}
   {{- end }}
   {{- with $dindContext.userVolumeMounts }}
   userVolumeMounts: {{- toYaml . | nindent 4 }}

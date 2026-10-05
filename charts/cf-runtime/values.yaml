@@ -451,6 +451,8 @@ runtime:
       DISK_USAGE_THRESHOLD: '0.8'
       # -- Run cleanup if current inodes usage exceeds INODES_USAGE_THRESHOLD
       INODES_USAGE_THRESHOLD: '0.8'
+      # -- Write available disk space to the termination log on shutdown
+      WRITE_TERMINATION_MESSAGE: 'true'
     # -- Set pod annotations.
     podAnnotations: {}
     # -- Set pod labels.
@@ -460,7 +462,10 @@ runtime:
     # -- Set affinity
     affinity: {}
     # -- Set tolerations.
-    tolerations: []
+    tolerations:
+      - key: 'codefresh/dind'
+        operator: 'Exists'
+        effect: 'NoSchedule'
     # -- Set security context for the pod.
     podSecurityContext: {}
     # -- Set container security context.
@@ -682,14 +687,26 @@ runtime:
       # -- Engine operation configuration
       # -- Interval to check the exec status in the container-logger
       CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: 1000
+      # -- Timeout for the container-logger exec to finish; milliseconds
+      CONTAINER_LOGGER_EXEC_TIMEOUT: '1800000'
+      # -- If "true", container-logger prints progress of `docker pull`/`docker push` operations
+      CONTAINER_LOGGER_SHOW_PROGRESS: 'true'
+      # -- DEPRECATED: Disable export/restore of the workspace volume cache
+      DISABLE_WORKSPACE_CACHE: 'true'
       # -- Timeout while doing requests to the Docker daemon
       DOCKER_REQUEST_TIMEOUT_MS: 30000
       # -- If "true", composition images will be pulled sequentially
       FORCE_COMPOSE_SERIAL_PULL: false
+      # -- Report build metrics to Codefresh platform.
+      METRICS_CODEFRESH_ENABLED: 'true'
       # -- Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.DEFAULT_QEMU_IMAGE value
       TRUSTED_QEMU_IMAGES: 'tonistiigi/binfmt'
       # -- DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead.
       NEW_RELIC_ENABLED: "false"
+      # -- DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead.
+      NO_EXT_MONITOR: 'true'
+      # -- Engine configuration profile. Keep `kubernetes` as default!
+      NODE_ENV: 'kubernetes'
     # -- Set workflow limits.
     workflowLimits:
       # -- Maximum time allowed to the engine to wait for the pre-steps (aka "Initializing Process") to succeed; seconds.
