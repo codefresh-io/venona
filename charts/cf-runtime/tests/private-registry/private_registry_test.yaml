@@ -39,12 +39,18 @@ tests:
                 CF_TELEMETRY_PROMETHEUS_PORT: '9100'
                 CF_TELEMETRY_PYROSCOPE_ENABLE: 'false'
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                CONTAINER_LOGGER_EXEC_TIMEOUT: '1800000'
+                CONTAINER_LOGGER_SHOW_PROGRESS: 'true'
+                DISABLE_WORKSPACE_CACHE: 'true'
                 DOCKER_REQUEST_TIMEOUT_MS: '30000'
                 FORCE_COMPOSE_SERIAL_PULL: 'false'
                 LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                METRICS_CODEFRESH_ENABLED: 'true'
                 METRICS_SCRAPE_TIMEOUT_MS: '0'
                 NEW_RELIC_ENABLED: 'false'
+                NODE_ENV: 'kubernetes'
+                NO_EXT_MONITOR: 'true'
                 OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
                 OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
                 OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
@@ -102,6 +108,8 @@ tests:
                   cpu: 100m
                   memory: 128Mi
               terminationGracePeriodSeconds: 180
+              volumeMounts: {}
+              volumes: {}
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'somedomain.io/codefresh/dind:tagoverride'
@@ -115,6 +123,7 @@ tests:
                 IMAGE_RETAIN_PERIOD: '14400'
                 INODES_USAGE_THRESHOLD: '0.8'
                 VOLUMES_RETAIN_PERIOD: '14400'
+                WRITE_TERMINATION_MESSAGE: 'true'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=my-context/codefresh,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
@@ -122,6 +131,10 @@ tests:
                 clusterProvider:
                   accountId: 7890
                   selector: my-context
+              tolerations:
+                - effect: NoSchedule
+                  key: codefresh/dind
+                  operator: Exists
               pvcs:
                 - name: dind
                   reuseVolumeSelector: 'codefresh-app,io.codefresh.accountName'
@@ -155,7 +168,7 @@ tests:
                   configMap:
                     name: codefresh-dind-config
             extends:
-              - system/default/hybrid/k8s_low_limits
+              []
             description: null
             accountId: 7890
 

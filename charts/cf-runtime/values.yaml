@@ -377,9 +377,8 @@ runtime:
     #     annotations:
     #       eks.amazonaws.com/role-arn: "arn:aws:iam::<ACCOUNT_ID>:role/<IAM_ROLE_NAME>"
   # -- Set parent runtime to inherit.
-  # Should not be changes. Parent runtime is controlled from Codefresh side.
-  runtimeExtends:
-    - system/default/hybrid/k8s_low_limits
+  # Should only be used in On-Premises installations.
+  runtimeExtends: []
   # -- Runtime description
   description: ""
   # -- RBAC parameters

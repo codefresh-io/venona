@@ -352,6 +352,30 @@ runtime:
 
 * **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for 1.32 Kubernetes version. Supported versions are: 1.35, 1.34, 1.33.
 
+### To 10.6.x
+
+* **Changed**: `runtime.runtimeExtends` default is changed from `["system/default/hybrid/k8s_low_limits"]` to `[]`. The runtime spec no longer inherits values from the parent runtime; all values previously inherited are now set explicitly in the chart defaults:
+
+  ```yaml
+  runtime:
+    engine:
+      env:
+        CONTAINER_LOGGER_EXEC_TIMEOUT: '1800000'
+        CONTAINER_LOGGER_SHOW_PROGRESS: 'true'
+        METRICS_CODEFRESH_ENABLED: 'true'
+    dind:
+      tolerations:
+        - key: 'codefresh/dind'
+          operator: 'Exists'
+          effect: 'NoSchedule'
+  ```
+
+  If you override `runtime.dind.tolerations`, make sure to keep the `codefresh/dind` toleration in your list if your DinD nodes are tainted with it.
+
+  Previously ignored values are now applied as set: `runtime.dind.tolerations: []` and `runtime.engine.resources.requests: null` are no longer replaced by the parent runtime values.
+
+* **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for 1.33-1.34 Kubernetes version. Supported versions are: 1.37, 1.36, 1.35.
+
 ## Architecture
 
 [Codefresh Runner architecture](https://codefresh.io/docs/docs/installation/codefresh-runner/#codefresh-runner-architecture)
