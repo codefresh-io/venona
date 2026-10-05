@@ -31,18 +31,6 @@ codefresh.io/application: runtime
 {{- end }}
 
 {{/*
-Return runtime image (classic runtime) with private registry prefix
-*/}}
-{{- define "runtime.runtimeImageName" -}}
-  {{- if .registry -}}
-    {{- $imageName :=  (trimPrefix "quay.io/" .imageFullName) -}}
-    {{- printf "%s/%s" .registry $imageName -}}
-  {{- else -}}
-    {{- printf "%s" .imageFullName -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
 Environment variable value of Codefresh installation token
 */}}
 {{- define "runtime.installation-token-env-var-value" -}}

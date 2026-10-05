@@ -23,6 +23,7 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
   - [To 8.2.x](#to-8-2-x)
   - [To 9.x](#to-9-x)
   - [To 10.1.x](#to-10-1-x)
+  - [To 10.6.x](#to-10-6-x)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [Runtime spec synchronization](#runtime-spec-synchronization)
@@ -375,6 +376,8 @@ runtime:
   Previously ignored values are now applied as set: `runtime.dind.tolerations: []` and `runtime.engine.resources.requests: null` are no longer replaced by the parent runtime values.
 
 * **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for 1.33-1.34 Kubernetes version. Supported versions are: 1.37, 1.36, 1.35.
+
+* **Removed**: Legacy key-value format of `runtime.engine.runtimeImages` (e.g. `COMPOSE_IMAGE: quay.io/codefresh/compose:<tag>`) is no longer supported. Use the map format with `registry`, `repository`, `tag` and `digest` fields instead. See [To 7.9.x](#to-7-9-x) for migration details.
 
 ## Architecture
 
@@ -1606,7 +1609,7 @@ Install the Helm chart
 | runtime.engine.env.OTEL_TRACES_EXPORTER | string | `"none"` | OTel traces exporter to be used. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
 | runtime.engine.env.OTEL_TRACES_SAMPLER | string | `"parentbased_always_on"` | OTel sampler to be used for traces. Ref: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/ |
 | runtime.engine.env.PYROSCOPE_SERVER_ADDRESS | string | `""` | Pyroscope server address |
-| runtime.engine.env.TRUSTED_QEMU_IMAGES | string | `"tonistiigi/binfmt"` | Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.DEFAULT_QEMU_IMAGE value |
+| runtime.engine.env.TRUSTED_QEMU_IMAGES | string | `"tonistiigi/binfmt"` | Trusted QEMU images used for docker builds - when left blank defaults to .runtime.engine.runtimeImages.default-qemu value |
 | runtime.engine.image | object | `{"digest":"sha256:34c5b000d90704088ac9ef46dc63672537ff1da5afd0d3f6abf4b58c1233a418","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/engine","tag":"3.3.23"}` | Set image. |
 | runtime.engine.nodeSelector | object | `{}` | Set node selector. |
 | runtime.engine.podAnnotations | object | `{}` | Set pod annotations. |

@@ -81,7 +81,7 @@ tests:
                 OTEL_TRACES_SAMPLER: 'parentbased_always_on'
                 PYROSCOPE_SERVER_ADDRESS: ''
                 TRUSTED_QEMU_IMAGES: 'my-registry/tonistiigi/binfmt'
-                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverrideold'
+                COMPOSE_IMAGE: 'quay.io/codefresh/compose:tagoverridenew'
                 CONTAINER_LOGGER_IMAGE: 'quay.io/codefresh/cf-container-logger:tagoverride@sha256:123'
                 DEFAULT_QEMU_IMAGE: 'docker.io/tonistiigi/binfmt:tagoverride'
                 DOCKER_BUILDER_IMAGE: 'quay.io/codefresh/cf-docker-builder:tagoverride'
