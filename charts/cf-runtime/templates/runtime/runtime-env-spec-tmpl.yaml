@@ -104,8 +104,8 @@ runtimeScheduler:
   {{- if $engineContext.resources}}
   {{- toYaml $engineContext.resources | nindent 4 }}
   {{- end }}
-  {{- if not (kindIs "invalid" $engineContext.terminationGracePeriodSeconds) }}
-  terminationGracePeriodSeconds: {{ $engineContext.terminationGracePeriodSeconds }}
+  {{- if hasKey $engineContext "terminationGracePeriodSeconds" }}
+  terminationGracePeriodSeconds: {{ $engineContext.terminationGracePeriodSeconds | int }}
   {{- end }}
   volumeMounts: {}
   volumes: {}
@@ -184,8 +184,8 @@ dockerDaemonScheduler:
   {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- end }}
-  {{- if not (kindIs "invalid" $dindContext.terminationGracePeriodSeconds) }}
-  terminationGracePeriodSeconds: {{ $dindContext.terminationGracePeriodSeconds }}
+  {{- if hasKey $dindContext "terminationGracePeriodSeconds" }}
+  terminationGracePeriodSeconds: {{ $dindContext.terminationGracePeriodSeconds | int }}
   {{- end }}
   {{- with $dindContext.userVolumeMounts }}
   userVolumeMounts: {{- toYaml . | nindent 4 }}
