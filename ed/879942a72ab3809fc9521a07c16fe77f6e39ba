@@ -1,0 +1,14 @@
+charts/cf-runtime/templates/runtime/runtime-env-spec-tmpl.yaml
+  h_e5037b46dfdc11 107-108,187-188
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ed879942a72ab3809fc9521a07c16fe77f6e39ba",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
