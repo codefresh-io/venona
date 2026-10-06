@@ -375,6 +375,13 @@ runtime:
 
   Previously ignored values are now applied as set: `runtime.dind.tolerations: []` and `runtime.engine.resources.requests: null` are no longer replaced by the parent runtime values.
 
+  `runtime.engine.terminationGracePeriodSeconds` and `runtime.dind.terminationGracePeriodSeconds` behave differently in the following cases (positive values are applied as before):
+
+  | Value | Before | After |
+  |---|---|---|
+  | `0` | Ignored, parent runtime value is used (engine: `180`, dind: `900`) | `0` (pod is killed immediately) |
+  | `null` | Parent runtime value is used (engine: `180`, dind: `900`) | Not set, Kubernetes default (`30`) is used |
+
 * **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for 1.33-1.34 Kubernetes version. Supported versions are: 1.37, 1.36, 1.35.
 
 * **Removed**: Legacy key-value format of `runtime.engine.runtimeImages` (e.g. `COMPOSE_IMAGE: quay.io/codefresh/compose:<tag>`) is no longer supported. Use the map format with `registry`, `repository`, `tag` and `digest` fields instead. See [To 7.9.x](#to-7-9-x) for migration details.
