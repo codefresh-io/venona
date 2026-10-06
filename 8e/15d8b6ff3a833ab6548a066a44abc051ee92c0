@@ -1,0 +1,16 @@
+charts/cf-runtime/README.md
+  h_e5037b46dfdc11 1491
+charts/cf-runtime/values.yaml
+  h_e5037b46dfdc11 514,516,539-540,544-545,549-550,554-555,559-560,589-590,594-595,988-989
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8e15d8b6ff3a833ab6548a066a44abc051ee92c0",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
