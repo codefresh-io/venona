@@ -115,9 +115,7 @@ dockerDaemonScheduler:
   dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) | squote }}
   {{- end }}
   imagePullPolicy: {{ $dindContext.image.pullPolicy }}
-  {{- if not (kindIs "invalid" $dindContext.userAccess) }}
   userAccess: {{ $dindContext.userAccess }}
-  {{- end }}
   envVars:
   {{- with $dindContext.env }}
     {{- range $key, $val := . }}
