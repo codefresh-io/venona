@@ -1,0 +1,21 @@
+charts/cf-runtime/README.md.gotmpl
+  s_3c778e9aabdd86::t_bad33dab302f9a 378-384
+charts/cf-runtime/README.md
+  s_3c778e9aabdd86::t_3c58807f46a2b9 378-384
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "13111f207bd4c53424c8817bc674e95295680de1",
+  "prompts": {},
+  "sessions": {
+    "s_3c778e9aabdd86": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3486a663-a750-4cf2-9040-526e2482aa28",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
