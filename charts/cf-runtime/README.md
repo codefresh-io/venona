@@ -12,18 +12,18 @@ Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/insta
 - [Chart Configuration](#chart-configuration)
 - [Upgrade Chart](#upgrade-chart)
   - [⚠️ Known issues](#-known-issues)
-  - [To 2.x](#to-2x)
-  - [To 3.x](#to-3x)
-  - [To 4.x](#to-4x)
-  - [To 5.x](#to-5x)
-  - [To 6.x](#to-6x)
-  - [To 7.x](#to-7x)
-  - [To 7.9.x](#to-79x)
-  - [To 8.x](#to-8x)
-  - [To 8.2.x](#to-82x)
-  - [To 9.x](#to-9x)
-  - [To 10.1.x](#to-101x)
-  - [To 11.x](#to-11x)
+  - [To 2.x](#to-2-x)
+  - [To 3.x](#to-3-x)
+  - [To 4.x](#to-4-x)
+  - [To 5.x](#to-5-x)
+  - [To 6.x](#to-6-x)
+  - [To 7.x](#to-7-x)
+  - [To 7.9.x](#to-7-9-x)
+  - [To 8.x](#to-8-x)
+  - [To 8.2.x](#to-8-2-x)
+  - [To 9.x](#to-9-x)
+  - [To 10.1.x](#to-10-1-x)
+  - [To 11.0.0](#to-11-0-0)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
   - [Runtime spec synchronization](#runtime-spec-synchronization)
@@ -353,7 +353,7 @@ runtime:
 
 * **Removed**: `deploy` step ([docs](https://codefresh.io/docs/docs/pipelines/steps/deploy/)) drops support for 1.32 Kubernetes version. Supported versions are: 1.35, 1.34, 1.33.
 
-### To 11.x
+### To 11.0.0
 
 * **Changed**: `runtime.runtimeExtends` default is changed from `["system/default/hybrid/k8s_low_limits"]` to `[]`. The runtime spec no longer inherits values from the parent runtime; all values previously inherited are now set explicitly in the chart defaults:
 
