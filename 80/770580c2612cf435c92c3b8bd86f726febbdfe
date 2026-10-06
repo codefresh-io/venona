@@ -1,0 +1,17 @@
+charts/cf-runtime/README.md.gotmpl
+  h_e5037b46dfdc11 21,23,25-26,356
+  h_e5037b46dfdc11 15-20,22,24
+charts/cf-runtime/README.md
+  h_e5037b46dfdc11 15-26,356
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "80770580c2612cf435c92c3b8bd86f726febbdfe",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
