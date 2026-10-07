@@ -5,9 +5,8 @@
 {{- $name := coalesce .Values.runtime.kubeconfigName (include "runtime.runtime-environment-spec.runtime-name" .) -}}
 {{- $engineContext := .Values.runtime.engine -}}
 {{- $dindContext := .Values.runtime.dind -}}
-{{- $runtimeImageRegistry := .Values.runtime.engine.runtimeImagesRegistry -}}
-{{- if $runtimeImageRegistry }}
-  {{- $_ := set $rootContext.Values.global "imageRegistry" $runtimeImageRegistry }}
+{{- with .Values.runtime.engine.runtimeImagesRegistry }}
+  {{- $_ := set $rootContext.Values.global "imageRegistry" . }}
 {{- end }}
 {{- $runtimeVersion := coalesce .Values.version .Chart.Version -}}
 {{- $runtimeName := include "runtime.runtime-environment-spec.runtime-name" . -}}
@@ -40,76 +39,20 @@ runtimeScheduler:
     {{ $key }}: {{ $val | squote }}
     {{- end }}
   {{- end }}
-  {{- if (index $engineContext "runtimeImages" "COMPOSE_IMAGE") }}
-    COMPOSE_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.COMPOSE_IMAGE) | squote }}
-  {{- else }}
     COMPOSE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "compose") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "CONTAINER_LOGGER_IMAGE" ) }}
-    CONTAINER_LOGGER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.CONTAINER_LOGGER_IMAGE) | squote }}
-  {{- else }}
     CONTAINER_LOGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "container-logger") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "DEFAULT_QEMU_IMAGE") }}
-    DEFAULT_QEMU_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DEFAULT_QEMU_IMAGE) | squote }}
-  {{- else }}
     DEFAULT_QEMU_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "default-qemu") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "DOCKER_BUILDER_IMAGE") }}
-    DOCKER_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_BUILDER_IMAGE) | squote }}
-  {{- else }}
     DOCKER_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-builder") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "DOCKER_PULLER_IMAGE") }}
-    DOCKER_PULLER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PULLER_IMAGE) | squote }}
-  {{- else }}
     DOCKER_PULLER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-puller") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "DOCKER_PUSHER_IMAGE") }}
-    DOCKER_PUSHER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.DOCKER_PUSHER_IMAGE) | squote }}
-  {{- else }}
     DOCKER_PUSHER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "docker-pusher") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "FS_OPS_IMAGE") }}
-    FS_OPS_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.FS_OPS_IMAGE) | squote }}
-  {{- else }}
     FS_OPS_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "fs-ops") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "GIT_CLONE_IMAGE") }}
-    GIT_CLONE_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.GIT_CLONE_IMAGE) | squote }}
-  {{- else }}
     GIT_CLONE_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "git-cloner") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "KUBE_DEPLOY") }}
-    KUBE_DEPLOY: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.KUBE_DEPLOY) | squote }}
-  {{- else }}
     KUBE_DEPLOY: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "kube-deploy") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "PIPELINE_DEBUGGER_IMAGE") }}
-    PIPELINE_DEBUGGER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.PIPELINE_DEBUGGER_IMAGE) | squote }}
-  {{- else }}
     PIPELINE_DEBUGGER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "pipeline-debugger") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "TEMPLATE_ENGINE") }}
-    TEMPLATE_ENGINE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.TEMPLATE_ENGINE) | squote }}
-  {{- else }}
     TEMPLATE_ENGINE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "template-engine") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "CR_6177_FIXER") }}
-    CR_6177_FIXER: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.CR_6177_FIXER) | squote }}
-  {{- else }}
     CR_6177_FIXER: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "alpine") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "GC_BUILDER_IMAGE") }}
-    GC_BUILDER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.GC_BUILER_IMAGE) | squote }}
-  {{- else }}
     GC_BUILDER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "gc-builder") "context" $rootContext) | squote }}
-  {{- end }}
-  {{- if (index $engineContext "runtimeImages" "COSIGN_IMAGE_SIGNER_IMAGE") }}
-    COSIGN_IMAGE_SIGNER_IMAGE: {{ include "runtime.runtimeImageName" (dict "registry" $runtimeImageRegistry "imageFullName" $engineContext.runtimeImages.COSIGN_IMAGE_SIGNER_IMAGE) | squote }}
-  {{- else }}
     COSIGN_IMAGE_SIGNER_IMAGE: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" (index $engineContext "runtimeImages" "cosign-image-signer") "context" $rootContext) | squote }}
-  {{- end }}
     RUNTIME_CHART_VERSION: {{ $runtimeVersion }}
     CF_SERVICE_NAME: {{ printf "cf-classic-engine" }}
     CF_SERVICE_VERSION: {{ $engineVersion }}
@@ -161,18 +104,18 @@ runtimeScheduler:
   {{- if $engineContext.resources}}
   {{- toYaml $engineContext.resources | nindent 4 }}
   {{- end }}
-  {{- with $engineContext.terminationGracePeriodSeconds }}
-  terminationGracePeriodSeconds: {{ . }}
+  {{- if hasKey $engineContext "terminationGracePeriodSeconds" }}
+  terminationGracePeriodSeconds: {{ $engineContext.terminationGracePeriodSeconds | int }}
   {{- end }}
+  volumeMounts: {}
+  volumes: {}
 dockerDaemonScheduler:
   type: DindKubernetesPod
   {{- if $dindContext.image }}
   dindImage: {{ include (printf "%s.image.name" $cfCommonTplSemver ) (dict "image" $dindContext.image "context" .) | squote }}
   {{- end }}
   imagePullPolicy: {{ $dindContext.image.pullPolicy }}
-  {{- with $dindContext.userAccess }}
-  userAccess: {{ . }}
-  {{- end }}
+  userAccess: {{ $dindContext.userAccess }}
   envVars:
   {{- with $dindContext.env }}
     {{- range $key, $val := . }}
@@ -239,8 +182,8 @@ dockerDaemonScheduler:
   {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- end }}
-  {{- with $dindContext.terminationGracePeriodSeconds }}
-  terminationGracePeriodSeconds: {{ . }}
+  {{- if hasKey $dindContext "terminationGracePeriodSeconds" }}
+  terminationGracePeriodSeconds: {{ $dindContext.terminationGracePeriodSeconds | int }}
   {{- end }}
   {{- with $dindContext.userVolumeMounts }}
   userVolumeMounts: {{- toYaml . | nindent 4 }}

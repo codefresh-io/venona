@@ -69,8 +69,6 @@ runtime:
         cpu: 200m
         memory: 256Mi
     runtimeImages:
-      # check legacy way to specify runtime images
-      COMPOSE_IMAGE: quay.io/codefresh/compose:tagoverrideold
       compose:
         tag: tagoverridenew
         digest: ""

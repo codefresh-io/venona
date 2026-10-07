@@ -50,6 +50,9 @@ tests:
                 CF_TELEMETRY_PROMETHEUS_PORT: '9100'
                 CF_TELEMETRY_PYROSCOPE_ENABLE: 'false'
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                CONTAINER_LOGGER_EXEC_TIMEOUT: '1800000'
+                CONTAINER_LOGGER_SHOW_PROGRESS: 'true'
+                DISABLE_WORKSPACE_CACHE: 'true'
                 DOCKER_REQUEST_TIMEOUT_MS: '30000'
                 FLOAT_AS_STRING: '12.34'
                 FOO: 'BAR'
@@ -57,8 +60,11 @@ tests:
                 INT: '123'
                 LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                METRICS_CODEFRESH_ENABLED: 'true'
                 METRICS_SCRAPE_TIMEOUT_MS: '0'
                 NEW_RELIC_ENABLED: 'false'
+                NODE_ENV: 'kubernetes'
+                NO_EXT_MONITOR: 'true'
                 OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
                 OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
                 OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
@@ -133,6 +139,8 @@ tests:
                   cpu: 200m
                   memory: 256Mi
               terminationGracePeriodSeconds: 180
+              volumeMounts: {}
+              volumes: {}
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'quay.io/codefresh/dind:tagoverride'
@@ -149,6 +157,7 @@ tests:
                 INODES_USAGE_THRESHOLD: '0.8'
                 INT: '123'
                 VOLUMES_RETAIN_PERIOD: '14400'
+                WRITE_TERMINATION_MESSAGE: 'true'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/my-runtime,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
@@ -264,6 +273,9 @@ tests:
                 CF_TELEMETRY_PROMETHEUS_PORT: '9100'
                 CF_TELEMETRY_PYROSCOPE_ENABLE: 'false'
                 CONTAINER_LOGGER_EXEC_CHECK_INTERVAL_MS: '1000'
+                CONTAINER_LOGGER_EXEC_TIMEOUT: '1800000'
+                CONTAINER_LOGGER_SHOW_PROGRESS: 'true'
+                DISABLE_WORKSPACE_CACHE: 'true'
                 DOCKER_REQUEST_TIMEOUT_MS: '30000'
                 FLOAT_AS_STRING: '12.34'
                 FOO: 'BAR'
@@ -271,8 +283,11 @@ tests:
                 INT: '123'
                 LOGGER_LEVEL: 'debug'
                 LOG_OUTGOING_HTTP_REQUESTS: 'false'
+                METRICS_CODEFRESH_ENABLED: 'true'
                 METRICS_SCRAPE_TIMEOUT_MS: '0'
                 NEW_RELIC_ENABLED: 'false'
+                NODE_ENV: 'kubernetes'
+                NO_EXT_MONITOR: 'true'
                 OTEL_EXPORTER_OTLP_COMPRESSION: 'gzip'
                 OTEL_EXPORTER_OTLP_ENDPOINT: 'http://localhost:4317'
                 OTEL_EXPORTER_OTLP_PROTOCOL: 'grpc'
@@ -347,6 +362,8 @@ tests:
                   cpu: 200m
                   memory: 256Mi
               terminationGracePeriodSeconds: 180
+              volumeMounts: {}
+              volumes: {}
             dockerDaemonScheduler:
               type: DindKubernetesPod
               dindImage: 'quay.io/codefresh/dind:tagoverride'
@@ -363,6 +380,7 @@ tests:
                 INODES_USAGE_THRESHOLD: '0.8'
                 INT: '123'
                 VOLUMES_RETAIN_PERIOD: '14400'
+                WRITE_TERMINATION_MESSAGE: 'true'
                 OTEL_RESOURCE_ATTRIBUTES: service.name=cf-classic-dind,service.version=tagoverride,service.namespace=cf-classic-runtime,cf.classic.runtime.name=system/default-override,cf.classic.runtime.version=1.0.0
               cluster:
                 namespace: codefresh
