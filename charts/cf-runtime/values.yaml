@@ -402,9 +402,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 3.0.29 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
+      tag: 3.0.30 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
-      digest: sha256:a66e3257a4b58ab4fe418db2596288e271ff8a47e5f30777074f1941498bd6ff
+      digest: sha256:981f2e583aafc7f18ed9181c7973f670cdc227893c9817b430f081687cbc413f
     # -- Set dind resources.
     resources:
       requests: null
@@ -511,9 +511,9 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.3.25
+      tag: 3.3.28
       pullPolicy: IfNotPresent
-      digest: sha256:8bcecf05f4a0fb061528e5665ed48622d80d08a67b299a1104016d7450aac4a8
+      digest: sha256:705ea8a9ef1a14de1e59ed4e0443795df45e5dbc8c2c897636e022770df4926d
     # -- Set container command.
     command:
       - 'node'
@@ -783,8 +783,8 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/kubectl
-      tag: 1.36.3
-      digest: sha256:698013dc030404ac61b947da9cc85c30e264bdd5eff8c0c5769cea6f7d93b4f1
+      tag: 1.37.1
+      digest: sha256:7e6dc72eb94d7ee38d07d6c6fe6541aaab5e77320bd8bd8e5eaf7a9dd0b660a9
     rbac:
       enabled: true
     annotations: {}
@@ -826,8 +826,8 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.6
-    digest: sha256:2928be25db57c22cd2bca2cce6be6e69aefc6eabb69e39081fa548cbbb30104c
+    tag: 0.1.7
+    digest: sha256:848bbfa8ee22eef544fa16a56e9db6d25e2618b06f8a324af0b70ce3437177f
   # -- Add additional env vars
   env:
     # -- Telemetry configuration
