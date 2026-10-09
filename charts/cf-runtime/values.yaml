@@ -827,7 +827,7 @@ appProxy:
     registry: quay.io
     repository: codefresh/cf-app-proxy
     tag: 0.1.7
-    digest: sha256:848bbfa8ee22eef544fa16a56e9db6d25e2618b06f8a324af0b70ce3437177f
+    digest: sha256:848bbfa8ee22eef544fa16a56e9db6d25e2618b06f8a324af0b70ce3437177f6
   # -- Add additional env vars
   env:
     # -- Telemetry configuration
