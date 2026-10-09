@@ -402,7 +402,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 3.0.29 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
+      tag: 3.0.30 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
       digest: sha256:a66e3257a4b58ab4fe418db2596288e271ff8a47e5f30777074f1941498bd6ff
     # -- Set dind resources.
@@ -511,7 +511,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.3.25
+      tag: 3.3.28
       pullPolicy: IfNotPresent
       digest: sha256:8bcecf05f4a0fb061528e5665ed48622d80d08a67b299a1104016d7450aac4a8
     # -- Set container command.
@@ -536,27 +536,27 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: 1.6.14
+        tag: 1.6.15
         digest: sha256:1e3b9a4f6d3f98dd5913a7101ad514a12b80e4b6e46df59f71d8c4f7d29b9d7e
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
-        tag: 2.0.47
+        tag: 2.0.50
         digest: sha256:9487c9b5b42829fc6bc44b8c7de511fcc1368d9058d7f210589b65f663f7c19c
       docker-builder:
         registry: quay.io
         repository: codefresh/cf-docker-builder
-        tag: 1.7.3
+        tag: 1.7.6
         digest: sha256:e0aa834ff8e3855db9f235e69ed62bf2aa64d092cbb2ee1d5009a8d9f81de163
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.58
+        tag: 8.0.60
         digest: sha256:079d312a7ab81ef35213e0a1da2c7a740b18ee0d1f87c5dfa9ba50f9102b822e
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.48
+        tag: 6.0.52
         digest: sha256:3f0061c2c1af96d476608b3a8fe53cb4f7f707b0888ebb3f4b6bf455237fb402
       fs-ops:
         registry: quay.io
@@ -586,7 +586,7 @@ runtime:
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 4.0.16
+        tag: 4.0.18
         digest: sha256:f93977807c8c144697dcd3ddb14d1383a921edc1e55f34d0d32ab63ef33c66f5
       gc-builder:
         registry: quay.io
@@ -826,7 +826,7 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.6
+    tag: 0.1.7
     digest: sha256:2928be25db57c22cd2bca2cce6be6e69aefc6eabb69e39081fa548cbbb30104c
   # -- Add additional env vars
   env:
@@ -985,7 +985,7 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.56
+    tag: 1.3.58
     digest: sha256:6fa8767fd62d134e5c10552f6de46c649ded2850e0e7edd7df0140cf06ac71bf
   # -- Add additional env vars
   env: {}
