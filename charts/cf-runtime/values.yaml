@@ -81,7 +81,7 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 1.2.8-rootless
+      tag: 1.2.10-rootless
       digest: sha256:5cb18daf5941018bc64df5ab9be90bc4d31b84e716f1100f671fcaed6bc6a932
     resources:
       limits:
@@ -402,7 +402,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/dind
-      tag: 3.0.30 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
+      tag: 3.0.33 # use `latest-rootless/rootless/3.0.20-rootless` tags for rootless-dind
       pullPolicy: IfNotPresent
       digest: sha256:981f2e583aafc7f18ed9181c7973f670cdc227893c9817b430f081687cbc413f
     # -- Set dind resources.
@@ -746,7 +746,7 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.2.8-rootless
+        tag: 1.2.10-rootless
         digest: sha256:5cb18daf5941018bc64df5ab9be90bc4d31b84e716f1100f671fcaed6bc6a932
       rbac:
         enabled: true
@@ -768,7 +768,7 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.2.8-rootless
+        tag: 1.2.10-rootless
         digest: sha256:5cb18daf5941018bc64df5ab9be90bc4d31b84e716f1100f671fcaed6bc6a932
       affinity: {}
       nodeSelector: {}
