@@ -1,0 +1,40 @@
+charts/cf-runtime/README.md
+  s_784d3c25dbb8d6::t_eeba7f7da83cc4 3,355-376,1641
+  s_784d3c25dbb8d6::t_e4fa390898cfa7 1538,1541,1549,1566,1571,1574,1584-1586,1591,1594-1595
+  s_784d3c25dbb8d6::t_c533a95ce3eaf9 377-378
+charts/cf-runtime/README.md.gotmpl
+  s_784d3c25dbb8d6::t_eeba7f7da83cc4 357,372
+  s_784d3c25dbb8d6::t_9184ae5e9152fb 359-371,373-375
+  h_e5037b46dfdc11 355-356,358,376-378
+charts/cf-runtime/Chart.yaml
+  h_e5037b46dfdc11 4,21,24
+charts/cf-runtime/tests/private-registry/private_registry_test.yaml
+  s_784d3c25dbb8d6::t_c35974eb32e634 42-44,49,52-53,111-112,126,134-137,171
+charts/cf-runtime/tests/runtime/runtime_onprem_test.yaml
+  s_784d3c25dbb8d6::t_c35974eb32e634 53-55,63,66-67,142-143,160,276-278,286,289-290,365-366,383
+charts/cf-runtime/tests/runtime/runtime_test.yaml
+  s_784d3c25dbb8d6::t_c35974eb32e634 55-57,65,68-69,153-154,171,242
+charts/cf-runtime/values.yaml
+  h_e5037b46dfdc11 380-381
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "344dc3b3934849fe9756203b927091b1b67671d5",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  },
+  "sessions": {
+    "s_784d3c25dbb8d6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0ed904c1-2681-4b63-b18b-d1f1438e19ad",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}

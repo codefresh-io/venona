@@ -1,0 +1,23 @@
+charts/cf-runtime/templates/runtime/_helpers.tpl
+  s_a49f05228aeafa::t_e0c9627429a856 144-165
+charts/cf-runtime/templates/runtime/runtime-env-spec-tmpl.yaml
+  s_a49f05228aeafa::t_80732263008487 235
+charts/cf-runtime/tests/runtime/runtime_test.yaml
+  s_a49f05228aeafa::t_d431054ca3ded9 236-263
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b4ac7c9db2945d7cc2ba8c95eac422295e7b2c6a",
+  "prompts": {},
+  "sessions": {
+    "s_a49f05228aeafa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cc8f20af-7ff2-4560-bbf7-8393084a33b8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
