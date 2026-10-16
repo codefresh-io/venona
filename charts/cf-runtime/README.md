@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 11.0.1](https://img.shields.io/badge/Version-11.0.1-informational?style=flat-square)
+![Version: 11.0.2](https://img.shields.io/badge/Version-11.0.2-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1495,7 +1495,7 @@ Install the Helm chart
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.image | object | `{"digest":"sha256:dd08720a99f116622198a5436dd23a7a2e14515cf2887f46beb67f8d9e684863","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.58"}` | Set image |
+| monitor.image | object | `{"digest":"sha256:77c4f2445a7681a8f1b413dff2aaf105af5f646b2aff40a2b5730655f22d62e3","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.59"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
 | monitor.podSecurityContext | object | `{}` |  |
@@ -1524,7 +1524,7 @@ Install the Helm chart
 | runner.env | object | `{"NEW_RELIC_ENABLED":"false"}` | Add additional env vars |
 | runner.env.NEW_RELIC_ENABLED | string | `"false"` | DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead. |
 | runner.image | object | `{"digest":"sha256:f85cd3b2442f8f58e0fd1250cbe82889c6fc7fc62550733a898c60e6f91304d3","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.12"}` | Set image |
-| runner.init | object | `{"image":{"digest":"sha256:5cb18daf5941018bc64df5ab9be90bc4d31b84e716f1100f671fcaed6bc6a932","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.8-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
+| runner.init | object | `{"image":{"digest":"sha256:3513d814b8f2669e5c095a5b6c7578b8dbcb2f20071f84336b58b9e4fa2b074f","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.12-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
 | runner.podAnnotations | object | `{}` | Set pod annotations |
@@ -1545,7 +1545,7 @@ Install the Helm chart
 | runtime.accounts | for On-Premise only | `[]` | Assign accounts to runtime (list of account ids) |
 | runtime.agent | for On-Premise only | `true` | Enable agent |
 | runtime.description | string | `""` | Runtime description |
-| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400","WRITE_TERMINATION_MESSAGE":"true"},"image":{"digest":"sha256:981f2e583aafc7f18ed9181c7973f670cdc227893c9817b430f081687cbc413f","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.30"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[{"effect":"NoSchedule","key":"codefresh/dind","operator":"Exists"}],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0","registry":"docker.io","repository":"alpine","tag":3.23},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
+| runtime.dind | object | `{"affinity":{},"containerSecurityContext":{},"env":{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400","WRITE_TERMINATION_MESSAGE":"true"},"image":{"digest":"sha256:feef93b16baa903c3bfaa2d5c4b9613abbfe861984bd845339897a5f9b71f016","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.33"},"nodeSelector":{},"podAnnotations":{},"podLabels":{},"podSecurityContext":{},"pvcs":{"dind":{"annotations":{},"name":"dind","reuseVolumeSelector":"codefresh-app,io.codefresh.accountName","reuseVolumeSortOrder":"pipeline_id","storageClassName":"{{ include \"dind-volume-provisioner.storageClassName\" . }}","volumeSize":"16Gi"}},"resources":{"limits":{"cpu":"400m","memory":"800Mi"},"requests":null},"schedulerName":"","serviceAccount":"codefresh-engine","terminationGracePeriodSeconds":30,"tolerations":[{"effect":"NoSchedule","key":"codefresh/dind","operator":"Exists"}],"userAccess":true,"userVolumeMounts":{},"userVolumes":{},"volumePermissions":{"enabled":false,"image":{"digest":"sha256:85fe1e81d6758c208f3e1eed4338a1997e19d4be002d4dd32d3100c9a8c010a0","registry":"docker.io","repository":"alpine","tag":3.23},"resources":{},"securityContext":{"runAsUser":0}}}` | Parameters for DinD (docker-in-docker) pod (aka "runtime" pod). |
 | runtime.dind.affinity | object | `{}` | Set affinity |
 | runtime.dind.containerSecurityContext | object | `{}` | Set container security context. |
 | runtime.dind.env | object | `{"CLEAN_DOCKER":true,"CLEAN_PERIOD_BUILDS":"5","CLEAN_PERIOD_SECONDS":"21600","DISK_USAGE_THRESHOLD":"0.8","IMAGE_RETAIN_PERIOD":"14400","INODES_USAGE_THRESHOLD":"0.8","VOLUMES_RETAIN_PERIOD":"14400","WRITE_TERMINATION_MESSAGE":"true"}` | Set additional env vars. |
@@ -1557,7 +1557,7 @@ Install the Helm chart
 | runtime.dind.env.INODES_USAGE_THRESHOLD | string | `"0.8"` | Run cleanup if current inodes usage exceeds INODES_USAGE_THRESHOLD |
 | runtime.dind.env.VOLUMES_RETAIN_PERIOD | string | `"14400"` | Do not delete Docker volumes if they have events newer than `NOW minus VOLUMES_RETAIN_PERIOD` |
 | runtime.dind.env.WRITE_TERMINATION_MESSAGE | string | `"true"` | Write available disk space to the termination log on shutdown |
-| runtime.dind.image | object | `{"digest":"sha256:981f2e583aafc7f18ed9181c7973f670cdc227893c9817b430f081687cbc413f","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.30"}` | Set dind image. |
+| runtime.dind.image | object | `{"digest":"sha256:feef93b16baa903c3bfaa2d5c4b9613abbfe861984bd845339897a5f9b71f016","pullPolicy":"IfNotPresent","registry":"quay.io","repository":"codefresh/dind","tag":"3.0.33"}` | Set dind image. |
 | runtime.dind.nodeSelector | object | `{}` | Set node selector. |
 | runtime.dind.podAnnotations | object | `{}` | Set pod annotations. |
 | runtime.dind.podLabels | object | `{}` | Set pod labels. |
@@ -1644,7 +1644,7 @@ Install the Helm chart
 | runtime.inCluster | for On-Premise only | `true` | Set inCluster runtime |
 | runtime.kubeconfigFilePath | for On-Premise only | `""` | Set kubeconfig name and path |
 | runtime.patch | object | See below | Parameters for `runtime-patch` post-upgrade/install hook |
-| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:5cb18daf5941018bc64df5ab9be90bc4d31b84e716f1100f671fcaed6bc6a932","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.8-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
+| runtime.patch.cronjob | object | `{"affinity":{},"enabled":true,"failedJobsHistory":1,"image":{"digest":"sha256:3513d814b8f2669e5c095a5b6c7578b8dbcb2f20071f84336b58b9e4fa2b074f","registry":"quay.io","repository":"codefresh/cli","tag":"1.2.12-rootless"},"nodeSelector":{},"podSecurityContext":{},"resources":{},"schedule":"0/5 * * * *","successfulJobsHistory":1,"tolerations":[]}` | CronJob to update the runtime on schedule |
 | runtime.rbac | object | `{"create":true,"rules":[]}` | RBAC parameters |
 | runtime.rbac.create | bool | `true` | Create RBAC resources |
 | runtime.rbac.rules | list | `[]` | Add custom rule to the engine role |
