@@ -1,0 +1,31 @@
+venona/VERSION
+  h_51acfbafc7319b 1
+venona/go.mod
+  s_d1c99e8c596df0::t_71f5a0bfd6081c 3
+venona/Dockerfile
+  h_51acfbafc7319b 1
+  s_d1c99e8c596df0::t_71f5a0bfd6081c 10
+venona/build/Dockerfile.tester
+  s_d1c99e8c596df0::t_71f5a0bfd6081c 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cd30542e42126841243af81f5b8a7000bc078fa4",
+  "prompts": {},
+  "humans": {
+    "h_51acfbafc7319b": {
+      "author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  },
+  "sessions": {
+    "s_d1c99e8c596df0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d00bfc84-ef39-4579-b876-6ee63368b9c4",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
