@@ -1,4 +1,4 @@
-FROM octopusdeploy/dhi-golang:1.26-alpine3.24-dev@sha256:f28d97e9f0ff445596a1c9501ef10b5b47561bf24c32b04afa03bc21008c7800 AS build
+FROM octopusdeploy/dhi-golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS build
 RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 WORKDIR /venona
 COPY . .
@@ -7,7 +7,7 @@ RUN go mod verify
 RUN make build
 
 
-FROM octopusdeploy/dhi-alpine-base:3.24@sha256:c83afceb9027a70719ea5ed916754a94ecdbe33a64cb8bcbb4da9fbffaefe7b0 AS prod
+FROM octopusdeploy/dhi-alpine-base:3.24@sha256:648a78db84b3e98a95104e2e8d246f37f03a3bee3fb2fb7afb3ed91998b17483 AS prod
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
