@@ -82,7 +82,7 @@ runner:
       registry: quay.io
       repository: codefresh/cli
       tag: 1.2.13-rootless
-      digest: sha256:4d20426da1c9ebb29924c3d7f97b448b81630299b2da03e07f58ad63358b9c90
+      digest: sha256:6ec0760e38229987d362929c496269bf921331364606ee4a8258976b242e3f10
     resources:
       limits:
         memory: 512Mi
@@ -602,7 +602,7 @@ runtime:
         registry: docker.io
         repository: alpine
         tag: latest
-        digest: sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+        digest: sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
     # -- Set additional env vars.
     env:
       # -- Telemetry configuration
@@ -747,7 +747,7 @@ runtime:
         registry: quay.io
         repository: codefresh/cli
         tag: 1.2.13-rootless
-        digest: sha256:4d20426da1c9ebb29924c3d7f97b448b81630299b2da03e07f58ad63358b9c90
+        digest: sha256:6ec0760e38229987d362929c496269bf921331364606ee4a8258976b242e3f10
       rbac:
         enabled: true
       annotations: {}
@@ -769,7 +769,7 @@ runtime:
         registry: quay.io
         repository: codefresh/cli
         tag: 1.2.13-rootless
-        digest: sha256:4d20426da1c9ebb29924c3d7f97b448b81630299b2da03e07f58ad63358b9c90
+        digest: sha256:6ec0760e38229987d362929c496269bf921331364606ee4a8258976b242e3f10
       affinity: {}
       nodeSelector: {}
       podSecurityContext: {}
