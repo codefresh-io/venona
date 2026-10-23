@@ -1,0 +1,16 @@
+charts/cf-runtime/values.yaml
+  h_51acfbafc7319b 77-78,84-85,156-157,206-207,226-227,405,407,503-504,514,516,544-545,549-550,554-555,559-560,569-570,574-575,749-750,771-772,787,829-830,988-989
+charts/cf-runtime/.ci/values-rootless.yaml
+  h_51acfbafc7319b 18-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7034428189ff12beb3f0aed119ceab5970255f25",
+  "prompts": {},
+  "humans": {
+    "h_51acfbafc7319b": {
+      "author": "vitaliichyrka <vitalii.chyrka@codefresh.io>"
+    }
+  }
+}
