@@ -581,8 +581,8 @@ runtime:
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
-        tag: 0.15.23
-        digest: sha256:d72c0c8e2c3d97b1bb76d8b2ad5d6ac47eb7e7e183211d450361338aa75fd533
+        tag: 0.15.25
+        digest: sha256:80347b770e4aa42e46681d392f7367bbcec62115547e24f964aaf71314e5ac8f
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
