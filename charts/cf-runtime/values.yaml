@@ -237,8 +237,8 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-cleanup
-      tag: 1.2.0
-      digest: sha256:1af3e3ecc87bf2e26ba07ecef68f54ad100d7e3b5fcf074099f627fd5d917369
+      tag: 1.2.1
+      digest: sha256:3713f7aca59cbe556cd64fa552269b273ff8761d10108a3bf13d3b56083f965f
     env: {}
     concurrencyPolicy: Forbid
     schedule: "*/10 * * * *"
