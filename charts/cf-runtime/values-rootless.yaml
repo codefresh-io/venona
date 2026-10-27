@@ -19,7 +19,7 @@ runtime:
   dind:
     image:
       tag: 3.0.34-rootless
-      digest: sha256:7953c5cbbdfbdb1369a33dd84996886521d02dbd7076b44098f43db9a552b138
+      digest: sha256:537f80a84e2cf1290399cbdb3063693639497a59d5005ac47f66cddb87246209
     userVolumeMounts:
       dind:
         name: dind

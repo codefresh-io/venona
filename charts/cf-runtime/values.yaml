@@ -513,7 +513,7 @@ runtime:
       repository: codefresh/engine
       tag: 3.3.37
       pullPolicy: IfNotPresent
-      digest: sha256:62bcb495e10a3fea1edffefe8896cb6c526f2381be3f33b0f899049a98654ae3
+      digest: sha256:8a0015a92fd3b691c4dcdb217fb70c900ce24ad4d4a96677e282ac42e5667a4c
     # -- Set container command.
     command:
       - 'node'
@@ -537,7 +537,7 @@ runtime:
         registry: quay.io
         repository: codefresh/compose
         tag: 1.6.16
-        digest: sha256:77ac39180aaf9d44338cd3c0576318b20a40d8c9c5ce76b48275920f50397207
+        digest: sha256:f1e03ffa0a0c3732c04de0bab8e285043f1304dcbe1a056f4d95050d198ac28c
       container-logger:
         registry: quay.io
         repository: codefresh/cf-container-logger
@@ -547,7 +547,7 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-docker-builder
         tag: 1.7.11
-        digest: sha256:a5804adadb62cb71aab1953e6743c29aad78e5cb2a720248539e5e9222427af7
+        digest: sha256:cc302e017c95958484ebab024fc8e197cac264ee06d5191d1de89e052c3878ae
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
@@ -562,7 +562,7 @@ runtime:
         registry: quay.io
         repository: codefresh/fs-ops
         tag: 1.2.15
-        digest: sha256:967d9b0d5676818da2103c93f1aa26f46b2d77b8f0194de844de6fc5f0f2f7bd
+        digest: sha256:fe0398bea1be2cc889c1c944cb8fcdae85423a0b29214ae634fe90bc385d9ddb
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
@@ -577,7 +577,7 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-debugger
         tag: 1.3.17
-        digest: sha256:9c142e93c427ca4d32fa28bef471676372543dbbf550da7e89cc942d55307c36
+        digest: sha256:74aff9f01c3e4b3ae05cfe66ee8bda000e5062e330e3d19862d76df91608d4fc
       template-engine:
         registry: quay.io
         repository: codefresh/pikolo
@@ -587,12 +587,12 @@ runtime:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
         tag: 4.0.21
-        digest: sha256:72cfe3d8404da44030ce0f4c6a05bb1aebcd58ea7c1ec3837e28fc083f1d949b
+        digest: sha256:638bc53897f8137c592eba33ce073305c39cb10ca034849b17462b7dc21ff49c
       gc-builder:
         registry: quay.io
         repository: codefresh/gcloud-builder
         tag: 0.5.28
-        digest: sha256:eeff0eeb45751ee5dd1bcdbe94a2b7591fb730a2c25b6a26d470f0735c9a0ff7
+        digest: sha256:240bed05768afadb75ad47cc8dd7c7b8f88b53ca95057c0be1d0dc0e6bd90f43
       default-qemu:
         registry: docker.io
         repository: tonistiigi/binfmt
