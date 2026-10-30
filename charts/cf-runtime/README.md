@@ -1,6 +1,6 @@
 ## Codefresh Runner
 
-![Version: 11.0.4](https://img.shields.io/badge/Version-11.0.4-informational?style=flat-square)
+![Version: 11.0.5](https://img.shields.io/badge/Version-11.0.5-informational?style=flat-square)
 
 Helm chart for deploying [Codefresh Runner](https://codefresh.io/docs/docs/installation/codefresh-runner/) to Kubernetes.
 
@@ -1495,7 +1495,7 @@ Install the Helm chart
 | monitor.affinity | object | `{}` | Set affinity |
 | monitor.enabled | bool | `false` | Enable monitor Ref: https://codefresh.io/docs/docs/installation/codefresh-runner/#install-monitoring-component |
 | monitor.env | object | `{}` | Add additional env vars |
-| monitor.image | object | `{"digest":"sha256:706439185c790652dd67dec6ca278a17de2e74c3ada46ffcfcd51822763515c0","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.61"}` | Set image |
+| monitor.image | object | `{"digest":"sha256:ac52a051da1a1c704002970077f2797bca9bf47cba278b3a32b83e598c53f95e","registry":"quay.io","repository":"codefresh/cf-k8s-agent","tag":"1.3.64"}` | Set image |
 | monitor.nodeSelector | object | `{}` | Set node selector |
 | monitor.podAnnotations | object | `{}` | Set pod annotations |
 | monitor.podSecurityContext | object | `{}` |  |
