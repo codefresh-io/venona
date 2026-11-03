@@ -1,0 +1,53 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+registries:
+  docker-registry:
+    type: docker-registry
+    url: https://registry.hub.docker.com
+    username: ${{ secrets.DOCKERHUB_USERNAME }}
+    password: ${{ secrets.DOCKERHUB_TOKEN }}
+  codefresh-io-github:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{ secrets.CF_GITHUB_TOKEN }}
+updates:
+  - package-ecosystem: "gomod"
+    open-pull-requests-limit: 0 # Disable version updates — we can't handle the load.
+    directory: "/venona"
+    registries: "*"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependabot"
+      - "review-required"
+      - "gomod"
+    cooldown:
+      default-days: 7
+    groups:
+      minor-and-patch-security:
+        applies-to: security-updates
+        update-types:
+          - "minor"
+          - "patch"
+      minor-and-patch-bump:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "docker"
+    directory: "/venona"
+    registries: "*"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependabot"
+      - "review-required"
+      - "docker"
+    ignore:
+      - dependency-name: "octopusdeploy/dhi-golang"
+        update-types:
+          - version-update:semver-major
