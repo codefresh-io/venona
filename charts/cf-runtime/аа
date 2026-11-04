@@ -1,0 +1,65 @@
+> [!IMPORTANT]
+>
+> Auto-generated PR — please complete this checklist before merging:
+>
+> * [x] Verified changelogs for every updated image; listed any missing changes below.
+> * [x] Bumped chart version if needed: `minor` for features, `major` for breaking changes.
+> * [x] Linked any unlinked tickets.
+> * [ ] Removed unused sections below.
+
+---
+
+# Changelog
+
+## Breaking changes
+> [!WARNING]
+> **Breaking changes:**
+>
+> * <description of the breaking change>
+
+## Changes to the chart
+
+## Features and enhancements
+
+## Bug fixes
+
+* Some security vulnerabilities have been fixed.
+
+## Docs
+
+# Internal notes
+
+* This upgrades `helm-docs` to v1.11.0 to align with other CI pipelines.
+
+## Updated images
+
+| Image | Old version | New version | Changelog |
+| --- | --- | --- | --- |
+| `codefresh/compose` | 1.6.8 | 1.6.9 | [Compare](https://github.com/codefresh-io/compose/compare/1.6.8...1.6.9) |
+| `codefresh/cf-container-logger` | 2.0.33 | 2.0.41 | [Compare](https://github.com/codefresh-io/cf-container-logger/compare/2.0.33...2.0.41) |
+| `codefresh/cf-docker-builder` | 1.6.16 | 1.6.18 | [Compare](https://github.com/codefresh-io/cf-docker-builder/compare/1.6.16...1.6.18) |
+| `codefresh/cf-docker-puller` | 8.0.44 | 8.0.48 | [Compare](https://github.com/codefresh-io/cf-docker-puller/compare/8.0.44...8.0.48) |
+| `codefresh/cf-docker-pusher` | 6.0.39 | 6.0.42 | [Compare](https://github.com/codefresh-io/cf-docker-pusher/compare/6.0.39...6.0.42) |
+| `codefresh/pikolo` | 0.15.12 | 0.15.15 | [Compare](https://github.com/codefresh-io/pikolo/compare/0.15.12...0.15.15) |
+| `codefresh/cf-cosign-image-signer` | 4.0.0 | 4.0.4 | [Compare](https://github.com/codefresh-io/cf-cosign-image-signer/compare/4.0.0...4.0.4) |
+| `codefresh/gcloud-builder` | 0.5.19 | 0.5.21 | [Compare](https://github.com/codefresh-io/gcloud-builder/compare/0.5.19...0.5.21) |
+| `codefresh/engine` | 3.3.9 | 3.3.13 | [Compare](https://github.com/codefresh-io/engine/compare/3.3.9...3.3.13) |
+| `codefresh/dind` | 3.0.24 | 3.0.25 | [Compare](https://github.com/codefresh-io/dind/compare/3.0.24...3.0.25) |
+| `codefresh/cf-app-proxy` | 0.1.3 | 0.1.4 | [Compare](https://github.com/codefresh-io/cf-app-proxy/compare/0.1.3...0.1.4) |
+| `codefresh/cf-k8s-agent` | 1.3.42 | 1.3.46 | [Compare](https://github.com/codefresh-io/cf-k8s-agent/compare/1.3.42...1.3.46) |
+| `codefresh/dind` | 3.0.24-rootless | 3.0.25-rootless | [Compare](https://github.com/codefresh-io/dind/compare/3.0.24-rootless...3.0.25-rootless) |
+| `codefresh/dind` | 3.0.24-rootless | 3.0.25-rootless | [Compare](https://github.com/codefresh-io/dind/compare/3.0.24-rootless...3.0.25-rootless) |
+
+## Related tickets
+
+* Closes [CFS-16088](https://linear.app/octopus/issue/CFS-16088/ready-for-release-codefreshcf-container-logger2041)
+* Closes [CFS-16085](https://linear.app/octopus/issue/CFS-16085/ready-for-release-codefreshcf-container-logger2039)
+* Closes [CFS-15228](https://linear.app/octopus/issue/CFS-15228/ready-for-release-codefreshcf-container-logger2036)
+* Closes [CFS-15200](https://linear.app/octopus/issue/CFS-15200/ready-for-release-codefreshcf-container-loggerv2034)
+* Closes [CFS-16091](https://linear.app/octopus/issue/CFS-16091/ready-for-release-codefreshpikolo01515)
+* Closes [CFS-16089](https://linear.app/octopus/issue/CFS-16089/ready-for-release-codefreshcf-cosign-image-signer402)
+* Closes [CFS-16041](https://linear.app/octopus/issue/CFS-16041/ready-for-release-codefreshgcloud-builder0520)
+* Closes [CFS-16075](https://linear.app/octopus/issue/CFS-16075/ready-for-release-codefreshdind3025)
+* Closes [CFS-16093](https://linear.app/octopus/issue/CFS-16093/ready-for-release-codefreshcf-app-proxy014)
+* Closes [CFS-16048](https://linear.app/octopus/issue/CFS-16048/ready-for-release-codefreshcf-k8s-agent1344)
+* Closes [CFS-16045](https://linear.app/octopus/issue/CFS-16045/ready-for-release-codefreshcf-k8s-agent1343)
