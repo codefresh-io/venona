@@ -2,6 +2,7 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
+
 registries:
   docker-registry:
     type: docker-registry
@@ -13,6 +14,12 @@ registries:
     url: https://github.com
     username: x-access-token
     password: ${{ secrets.CF_GITHUB_TOKEN }}
+
+multi-ecosystem-groups:
+  docker-weekly:
+    schedule:
+      interval: "weekly"
+
 updates:
   - package-ecosystem: "gomod"
     open-pull-requests-limit: 0 # Disable version updates — we can't handle the load.
@@ -39,7 +46,7 @@ updates:
           - "patch"
 
   - package-ecosystem: "docker"
-    directory: "/venona"
+    directory: "/"
     registries: "*"
     schedule:
       interval: "weekly"
@@ -47,6 +54,9 @@ updates:
       - "dependabot"
       - "review-required"
       - "docker"
+    multi-ecosystem-group: "docker-weekly"
+    patterns:
+      - "*"
     ignore:
       - dependency-name: "octopusdeploy/dhi-golang"
         update-types:
