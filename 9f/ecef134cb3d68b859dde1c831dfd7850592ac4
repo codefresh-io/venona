@@ -1,0 +1,16 @@
+venona/go.mod
+  h_e5037b46dfdc11 3
+venona/Dockerfile
+  h_e5037b46dfdc11 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9fecef134cb3d68b859dde1c831dfd7850592ac4",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
