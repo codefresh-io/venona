@@ -7,7 +7,7 @@ RUN go mod verify
 RUN make build
 
 
-FROM octopusdeploy/dhi-alpine-base:3.24@sha256:648a78db84b3e98a95104e2e8d246f37f03a3bee3fb2fb7afb3ed91998b17483 AS prod
+FROM octopusdeploy/dhi-alpine-base:3.24@sha256:7b06d747fcb428a0699679955e903b13322c92c79d94ce94c108634f13a714f1 AS prod
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
