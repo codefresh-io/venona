@@ -46,7 +46,7 @@ updates:
           - "patch"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/venona"
     registries: "*"
     schedule:
       interval: "weekly"
