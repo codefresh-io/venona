@@ -1,0 +1,14 @@
+.github/dependabot.yml
+  h_e5037b46dfdc11 5,17-22,49,57-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f4787056d75e0b61ebbcda2c30738a3d8c17d3d2",
+  "prompts": {},
+  "humans": {
+    "h_e5037b46dfdc11": {
+      "author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
