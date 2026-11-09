@@ -1,4 +1,4 @@
-FROM octopusdeploy/dhi-golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS build
+FROM octopusdeploy/dhi-golang:1.27-alpine3.24-dev@sha256:95894969dcf353c87cd1b9730e599e1d3c3b7519c8966d28120859609269df4d AS build
 RUN apk -U add --no-cache git make ca-certificates && update-ca-certificates
 WORKDIR /venona
 COPY . .
