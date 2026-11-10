@@ -1,0 +1,21 @@
+venona/build/Dockerfile.tester
+  s_b2203c1f746719::t_203e3971516fdd 7
+venona/Makefile
+  s_b2203c1f746719::t_0f03d2d9541026 88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "77adbb865fe00290511980852303e97c3b0dd400",
+  "prompts": {},
+  "sessions": {
+    "s_b2203c1f746719": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c501486f-1069-46f4-bdc3-0ee35f1f8393",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Zhenya Tikhonov <zhenya.tikhonov@octopus.com>"
+    }
+  }
+}
