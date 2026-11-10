@@ -74,8 +74,8 @@ runner:
   image:
     registry: quay.io
     repository: codefresh/venona
-    tag: 2.0.13
-    digest: sha256:235e419c0557b87ded2291995ac2997cd4b654dcfe52fe8f7de0a236d6e17cc6
+    tag: 2.0.14
+    digest: sha256:5fdc8f79a949608e7b859f2d31cce5d85e73c1d683a3c3a71946bb02206884a7
   # -- Init container
   init:
     image:

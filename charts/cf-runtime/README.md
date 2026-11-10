@@ -1523,7 +1523,7 @@ Install the Helm chart
 | runner.enabled | bool | `true` | Enable the runner |
 | runner.env | object | `{"NEW_RELIC_ENABLED":"false"}` | Add additional env vars |
 | runner.env.NEW_RELIC_ENABLED | string | `"false"` | DEPRECATED: New Relic instrumentation is no longer supported and will be removed in future version. Use OTel instead. |
-| runner.image | object | `{"digest":"sha256:235e419c0557b87ded2291995ac2997cd4b654dcfe52fe8f7de0a236d6e17cc6","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.13"}` | Set image |
+| runner.image | object | `{"digest":"sha256:5fdc8f79a949608e7b859f2d31cce5d85e73c1d683a3c3a71946bb02206884a7","registry":"quay.io","repository":"codefresh/venona","tag":"2.0.14"}` | Set image |
 | runner.init | object | `{"image":{"digest":"sha256:ea6db308667df5c7a02e2331d8af1a5829589c9adafb386a83da329b78ec49d8","registry":"quay.io","repository":"codefresh/cli","tag":"1.3.2-rootless"},"resources":{"limits":{"cpu":"1","memory":"512Mi"},"requests":{"cpu":"0.2","memory":"256Mi"}}}` | Init container |
 | runner.name | string | `""` | Set runner deployment name |
 | runner.nodeSelector | object | `{}` | Set node selector |
