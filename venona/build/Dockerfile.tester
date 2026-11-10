@@ -1,10 +1,10 @@
 # quay.io/codefresh/venona-tester
-FROM golang:1.26.10-alpine3.23
+FROM golang:1.27.3-alpine3.24
 
 RUN apk -U add --no-cache ca-certificates git make gcc g++ bash && update-ca-certificates
 RUN go install github.com/client9/misspell/cmd/misspell@v0.3.4 && \
     go install github.com/fzipp/gocyclo/cmd/gocyclo@v0.6.0 && \
-    go install github.com/securego/gosec/v2/cmd/gosec@v2.22.8 && \
+    go install github.com/securego/gosec/v2/cmd/gosec@v2.30.0 && \
     go install github.com/google/addlicense@v1.1.1 && \
     go install github.com/github/hub@v2.11.2+incompatible
 
