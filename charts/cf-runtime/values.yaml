@@ -81,7 +81,7 @@ runner:
     image:
       registry: quay.io
       repository: codefresh/cli
-      tag: 1.3.6-rootless
+      tag: 2.0.0-rootless
       digest: sha256:81ec16449c80e22d242edd20fd4d3b0eaa345053a1fb3a47587d220aa08e8e94
     resources:
       limits:
@@ -153,7 +153,7 @@ volumeProvisioner:
   image:
     registry: quay.io
     repository: codefresh/dind-volume-provisioner
-    tag: 2.1.5
+    tag: 2.1.6
     digest: sha256:632dbeb8b093031c9cb4150f38f17fcdd94e8db8505ce202b1a71086d80831c2
   # -- Add additional env vars
   env: {}
@@ -203,7 +203,7 @@ volumeProvisioner:
     image:
       registry: quay.io
       repository: codefresh/dind-volume-utils
-      tag: 1.30.15
+      tag: 1.30.16
       digest: sha256:86e62922498b671f09bb04fa67eaa1c3f2ea514ff0e966203d587824ed7cc27d
     podAnnotations: {}
     podSecurityContext:
@@ -511,7 +511,7 @@ runtime:
     image:
       registry: quay.io
       repository: codefresh/engine
-      tag: 3.4.3
+      tag: 3.4.6
       pullPolicy: IfNotPresent
       digest: sha256:25da3eacf635ded7b984350816d9f2c0f4a5ff7d5a9f742f08545e5ceba7bd4e
     # -- Set container command.
@@ -536,7 +536,7 @@ runtime:
       compose:
         registry: quay.io
         repository: codefresh/compose
-        tag: 1.7.0
+        tag: 1.8.1
         digest: sha256:0430a3c328460fa9d8bee8ac2b7da2ead015a2fe2068a566aceb24fcf806d10a
       container-logger:
         registry: quay.io
@@ -551,12 +551,12 @@ runtime:
       docker-puller:
         registry: quay.io
         repository: codefresh/cf-docker-puller
-        tag: 8.0.74
+        tag: 8.0.76
         digest: sha256:0688803541ed6b20028df5a1dcd010d0857abb86b5742d54b4d81110d0c0043a
       docker-pusher:
         registry: quay.io
         repository: codefresh/cf-docker-pusher
-        tag: 6.0.64
+        tag: 6.0.65
         digest: sha256:7e29778a979ad7cda9d5919066849e6c1865129dce1025a4f8c6b485dc0f6fbf
       fs-ops:
         registry: quay.io
@@ -566,7 +566,7 @@ runtime:
       git-cloner:
         registry: quay.io
         repository: codefresh/cf-git-cloner
-        tag: 10.3.17
+        tag: 10.3.18
         digest: sha256:ec616a3a76eb3ebbc2cdfc5d0bf021a35d36fba0c01c2d4a146d05cffa415d6e
       kube-deploy:
         registry: quay.io
@@ -576,7 +576,7 @@ runtime:
       pipeline-debugger:
         registry: quay.io
         repository: codefresh/cf-debugger
-        tag: 1.3.19
+        tag: 1.3.20
         digest: sha256:061172fda1ef7d296e8c33a3905bf17e187f0a6836f174e960170b6701e3c33d
       template-engine:
         registry: quay.io
@@ -586,7 +586,7 @@ runtime:
       cosign-image-signer:
         registry: quay.io
         repository: codefresh/cf-cosign-image-signer
-        tag: 4.0.30
+        tag: 4.0.31
         digest: sha256:f6b5d15cadf99ff7703d796158afea433bdf2f602b15cccdb12f62b59edf1a23
       gc-builder:
         registry: quay.io
@@ -746,7 +746,7 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.3.6-rootless
+        tag: 2.0.0-rootless
         digest: sha256:81ec16449c80e22d242edd20fd4d3b0eaa345053a1fb3a47587d220aa08e8e94
       rbac:
         enabled: true
@@ -768,7 +768,7 @@ runtime:
       image:
         registry: quay.io
         repository: codefresh/cli
-        tag: 1.3.6-rootless
+        tag: 2.0.0-rootless
         digest: sha256:81ec16449c80e22d242edd20fd4d3b0eaa345053a1fb3a47587d220aa08e8e94
       affinity: {}
       nodeSelector: {}
@@ -826,7 +826,7 @@ appProxy:
   image:
     registry: quay.io
     repository: codefresh/cf-app-proxy
-    tag: 0.1.18
+    tag: 0.1.19
     digest: sha256:d764129a02da15b7dec603f375c136e7ca5d0134f2179e7272703a22cd0f6611
   # -- Add additional env vars
   env:
@@ -985,7 +985,7 @@ monitor:
   image:
     registry: quay.io
     repository: codefresh/cf-k8s-agent
-    tag: 1.3.68
+    tag: 1.3.69
     digest: sha256:18813d43601454fb312c4bff8c2528e47c4b3e81dbdc58a64905e6a7e94b3891
   # -- Add additional env vars
   env: {}
